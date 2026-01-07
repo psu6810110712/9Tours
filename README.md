@@ -169,8 +169,8 @@ stateDiagram-v2
 | Role | Student ID | Responsibilities |
 |------|------------|------------------|
 | **PM & UI/UX** | 6810110229 | Requirement, Figma, Timeline, QA |
-| **Frontend Dev** | 6810110xxx | React, Responsive, API Integration |
-| **Backend Dev** | 6810110xxx | NestJS, TypeORM, Auth, API |
+| **Frontend Dev** | 6810110347 | React, Responsive, API Integration |
+| **Backend Dev** | 6810110167 | NestJS, TypeORM, Auth, API |
 | **QA & DevOps** | 6810110712 | Testing, Docker, CI/CD |
 
 ---
