@@ -1,7 +1,12 @@
 @import "tailwindcss";
 
-/* สีหลักของ 9Tours */
+/* สีหลักและ font ของ 9Tours */
 :root {
   --color-primary: #F5A623;
   --color-primary-dark: #E09415;
+}
+
+/* ใช้ IBM Plex Sans Thai เป็น font หลักทั้งเว็บ รองรับภาษาไทย+อังกฤษ */
+body {
+  font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif;
 }

@@ -87,40 +87,50 @@ export default function Footer() {
         <div>
           <h3 className="font-bold text-gray-900 text-sm mb-4">ช่องทางการชำระเงิน</h3>
           <div className="flex items-center gap-2">
-            {/* Thai QR Payment Badge */}
-            <div className="border border-gray-300 rounded overflow-hidden flex items-center" style={{ height: '40px' }}>
-              <div className="bg-[#1a3a6b] flex items-center justify-center px-2 h-full">
-                <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM19 13h2v2h-2zm-4 0h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2z"/>
-                </svg>
-              </div>
-              <div className="bg-white px-2 h-full flex flex-col justify-center leading-tight">
-                <span className="text-[9px] font-black text-[#1a3a6b] tracking-wide">THAI QR</span>
-                <span className="text-[7px] font-semibold text-[#1a3a6b] tracking-wide">PAYMENT</span>
-              </div>
-            </div>
+            {/* Thai QR Payment — official badge shape */}
+            <svg width="88" height="36" viewBox="0 0 88 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="88" height="36" rx="4" fill="white" stroke="#d1d5db" strokeWidth="1"/>
+              {/* ซ้าย: พื้นน้ำเงิน */}
+              <rect width="36" height="36" rx="4" fill="#003087"/>
+              <rect width="4" height="36" x="32" fill="#003087"/>
+              {/* icon QR scan ใน section น้ำเงิน */}
+              {/* finder top-left */}
+              <rect x="6" y="7" width="9" height="9" rx="1.5" fill="white"/>
+              <rect x="7.5" y="8.5" width="6" height="6" rx="0.8" fill="#003087"/>
+              <rect x="9" y="10" width="3" height="3" fill="white"/>
+              {/* finder top-right */}
+              <rect x="19" y="7" width="9" height="9" rx="1.5" fill="white"/>
+              <rect x="20.5" y="8.5" width="6" height="6" rx="0.8" fill="#003087"/>
+              <rect x="22" y="10" width="3" height="3" fill="white"/>
+              {/* finder bottom-left */}
+              <rect x="6" y="20" width="9" height="9" rx="1.5" fill="white"/>
+              <rect x="7.5" y="21.5" width="6" height="6" rx="0.8" fill="#003087"/>
+              <rect x="9" y="23" width="3" height="3" fill="white"/>
+              {/* data dots bottom-right */}
+              <rect x="19" y="20" width="4" height="4" rx="0.5" fill="white"/>
+              <rect x="24" y="20" width="4" height="4" rx="0.5" fill="white"/>
+              <rect x="19" y="25" width="4" height="4" rx="0.5" fill="white"/>
+              <rect x="24" y="25" width="4" height="4" rx="0.5" fill="white" opacity="0.5"/>
+              {/* ขวา: ข้อความ */}
+              <text x="43" y="16" fontFamily="'IBM Plex Sans','Arial',sans-serif" fontWeight="800" fontSize="9" fill="#003087" letterSpacing="0.5">THAI QR</text>
+              <text x="43" y="27" fontFamily="'IBM Plex Sans','Arial',sans-serif" fontWeight="500" fontSize="7.5" fill="#003087" letterSpacing="0.3">PAYMENT</text>
+            </svg>
 
-            {/* QR Code Box */}
-            <div className="border border-gray-300 rounded p-1.5">
-              <svg className="w-6 h-6 text-gray-800" viewBox="0 0 100 100" fill="currentColor">
-                <rect x="10" y="10" width="30" height="30" rx="3"/>
-                <rect x="16" y="16" width="18" height="18" rx="1" fill="white"/>
-                <rect x="20" y="20" width="10" height="10" rx="1"/>
-                <rect x="60" y="10" width="30" height="30" rx="3"/>
-                <rect x="66" y="16" width="18" height="18" rx="1" fill="white"/>
-                <rect x="70" y="20" width="10" height="10" rx="1"/>
-                <rect x="10" y="60" width="30" height="30" rx="3"/>
-                <rect x="16" y="66" width="18" height="18" rx="1" fill="white"/>
-                <rect x="20" y="70" width="10" height="10" rx="1"/>
-                <rect x="60" y="60" width="8" height="8"/>
-                <rect x="72" y="60" width="8" height="8"/>
-                <rect x="84" y="60" width="8" height="8"/>
-                <rect x="60" y="72" width="8" height="8"/>
-                <rect x="72" y="72" width="8" height="8"/>
-                <rect x="84" y="84" width="8" height="8"/>
-                <rect x="60" y="84" width="8" height="8"/>
-              </svg>
-            </div>
+            {/* QR scan frame box */}
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="36" height="36" rx="4" fill="white" stroke="#d1d5db" strokeWidth="1"/>
+              {/* corner frames */}
+              <path d="M7 13V7h6" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M23 7h6v6" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M29 23v6h-6" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M13 29H7v-6" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              {/* inner QR dots */}
+              <rect x="11" y="11" width="5" height="5" rx="1" fill="#1a1a1a"/>
+              <rect x="20" y="11" width="5" height="5" rx="1" fill="#1a1a1a"/>
+              <rect x="11" y="20" width="5" height="5" rx="1" fill="#1a1a1a"/>
+              <rect x="20" y="20" width="2.5" height="2.5" rx="0.5" fill="#1a1a1a"/>
+              <rect x="22.5" y="22.5" width="2.5" height="2.5" rx="0.5" fill="#1a1a1a"/>
+            </svg>
           </div>
         </div>
 
