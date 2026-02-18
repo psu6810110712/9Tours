@@ -6,10 +6,8 @@ import TourCard from '../components/TourCard'
 import { tourService } from '../services/tourService'
 import type { Tour } from '../types/tour'
 
-// categories ผูกกับ tourType param เพื่อกรองใน ToursPage
-// "วันเดย์ทริป" → tourType=one_day, "เที่ยวพร้อมที่พัก" → tourType=package
-// อื่นๆ → ใช้ search param แทน
-const CATEGORIES = ['ธรรมชาติ', 'วันเดย์ทริป', 'เที่ยวพร้อมที่พัก', 'สายมู', 'สายชิล']
+// multi-select category tags — รวมเป็น filter ตอนกดค้นหา
+const CATEGORIES = ['สายธรรมชาติ', 'สายคาเฟ่', 'สายกิจกรรม', 'สายมู', 'สายชิล']
 
 // static data — รูปจาก Unsplash, province ใช้เป็น filter ตอนคลิก
 const PLACES = [
@@ -19,97 +17,155 @@ const PLACES = [
   { name: 'เชียงใหม่', image: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400', province: 'เชียงใหม่' },
 ]
 
-// ภาค dropdown สำหรับ search bar — map ไปเป็น region param
-const REGIONS = ['ภาคเหนือ', 'ภาคกลาง', 'ภาคใต้', 'ภาคตะวันออก', 'ภาคตะวันออกเฉียงเหนือ']
-
 export default function HomePage() {
   const [tours, setTours] = useState<Tour[]>([])
   const [search, setSearch] = useState('')
-  const [region, setRegion] = useState('')
+  const [tourType, setTourType] = useState<'' | 'one_day' | 'package'>('')
+  const [guests, setGuests] = useState(2)
+  const [selectedCats, setSelectedCats] = useState<Set<string>>(new Set())
   const navigate = useNavigate()
 
   useEffect(() => {
     tourService.getAll().then(setTours).catch(console.error)
   }, [])
 
-  // รวม search + region แล้ว navigate ไป ToursPage พร้อม query params
+  const toggleCategory = (cat: string) => {
+    setSelectedCats((prev) => {
+      const next = new Set(prev)
+      if (next.has(cat)) next.delete(cat)
+      else next.add(cat)
+      return next
+    })
+  }
+
+  // รวมทุก filter → navigate ไป ToursPage
   const handleSearch = () => {
     const params = new URLSearchParams()
     if (search) params.set('search', search)
-    if (region) params.set('region', region)
+    if (tourType) params.set('tourType', tourType)
+    if (selectedCats.size > 0) {
+      const catSearch = [...selectedCats].join(' ')
+      params.set('search', search ? `${search} ${catSearch}` : catSearch)
+    }
     navigate(`/tours?${params.toString()}`)
-  }
-
-  const handleCategoryClick = (cat: string) => {
-    if (cat === 'วันเดย์ทริป') navigate('/tours?tourType=one_day')
-    else if (cat === 'เที่ยวพร้อมที่พัก') navigate('/tours?tourType=package')
-    else navigate(`/tours?search=${cat}`)
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      {/* ===== Hero Section ===== */}
-      {/* hero height 500px เพื่อให้ search + category chips ใส่ได้พอดี */}
-      <section
-        className="relative h-[500px] flex items-center justify-center"
-        style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        <div className="absolute inset-0 bg-black/45" />
+      {/* ===== Hero — rounded card ไม่เต็มจอ ===== */}
+      <div className="max-w-7xl mx-auto px-8 pt-6">
+        <section
+          className="relative rounded-3xl overflow-hidden"
+          style={{
+            backgroundImage: 'url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="absolute inset-0 bg-black/40" />
 
-        <div className="relative z-10 text-center text-white px-4 w-full max-w-2xl">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">
-            คุณพัณวดีอยากเที่ยวที่ไหนดี?
-          </h1>
-          <p className="text-base mb-8 text-white/80">
-            เที่ยวทั่วไทย ราคาโดนใจ เลือกทริปที่ใช่ จองได้ทุกที่
-          </p>
+          <div className="relative z-10 text-center text-white px-6 py-14">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+              คุณพัณวดีอยากเที่ยวที่ไหนดี?
+            </h1>
+            <p className="text-base mb-8 text-white/80">
+              เที่ยวทั่วไทย ราคาโดนใจ เลือกทริปที่ใช่ จองได้ทันที
+            </p>
 
-          {/* Search Bar — ภาค dropdown + text input + ค้นหา */}
-          <div className="bg-white rounded-xl shadow-lg p-2 flex items-center gap-1">
-            <select
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              className="px-3 py-2.5 text-gray-600 text-sm rounded-lg outline-none bg-white border-r border-gray-200"
-            >
-              <option value="">ทุกภาค</option>
-              {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-            </select>
-            <input
-              type="text"
-              placeholder="ค้นหาทัวร์หรือสถานที่..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              className="flex-1 px-3 py-2.5 text-gray-800 text-sm outline-none min-w-0"
-            />
-            <button
-              onClick={handleSearch}
-              className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-dark)] text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors flex-shrink-0"
-            >
-              ค้นหา
-            </button>
-          </div>
-
-          {/* Category chips — อยู่ใน hero ใต้ search bar */}
-          <div className="flex justify-center gap-2 mt-5">
-            {CATEGORIES.map((cat) => (
+            {/* Tour Type Toggle — signature ของ 9Tours */}
+            <div className="flex justify-center gap-3 mb-5">
               <button
-                key={cat}
-                onClick={() => handleCategoryClick(cat)}
-                className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm border border-white/30 hover:bg-white/40 transition-colors"
+                onClick={() => setTourType(tourType === 'one_day' ? '' : 'one_day')}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                  tourType === 'one_day'
+                    ? 'bg-[var(--color-accent)] text-white shadow-lg'
+                    : 'bg-white/15 text-white border border-white/30 backdrop-blur-sm hover:bg-white/25'
+                }`}
               >
-                {cat}
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20 7h-3V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM9 5h6v2H9V5z" />
+                </svg>
+                วันเดย์ทริปทั่วไทย
               </button>
-            ))}
+              <button
+                onClick={() => setTourType(tourType === 'package' ? '' : 'package')}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                  tourType === 'package'
+                    ? 'bg-[var(--color-accent)] text-white shadow-lg'
+                    : 'bg-white/15 text-white border border-white/30 backdrop-blur-sm hover:bg-white/25'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3m4-10h1m4 0h1m-5 4h1m4 0h1" />
+                </svg>
+                เที่ยวหลายวันพร้อมที่พัก
+              </button>
+            </div>
+
+            {/* Search Bar — rounded-2xl, search icon + input + person counter + ค้นหา */}
+            <div className="bg-white rounded-2xl shadow-lg p-2 flex items-center gap-1 max-w-2xl mx-auto">
+              {/* search icon + input */}
+              <div className="flex items-center gap-2 flex-1 min-w-0 pl-3">
+                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" strokeLinecap="round" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="ค้นหาทัวร์หรือสถานที่..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  className="flex-1 py-2.5 text-gray-800 text-sm outline-none bg-transparent min-w-0"
+                />
+              </div>
+
+              <div className="w-px h-7 bg-gray-200 flex-shrink-0" />
+
+              {/* person counter */}
+              <div className="flex items-center gap-1.5 px-3 flex-shrink-0">
+                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <select
+                  value={guests}
+                  onChange={(e) => setGuests(Number(e.target.value))}
+                  className="text-sm text-gray-700 bg-transparent outline-none font-medium"
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                    <option key={n} value={n}>x{n}</option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={handleSearch}
+                className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-dark)] text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors flex-shrink-0"
+              >
+                ค้นหา
+              </button>
+            </div>
+
+            {/* Category chips — multi-select ใต้ search bar */}
+            <div className="flex justify-center gap-2 mt-4 max-w-2xl mx-auto flex-wrap">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => toggleCategory(cat)}
+                  className={`px-4 py-1.5 rounded-full text-sm transition-all ${
+                    selectedCats.has(cat)
+                      ? 'bg-[var(--color-accent)] text-white font-semibold shadow-sm'
+                      : 'bg-white/90 text-gray-600 hover:bg-white hover:text-gray-800'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* ===== Content Area ===== */}
       <div className="max-w-7xl mx-auto px-8 py-10">
