@@ -17,7 +17,6 @@ export default function Navbar() {
   const navigate = useNavigate()
   const { pathname, search } = useLocation()
 
-  // ตรวจว่า link นี้ active หรือไม่ — เช็ค path + query string
   const isActive = (path: string) => {
     const [p, q] = path.split('?')
     if (q) return pathname === p && search.includes(q)
@@ -30,28 +29,26 @@ export default function Navbar() {
     navigate('/')
   }
 
+  const navLinkClass = (path: string) =>
+    isActive(path)
+      ? 'text-[var(--color-primary)] font-semibold border-b-2 border-[var(--color-primary)] pb-0.5'
+      : 'text-gray-500 hover:text-gray-900 transition-colors border-b-2 border-transparent pb-0.5'
+
   return (
     <>
-      <nav className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      {/* border-b แทน shadow ดูสะอาดและ professional กว่า */}
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-8 h-[68px] flex items-center justify-between gap-8">
 
           {/* โลโก้ */}
-          <Link to="/">
-            <img src="/logo.png" alt="9Tours" className="h-10 w-auto" />
+          <Link to="/" className="flex-shrink-0">
+            <img src="/logo.png" alt="9Tours" className="h-16 w-auto" />
           </Link>
 
-          {/* เมนูกลาง */}
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+          {/* เมนูกลาง — breathing room มากขึ้น */}
+          <div className="hidden md:flex items-center gap-8 text-[15px]">
             {NAV_LINKS.map(({ label, path }) => (
-              <Link
-                key={path}
-                to={path}
-                className={
-                  isActive(path)
-                    ? 'text-[var(--color-primary)] font-semibold'
-                    : 'text-gray-600 hover:text-[var(--color-primary)] transition-colors'
-                }
-              >
+              <Link key={path} to={path} className={navLinkClass(path)}>
                 {label}
               </Link>
             ))}
@@ -60,8 +57,8 @@ export default function Navbar() {
                 to="/admin/tours"
                 className={
                   pathname.startsWith('/admin')
-                    ? 'text-[var(--color-primary)] font-semibold'
-                    : 'text-gray-600 hover:text-[var(--color-primary)] transition-colors'
+                    ? 'text-[var(--color-primary)] font-semibold border-b-2 border-[var(--color-primary)] pb-0.5'
+                    : 'text-gray-500 hover:text-gray-900 transition-colors border-b-2 border-transparent pb-0.5'
                 }
               >
                 จัดการทัวร์
@@ -70,16 +67,15 @@ export default function Navbar() {
           </div>
 
           {/* ด้านขวา */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 ml-auto">
             {user ? (
               <>
-                {/* การจองของฉัน — แสดงเฉพาะหลัง login */}
                 <Link
                   to="/my-bookings"
-                  className={`hidden md:block text-sm font-medium transition-colors ${
+                  className={`hidden md:block text-[15px] transition-colors ${
                     pathname === '/my-bookings'
-                      ? 'text-[var(--color-primary)]'
-                      : 'text-gray-600 hover:text-[var(--color-primary)]'
+                      ? 'text-[var(--color-primary)] font-semibold'
+                      : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   การจองของฉัน
@@ -89,9 +85,9 @@ export default function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setMenuOpen(!menuOpen)}
-                    className="flex items-center gap-2 text-sm font-medium text-gray-700"
+                    className="flex items-center gap-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                   >
-                    <span className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center font-bold">
+                    <span className="w-9 h-9 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-sm font-bold">
                       {user.name.charAt(0).toUpperCase()}
                     </span>
                     <span className="hidden md:block">{user.name}</span>
@@ -100,11 +96,11 @@ export default function Navbar() {
                   {menuOpen && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                      <div className="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-1 text-sm z-20">
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 text-sm z-20">
                         {isAdmin && (
                           <Link
                             to="/admin/tours"
-                            className="block px-4 py-2.5 text-gray-700 hover:bg-gray-50"
+                            className="block px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
                             onClick={() => setMenuOpen(false)}
                           >
                             จัดการทัวร์ (Admin)
@@ -113,7 +109,7 @@ export default function Navbar() {
                         <hr className="my-1 border-gray-100" />
                         <button
                           onClick={handleLogout}
-                          className="w-full text-left px-4 py-2.5 text-red-500 hover:bg-gray-50"
+                          className="w-full text-left px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors"
                         >
                           ออกจากระบบ
                         </button>
@@ -123,9 +119,10 @@ export default function Navbar() {
                 </div>
               </>
             ) : (
+              /* ปุ่มใหญ่ขึ้น rounded-xl และ font-semibold ดูหนักแน่นขึ้น */
               <button
                 onClick={() => setModal('login')}
-                className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
               >
                 เข้าสู่ระบบ
               </button>
