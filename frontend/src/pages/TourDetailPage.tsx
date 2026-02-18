@@ -15,7 +15,6 @@ export default function TourDetailPage() {
   const [selectedSchedule, setSelectedSchedule] = useState<TourSchedule | null>(null)
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
-  const [loginOpen, setLoginOpen] = useState(false)
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -47,14 +46,15 @@ export default function TourDetailPage() {
     : 0
 
   const handleBooking = () => {
-    if (!user) { setLoginOpen(true); return }
+    // ถ้ายังไม่ login ให้กลับไปหน้าแรก (Navbar จะ handle modal)
+    if (!user) { navigate('/'); return }
     if (!selectedSchedule) return
     navigate(`/booking/${tour.id}?scheduleId=${selectedSchedule.id}&adults=${adults}&children=${children}`)
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar onLoginClick={() => setLoginOpen(true)} />
+      <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
 
@@ -269,18 +269,6 @@ export default function TourDetailPage() {
 
       <Footer />
 
-      {/* TODO: LoginModal */}
-      {loginOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-80">
-            <h2 className="text-lg font-bold mb-2">กรุณาเข้าสู่ระบบ</h2>
-            <p className="text-sm text-gray-500 mb-4">ต้องเข้าสู่ระบบก่อนจึงจะจองได้</p>
-            <button onClick={() => setLoginOpen(false)} className="w-full bg-[#F5A623] text-white py-2 rounded-lg">
-              ปิด
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -19,7 +19,6 @@ export default function HomePage() {
   const [tours, setTours] = useState<Tour[]>([])
   const [search, setSearch] = useState('')
   const [province, setProvince] = useState('')
-  const [loginOpen, setLoginOpen] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -41,7 +40,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar onLoginClick={() => setLoginOpen(true)} />
+      <Navbar />
 
       {/* Hero Section */}
       <section
@@ -147,21 +146,6 @@ export default function HomePage() {
 
       <Footer />
 
-      {/* TODO: LoginModal เพิ่มทีหลัง */}
-      {loginOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-80">
-            <h2 className="text-lg font-bold mb-4">เข้าสู่ระบบ</h2>
-            <p className="text-sm text-gray-500 mb-4">LoginModal จะเพิ่มในขั้นตอนที่ 7</p>
-            <button
-              onClick={() => setLoginOpen(false)}
-              className="w-full bg-[#F5A623] text-white py-2 rounded-lg"
-            >
-              ปิด
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
