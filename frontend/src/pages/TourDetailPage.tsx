@@ -39,9 +39,9 @@ export default function TourDetailPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Breadcrumb */}
-        <nav className="text-sm text-gray-400 mb-4 flex gap-2">
+        <nav className="text-xs text-gray-400 mb-4 flex gap-2">
           <Link to="/" className="hover:text-[#F5A623]">หน้าแรก</Link>
           <span>/</span>
           <Link to={`/tours?province=${tour.province}`} className="hover:text-[#F5A623]">{tour.province}</Link>
@@ -49,14 +49,19 @@ export default function TourDetailPage() {
           <span className="text-gray-600 line-clamp-1">{tour.name}</span>
         </nav>
 
-        <div className="flex gap-6">
-          <div className="flex-1 min-w-0">
-            <TourGallery images={tour.images} name={tour.name} />
+        {/* แถวบน: รูป + thumbnail เต็มความกว้างคอนเทนต์ */}
+        <div className="mb-6">
+          <TourGallery images={tour.images} name={tour.name} />
+        </div>
+
+        {/* แถวล่าง: ซ้ายข้อมูล / ขวาจอง */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-8 min-w-0">
             <TourInfo tour={tour} />
             <TourItinerary items={tour.itinerary} />
           </div>
 
-          <aside className="w-72 flex-shrink-0">
+          <aside className="lg:col-span-4 lg:pl-3 lg:border-l lg:border-gray-200/80">
             <BookingSidebar tour={tour} />
           </aside>
         </div>

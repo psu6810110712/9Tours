@@ -26,10 +26,10 @@ export class TourSchedule {
   endDate: string;
 
   // สำหรับทริปที่มีหลายรอบต่อวัน เช่น ATV รอบเช้า/รอบบ่าย
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   timeSlot: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   roundName: string | null;
 
   @Column()

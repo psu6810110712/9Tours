@@ -60,7 +60,7 @@ export class Tour {
   province: string;
 
   // เฉพาะทัวร์แบบ package ที่มีที่พัก
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   accommodation: string | null;
 
   @Column('float', { default: 0 })

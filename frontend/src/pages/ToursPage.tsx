@@ -35,6 +35,10 @@ export default function ToursPage() {
         search: search || undefined,
       })
       .then(setTours)
+      .catch((err) => {
+        console.error(err)
+        setTours([])
+      })
       .finally(() => setLoading(false))
   }, [region, province, tourType, search])
 

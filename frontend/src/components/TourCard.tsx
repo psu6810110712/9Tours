@@ -36,7 +36,7 @@ export default function TourCard({ tour }: TourCardProps) {
       {/* เนื้อหา */}
       <div className="p-3">
         {/* ชื่อทัวร์ */}
-        <h3 className="font-semibold text-gray-800 text-sm line-clamp-2 leading-snug mb-1">
+        <h3 className="font-semibold text-gray-800 text-sm truncate mb-1">
           {tour.name}
         </h3>
 

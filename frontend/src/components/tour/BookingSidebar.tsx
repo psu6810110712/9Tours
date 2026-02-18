@@ -16,6 +16,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const { user } = useAuth()
   const navigate = useNavigate()
 
+  const hasSchedule = tour.schedules.length > 0
   const seatsLeft = selectedSchedule
     ? selectedSchedule.maxCapacity - selectedSchedule.currentBooked
     : 0
@@ -29,33 +30,33 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-5 sticky top-20">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sticky top-20">
       {/* ราคา */}
-      <div className="mb-4">
+      <div className="mb-3">
         {tour.originalPrice && (
-          <p className="text-sm text-gray-400 line-through">
+          <p className="text-xs text-gray-400 line-through">
             ฿{Number(tour.originalPrice).toLocaleString()}
           </p>
         )}
-        <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-bold text-[#F5A623]">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-[30px] leading-none font-bold text-[#111827]">
             ฿{Number(tour.price).toLocaleString()}
           </span>
-          <span className="text-sm text-gray-400">/ คน</span>
+          <span className="text-sm text-gray-500">บาท</span>
         </div>
       </div>
 
       {/* เลือก schedule */}
       {tour.schedules.length > 0 && (
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-gray-500 mb-1 block">เลือกวันที่ / รอบ</label>
+        <div className="mb-3">
+          <label className="text-xs font-semibold text-gray-500 mb-1 block">เลือกวันที่</label>
           <select
             value={selectedSchedule?.id || ''}
             onChange={(e) => {
               const s = tour.schedules.find((x) => x.id === Number(e.target.value))
               setSelectedSchedule(s ?? null)
             }}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none"
+            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none bg-white"
           >
             {tour.schedules.map((s) => {
               const left = s.maxCapacity - s.currentBooked
@@ -68,22 +69,20 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
               )
             })}
           </select>
-          {selectedSchedule && (
-            <p className="text-xs text-gray-400 mt-1">
-              เหลือ {seatsLeft}/{selectedSchedule.maxCapacity} ที่นั่ง
-            </p>
-          )}
+          {selectedSchedule && <p className="text-xs text-gray-400 mt-1">เหลือ {seatsLeft}/{selectedSchedule.maxCapacity} ที่นั่ง</p>}
         </div>
       )}
 
       {/* จำนวนคน */}
-      <div className="mb-4 grid grid-cols-2 gap-2">
+      <div className="mb-3">
+        <label className="text-xs font-semibold text-gray-500 mb-1 block">จำนวนผู้เดินทาง</label>
+        <div className="grid grid-cols-2 gap-2">
         {[
           { label: 'ผู้ใหญ่', value: adults, min: 1, set: setAdults },
           { label: 'เด็ก', value: children, min: 0, set: setChildren },
         ].map(({ label, value, min, set }) => (
           <div key={label}>
-            <label className="text-xs font-semibold text-gray-500 mb-1 block">{label}</label>
+            <label className="text-xs text-gray-500 mb-1 block">{label}</label>
             <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
               <button onClick={() => set(Math.max(min, value - 1))} className="px-3 py-1.5 text-gray-500 hover:bg-gray-50">-</button>
               <span className="flex-1 text-center text-sm font-medium">{value}</span>
@@ -91,10 +90,11 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
             </div>
           </div>
         ))}
+        </div>
       </div>
 
       {/* ราคารวม */}
-      <div className="border-t border-gray-100 pt-3 mb-4">
+      <div className="border-t border-gray-100 pt-3 mb-3">
         <div className="flex justify-between text-sm text-gray-500 mb-1">
           <span>฿{Number(tour.price).toLocaleString()} × {totalGuests} คน</span>
         </div>
@@ -107,9 +107,9 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
       <button
         onClick={handleBooking}
         disabled={!selectedSchedule || seatsLeft === 0}
-        className="w-full bg-[#F5A623] hover:bg-[#E09415] disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold py-3 rounded-xl transition-colors"
+        className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold py-2.5 rounded-xl transition-colors"
       >
-        {seatsLeft === 0 ? 'เต็มแล้ว' : 'จองเลย'}
+        {!hasSchedule ? 'ยังไม่มีรอบให้จอง' : seatsLeft === 0 ? 'เต็มแล้ว' : 'จองเลย'}
       </button>
       <p className="text-xs text-center text-gray-400 mt-2">ยกเลิกได้ภายใน 24 ชั่วโมง</p>
     </div>
