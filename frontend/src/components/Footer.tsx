@@ -87,50 +87,12 @@ export default function Footer() {
         <div>
           <h3 className="font-bold text-gray-900 text-sm mb-4">ช่องทางการชำระเงิน</h3>
           <div className="flex items-center gap-2">
-            {/* Thai QR Payment — official badge shape */}
-            <svg width="88" height="36" viewBox="0 0 88 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="88" height="36" rx="4" fill="white" stroke="#d1d5db" strokeWidth="1"/>
-              {/* ซ้าย: พื้นน้ำเงิน */}
-              <rect width="36" height="36" rx="4" fill="#003087"/>
-              <rect width="4" height="36" x="32" fill="#003087"/>
-              {/* icon QR scan ใน section น้ำเงิน */}
-              {/* finder top-left */}
-              <rect x="6" y="7" width="9" height="9" rx="1.5" fill="white"/>
-              <rect x="7.5" y="8.5" width="6" height="6" rx="0.8" fill="#003087"/>
-              <rect x="9" y="10" width="3" height="3" fill="white"/>
-              {/* finder top-right */}
-              <rect x="19" y="7" width="9" height="9" rx="1.5" fill="white"/>
-              <rect x="20.5" y="8.5" width="6" height="6" rx="0.8" fill="#003087"/>
-              <rect x="22" y="10" width="3" height="3" fill="white"/>
-              {/* finder bottom-left */}
-              <rect x="6" y="20" width="9" height="9" rx="1.5" fill="white"/>
-              <rect x="7.5" y="21.5" width="6" height="6" rx="0.8" fill="#003087"/>
-              <rect x="9" y="23" width="3" height="3" fill="white"/>
-              {/* data dots bottom-right */}
-              <rect x="19" y="20" width="4" height="4" rx="0.5" fill="white"/>
-              <rect x="24" y="20" width="4" height="4" rx="0.5" fill="white"/>
-              <rect x="19" y="25" width="4" height="4" rx="0.5" fill="white"/>
-              <rect x="24" y="25" width="4" height="4" rx="0.5" fill="white" opacity="0.5"/>
-              {/* ขวา: ข้อความ */}
-              <text x="43" y="16" fontFamily="'IBM Plex Sans','Arial',sans-serif" fontWeight="800" fontSize="9" fill="#003087" letterSpacing="0.5">THAI QR</text>
-              <text x="43" y="27" fontFamily="'IBM Plex Sans','Arial',sans-serif" fontWeight="500" fontSize="7.5" fill="#003087" letterSpacing="0.3">PAYMENT</text>
-            </svg>
-
-            {/* QR scan frame box */}
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="36" height="36" rx="4" fill="white" stroke="#d1d5db" strokeWidth="1"/>
-              {/* corner frames */}
-              <path d="M7 13V7h6" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <path d="M23 7h6v6" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <path d="M29 23v6h-6" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <path d="M13 29H7v-6" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              {/* inner QR dots */}
-              <rect x="11" y="11" width="5" height="5" rx="1" fill="#1a1a1a"/>
-              <rect x="20" y="11" width="5" height="5" rx="1" fill="#1a1a1a"/>
-              <rect x="11" y="20" width="5" height="5" rx="1" fill="#1a1a1a"/>
-              <rect x="20" y="20" width="2.5" height="2.5" rx="0.5" fill="#1a1a1a"/>
-              <rect x="22.5" y="22.5" width="2.5" height="2.5" rx="0.5" fill="#1a1a1a"/>
-            </svg>
+            {/* Thai QR Payment — official logo */}
+            <img
+              src="/thai-qr-payment.png"
+              alt="Thai QR Payment"
+              className="h-10 w-auto rounded"
+            />
           </div>
         </div>
 
