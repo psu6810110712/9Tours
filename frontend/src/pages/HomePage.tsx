@@ -74,43 +74,41 @@ export default function HomePage() {
               เที่ยวทั่วไทย ราคาโดนใจ เลือกทริปที่ใช่ จองได้ทันที
             </p>
 
-            {/* Tour Type Slider Toggle — signature ของ 9Tours */}
-            {/* pill background วิ่งซ้าย-ขวาตาม tourType ที่เลือก */}
-            <div className="flex justify-center mb-5">
-              <div className="relative bg-white/15 backdrop-blur-sm rounded-full p-1 border border-white/20">
-                {/* sliding pill — ขยับด้วย translateX */}
+            {/* Tour Type Slider — sliding pill ที่ขยับตาม selection */}
+            <div className="flex justify-center mb-6">
+              <div className="relative inline-flex bg-white/10 backdrop-blur-md rounded-full p-1 border border-white/20 shadow-inner">
+                {/* pill วิ่ง — ใช้ grid 2 ช่องเท่ากัน แล้ว translateX ขยับ */}
                 <div
-                  className="absolute top-1 bottom-1 rounded-full bg-[var(--color-accent)] shadow-lg transition-all duration-300 ease-in-out"
+                  className="absolute inset-y-1 rounded-full transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)] bg-[var(--color-accent)] shadow-md"
                   style={{
-                    width: tourType === 'package' ? '55%' : '45%',
-                    left: tourType === 'package' ? '45%' : '0%',
+                    width: 'calc(50% - 4px)',
+                    transform: tourType === 'package' ? 'translateX(calc(100% + 8px))' : 'translateX(0)',
                     opacity: tourType ? 1 : 0,
+                    left: '4px',
                   }}
                 />
-                <div className="relative flex">
-                  <button
-                    onClick={() => setTourType(tourType === 'one_day' ? '' : 'one_day')}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors z-10 ${
-                      tourType === 'one_day' ? 'text-white' : 'text-white/70 hover:text-white'
-                    }`}
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M20 7h-3V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM9 5h6v2H9V5z" />
-                    </svg>
-                    วันเดย์ทริปทั่วไทย
-                  </button>
-                  <button
-                    onClick={() => setTourType(tourType === 'package' ? '' : 'package')}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors z-10 ${
-                      tourType === 'package' ? 'text-white' : 'text-white/70 hover:text-white'
-                    }`}
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3m4-10h1m4 0h1m-5 4h1m4 0h1" />
-                    </svg>
-                    เที่ยวหลายวันพร้อมที่พัก
-                  </button>
-                </div>
+                <button
+                  onClick={() => setTourType(tourType === 'one_day' ? '' : 'one_day')}
+                  className={`relative z-10 flex items-center justify-center gap-2 px-6 py-3 rounded-full text-[13px] font-semibold tracking-wide transition-colors duration-200 ${
+                    tourType === 'one_day' ? 'text-white' : 'text-white/60 hover:text-white/90'
+                  }`}
+                >
+                  <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20 7h-3V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM9 5h6v2H9V5z" />
+                  </svg>
+                  วันเดย์ทริปทั่วไทย
+                </button>
+                <button
+                  onClick={() => setTourType(tourType === 'package' ? '' : 'package')}
+                  className={`relative z-10 flex items-center justify-center gap-2 px-6 py-3 rounded-full text-[13px] font-semibold tracking-wide transition-colors duration-200 ${
+                    tourType === 'package' ? 'text-white' : 'text-white/60 hover:text-white/90'
+                  }`}
+                >
+                  <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3m4-10h1m4 0h1m-5 4h1m4 0h1" />
+                  </svg>
+                  เที่ยวหลายวันพร้อมที่พัก
+                </button>
               </div>
             </div>
 
