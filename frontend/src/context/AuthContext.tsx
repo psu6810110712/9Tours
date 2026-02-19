@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       user, token, isLoading,
       login, register, logout,
-      // จำลองว่าเป็น
+      // Mocking isAdmin
       isAdmin: true,
     }}>
       {children}
