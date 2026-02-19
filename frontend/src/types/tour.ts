@@ -13,6 +13,7 @@ export interface TourSchedule {
 
 export interface Tour {
   id: number
+  tourCode: string
   name: string
   description: string
   tourType: TourType

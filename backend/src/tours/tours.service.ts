@@ -8,6 +8,7 @@ import { TourType } from './entities/tour.entity';
 const DEMO_TOURS = [
   {
     id: 1,
+    tourCode: '15012026001',
     name: 'เที่ยวภูเก็ต เมืองเก่า ถ่ายรูปคาเฟ่ทั้งวัน',
     description: 'เดินเล่นย่านเมืองเก่าภูเก็ต คาเฟ่สวย ๆ และแลนด์มาร์กยอดฮิตในวันเดียว',
     tourType: TourType.ONE_DAY,
@@ -44,6 +45,7 @@ const DEMO_TOURS = [
   },
   {
     id: 2,
+    tourCode: '15012026002',
     name: 'ทัวร์เขื่อนเชี่ยวหลาน ล่องเรือ ชมหมอกตอนเช้า',
     description: 'ล่องเรือชมวิวเขื่อนเชี่ยวหลาน น้ำสีเขียวมรกต พร้อมกิจกรรมพายเรือคายัค',
     tourType: TourType.ONE_DAY,
@@ -80,6 +82,7 @@ const DEMO_TOURS = [
   },
   {
     id: 3,
+    tourCode: '20012026003',
     name: 'แพ็คเกจเชียงใหม่ 3 วัน 2 คืน ชมดอยอินทนนท์',
     description: 'เที่ยวเชียงใหม่ครบทั้งดอยวัดคาเฟ่ ที่พักสบายย่านนิมมาน',
     tourType: TourType.PACKAGE,
@@ -116,6 +119,7 @@ const DEMO_TOURS = [
   },
   {
     id: 4,
+    tourCode: '25012026004',
     name: 'เกาะพีพี ดำน้ำดูปะการัง เต็มวัน',
     description: 'นั่งสปีดโบ๊ทไปเกาะพีพี ดำน้ำ 2 จุด พร้อมอาหารกลางวันบุฟเฟ่ต์',
     tourType: TourType.ONE_DAY,
@@ -164,12 +168,22 @@ const DEMO_TOURS = [
 
 @Injectable()
 export class ToursService {
-  // ตัวนับ id สำหรับทัวร์ใหม่
   private nextId = 100;
+  private codeSeq = 5; // เริ่มจาก 5 เพราะ mock data ใช้ 1-4
+
+  // สร้างรหัสทัวร์: DDMMYYYY + ลำดับ 3 หลัก เช่น 19022026005
+  private makeTourCode(): string {
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const seq = String(this.codeSeq++).padStart(3, '0');
+    return `${dd}${mm}${d.getFullYear()}${seq}`;
+  }
 
   create(dto: CreateTourDto) {
     const newTour = {
       id: this.nextId++,
+      tourCode: this.makeTourCode(),
       name: dto.name,
       description: dto.description,
       tourType: dto.tourType as unknown as TourType,

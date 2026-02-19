@@ -127,7 +127,7 @@ export default function AdminTourListPage() {
                     key={tour.id}
                     className="border-t border-gray-100 hover:bg-yellow-50/60 transition-colors"
                   >
-                    <td className="px-5 py-4 text-gray-500">T-{tour.id}</td>
+                    <td className="px-5 py-4 text-gray-500 font-mono text-xs">{tour.tourCode}</td>
                     <td className="px-5 py-4 font-medium text-gray-800">{tour.name}</td>
                     <td className="px-5 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${

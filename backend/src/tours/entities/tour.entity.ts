@@ -18,6 +18,10 @@ export class Tour {
   @PrimaryGeneratedColumn()
   id: number;
 
+  // รหัสทัวร์แบบ DDMMYYYY + ลำดับ 3 หลัก เช่น 19022026001
+  @Column({ unique: true })
+  tourCode: string;
+
   @Column()
   name: string;
 

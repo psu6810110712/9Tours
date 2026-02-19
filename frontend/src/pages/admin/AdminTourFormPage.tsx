@@ -24,6 +24,7 @@ export default function AdminTourFormPage() {
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [tourCode, setTourCode] = useState('')
 
   // ===== State ฟอร์ม =====
   const [tourType, setTourType] = useState<'package' | 'one_day'>('one_day')
@@ -45,6 +46,7 @@ export default function AdminTourFormPage() {
     if (!isEditing) return
     tourService.getOne(Number(id)).then((tour) => {
       if (!tour) return
+      setTourCode(tour.tourCode || '')
       setTourType(tour.tourType)
       setName(tour.name)
       setDescription(tour.description)
@@ -207,7 +209,7 @@ export default function AdminTourFormPage() {
                   <label className={labelClass}>รหัสทัวร์</label>
                   <input
                     type="text"
-                    value={isEditing ? `T-${id}` : 'Auto'}
+                    value={isEditing ? tourCode : 'สร้างอัตโนมัติ'}
                     disabled
                     className="w-full bg-gray-100 rounded-xl px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed"
                   />
