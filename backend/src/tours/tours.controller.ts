@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { ToursService } from './tours.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { diskStorage, Multer } from 'multer';
 import { extname } from 'path';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
@@ -25,7 +25,7 @@ export class ToursController {
       },
     }),
   }))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
+  uploadFile(@UploadedFile() file: Multer.File) {
     if (!file) throw new BadRequestException('ไม่มีไฟล์อัปโหลด');
     return { url: `http://localhost:3000/uploads/${file.filename}` };
   }

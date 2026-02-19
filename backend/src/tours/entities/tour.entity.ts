@@ -2,85 +2,73 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  ManyToOne,
   OneToMany,
+  JoinColumn,
   CreateDateColumn,
-  UpdateDateColumn,
 } from 'typeorm';
+import { TourCategory } from './tour-category.entity';
 import { TourSchedule } from './tour-schedule.entity';
-
-export enum TourType {
-  ONE_DAY = 'one_day',
-  PACKAGE = 'package',
-}
+import { Region } from '../../regions/entities/region.entity';
+import { Province } from '../../regions/entities/province.entity';
+import { Festival } from '../../festivals/entities/festival.entity';
 
 @Entity('tours')
 export class Tour {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  name: string;
+  @Column({ name: 'tour_code', unique: true, nullable: true })
+  tourCode: string;
 
-  @Column('text')
+  @Column()
+  title: string;
+
+  @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ type: 'enum', enum: TourType })
-  tourType: TourType;
+  @Column({ name: 'price_per_person', type: 'decimal', precision: 10, scale: 2, nullable: true })
+  pricePerPerson: number;
 
-  @Column({ type: 'jsonb', default: [] })
-  categories: string[];
+  @Column({ name: 'image_url', nullable: true })
+  imageUrl: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  price: number;
+  @Column({ name: 'is_visible', default: true })
+  isVisible: boolean;
 
-  // ราคาเดิมก่อนลด - ถ้า null แสดงว่าไม่มีส่วนลด
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  originalPrice: number | null;
+  // --- Relations ---
 
-  @Column({ type: 'jsonb', default: [] })
-  images: string[];
+  @ManyToOne(() => TourCategory, (category) => category.tours, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'category_id' })
+  category: TourCategory;
 
-  @Column({ type: 'jsonb', default: [] })
-  highlights: string[];
+  @Column({ name: 'category_id', nullable: true })
+  categoryId: number;
 
-  // กำหนดการแบบ [{time, title, description}]
-  @Column({ type: 'jsonb', default: [] })
-  itinerary: { time: string; title: string; description: string }[];
+  @ManyToOne(() => Region, (region) => region.tours, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'region_id' })
+  region: Region;
 
-  @Column({ nullable: true })
-  transportation: string;
+  @Column({ name: 'region_id', nullable: true })
+  regionId: number;
 
-  @Column()
-  duration: string;
+  @ManyToOne(() => Province, (province) => province.tours, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'province_id' })
+  province: Province;
 
-  @Column()
-  region: string;
+  @Column({ name: 'province_id', nullable: true })
+  provinceId: number;
 
-  @Column()
-  province: string;
+  @ManyToOne(() => Festival, (festival) => festival.tours, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'festival_id' })
+  festival: Festival;
 
-  // เฉพาะทัวร์แบบ package ที่มีที่พัก
-  @Column({ type: 'varchar', nullable: true })
-  accommodation: string | null;
+  @Column({ name: 'festival_id', nullable: true })
+  festivalId: number;
 
-  @Column('float', { default: 0 })
-  rating: number;
-
-  @Column({ default: 0 })
-  reviewCount: number;
-
-  // false = ซ่อนจากรายการ (soft delete)
-  @Column({ default: true })
-  isActive: boolean;
-
-  @OneToMany(() => TourSchedule, (schedule) => schedule.tour, {
-    cascade: true,
-  })
+  @OneToMany(() => TourSchedule, (schedule) => schedule.tour, { cascade: true })
   schedules: TourSchedule[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }
