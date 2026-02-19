@@ -200,7 +200,9 @@ export class ToursService {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    DEMO_TOURS.push(newTour);
+    // cast เป็น any เพราะ TypeScript infer type ของ DEMO_TOURS จาก literal values
+    // ทำให้ originalPrice: number | null ไม่ตรงกับ type ที่ infer ไว้
+    DEMO_TOURS.push(newTour as any);
     return newTour;
   }
 
@@ -247,7 +249,25 @@ export class ToursService {
   update(id: number, dto: UpdateTourDto) {
     const tour = DEMO_TOURS.find((t) => t.id === id);
     if (!tour) return null;
-    Object.assign(tour, dto, { updatedAt: new Date() });
+
+    // แยก schedules ออกจาก dto เพื่อไม่ให้ Object.assign ลบ schedules เดิมทิ้ง
+    const { schedules: newSchedules, ...rest } = dto as any;
+    Object.assign(tour, rest, { updatedAt: new Date() });
+
+    // ถ้า frontend ส่ง schedules มา → สร้าง schedules ใหม่ทั้งชุด
+    if (newSchedules && Array.isArray(newSchedules)) {
+      tour.schedules = newSchedules.map((s: any, i: number) => ({
+        id: tour.id * 100 + i,
+        tourId: tour.id,
+        startDate: s.startDate,
+        endDate: s.endDate,
+        timeSlot: null,
+        roundName: null,
+        maxCapacity: Number(s.maxCapacity),
+        currentBooked: 0,
+      }));
+    }
+
     return tour;
   }
 

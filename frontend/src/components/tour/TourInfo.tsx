@@ -25,14 +25,19 @@ export default function TourInfo({ tour }: TourInfoProps) {
         <p className="text-gray-600 text-sm leading-relaxed">{tour.description}</p>
       </div>
 
-      {/* จุดเด่นแบบ checklist */}
+      {/* ข้อมูลทัวร์ — ดึงจากข้อมูลจริง ไม่ hardcode */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-4">
         <h2 className="font-bold text-gray-800 mb-3">เกี่ยวกับทัวร์นี้</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
-          <p className="text-sm text-gray-700">⏱ {tour.duration}</p>
-          {tour.transportation && <p className="text-sm text-gray-700">✓ {tour.transportation}</p>}
-          <p className="text-sm text-gray-700">✓ สามารถยกเลิกได้</p>
-          <p className="text-sm text-gray-700">✓ รวมอาหารกลางวัน</p>
+          {tour.duration && (
+            <p className="text-sm text-gray-700">⏱ {tour.duration}</p>
+          )}
+          {tour.transportation && (
+            <p className="text-sm text-gray-700">🚐 {tour.transportation}</p>
+          )}
+          {tour.accommodation && (
+            <p className="text-sm text-gray-700">🏨 {tour.accommodation}</p>
+          )}
         </div>
       </div>
 
