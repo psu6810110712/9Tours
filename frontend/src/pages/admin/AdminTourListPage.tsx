@@ -36,6 +36,14 @@ export default function AdminTourListPage() {
     setTours((prev) => prev.filter((t) => t.id !== tour.id))
   }
 
+  // สลับสถานะเปิด/ปิดทัวร์ แล้วอัปเดต state ทันทีโดยไม่ต้อง reload
+  const handleToggleActive = async (tour: Tour) => {
+    await tourService.update(tour.id, { isActive: !tour.isActive } as any)
+    setTours((prev) =>
+      prev.map((t) => (t.id === tour.id ? { ...t, isActive: !t.isActive } : t))
+    )
+  }
+
   // กรองทัวร์ตาม tab + คำค้นหา
   const filtered = tours.filter((t) => {
     if (filter === 'one_day' && t.tourType !== 'one_day') return false
@@ -135,13 +143,16 @@ export default function AdminTourListPage() {
                       {Number(tour.price).toLocaleString()} บาท
                     </td>
                     <td className="px-5 py-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                        tour.isActive
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-600'
-                      }`}>
+                      <button
+                        onClick={() => handleToggleActive(tour)}
+                        className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                          tour.isActive
+                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                            : 'bg-red-100 text-red-600 hover:bg-red-200'
+                        }`}
+                      >
                         {tour.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
-                      </span>
+                      </button>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex gap-2 justify-end items-center">
