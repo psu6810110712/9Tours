@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
-import { Tour, TourType } from './entities/tour.entity';
+import { TourType } from './entities/tour.entity';
 
 // ข้อมูล mock สำหรับ demo วันที่ 20 ก.พ.
 // ถ้าทีม backend ทำ CRUD เสร็จแล้ว สามารถลบส่วนนี้แล้วเปลี่ยนไปใช้ DB จริงได้เลย
