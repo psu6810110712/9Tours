@@ -164,16 +164,59 @@ const DEMO_TOURS = [
 
 @Injectable()
 export class ToursService {
-  create(createTourDto: CreateTourDto) {
-    // demo: ยังไม่รองรับ create จริง
-    return createTourDto;
+  // ตัวนับ id สำหรับทัวร์ใหม่
+  private nextId = 100;
+
+  create(dto: CreateTourDto) {
+    const newTour = {
+      id: this.nextId++,
+      name: dto.name,
+      description: dto.description,
+      tourType: dto.tourType as unknown as TourType,
+      categories: dto.categories || [],
+      price: Number(dto.price),
+      originalPrice: dto.originalPrice ? Number(dto.originalPrice) : null,
+      images: dto.images || [],
+      highlights: dto.highlights || [],
+      itinerary: [],
+      transportation: dto.transportation || '',
+      duration: dto.duration,
+      region: dto.region,
+      province: dto.province,
+      accommodation: dto.accommodation || null,
+      rating: 0,
+      reviewCount: 0,
+      isActive: true,
+      schedules: (dto.schedules || []).map((s, i) => ({
+        id: this.nextId * 100 + i,
+        tourId: this.nextId - 1,
+        startDate: s.startDate,
+        endDate: s.endDate,
+        timeSlot: null,
+        roundName: null,
+        maxCapacity: Number(s.maxCapacity),
+        currentBooked: 0,
+      })),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    DEMO_TOURS.push(newTour);
+    return newTour;
   }
 
-  // filters: รับมาจาก query string เช่น ?province=ภูเก็ต&tourType=one_day
-  findAll(filters?: { region?: string; province?: string; tourType?: string; search?: string }) {
-    const { region, province, tourType, search } = filters || {};
+  // admin=true จะ return ทุกทัวร์ รวมที่ปิดใช้งาน
+  findAll(filters?: {
+    region?: string;
+    province?: string;
+    tourType?: string;
+    search?: string;
+    admin?: string;
+  }) {
+    const { region, province, tourType, search, admin } = filters || {};
 
-    let result = DEMO_TOURS.filter((t) => t.isActive);
+    let result = admin === 'true'
+      ? [...DEMO_TOURS]
+      : DEMO_TOURS.filter((t) => t.isActive);
 
     if (region) {
       result = result.filter((t) => t.region === region);
@@ -201,13 +244,18 @@ export class ToursService {
     return DEMO_TOURS.find((t) => t.id === id) || null;
   }
 
-  update(id: number, updateTourDto: UpdateTourDto) {
-    // demo: ยังไม่อัปเดตจริง แค่ echo กลับ
-    return { id, ...updateTourDto };
+  update(id: number, dto: UpdateTourDto) {
+    const tour = DEMO_TOURS.find((t) => t.id === id);
+    if (!tour) return null;
+    Object.assign(tour, dto, { updatedAt: new Date() });
+    return tour;
   }
 
   remove(id: number) {
-    // demo: ยังไม่ลบจริง
-    return { id };
+    const tour = DEMO_TOURS.find((t) => t.id === id);
+    if (!tour) return null;
+    // soft delete: ซ่อนจากหน้าผู้ใช้ แต่ admin ยังเห็น
+    tour.isActive = false;
+    return { id, deleted: true };
   }
 }

@@ -6,6 +6,7 @@ export interface TourFilters {
   province?: string
   tourType?: string
   search?: string
+  admin?: string
 }
 
 export const tourService = {
