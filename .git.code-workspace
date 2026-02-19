@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "../../mini_project/.git"
+		},
+		{
+			"path": "../../mini_project/.husky"
+		},
+		{
+			"path": "../../mini_project/backend"
+		},
+		{
+			"path": "../../mini_project/frontend"
+		},
+		{
+			"path": "../../mini_project/shared"
+		}
+	]
+}
