@@ -18,7 +18,11 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!agree) { setError('กรุณายอมรับข้อตกลงก่อน'); return }
+    // ตรวจสอบว่ากดยอมรับข้อตกลงก่อนส่งฟอร์ม
+    if (!agree) {
+      setError('กรุณายอมรับข้อตกลงก่อน')
+      return
+    }
     setError('')
     setLoading(true)
     try {
@@ -32,63 +36,74 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
   }
 
   return (
+    // พื้นหลังสีดำโปร่งแสง — คลิกนอก modal เพื่อปิด
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
-        <div className="flex justify-between items-center mb-5">
-          <h2 className="text-xl font-bold text-gray-800">สมัครสมาชิก</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+      <div className="bg-white rounded-2xl w-full max-w-sm p-8 shadow-xl relative">
+
+        {/* ปุ่มปิด — วางด้านบนขวาของ modal */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:border-gray-400 transition-colors"
+        >
+          ✕
+        </button>
+
+        {/* โลโก้และหัวข้อ */}
+        <div className="flex flex-col items-center mb-4">
+          <img src="/logo.png" alt="9Tours" className="h-20 w-auto mb-3" />
+          <h2 className="text-2xl font-bold text-gray-800">สมัครสมาชิก</h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">ชื่อผู้ใช้</label>
+            <label className="text-base font-bold text-gray-800 mb-1 block">ชื่อผู้ใช้</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="ชื่อ-นามสกุล"
+              placeholder="natee"
               required
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#F5A623] transition-colors"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-400 transition-colors"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">อีเมล</label>
+            <label className="text-base font-bold text-gray-800 mb-1 block">อีเมล</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="example@email.com"
+              placeholder="natee@example.com"
               required
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#F5A623] transition-colors"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-400 transition-colors"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">หมายเลขโทรศัพท์</label>
+            <label className="text-base font-bold text-gray-800 mb-1 block">หมายเลขโทรศัพท์</label>
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="08x-xxx-xxxx"
+              placeholder="095xxxxxxx"
               required
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#F5A623] transition-colors"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-400 transition-colors"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">รหัสผ่าน</label>
+            <label className="text-base font-bold text-gray-800 mb-1 block">รหัสผ่าน</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="อย่างน้อย 6 ตัวอักษร"
+              placeholder="ความยาว 8 ตัวอักษรขึ้นไป"
               required
-              minLength={6}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#F5A623] transition-colors"
+              minLength={8}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-400 transition-colors"
             />
           </div>
 
@@ -97,15 +112,17 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
               type="checkbox"
               checked={agree}
               onChange={(e) => setAgree(e.target.checked)}
-              className="accent-[#F5A623] mt-0.5"
+              className="accent-blue-500 mt-0.5"
             />
             <span className="text-sm text-gray-600">
               ฉันยอมรับ{' '}
-              <span className="text-[#F5A623]">ข้อกำหนดและเงื่อนไข</span>
-              {' '}ของ 9Tours
+              <span className="text-[#F5A623] cursor-pointer hover:underline">ข้อกำหนดและเงื่อนไข</span>
+              {' '}และ{' '}
+              <span className="text-[#F5A623] cursor-pointer hover:underline">นโยบายความเป็นส่วนตัว</span>
             </span>
           </label>
 
+          {/* แสดงข้อความผิดพลาดเมื่อสมัครไม่สำเร็จ */}
           {error && (
             <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
           )}
@@ -113,19 +130,16 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#F5A623] hover:bg-[#E09415] disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
+            className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-semibold py-3 rounded-full transition-colors"
           >
-            {loading ? 'กำลังสมัคร...' : 'สมัครสมาชิก'}
+            {loading ? 'กำลังสมัคร...' : 'ยืนยัน'}
           </button>
         </form>
 
         <p className="text-sm text-center text-gray-500 mt-4">
-          มีบัญชีแล้ว?{' '}
-          <button
-            onClick={onSwitchToLogin}
-            className="text-[#F5A623] font-medium hover:underline"
-          >
-            เข้าสู่ระบบ
+          หากมีบัญชีแล้ว{' '}
+          <button onClick={onSwitchToLogin} className="text-[#F5A623] font-medium hover:underline">
+            เข้าสู่ระบบที่นี่
           </button>
         </p>
       </div>
