@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
 import type { Tour, TourSchedule } from '../../types/tour'
 
 interface BookingSidebarProps {
@@ -13,21 +11,12 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   )
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
-  const { user } = useAuth()
-  const navigate = useNavigate()
 
-  const hasSchedule = tour.schedules.length > 0
   const seatsLeft = selectedSchedule
     ? selectedSchedule.maxCapacity - selectedSchedule.currentBooked
     : 0
   const totalGuests = adults + children
   const totalPrice = Number(tour.price) * totalGuests
-
-  const handleBooking = () => {
-    if (!user) { navigate('/'); return }
-    if (!selectedSchedule) return
-    navigate(`/booking/${tour.id}?scheduleId=${selectedSchedule.id}&adults=${adults}&children=${children}`)
-  }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sticky top-20">
@@ -104,14 +93,14 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
         </div>
       </div>
 
+      {/* ปุ่มจอง — ปิดไว้ชั่วคราวเพราะระบบจองยังไม่พร้อม (milestone มี.ค.) */}
       <button
-        onClick={handleBooking}
-        disabled={!selectedSchedule || seatsLeft === 0}
-        className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold py-2.5 rounded-xl transition-colors"
+        disabled
+        className="w-full bg-gray-200 text-gray-400 font-semibold py-2.5 rounded-xl cursor-not-allowed"
       >
-        {!hasSchedule ? 'ยังไม่มีรอบให้จอง' : seatsLeft === 0 ? 'เต็มแล้ว' : 'จองเลย'}
+        เปิดรับจองเร็วๆ นี้
       </button>
-      <p className="text-xs text-center text-gray-400 mt-2">ยกเลิกได้ภายใน 24 ชั่วโมง</p>
+      <p className="text-xs text-center text-gray-400 mt-2">ระบบจองอยู่ระหว่างพัฒนา</p>
     </div>
   )
 }
