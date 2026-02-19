@@ -3,9 +3,11 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { Tour } from './tour.entity';
+import { Booking } from '../../bookings/entities/booking.entity';
 
 @Entity('tour_schedules')
 export class TourSchedule {
@@ -13,28 +15,21 @@ export class TourSchedule {
   id: number;
 
   @ManyToOne(() => Tour, (tour) => tour.schedules, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'tourId' })
+  @JoinColumn({ name: 'tour_id' })
   tour: Tour;
 
-  @Column()
+  @Column({ name: 'tour_id' })
   tourId: number;
 
-  @Column('date')
-  startDate: string;
+  @Column({ name: 'travel_date', type: 'date' })
+  travelDate: string;
 
-  @Column('date')
-  endDate: string;
+  @Column({ name: 'total_capacity' })
+  totalCapacity: number;
 
-  // สำหรับทริปที่มีหลายรอบต่อวัน เช่น ATV รอบเช้า/รอบบ่าย
-  @Column({ type: 'varchar', nullable: true })
-  timeSlot: string | null;
+  @Column({ name: 'available_seats' })
+  availableSeats: number;
 
-  @Column({ type: 'varchar', nullable: true })
-  roundName: string | null;
-
-  @Column()
-  maxCapacity: number;
-
-  @Column({ default: 0 })
-  currentBooked: number;
+  @OneToMany(() => Booking, (booking) => booking.schedule)
+  bookings: Booking[];
 }
