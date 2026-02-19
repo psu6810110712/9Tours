@@ -1,213 +1,68 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
-import { Tour, TourType } from './entities/tour.entity';
-
-// ข้อมูล mock สำหรับ demo วันที่ 20 ก.พ.
-// ถ้าทีม backend ทำ CRUD เสร็จแล้ว สามารถลบส่วนนี้แล้วเปลี่ยนไปใช้ DB จริงได้เลย
-const DEMO_TOURS = [
-  {
-    id: 1,
-    name: 'เที่ยวภูเก็ต เมืองเก่า ถ่ายรูปคาเฟ่ทั้งวัน',
-    description: 'เดินเล่นย่านเมืองเก่าภูเก็ต คาเฟ่สวย ๆ และแลนด์มาร์กยอดฮิตในวันเดียว',
-    tourType: TourType.ONE_DAY,
-    categories: ['สายคาเฟ่', 'สายชิล'],
-    price: 2900,
-    originalPrice: 3200,
-    images: [
-      'https://images.unsplash.com/photo-1541417904950-b855846fe074?w=800',
-    ],
-    highlights: ['บริการรถรับส่ง', 'รวมอาหารกลางวัน'],
-    itinerary: [],
-    transportation: 'รถตู้ปรับอากาศ',
-    duration: '8 ชั่วโมง',
-    region: 'ภาคใต้',
-    province: 'ภูเก็ต',
-    accommodation: null,
-    rating: 4.3,
-    reviewCount: 19,
-    isActive: true,
-    schedules: [
-      {
-        id: 101,
-        tourId: 1,
-        startDate: '2026-02-21',
-        endDate: '2026-02-21',
-        timeSlot: '09:00-17:00',
-        roundName: 'รอบเช้า',
-        maxCapacity: 20,
-        currentBooked: 8,
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 2,
-    name: 'ทัวร์เขื่อนเชี่ยวหลาน ล่องเรือ ชมหมอกตอนเช้า',
-    description: 'ล่องเรือชมวิวเขื่อนเชี่ยวหลาน น้ำสีเขียวมรกต พร้อมกิจกรรมพายเรือคายัค',
-    tourType: TourType.ONE_DAY,
-    categories: ['สายธรรมชาติ', 'สายชิล'],
-    price: 1800,
-    originalPrice: 2100,
-    images: [
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800',
-    ],
-    highlights: ['ล่องเรือชมวิว', 'พายเรือคายัค'],
-    itinerary: [],
-    transportation: 'เรือหางยาว + รถตู้',
-    duration: '8 ชั่วโมง',
-    region: 'ภาคใต้',
-    province: 'สุราษฎร์ธานี',
-    accommodation: null,
-    rating: 4.9,
-    reviewCount: 95,
-    isActive: true,
-    schedules: [
-      {
-        id: 201,
-        tourId: 2,
-        startDate: '2026-02-22',
-        endDate: '2026-02-22',
-        timeSlot: '08:00-16:00',
-        roundName: 'รอบปกติ',
-        maxCapacity: 25,
-        currentBooked: 11,
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 3,
-    name: 'แพ็คเกจเชียงใหม่ 3 วัน 2 คืน ชมดอยอินทนนท์',
-    description: 'เที่ยวเชียงใหม่ครบทั้งดอยวัดคาเฟ่ ที่พักสบายย่านนิมมาน',
-    tourType: TourType.PACKAGE,
-    categories: ['สายธรรมชาติ', 'สายชิล'],
-    price: 6900,
-    originalPrice: 7500,
-    images: [
-      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800',
-    ],
-    highlights: ['รวมที่พัก', 'รถรับส่งสนามบิน'],
-    itinerary: [],
-    transportation: 'รถตู้ส่วนตัว',
-    duration: '3 วัน 2 คืน',
-    region: 'ภาคเหนือ',
-    province: 'เชียงใหม่',
-    accommodation: 'โรงแรม 3 ดาว ย่านนิมมาน',
-    rating: 4.7,
-    reviewCount: 48,
-    isActive: true,
-    schedules: [
-      {
-        id: 301,
-        tourId: 3,
-        startDate: '2026-02-24',
-        endDate: '2026-02-26',
-        timeSlot: null,
-        roundName: 'แพ็กเกจ 3 วัน 2 คืน',
-        maxCapacity: 15,
-        currentBooked: 6,
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 4,
-    name: 'เกาะพีพี ดำน้ำดูปะการัง เต็มวัน',
-    description: 'นั่งสปีดโบ๊ทไปเกาะพีพี ดำน้ำ 2 จุด พร้อมอาหารกลางวันบุฟเฟ่ต์',
-    tourType: TourType.ONE_DAY,
-    categories: ['สายกิจกรรม', 'สายธรรมชาติ'],
-    price: 2300,
-    originalPrice: null,
-    images: [
-      'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800',
-    ],
-    highlights: ['ดำน้ำดูปะการัง', 'รวมอุปกรณ์ดำน้ำ'],
-    itinerary: [],
-    transportation: 'สปีดโบ๊ท',
-    duration: '8 ชั่วโมง',
-    region: 'ภาคใต้',
-    province: 'ภูเก็ต',
-    accommodation: null,
-    rating: 4.5,
-    reviewCount: 65,
-    isActive: true,
-    schedules: [
-      {
-        id: 401,
-        tourId: 4,
-        startDate: '2026-02-23',
-        endDate: '2026-02-23',
-        timeSlot: '10:00-18:00',
-        roundName: 'รอบทะเลสวย',
-        maxCapacity: 18,
-        currentBooked: 18,
-      },
-      {
-        id: 402,
-        tourId: 4,
-        startDate: '2026-02-25',
-        endDate: '2026-02-25',
-        timeSlot: '10:00-18:00',
-        roundName: 'รอบพิเศษ',
-        maxCapacity: 18,
-        currentBooked: 9,
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+import { Tour } from './entities/tour.entity';
 
 @Injectable()
 export class ToursService {
-  create(createTourDto: CreateTourDto) {
-    // demo: ยังไม่รองรับ create จริง
-    return createTourDto;
+  constructor(
+    @InjectRepository(Tour)
+    private readonly tourRepository: Repository<Tour>,
+  ) { }
+
+  async create(createTourDto: CreateTourDto) {
+    const newTour = this.tourRepository.create(createTourDto);
+    return await this.tourRepository.save(newTour); // บันทึกลง DB
   }
 
-  // filters: รับมาจาก query string เช่น ?province=ภูเก็ต&tourType=one_day
-  findAll(filters?: { region?: string; province?: string; tourType?: string; search?: string }) {
-    const { region, province, tourType, search } = filters || {};
+  async findAll(filters?: { region?: string; province?: string; tourType?: string; search?: string }) {
+    const query = this.tourRepository.createQueryBuilder('tour')
+      .leftJoinAndSelect('tour.schedules', 'schedules')
+      .where('tour.isActive = :isActive', { isActive: true });
 
-    let result = DEMO_TOURS.filter((t) => t.isActive);
-
-    if (region) {
-      result = result.filter((t) => t.region === region);
+    if (filters?.region) {
+      query.andWhere('tour.region = :region', { region: filters.region });
     }
-    if (province) {
-      result = result.filter((t) => t.province === province);
+    if (filters?.province) {
+      query.andWhere('tour.province = :province', { province: filters.province });
     }
-    if (tourType) {
-      result = result.filter((t) => t.tourType === tourType);
+    if (filters?.tourType) {
+      query.andWhere('tour.tourType = :tourType', { tourType: filters.tourType });
     }
-    if (search && search.trim()) {
-      const term = search.trim().toLowerCase();
-      result = result.filter(
-        (t) =>
-          t.name.toLowerCase().includes(term) ||
-          t.description.toLowerCase().includes(term) ||
-          t.province.includes(search),
+    if (filters?.search) {
+      const searchTerm = `%${filters.search.trim().toLowerCase()}%`;
+      query.andWhere(
+        '(LOWER(tour.name) LIKE :search OR LOWER(tour.description) LIKE :search OR LOWER(tour.province) LIKE :search)',
+        { search: searchTerm },
       );
     }
 
-    return result;
+    query.orderBy('tour.id', 'DESC');
+
+    return await query.getMany();
   }
 
-  findOne(id: number) {
-    return DEMO_TOURS.find((t) => t.id === id) || null;
+  async findOne(id: number) {
+    const tour = await this.tourRepository.findOne({
+      where: { id },
+      relations: ['schedules'],
+    });
+
+    if (!tour) throw new NotFoundException(`ไม่พบทัวร์รหัส ${id}`);
+    return tour;
   }
 
-  update(id: number, updateTourDto: UpdateTourDto) {
-    // demo: ยังไม่อัปเดตจริง แค่ echo กลับ
-    return { id, ...updateTourDto };
+  async update(id: number, updateTourDto: UpdateTourDto) {
+    const tour = await this.findOne(id);
+    this.tourRepository.merge(tour, updateTourDto);
+    return await this.tourRepository.save(tour);
   }
 
-  remove(id: number) {
-    // demo: ยังไม่ลบจริง
-    return { id };
+  async remove(id: number) {
+    const tour = await this.findOne(id);
+    tour.isActive = false;
+    return await this.tourRepository.save(tour);
   }
 }
