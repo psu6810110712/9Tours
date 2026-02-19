@@ -53,11 +53,10 @@ export default function FilterSidebar({
               <button
                 key={opt.value}
                 onClick={() => onTourTypeChange(opt.value)}
-                className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${
-                  tourType === opt.value
+                className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${tourType === opt.value
                     ? 'bg-[#F5A623] text-white'
                     : 'text-gray-600 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {opt.label}
               </button>
@@ -89,18 +88,6 @@ export default function FilterSidebar({
             <option value="">ทุกจังหวัด</option>
             {provinceOptions.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
-        </div>
-
-        {/* ค้นหา */}
-        <div>
-          <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">ค้นหา</label>
-          <input
-            type="text"
-            placeholder="ชื่อทัวร์..."
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none"
-          />
         </div>
       </div>
     </aside>

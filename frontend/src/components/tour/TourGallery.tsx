@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 interface TourGalleryProps {
   images: string[]
@@ -8,6 +8,7 @@ interface TourGalleryProps {
 export default function TourGallery({ images, name }: TourGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
+  const thumbRef = useRef<HTMLDivElement>(null)
   const activeImage = images[activeIndex] || images[0]
 
   const showPrev = () => {
@@ -20,41 +21,45 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
 
   return (
     <div className="mb-4">
-      <div className="relative rounded-2xl overflow-hidden h-[270px] md:h-[320px] mb-3 bg-gray-100">
+      {/* ===== รูปหลัก (hero) ===== */}
+      <div className="relative rounded-2xl overflow-hidden h-[270px] md:h-[350px] mb-3 bg-gray-100">
+        <img
+          src={activeImage}
+          alt={name}
+          className="w-full h-full object-cover"
+        />
+        {/* ปุ่ม "ดูรูปทั้งหมด" */}
         <button
           type="button"
           onClick={() => setIsPopupOpen(true)}
-          className="w-full h-full"
+          className="absolute bottom-3 right-4 bg-white/90 hover:bg-white text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition-colors"
         >
-          <img
-            src={activeImage}
-            alt={name}
-            className="w-full h-full object-cover"
-          />
+          ดูรูปทั้งหมด
         </button>
       </div>
 
-      <h1 className="text-3xl md:text-4xl leading-tight font-bold text-gray-900 mb-3">
-        {name}
-      </h1>
-
+      {/* ===== thumbnail grid — 5 รูปเรียงพอดี ===== */}
       {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {images.map((img, i) => (
-            <button key={i} onClick={() => setActiveIndex(i)}>
+        <div className="grid grid-cols-5 gap-2 mb-4">
+          {images.slice(0, 5).map((img, i) => (
+            <button key={i} onClick={() => { setActiveIndex(i); setIsPopupOpen(true) }}>
               <img
                 src={img}
                 alt=""
-                className={`w-[72px] h-[56px] object-cover rounded-lg flex-shrink-0 transition-all ${
-                  activeIndex === i
-                    ? 'opacity-100 ring-2 ring-[var(--color-primary)]'
-                    : 'opacity-70 hover:opacity-100'
-                }`}
+                className={`w-full aspect-[3/2] object-cover rounded-xl transition-all ${activeIndex === i
+                  ? 'opacity-100 ring-2 ring-[var(--color-primary)]'
+                  : 'opacity-60 hover:opacity-100'
+                  }`}
               />
             </button>
           ))}
         </div>
       )}
+
+      {/* ===== ชื่อทัวร์ — อยู่ใต้ภาพเล็ก ===== */}
+      <h1 className="text-3xl md:text-4xl leading-tight font-bold text-gray-900 mt-10 mb-4">
+        {name}
+      </h1>
 
       {/* popup gallery — ใช้ของง่ายๆอ่านง่าย ไม่ซับซ้อน */}
       {isPopupOpen && (
@@ -66,11 +71,11 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
             className="w-full max-w-5xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative rounded-xl overflow-hidden bg-black">
+            <div className="relative rounded-xl overflow-hidden">
               <img
                 src={activeImage}
                 alt={name}
-                className="w-full max-h-[78vh] object-contain"
+                className="w-full max-h-[78vh] object-cover rounded-xl"
               />
 
               {images.length > 1 && (
@@ -108,11 +113,10 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
                     <img
                       src={img}
                       alt=""
-                      className={`w-20 h-14 object-cover rounded-md ${
-                        activeIndex === i
-                          ? 'ring-2 ring-white'
-                          : 'opacity-70 hover:opacity-100'
-                      }`}
+                      className={`w-20 h-14 object-cover rounded-md ${activeIndex === i
+                        ? 'ring-2 ring-white'
+                        : 'opacity-70 hover:opacity-100'
+                        }`}
                     />
                   </button>
                 ))}

@@ -41,7 +41,7 @@ export default function TourDetailPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Breadcrumb */}
-        <nav className="text-xs text-gray-400 mb-4 flex gap-2">
+        <nav className="text-sm font-medium text-gray-400 mb-5 flex gap-2">
           <Link to="/" className="hover:text-[#F5A623]">หน้าแรก</Link>
           <span>/</span>
           <Link to={`/tours?province=${tour.province}`} className="hover:text-[#F5A623]">{tour.province}</Link>
@@ -69,7 +69,7 @@ export default function TourDetailPage() {
         {/* ทัวร์แนะนำ */}
         {related.length > 0 && (
           <section className="mt-10">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">ทัวร์แนะนำใน{tour.province}</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-5">ทัวร์แนะนำใน{tour.province}</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {related.map((t) => <TourCard key={t.id} tour={t} />)}
             </div>

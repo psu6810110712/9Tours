@@ -63,6 +63,30 @@ export default function ToursPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
+      {/* ===== แถบค้นหา — style เดียวกับ Hero search ใน HomePage ===== */}
+      <div className="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div className="bg-white rounded-2xl shadow-sm p-2 flex items-center gap-1 max-w-2xl mx-auto">
+          <div className="flex items-center gap-2 flex-1 min-w-0 pl-3">
+            <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" strokeLinecap="round" />
+            </svg>
+            <input
+              type="text"
+              placeholder="ค้นหาทัวร์หรือสถานที่..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 py-2.5 text-gray-800 text-sm font-medium outline-none bg-transparent min-w-0"
+            />
+          </div>
+          <button
+            onClick={() => {/* search ทำงานแบบ realtime อยู่แล้วผ่าน useEffect */ }}
+            className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors flex-shrink-0"
+          >
+            ค้นหา
+          </button>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
         <FilterSidebar
           region={region} province={province} tourType={tourType} search={search}
@@ -73,7 +97,7 @@ export default function ToursPage() {
 
         <main className="flex-1 min-w-0">
           <div className="flex justify-between items-center mb-4">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm font-medium text-gray-500">
               {loading ? 'กำลังโหลด...' : `พบ ${sortedTours.length} รายการ`}
             </p>
             <select

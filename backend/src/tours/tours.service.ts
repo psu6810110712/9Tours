@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
 import { TourType } from './entities/tour.entity';
 
 // ข้อมูล mock สำหรับ demo วันที่ 20 ก.พ.
 // ถ้าทีม backend ทำ CRUD เสร็จแล้ว สามารถลบส่วนนี้แล้วเปลี่ยนไปใช้ DB จริงได้เลย
-const DEMO_TOURS = [
+// ตำแหน่งไฟล์ฐานข้อมูลจำลอง
+const DATA_FILE = path.join(process.cwd(), 'tours-data.json');
+
+const INITIAL_DATA = [
   {
     id: 1,
     tourCode: '15012026001',
@@ -17,6 +22,10 @@ const DEMO_TOURS = [
     originalPrice: 3200,
     images: [
       'https://images.unsplash.com/photo-1541417904950-b855846fe074?w=800',
+      'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800',
+      'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=800',
+      'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=800',
+      'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=800',
     ],
     highlights: ['บริการรถรับส่ง', 'รวมอาหารกลางวัน'],
     itinerary: [],
@@ -54,6 +63,10 @@ const DEMO_TOURS = [
     originalPrice: 2100,
     images: [
       'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800',
+      'https://images.unsplash.com/photo-1504699894957-93f02c251aaa?w=800',
+      'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800',
+      'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800',
+      'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800',
     ],
     highlights: ['ล่องเรือชมวิว', 'พายเรือคายัค'],
     itinerary: [],
@@ -91,6 +104,10 @@ const DEMO_TOURS = [
     originalPrice: 7500,
     images: [
       'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800',
+      'https://images.unsplash.com/photo-1528181304800-259b08848526?w=800',
+      'https://images.unsplash.com/photo-1512100356356-de1b84283e18?w=800',
+      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800',
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
     ],
     highlights: ['รวมที่พัก', 'รถรับส่งสนามบิน'],
     itinerary: [],
@@ -128,6 +145,10 @@ const DEMO_TOURS = [
     originalPrice: null,
     images: [
       'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800',
+      'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
+      'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800',
+      'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800',
+      'https://images.unsplash.com/photo-1518990034670-3eb04d6ea23b?w=800',
     ],
     highlights: ['ดำน้ำดูปะการัง', 'รวมอุปกรณ์ดำน้ำ'],
     itinerary: [],
@@ -164,12 +185,107 @@ const DEMO_TOURS = [
     createdAt: new Date(),
     updatedAt: new Date(),
   },
+  {
+    id: 5,
+    tourCode: 'ATV2026005',
+    name: 'ขับ ATV ตะลุยป่า ภูเก็ต (Join Trip)',
+    description: 'ผจญภัยขับ ATV เส้นทางธรรมชาติ วิวทะเลและภูเขา พร้อมครูฝึกดูแลอย่างใกล้ชิด',
+    tourType: TourType.ONE_DAY,
+    categories: ['สายลุย', 'สายกิจกรรม'],
+    price: 1500,
+    originalPrice: 1900,
+    images: [
+      'https://images.unsplash.com/photo-1616174783309-8f388da5362e?w=800',
+      'https://images.unsplash.com/photo-1599557291771-859a1a457c13?w=800',
+      'https://images.unsplash.com/photo-1533230676263-5464731df400?w=800',
+      'https://images.unsplash.com/photo-1596489438096-76472304859a?w=800',
+      'https://images.unsplash.com/photo-1570460984850-629851722e13?w=800',
+    ],
+    highlights: ['ขับ ATV 1 ชั่วโมง', 'รวมอุปกรณ์ความปลอดภัย', 'ครูฝึกมืออาชีพ'],
+    itinerary: [],
+    transportation: 'รถรับส่งในโซน',
+    duration: '4 ชั่วโมง',
+    region: 'ภาคใต้',
+    province: 'ภูเก็ต',
+    accommodation: null,
+    rating: 4.8,
+    reviewCount: 42,
+    isActive: true,
+    schedules: [
+      {
+        id: 501,
+        tourId: 5,
+        startDate: '2026-02-25',
+        endDate: '2026-02-25',
+        timeSlot: '08:00-12:00',
+        roundName: 'รอบเช้า',
+        maxCapacity: 10,
+        currentBooked: 2,
+      },
+      {
+        id: 502,
+        tourId: 5,
+        startDate: '2026-02-25',
+        endDate: '2026-02-25',
+        timeSlot: '13:00-17:00',
+        roundName: 'รอบบ่าย',
+        maxCapacity: 10,
+        currentBooked: 8,
+      },
+      {
+        id: 503,
+        tourId: 5,
+        startDate: '2026-02-26',
+        endDate: '2026-02-26',
+        timeSlot: '08:00-12:00',
+        roundName: 'รอบเช้า',
+        maxCapacity: 10,
+        currentBooked: 0,
+      },
+      {
+        id: 504,
+        tourId: 5,
+        startDate: '2026-02-26',
+        endDate: '2026-02-26',
+        timeSlot: '13:00-17:00',
+        roundName: 'รอบบ่าย',
+        maxCapacity: 10,
+        currentBooked: 5,
+      },
+    ],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
 ];
+
+// โหลดข้อมูล (ใส่ Type any[] เพื่อป้องกัน TS Error 'never[]')
+let DEMO_TOURS: any[] = [];
+try {
+  if (fs.existsSync(DATA_FILE)) {
+    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+    DEMO_TOURS = JSON.parse(raw);
+    console.log('✅ Loaded tours from database file');
+  } else {
+    DEMO_TOURS = INITIAL_DATA;
+    fs.writeFileSync(DATA_FILE, JSON.stringify(DEMO_TOURS, null, 2));
+  }
+} catch (error) {
+  DEMO_TOURS = INITIAL_DATA;
+}
+
+// ฟังก์ชันเซฟข้อมูล
+const persistData = () => {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(DEMO_TOURS, null, 2));
+  } catch (error) {
+    console.error('❌ Save error:', error);
+  }
+};
 
 @Injectable()
 export class ToursService {
-  private nextId = 100;
-  private codeSeq = 5; // เริ่มจาก 5 เพราะ mock data ใช้ 1-4
+  private nextId = Math.max(...DEMO_TOURS.map(t => t.id), 99) + 1;
+  private codeSeq = DEMO_TOURS.length + 1;
 
   // สร้างรหัสทัวร์: DDMMYYYY + ลำดับ 3 หลัก เช่น 19022026005
   private makeTourCode(): string {
@@ -192,7 +308,7 @@ export class ToursService {
       originalPrice: dto.originalPrice ? Number(dto.originalPrice) : null,
       images: dto.images || [],
       highlights: dto.highlights || [],
-      itinerary: [],
+      itinerary: dto.itinerary || [],
       transportation: dto.transportation || '',
       duration: dto.duration,
       region: dto.region,
@@ -206,8 +322,8 @@ export class ToursService {
         tourId: this.nextId - 1,
         startDate: s.startDate,
         endDate: s.endDate,
-        timeSlot: null,
-        roundName: null,
+        timeSlot: (s as any).timeSlot || '',
+        roundName: (s as any).roundName || '',
         maxCapacity: Number(s.maxCapacity),
         currentBooked: 0,
       })),
@@ -217,6 +333,7 @@ export class ToursService {
     // cast เป็น any เพราะ TypeScript infer type ของ DEMO_TOURS จาก literal values
     // ทำให้ originalPrice: number | null ไม่ตรงกับ type ที่ infer ไว้
     DEMO_TOURS.push(newTour as any);
+    persistData();
     return newTour;
   }
 
@@ -275,13 +392,14 @@ export class ToursService {
         tourId: tour.id,
         startDate: s.startDate,
         endDate: s.endDate,
-        timeSlot: null,
-        roundName: null,
+        timeSlot: s.timeSlot || '',
+        roundName: s.roundName || '',
         maxCapacity: Number(s.maxCapacity),
         currentBooked: 0,
       }));
     }
 
+    persistData();
     return tour;
   }
 
@@ -290,6 +408,7 @@ export class ToursService {
     if (!tour) return null;
     // soft delete: ซ่อนจากหน้าผู้ใช้ แต่ admin ยังเห็น
     tour.isActive = false;
+    persistData();
     return { id, deleted: true };
   }
 }

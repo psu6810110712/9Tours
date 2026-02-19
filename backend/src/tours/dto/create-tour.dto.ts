@@ -4,6 +4,8 @@ export class CreateTourDto {
   tourType: 'one_day' | 'package';
   categories: string[];
   price: number;
+  minPeople?: number;
+  maxPeople?: number;
   originalPrice?: number | null;
   images?: string[];
   highlights: string[];
@@ -16,5 +18,11 @@ export class CreateTourDto {
     startDate: string;
     endDate: string;
     maxCapacity: number;
+  }[];
+  itinerary?: {
+    day?: number;
+    time: string;
+    title: string;
+    description: string;
   }[];
 }
