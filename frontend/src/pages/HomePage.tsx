@@ -199,7 +199,7 @@ export default function HomePage() {
                   onClick={() => setSelectedPlace(place)}
                   className={`group relative flex-shrink-0 w-56 h-36 rounded-xl overflow-hidden text-left transition-all duration-200 ${
                     selectedPlace.name === place.name
-                      ? 'ring-2 ring-inset ring-[var(--color-primary)]'
+                      ? 'ring-2 ring-[var(--color-primary)] ring-offset-2'
                       : 'opacity-80 hover:opacity-100'
                   }`}
                 >
