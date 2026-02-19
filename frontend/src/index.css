@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+:root {
+  /* Primary Blue — CTA buttons, active nav, auth, links */
+  --color-primary:       #2563EB;
+  --color-primary-dark:  #1D4ED8;
+  --color-primary-light: #EFF6FF;
+
+  /* Accent Orange — ราคา, badge, tour highlight (ใช้เป็น text เฉพาะตัวใหญ่/bold) */
+  --color-accent:        #F5A623;
+  --color-accent-dark:   #E09415;
+  --color-accent-light:  rgba(245, 166, 35, 0.10);
+
+  /* Neutrals — Clean White theme */
+  --color-text:          #1F2937;   /* gray-800 */
+  --color-text-muted:    #6B7280;   /* gray-500 */
+  --color-text-faint:    #9CA3AF;   /* gray-400 */
+  --color-bg:            #FFFFFF;
+  --color-surface:       #F9FAFB;   /* gray-50 */
+  --color-border:        #E5E7EB;   /* gray-200 */
+
+  /* Semantic */
+  --color-success:       #16A34A;
+  --color-error:         #EF4444;
+  --color-warning:       #F59E0B;
+}
+
+/* ซ่อน scrollbar แต่ยังเลื่อนได้ — ใช้กับ horizontal scroll sections */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* IBM Plex Sans Thai Medium เป็น default ทั้งเว็บ */
+body {
+  font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif;
+  font-weight: 500;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}

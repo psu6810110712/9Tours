@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ToursService } from './tours.service';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
@@ -13,8 +13,9 @@ export class ToursController {
   }
 
   @Get()
-  findAll() {
-    return this.toursService.findAll();
+  findAll(@Query() query: any) {
+    // query จะมีค่า region / province / tourType / search ตามที่ frontend ส่งมา
+    return this.toursService.findAll(query);
   }
 
   @Get(':id')
