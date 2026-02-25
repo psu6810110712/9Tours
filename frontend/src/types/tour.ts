@@ -13,6 +13,7 @@ export interface TourSchedule {
 
 export interface Tour {
   id: number
+  tourCode: string
   name: string
   description: string
   tourType: TourType
@@ -21,12 +22,14 @@ export interface Tour {
   originalPrice: number | null
   images: string[]
   highlights: string[]
-  itinerary: { time: string; title: string; description: string }[]
+  itinerary: { day?: number; time: string; title: string; description: string }[]
   transportation: string
   duration: string
   region: string
   province: string
   accommodation: string | null
+  minPeople?: number
+  maxPeople?: number
   rating: number
   reviewCount: number
   isActive: boolean

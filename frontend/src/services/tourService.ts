@@ -6,6 +6,7 @@ export interface TourFilters {
   province?: string
   tourType?: string
   search?: string
+  admin?: string
 }
 
 export const tourService = {
@@ -23,12 +24,4 @@ export const tourService = {
 
   remove: (id: number) =>
     api.delete(`/tours/${id}`).then((r) => r.data),
-
-  uploadImage: (file: File) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    return api.post<{ url: string }>('/tours/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }).then((r) => r.data.url)
-  },
 }

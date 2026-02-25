@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 interface RegisterModalProps {
@@ -16,7 +15,6 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { register } = useAuth()
-  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,12 +26,8 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
     setError('')
     setLoading(true)
     try {
-      const userData = await register(name, email, phone, password)
+      await register(name, email, phone, password)
       onClose()
-      // Redirect admin to admin page
-      if (userData?.role === 'admin') {
-        navigate('/admin/tours')
-      }
     } catch {
       setError('ไม่สามารถสมัครสมาชิกได้ อีเมลอาจถูกใช้งานแล้ว')
     } finally {
