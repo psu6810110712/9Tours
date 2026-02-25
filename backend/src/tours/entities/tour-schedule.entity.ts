@@ -3,9 +3,11 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { Tour } from './tour.entity';
+import { Booking } from '../../bookings/entities/booking.entity';
 
 @Entity('tour_schedules')
 export class TourSchedule {
@@ -37,4 +39,7 @@ export class TourSchedule {
 
   @Column({ default: 0 })
   currentBooked: number;
+
+  @OneToMany(() => Booking, (booking) => booking.schedule)
+  bookings: Booking[];
 }

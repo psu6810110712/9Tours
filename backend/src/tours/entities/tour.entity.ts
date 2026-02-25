@@ -3,10 +3,14 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { TourSchedule } from './tour-schedule.entity';
+import { TourCategory } from './tour-category.entity';
+import { Festival } from '../../festivals/entities/festival.entity';
 
 export enum TourType {
   ONE_DAY = 'one_day',
@@ -76,6 +80,14 @@ export class Tour {
   // false = ซ่อนจากรายการ (soft delete)
   @Column({ default: true })
   isActive: boolean;
+
+  @ManyToOne(() => TourCategory, (cat) => cat.tours, { nullable: true })
+  @JoinColumn({ name: 'category_id' })
+  category: TourCategory;
+
+  @ManyToOne(() => Festival, (fest) => fest.tours, { nullable: true })
+  @JoinColumn({ name: 'festival_id' })
+  festival: Festival;
 
   @OneToMany(() => TourSchedule, (schedule) => schedule.tour, {
     cascade: true,
