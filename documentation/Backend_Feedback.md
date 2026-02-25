@@ -66,37 +66,6 @@ getMe(@Request() req) {
 
 **แก้ไข:** ลบ `role` ออกจาก register flow หรือบังคับให้เป็น `customer` เสมอ
 
----
-
-## ⚠️ จุดที่ควรเพิ่ม
-
-### 4. ไม่มี Frontend Route Protection
-
-**ปัญหา:** ไม่มี `ProtectedRoute` component → หน้า admin dashboard ไม่ถูกป้องกัน ใครก็พิมพ์ URL เข้าถึงได้
-
-**แก้ไข:** สร้าง `ProtectedRoute` component ที่เช็ค `useAuth()` ก่อนแสดงหน้า
-
-### 5. JwtAuthGuard ใช้แค่ 1 จุด
-
-**ปัญหา:** `@UseGuards(JwtAuthGuard)` ใช้เฉพาะใน `users.controller.ts` → endpoint อื่นๆ เช่น bookings, tours (admin CRUD) **ไม่ได้ป้องกัน**
-
-**แก้ไข:** ใส่ `@UseGuards(JwtAuthGuard)` ในทุก controller/endpoint ที่ต้อง login
-
-### 6. ไม่มี Refresh Token
-
-**ปัญหา:** Token หมดอายุ 24 ชม. แล้วต้อง login ใหม่ ไม่มีระบบ refresh อัตโนมัติ
-
-**ผลกระทบ:** UX ไม่ดี ผู้ใช้ที่ใช้งานข้ามวันต้อง login ใหม่
-
-### 7. "จดจำฉัน" Checkbox ไม่ทำงานจริง
-
-**ปัญหา:** `LoginModal` มี checkbox "จดจำฉัน" แต่ค่า `remember` **ไม่ถูกใช้งานที่ไหนเลย** token ถูกเก็บ localStorage เสมอไม่ว่าจะติ๊กหรือไม่
-
-### 8. Token Expiry ไม่ถูก Handle ใน Frontend
-
-**ปัญหา:** ถ้า token หมดอายุ API จะ return 401 แต่ frontend ไม่มี interceptor ที่จะจับ 401 แล้ว auto-logout
-
----
 
 ## 🔴 Booking API — ต้องเสร็จภายในพฤหัส 26 ก.พ. 14:00
 
