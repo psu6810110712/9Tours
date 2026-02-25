@@ -14,27 +14,31 @@ export class ToursService {
 
   async create(createTourDto: CreateTourDto) {
     const newTour = this.tourRepository.create(createTourDto);
-    return await this.tourRepository.save(newTour); // บันทึกลง DB
+    return await this.tourRepository.save(newTour);
   }
 
-  async findAll(filters?: { region?: string; province?: string; tourType?: string; search?: string }) {
+  async findAll(filters?: { regionId?: number; provinceId?: number; categoryId?: number; search?: string }) {
     const query = this.tourRepository.createQueryBuilder('tour')
       .leftJoinAndSelect('tour.schedules', 'schedules')
-      .where('tour.isActive = :isActive', { isActive: true });
+      .leftJoinAndSelect('tour.category', 'category')
+      .leftJoinAndSelect('tour.region', 'region')
+      .leftJoinAndSelect('tour.province', 'province')
+      .leftJoinAndSelect('tour.festival', 'festival')
+      .where('tour.is_visible = :isVisible', { isVisible: true });
 
-    if (filters?.region) {
-      query.andWhere('tour.region = :region', { region: filters.region });
+    if (filters?.regionId) {
+      query.andWhere('tour.region_id = :regionId', { regionId: filters.regionId });
     }
-    if (filters?.province) {
-      query.andWhere('tour.province = :province', { province: filters.province });
+    if (filters?.provinceId) {
+      query.andWhere('tour.province_id = :provinceId', { provinceId: filters.provinceId });
     }
-    if (filters?.tourType) {
-      query.andWhere('tour.tourType = :tourType', { tourType: filters.tourType });
+    if (filters?.categoryId) {
+      query.andWhere('tour.category_id = :categoryId', { categoryId: filters.categoryId });
     }
     if (filters?.search) {
       const searchTerm = `%${filters.search.trim().toLowerCase()}%`;
       query.andWhere(
-        '(LOWER(tour.name) LIKE :search OR LOWER(tour.description) LIKE :search OR LOWER(tour.province) LIKE :search)',
+        '(LOWER(tour.title) LIKE :search OR LOWER(tour.description) LIKE :search)',
         { search: searchTerm },
       );
     }
@@ -47,7 +51,7 @@ export class ToursService {
   async findOne(id: number) {
     const tour = await this.tourRepository.findOne({
       where: { id },
-      relations: ['schedules'],
+      relations: ['schedules', 'category', 'region', 'province', 'festival'],
     });
 
     if (!tour) throw new NotFoundException(`ไม่พบทัวร์รหัส ${id}`);
@@ -62,7 +66,7 @@ export class ToursService {
 
   async remove(id: number) {
     const tour = await this.findOne(id);
-    tour.isActive = false;
+    tour.isVisible = false;
     return await this.tourRepository.save(tour);
   }
 }
