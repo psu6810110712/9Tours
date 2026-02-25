@@ -22,7 +22,7 @@ interface FilterSidebarProps {
 
 export default function FilterSidebar({
   region, province, tourType, search,
-  onRegionChange, onProvinceChange, onTourTypeChange, onSearchChange, onClear,
+  onRegionChange, onProvinceChange, onTourTypeChange, onClear,
 }: FilterSidebarProps) {
   const hasFilter = region || province || tourType || search
   const provinceOptions = region
@@ -54,8 +54,8 @@ export default function FilterSidebar({
                 key={opt.value}
                 onClick={() => onTourTypeChange(opt.value)}
                 className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${tourType === opt.value
-                    ? 'bg-[#F5A623] text-white'
-                    : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-[#F5A623] text-white'
+                  : 'text-gray-600 hover:bg-gray-50'
                   }`}
               >
                 {opt.label}

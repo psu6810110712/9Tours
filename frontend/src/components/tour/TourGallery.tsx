@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 
 interface TourGalleryProps {
   images: string[]
@@ -8,7 +8,6 @@ interface TourGalleryProps {
 export default function TourGallery({ images, name }: TourGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
-  const thumbRef = useRef<HTMLDivElement>(null)
   const activeImage = images[activeIndex] || images[0]
 
   const showPrev = () => {
