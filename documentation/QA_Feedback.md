@@ -45,11 +45,18 @@
   - หลัง login → แสดงชื่อ user + ปุ่ม logout
   - หลัง logout → กลับไปแสดงปุ่ม "เข้าสู่ระบบ"
 
-### 4. 🟡 ทดสอบ Booking Flow
+### 4. 🔴 ทดสอบ Booking Flow — ต้องเสร็จก่อนประชุมพฤหัส 26 ก.พ. 20:00
 
-- ลองจอง booking โดยไม่ login → ต้องถูก redirect ให้ login ก่อน (หลังแก้ ProtectedRoute)
-- ลองจอง booking สำเร็จ → paxCount และ totalPrice ถูกต้อง
-- ลองเข้าหน้า My Bookings → แสดงรายการจองของ user ที่ login อยู่เท่านั้น
+- **จอง booking สำเร็จ (end-to-end)**
+  - login → เปิดหน้าทัวร์ → เลือกวัน → กดจอง
+  - ตรวจสอบว่า database มี row ใหม่ในตาราง `bookings`
+  - ตรวจสอบว่า `tour_schedules.currentBooked` อัปเดตจริง
+  - ตรวจสอบว่า `paxCount` และ `totalPrice` ถูกต้อง
+  - ตรวจสอบว่าหน้า My Bookings แสดงรายการที่เพิ่งจอง
+- **จองโดยไม่ login** → ต้องถูก redirect ให้ login ก่อน
+- **จองเกิน capacity** → ต้อง return error ไม่ให้จอง
+- **ดู My Bookings** → ต้องแสดงเฉพาะ booking ของ user ที่ login ไม่ใช่ของคนอื่น
+- **Admin เปลี่ยนสถานะ** → PATCH status แล้วต้องอัปเดตจริงใน database
 
 ### 5. 🟢 ทดสอบ Cross-Browser
 
@@ -61,6 +68,7 @@
 
 ## 💡 แนะนำเพิ่มเติม
 
-- เริ่มจากทดสอบ **ข้อ 1 (Auth Security)** ก่อน เพราะเป็นช่องโหว่ที่อันตราย
+- เริ่มจากทดสอบ **ข้อ 1 (Auth Security)** + **ข้อ 4 (Booking Flow)** ก่อน เพราะเป็นสิ่งที่ต้อง demo ในวันพฤหัส
 - ใช้ **Postman** หรือ **Thunder Client** ทดสอบ API ก่อนทดสอบ UI
-- บันทึกผลทดสอบเป็นตาราง (test case / expected / actual / pass/fail)
+- หลังทดสอบ API แล้ว ให้ทดสอบบนหน้าเว็บจริง (Frontend) ว่าจองได้ครบ loop
+- บันทึกผลทดสอบเป็น pass/fail พร้อมรายงานในที่ประชุม 20:00

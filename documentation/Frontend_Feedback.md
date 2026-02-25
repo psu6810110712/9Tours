@@ -74,8 +74,30 @@
 
 ---
 
+## 🔴 หน้า Booking — ต้องเชื่อมกับ Backend ให้เสร็จภายในพฤหัส 26 ก.พ. 17:00
+
+ตอนนี้หน้า Booking (`/booking/:tourId`) มี UI แล้วแต่ยังไม่ได้เชื่อมกับ API จริง
+
+### สิ่งที่ต้องทำ
+
+- สร้าง `bookingService.ts` ใน `services/`
+  - `createBooking(scheduleId, paxCount)` → POST /bookings
+  - `getMyBookings()` → GET /bookings/my
+- หน้า Booking → กดปุ่ม "จอง" แล้วเรียก `createBooking()` จริง
+  - ส่ง `scheduleId` + `paxCount` ไปที่ Backend
+  - แสดงผลสำเร็จ → redirect ไป My Bookings
+  - แสดง error ถ้าจองไม่ได้ (เช่น เต็ม, ไม่ได้ login)
+- หน้า My Bookings → เรียก `getMyBookings()` แสดงรายการจองจริงจาก database
+  - แสดง: ชื่อทัวร์, วันที่, จำนวนคน, ราคารวม, สถานะ
+
+### ตัวชี้วัด
+
+- กดจองบนหน้าเว็บ → database มี row ใหม่จริง
+- หน้า My Bookings แสดงรายการที่เพิ่งจองได้
+
+---
+
 ## 💡 ข้อสังเกตเพิ่มเติม
 
 - **API interceptor** — ควรเพิ่ม `Authorization: Bearer <token>` header ใน axios instance (ถ้ายังไม่ได้ทำ)
 - **Error Boundary** — ยังไม่มี global error boundary ถ้า component crash จะเห็นหน้าขาว
-- **Loading states** — ตรวจสอบว่าทุกหน้าที่ fetch data มี loading skeleton/spinner
