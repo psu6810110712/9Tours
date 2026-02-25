@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 interface LoginModalProps {
@@ -13,14 +14,19 @@ export default function LoginModal({ onClose, onSwitchToRegister }: LoginModalPr
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      await login(email, password)
+      const userData = await login(email, password)
       onClose()
+      // Redirect admin to admin page
+      if (userData?.role === 'admin') {
+        navigate('/admin/tours')
+      }
     } catch {
       setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
     } finally {
