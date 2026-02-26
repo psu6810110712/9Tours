@@ -2,49 +2,96 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking, BookingStatus } from './entities/booking.entity';
-import { TourSchedule } from '../tours/entities/tour-schedule.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// === อ่าน tours-data.json (แหล่งข้อมูลเดียวกันกับ ToursService) ===
+const DATA_FILE = path.join(process.cwd(), 'tours-data.json');
+
+function loadToursData(): any[] {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    }
+  } catch (e) {
+    console.error('❌ BookingsService: cannot read tours-data.json', e);
+  }
+  return [];
+}
+
+function persistToursData(tours: any[]) {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(tours, null, 2));
+  } catch (e) {
+    console.error('❌ BookingsService: cannot write tours-data.json', e);
+  }
+}
+
+// ค้นหา schedule ใน JSON
+function findScheduleInJson(scheduleId: number): { tour: any; schedule: any } | null {
+  const tours = loadToursData();
+  for (const tour of tours) {
+    if (!tour.schedules) continue;
+    const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
+    if (schedule) {
+      return { tour, schedule };
+    }
+  }
+  return null;
+}
+
+// อัปเดต currentBooked ของ schedule ใน JSON
+function updateScheduleBookedCount(scheduleId: number, addPax: number) {
+  const tours = loadToursData();
+  for (const tour of tours) {
+    if (!tour.schedules) continue;
+    const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
+    if (schedule) {
+      schedule.currentBooked = (schedule.currentBooked || 0) + addPax;
+      persistToursData(tours);
+      return;
+    }
+  }
+}
 
 @Injectable()
 export class BookingsService {
   constructor(
     @InjectRepository(Booking)
     private bookingsRepository: Repository<Booking>,
-    @InjectRepository(TourSchedule)
-    private tourSchedulesRepository: Repository<TourSchedule>,
-  ) {}
+  ) { }
 
   async create(userId: number, createBookingDto: CreateBookingDto) {
     const { scheduleId, paxCount } = createBookingDto;
 
-    // ตรวจสอบว่า schedule มีอยู่และโหลด tour ด้วย
-    const schedule = await this.tourSchedulesRepository.findOne({
-      where: { id: scheduleId },
-      relations: ['tour'],
-    });
+    // ค้นหา schedule จาก tours-data.json (แหล่งข้อมูลเดียวกันกับ ToursService)
+    const found = findScheduleInJson(scheduleId);
 
-    if (!schedule) {
+    if (!found) {
       throw new NotFoundException('ไม่พบ Tour Schedule นี้');
     }
 
+    const { tour, schedule } = found;
+
     // ตรวจสอบ capacity
-    if (schedule.currentBooked + paxCount > schedule.maxCapacity) {
-      const availableSlots = schedule.maxCapacity - schedule.currentBooked;
+    const currentBooked = schedule.currentBooked || 0;
+    if (currentBooked + paxCount > schedule.maxCapacity) {
+      const availableSlots = schedule.maxCapacity - currentBooked;
       throw new BadRequestException(
         `ที่ว่างไม่พอ มี ${availableSlots} ที่ว่าง แต่คุณต้องการ ${paxCount} ที่`,
       );
     }
 
     // คำนวณ total price
-    const totalPrice = paxCount * schedule.tour.price;
+    const totalPrice = paxCount * tour.price;
 
-    // สร้าง booking ใหม่
+    // สร้าง booking ใหม่  (เราเก็บ scheduleId ไว้เฉยๆ เพื่อ reference)
     const booking = this.bookingsRepository.create({
       userId,
       scheduleId,
@@ -53,27 +100,50 @@ export class BookingsService {
       status: BookingStatus.PENDING_PAYMENT,
     });
 
-    // บันทึก booking
+    // บันทึก booking ลง DB
     const savedBooking = await this.bookingsRepository.save(booking);
 
-    // อัปเดต currentBooked ใน schedule
-    schedule.currentBooked += paxCount;
-    await this.tourSchedulesRepository.save(schedule);
+    // อัปเดต currentBooked ใน JSON
+    updateScheduleBookedCount(scheduleId, paxCount);
 
-    // คืน booking พร้อม schedule และ tour info
-    const result = await this.bookingsRepository.findOne({
-      where: { id: savedBooking.id },
-      relations: ['schedule', 'schedule.tour'],
-    });
-
-    return result;
+    // คืนข้อมูล booking พร้อมข้อมูลทัวร์
+    return {
+      ...savedBooking,
+      schedule: {
+        ...schedule,
+        tour: {
+          id: tour.id,
+          name: tour.name,
+          price: tour.price,
+          images: tour.images,
+        },
+      },
+    };
   }
 
   async getMyBookings(userId: number) {
-    return this.bookingsRepository.find({
+    const bookings = await this.bookingsRepository.find({
       where: { userId },
-      relations: ['schedule', 'schedule.tour'],
       order: { createdAt: 'DESC' },
+    });
+
+    // เติมข้อมูล schedule + tour จาก JSON
+    return bookings.map((booking) => {
+      const found = findScheduleInJson(booking.scheduleId);
+      return {
+        ...booking,
+        schedule: found
+          ? {
+            ...found.schedule,
+            tour: {
+              id: found.tour.id,
+              name: found.tour.name,
+              price: found.tour.price,
+              images: found.tour.images,
+            },
+          }
+          : null,
+      };
     });
   }
 
@@ -88,25 +158,49 @@ export class BookingsService {
 
     // อัปเดต status
     booking.status = updateBookingStatusDto.status;
-    await this.bookingsRepository.save(booking);
+    const updated = await this.bookingsRepository.save(booking);
 
-    // คืน booking ที่อัปเดตแล้ว
-    return this.bookingsRepository.findOne({
-      where: { id: bookingId },
-      relations: ['schedule', 'schedule.tour'],
-    });
+    // เติมข้อมูล schedule จาก JSON  
+    const found = findScheduleInJson(updated.scheduleId);
+    return {
+      ...updated,
+      schedule: found
+        ? {
+          ...found.schedule,
+          tour: {
+            id: found.tour.id,
+            name: found.tour.name,
+            price: found.tour.price,
+            images: found.tour.images,
+          },
+        }
+        : null,
+    };
   }
 
   async findOne(id: number) {
     const booking = await this.bookingsRepository.findOne({
       where: { id },
-      relations: ['schedule', 'schedule.tour', 'user'],
     });
 
     if (!booking) {
       throw new NotFoundException('ไม่พบ Booking นี้');
     }
 
-    return booking;
+    const found = findScheduleInJson(booking.scheduleId);
+    return {
+      ...booking,
+      schedule: found
+        ? {
+          ...found.schedule,
+          tour: {
+            id: found.tour.id,
+            name: found.tour.name,
+            price: found.tour.price,
+            images: found.tour.images,
+          },
+        }
+        : null,
+    };
   }
 }

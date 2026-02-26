@@ -20,7 +20,7 @@ import { UserRole } from '../users/entities/user.entity';
 
 @Controller('bookings')
 export class BookingsController {
-  constructor(private readonly bookingsService: BookingsService) {}
+  constructor(private readonly bookingsService: BookingsService) { }
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -32,6 +32,12 @@ export class BookingsController {
   @Get('my')
   async getMyBookings(@Req() req: any) {
     return this.bookingsService.getMyBookings(req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.bookingsService.findOne(+id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -46,3 +52,4 @@ export class BookingsController {
     return this.bookingsService.updateStatus(+id, updateBookingStatusDto, req.user.id);
   }
 }
+

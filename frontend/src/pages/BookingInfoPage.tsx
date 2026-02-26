@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { tourService } from '../services/tourService'
+import { bookingService } from '../services/bookingService'
 
 export default function BookingInfoPage() {
   const { tourId } = useParams<{ tourId: string }>()

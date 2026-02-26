@@ -260,7 +260,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 0
+        "currentBooked": 3
       },
       {
         "id": 503,
@@ -283,7 +283,7 @@
     "description": "dwq",
     "tourType": "one_day",
     "categories": [],
-    "price": 65,
+    "price": 99,
     "originalPrice": null,
     "images": [
       "http://localhost:3000/uploads/tour-1772089155065-38860284.jpg"
@@ -300,6 +300,6 @@
     "isActive": false,
     "schedules": [],
     "createdAt": "2026-02-26T06:59:24.897Z",
-    "updatedAt": "2026-02-26T07:06:18.302Z"
+    "updatedAt": "2026-02-26T11:43:56.750Z"
   }
 ]
