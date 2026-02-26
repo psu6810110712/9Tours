@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import LoginModal from './LoginModal'
@@ -15,7 +15,15 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [modal, setModal] = useState<'login' | 'register' | null>(null)
   const navigate = useNavigate()
-  const { pathname, search } = useLocation()
+  const location = useLocation()
+  const { pathname, search } = location
+
+  useEffect(() => {
+    if (location.state && (location.state as any).requireLogin) {
+      setModal('login')
+      navigate(pathname, { replace: true, state: {} })
+    }
+  }, [location, navigate, pathname])
 
   const isActive = (path: string) => {
     const [p, q] = path.split('?')
@@ -72,11 +80,10 @@ export default function Navbar() {
               <>
                 <Link
                   to="/my-bookings"
-                  className={`hidden md:block text-[15px] transition-colors ${
-                    pathname === '/my-bookings'
+                  className={`hidden md:block text-[15px] transition-colors ${pathname === '/my-bookings'
                       ? 'text-[var(--color-primary)] font-semibold'
                       : 'text-gray-500 hover:text-gray-900'
-                  }`}
+                    }`}
                 >
                   การจองของฉัน
                 </Link>

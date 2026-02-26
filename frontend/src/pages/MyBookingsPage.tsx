@@ -1,39 +1,246 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
-// TODO (Session 2): wire GET /bookings/my หลัง backend auth พร้อม
-// หน้านี้รอ: ต้อง login ก่อน, แสดง booking tabs (ทั้งหมด/รอ/สำเร็จ/ยกเลิก)
+export default function MyBookingPage() {
+  const [activeTab, setActiveTab] = useState('ทั้งหมด')
+  const [bookings, setBookings] = useState<any[]>([])
+  const [selectedBooking, setSelectedBooking] = useState<any>(null)
+  
+  const navigate = useNavigate()
 
-const STATUS_TABS = ['ทั้งหมด', 'รอตรวจสอบ', 'สำเร็จ', 'ยกเลิกแล้ว']
+  // 1. เพิ่มแท็บ "ยกเลิกแล้ว" กลับเข้ามา
+  const tabs = ['ทั้งหมด', 'รอชำระเงิน', 'รอตรวจสอบ', 'สำเร็จ', 'ยกเลิกแล้ว']
 
-export default function MyBookingsPage() {
+  // ดึงข้อมูลเมื่อโหลดหน้าเว็บ
+  useEffect(() => {
+    loadBookings()
+  }, [])
+
+  // 2. ฟังก์ชันโหลดข้อมูล พร้อมตรวจสอบวันหมดอายุ (1 วัน) สำหรับรายการที่ถูกยกเลิก
+  const loadBookings = () => {
+    const rawBookings = JSON.parse(localStorage.getItem('myBookings') || '[]')
+    const now = Date.now()
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000 // 24 ชั่วโมงในหน่วยมิลลิวินาที
+
+    // คัดกรองรายการ: ถ้ายกเลิกแล้ว และเวลาผ่านไปเกิน 1 วัน ให้ทิ้งไปเลย
+    const validBookings = rawBookings.filter((booking: any) => {
+      if (booking.status === 'ยกเลิกแล้ว' && booking.canceledAt) {
+        const timePassed = now - booking.canceledAt
+        return timePassed <= ONE_DAY_MS // เก็บไว้ถ้ายังไม่เกิน 1 วัน
+      }
+      return true // สถานะอื่นเก็บไว้หมด
+    })
+
+    // ถ้ารายการลดลง (แปลว่ามีรายการหมดอายุถูกลบไป) ให้เซฟทับ Local Storage ทันที
+    if (rawBookings.length !== validBookings.length) {
+      localStorage.setItem('myBookings', JSON.stringify(validBookings))
+    }
+
+    setBookings(validBookings)
+  }
+
+  // 3. ฟังก์ชันยกเลิกการจอง (เปลี่ยนสถานะ และปั๊มเวลาที่ยกเลิก)
+  const handleCancelBooking = (bookingId: string) => {
+    if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการจองนี้? \n(รายการจะถูกเก็บไว้ในประวัติ 1 วันก่อนระบบจะลบถาวร)')) {
+      
+      const updatedBookings = bookings.map(b => {
+        if (b.id === bookingId) {
+          // เปลี่ยนสถานะ และบันทึกเวลา (Timestamp) ณ วินาทีที่กดยกเลิก
+          return { ...b, status: 'ยกเลิกแล้ว', canceledAt: Date.now() }
+        }
+        return b
+      })
+
+      setBookings(updatedBookings)
+      localStorage.setItem('myBookings', JSON.stringify(updatedBookings))
+      alert('ยกเลิกการจองสำเร็จ')
+    }
+  }
+
+  const filteredBookings = activeTab === 'ทั้งหมด' 
+    ? bookings 
+    : bookings.filter(b => b.status === activeTab)
+
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+      case 'รอชำระเงิน': return 'bg-yellow-50 text-yellow-600 border border-yellow-200'
+      case 'รอตรวจสอบ': return 'bg-orange-50 text-orange-500 border border-orange-100'
+      case 'สำเร็จ': return 'bg-green-50 text-green-600 border border-green-200'
+      case 'ยกเลิกแล้ว': return 'bg-red-50 text-red-500 border border-red-200' // เพิ่มป้ายสีแดง
+      default: return 'bg-gray-50 text-gray-500'
+    }
+  }
+
+  // ฟังก์ชัน Helper สำหรับ Modal
+  const getModalHeaderColor = (status: string) => {
+    switch(status) {
+      case 'รอชำระเงิน': return 'bg-[#FFC107]' 
+      case 'รอตรวจสอบ': return 'bg-[#F97316]' 
+      case 'สำเร็จ': return 'bg-[#10B981]' 
+      case 'ยกเลิกแล้ว': return 'bg-[#EF4444]' // สีแดง
+      default: return 'bg-gray-500'
+    }
+  }
+
+  const getModalHeaderText = (status: string) => {
+    switch(status) {
+      case 'รอชำระเงิน': return 'อยู่ระหว่างการรอชำระเงิน'
+      case 'รอตรวจสอบ': return 'รอการตรวจสอบ'
+      case 'สำเร็จ': return 'ชำระเงินแล้ว'
+      case 'ยกเลิกแล้ว': return 'ยกเลิกแล้ว'
+      default: return 'สถานะไม่ทราบ'
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F9FAFB] relative">
       <Navbar />
+      <main className="max-w-5xl mx-auto px-4 py-10">
+        <h1 className="text-2xl font-black text-gray-800 mb-8">การจองของฉัน</h1>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">การจองของฉัน</h1>
-
-        {/* tabs */}
-        <div className="flex gap-2 mb-6 border-b border-gray-200">
-          {STATUS_TABS.map((tab, i) => (
+        <div className="flex gap-4 mb-8 overflow-x-auto pb-2 border-b border-gray-200">
+          {tabs.map(tab => (
             <button
               key={tab}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${i === 0 ? 'border-[#F5A623] text-[#F5A623]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-3 font-bold text-sm whitespace-nowrap transition-all border-b-2 ${
+                activeTab === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-400 hover:text-gray-600'
+              }`}
             >
               {tab}
             </button>
           ))}
         </div>
 
-        {/* placeholder state */}
-        <div className="text-center py-20 text-gray-400">
-          <div className="text-5xl mb-4">📋</div>
-          <p className="font-medium text-gray-500 mb-1">ยังไม่มีการจอง</p>
-          <p className="text-sm">⏳ รอการพัฒนาระบบ Auth + Booking (Session 2)</p>
-        </div>
-      </div>
+        <div className="space-y-4">
+          {filteredBookings.length > 0 ? filteredBookings.map((booking, index) => (
+            <div key={index} className={`bg-white p-5 rounded-[1.5rem] shadow-sm border flex flex-col md:flex-row gap-6 items-center hover:shadow-md transition-all ${booking.status === 'ยกเลิกแล้ว' ? 'border-red-100 opacity-70' : 'border-gray-100'}`}>
+              
+              <img src={booking.image} alt="tour" className={`w-full md:w-40 h-28 object-cover rounded-xl ${booking.status === 'ยกเลิกแล้ว' ? 'grayscale' : ''}`} />
+              
+              <div className="flex-1 w-full">
+                <div className="flex items-center gap-3">
+                  <h3 className={`text-lg font-bold ${booking.status === 'ยกเลิกแล้ว' ? 'text-gray-500 line-through' : 'text-gray-800'}`}>{booking.tourName}</h3>
+                  <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${getStatusBadge(booking.status)}`}>
+                    {booking.status}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-gray-500 mt-2">{booking.id}</p>
+                <p className="text-xs text-gray-500 mt-1">{booking.date}</p>
+              </div>
 
+              <div className="w-full md:w-auto flex flex-col items-start md:items-end gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400 font-bold">ยอดที่ต้องชำระ:</span>
+                  <span className="text-xl font-black text-gray-800">{booking.price.toLocaleString()}</span>
+                  <span className="text-sm font-bold text-gray-800">บาท</span>
+                </div>
+                
+                <div className="flex gap-2 items-center w-full md:w-auto">
+                  
+                  {/* ปุ่มรายละเอียด กดดูได้ทุกสถานะ */}
+                  <button 
+                    onClick={() => setSelectedBooking(booking)}
+                    className="flex-1 md:flex-none px-6 py-2 bg-white border border-gray-200 text-gray-600 rounded-full text-xs font-bold hover:bg-gray-50 transition-all shadow-sm"
+                  >
+                     รายละเอียด
+                  </button>
+
+                  {/* ปุ่มชำระเงิน/ยกเลิก จะไม่โชว์ถ้ายกเลิกไปแล้ว */}
+                  {booking.status === 'รอชำระเงิน' && (
+                    <>
+                      <button 
+                        onClick={() => navigate(`/payment/${booking.id}`)}
+                        className="flex-1 md:flex-none px-6 py-2 bg-[#3b82f6] text-white rounded-full text-xs font-bold hover:bg-blue-600 transition-all shadow-sm"
+                      >
+                         ชำระเงิน
+                      </button>
+                      <button 
+                        onClick={() => handleCancelBooking(booking.id)}
+                        className="flex-1 md:flex-none px-6 py-2 bg-white border border-red-200 text-red-500 rounded-full text-xs font-bold hover:bg-red-50 transition-all"
+                      >
+                         ยกเลิก
+                      </button>
+                    </>
+                  )}
+
+                </div>
+              </div>
+            </div>
+          )) : (
+            <div className="text-center text-gray-400 py-16 bg-white rounded-[1.5rem] border border-gray-100 border-dashed">
+              <span className="text-4xl mb-3 block">📄</span>
+              <p className="font-bold">ไม่พบรายการ</p>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* 🌟 Modal / Pop-up รายละเอียดการจอง 🌟 */}
+      {selectedBooking && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-[1.5rem] w-full max-w-[380px] overflow-hidden shadow-2xl relative">
+            
+            <div className={`py-3 px-4 text-center font-bold text-xs text-white relative ${getModalHeaderColor(selectedBooking.status)}`}>
+              <span>{getModalHeaderText(selectedBooking.status)}</span>
+              <button 
+                onClick={() => setSelectedBooking(null)} 
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-black/10 hover:bg-black/20 rounded-full flex items-center justify-center text-white font-bold transition-all"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6">
+              <h3 className="text-md font-bold text-gray-800 mb-5">สรุปข้อมูลการจองของท่าน</h3>
+              
+              <div className="flex gap-3 mb-6">
+                <div className="flex-1 space-y-2.5 text-[11px] text-gray-600 leading-tight">
+                  <div className="flex"><span className="font-bold text-gray-800 w-16 shrink-0">รหัสทัวร์</span> <span className="text-gray-600">{selectedBooking.id}</span></div>
+                  <div className="flex"><span className="font-bold text-gray-800 w-16 shrink-0">ชื่อทัวร์</span> <span className="line-clamp-2 text-gray-600">{selectedBooking.tourName}</span></div>
+                  <div className="flex"><span className="font-bold text-gray-800 w-16 shrink-0">วันที่</span> <span className="text-gray-600">{selectedBooking.date}</span></div>
+                  <div className="flex"><span className="font-bold text-gray-800 w-16 shrink-0">จำนวน</span> <span className="text-gray-600">ผู้ใหญ่ {selectedBooking.adults || 1}, เด็ก {selectedBooking.children || 0}</span></div>
+                </div>
+                <img src={selectedBooking.image} alt="tour" className={`w-20 h-24 object-cover rounded-lg shrink-0 shadow-sm border border-gray-100 ${selectedBooking.status === 'ยกเลิกแล้ว' ? 'grayscale' : ''}`} />
+              </div>
+
+              <div className="border-t border-gray-100 pt-5 mb-5">
+                 <h4 className="font-bold text-[11px] text-gray-800 mb-3">รายละเอียดราคา</h4>
+                 <div className="text-[11px] space-y-2 text-gray-600">
+                    {selectedBooking.adults > 0 && (
+                       <div className="flex justify-between items-center">
+                         <span className="w-16">ผู้ใหญ่</span>
+                         <span className="flex-1 text-center text-gray-400">({selectedBooking.adults} ท่าน)</span>
+                         <span className="font-bold text-gray-800">คำนวณในยอดรวม</span>
+                       </div>
+                    )}
+                 </div>
+              </div>
+
+              <div className="flex justify-between items-end border-t border-gray-100 pt-5 mb-2">
+                <span className="font-bold text-gray-800 text-sm">รวมยอด</span>
+                <span className={`text-2xl font-black ${selectedBooking.status === 'ยกเลิกแล้ว' ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+                  {selectedBooking.price.toLocaleString()} <span className="text-sm font-bold">บาท</span>
+                </span>
+              </div>
+
+              {selectedBooking.status === 'รอชำระเงิน' && (
+                <button 
+                  onClick={() => {
+                     setSelectedBooking(null); 
+                     navigate(`/payment/${selectedBooking.id}`);
+                  }} 
+                  className="w-full mt-6 bg-[#3b82f6] text-white font-bold py-3 rounded-full hover:bg-blue-600 transition-all text-sm shadow-md"
+                >
+                  ชำระเงิน
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <Footer />
     </div>
   )

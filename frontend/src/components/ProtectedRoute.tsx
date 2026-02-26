@@ -9,21 +9,26 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
     const { user, isLoading } = useAuth()
 
-    // Show loading while checking auth
+    // แสดงการโหลดเมื่อตรวจสอบ auth
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-screen">Loading...</div>
     }
 
-    // Not authenticated → redirect to home
+    // ไม่ได้ login → redirect ไปหน้า Home + เปิด LoginModal
     if (!user) {
-        return <Navigate to="/" replace />
+        return <Navigate to="/" state={{ requireLogin: true }} replace />
     }
 
-    // Authenticated but doesn't have required role → redirect to home
+    // ผู้ใช้ login แต่ไม่มีสิทธิ์เข้าถึง → แสดง "ไม่มีสิทธิ์เข้าถึง"
     if (requiredRole && user.role !== requiredRole) {
-        return <Navigate to="/" replace />
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen">
+                <h1 className="text-3xl font-bold text-red-500 mb-4">ไม่มีสิทธิ์เข้าถึง</h1>
+                <a href="/" className="text-blue-500 hover:underline">กลับหน้าแรก</a>
+            </div>
+        )
     }
 
-    // All checks passed → render children
+    // ผู้ใช้ login และมีสิทธิ์เข้าถึง → render children
     return <>{children}</>
 }
