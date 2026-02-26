@@ -1,7 +1,8 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -9,8 +10,7 @@ export class AuthController {
 
 	@Post('register')
 	async register(@Body() createUserDto: CreateUserDto) {
-		// Pass the whole DTO so role (if provided) is preserved.
-		// NOTE: For security, avoid allowing public registration with the `admin` role.
+		// SECURITY: Role is always set to 'customer' in the service, any role in body is ignored
 		return this.authService.register(createUserDto);
 	}
 
@@ -18,5 +18,18 @@ export class AuthController {
 	@Post('login')
 	async login(@Body() loginDto: LoginDto) {
 		return this.authService.login(loginDto.email, loginDto.password);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get('me')
+	async getMe(@Req() req: any) {
+		// req.user is set by JwtAuthGuard via JwtStrategy
+		return req.user;
+	}
+
+	@HttpCode(HttpStatus.OK)
+	@Post('refresh')
+	async refresh(@Body() body: { refresh_token: string }) {
+		return this.authService.refreshToken(body.refresh_token);
 	}
 }

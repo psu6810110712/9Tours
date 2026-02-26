@@ -30,17 +30,17 @@ function App() {
           } />
 
           <Route path="/admin/tours" element={
-            <ProtectedRoute adminOnly>
+            <ProtectedRoute requiredRole="admin">
               <AdminTourListPage />
             </ProtectedRoute>
           } />
           <Route path="/admin/tours/new" element={
-            <ProtectedRoute adminOnly>
+            <ProtectedRoute requiredRole="admin">
               <AdminTourFormPage />
             </ProtectedRoute>
           } />
           <Route path="/admin/tours/:id/edit" element={
-            <ProtectedRoute adminOnly>
+            <ProtectedRoute requiredRole="admin">
               <AdminTourFormPage />
             </ProtectedRoute>
           } />
