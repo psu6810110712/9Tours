@@ -8,6 +8,7 @@ import MyBookingsPage from './pages/MyBookingsPage'
 import AdminTourListPage from './pages/admin/AdminTourListPage'
 import AdminTourFormPage from './pages/admin/AdminTourFormPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import BookingInfoPage from './pages/BookingInfoPage'
 
 function App() {
   return (
@@ -17,6 +18,8 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/tours" element={<ToursPage />} />
           <Route path="/tours/:id" element={<TourDetailPage />} />
+          <Route path="/booking/:tourId" element={<BookingInfoPage />} />
+
 
           <Route path="/booking/:tourId" element={
             <ProtectedRoute>
@@ -44,7 +47,8 @@ function App() {
               <AdminTourFormPage />
             </ProtectedRoute>
           } />
-        </Routes>
+
+        </Routes>    
       </BrowserRouter>
     </AuthProvider>
   )
