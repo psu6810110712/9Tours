@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRefreshToken(savedRefreshToken)
       setUser(JSON.parse(savedUser))
     }
+    setIsLoading(false)
   }, [])
 
   const login = async (email: string, password: string, remember: boolean = false) => {
