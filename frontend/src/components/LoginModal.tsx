@@ -19,7 +19,8 @@ export default function LoginModal({ onClose, onSwitchToRegister }: LoginModalPr
     setError('')
     setLoading(true)
     try {
-      await login(email, password)
+      await login(email, password, remember)
+
       onClose()
     } catch {
       setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
