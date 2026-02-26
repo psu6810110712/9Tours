@@ -4,13 +4,14 @@ import { useAuth } from '../context/AuthContext'
 interface LoginModalProps {
   onClose: () => void
   onSwitchToRegister: () => void
+  initialError?: string
 }
 
-export default function LoginModal({ onClose, onSwitchToRegister }: LoginModalProps) {
+export default function LoginModal({ onClose, onSwitchToRegister, initialError = '' }: LoginModalProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(initialError)
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
 
@@ -19,7 +20,7 @@ export default function LoginModal({ onClose, onSwitchToRegister }: LoginModalPr
     setError('')
     setLoading(true)
     try {
-      await login(email, password, remember)
+      await login(email, password)
 
       onClose()
     } catch {
