@@ -1377,6 +1377,36 @@
       }
     ],
     "createdAt": "2026-02-19T16:26:18.071Z",
+<<<<<<< HEAD
     "updatedAt": "2026-02-26T07:10:32.962Z"
+=======
+    "updatedAt": "2026-02-19T18:32:17.655Z"
+  },
+  {
+    "id": 100,
+    "tourCode": "26022026006",
+    "name": "dqw",
+    "description": "dwq",
+    "tourType": "one_day",
+    "categories": [],
+    "price": 65,
+    "originalPrice": null,
+    "images": [
+      "http://localhost:3000/uploads/tour-1772089155065-38860284.jpg"
+    ],
+    "highlights": [],
+    "itinerary": [],
+    "transportation": "",
+    "duration": "dqw",
+    "region": "ภาคเหนือ",
+    "province": "dww",
+    "accommodation": null,
+    "rating": 0,
+    "reviewCount": 0,
+    "isActive": false,
+    "schedules": [],
+    "createdAt": "2026-02-26T06:59:24.897Z",
+    "updatedAt": "2026-02-26T07:06:18.302Z"
+>>>>>>> a62a761575bd046fb99188f222a41293b6d565ec
   }
 ]
