@@ -33,5 +33,10 @@ export const bookingService = {
   getBookingById: async (id: string): Promise<BookingResponse> => {
     const response = await api.get(`/bookings/${id}`);
     return response.data;
+  },
+
+  cancelBooking: async (id: string): Promise<BookingResponse> => {
+    const response = await api.patch(`/bookings/${id}/cancel`);
+    return response.data;
   }
 };

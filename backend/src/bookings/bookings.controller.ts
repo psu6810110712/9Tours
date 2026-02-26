@@ -51,5 +51,13 @@ export class BookingsController {
   ) {
     return this.bookingsService.updateStatus(+id, updateBookingStatusDto, req.user.id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Patch(':id/cancel')
+  async cancelBooking(@Param('id') id: string, @Req() req: any) {
+    return this.bookingsService.cancelBooking(+id, req.user.id);
+  }
 }
+
 

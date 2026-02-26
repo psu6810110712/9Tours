@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -190,6 +191,47 @@ export class BookingsService {
     const found = findScheduleInJson(booking.scheduleId);
     return {
       ...booking,
+      schedule: found
+        ? {
+          ...found.schedule,
+          tour: {
+            id: found.tour.id,
+            name: found.tour.name,
+            price: found.tour.price,
+            images: found.tour.images,
+          },
+        }
+        : null,
+    };
+  }
+
+  async cancelBooking(bookingId: number, userId: number) {
+    const booking = await this.bookingsRepository.findOne({
+      where: { id: bookingId },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('ไม่พบ Booking นี้');
+    }
+
+    if (booking.userId !== userId) {
+      throw new UnauthorizedException('คุณไม่มีสิทธิ์ยกเลิก Booking นี้');
+    }
+
+    if (booking.status !== BookingStatus.PENDING_PAYMENT) {
+      throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงินเท่านั้น');
+    }
+
+    // อัปเดต status เป็น canceled
+    booking.status = BookingStatus.CANCELED;
+    const updated = await this.bookingsRepository.save(booking);
+
+    // คืนจำนวนที่นั่งกลับไปที่ JSON
+    updateScheduleBookedCount(booking.scheduleId, -booking.paxCount);
+
+    const found = findScheduleInJson(updated.scheduleId);
+    return {
+      ...updated,
       schedule: found
         ? {
           ...found.schedule,

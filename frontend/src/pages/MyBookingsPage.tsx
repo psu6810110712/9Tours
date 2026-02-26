@@ -20,6 +20,19 @@ export default function MyBookingPage() {
     loadBookings()
   }, [])
 
+  // แปลงสถานะจาก Backend (ภาษาอังกฤษ) เป็น UI (ภาษาไทย)
+  const mapStatusToThai = (status: string) => {
+    switch (status) {
+      case 'pending_payment': return 'รอชำระเงิน'
+      case 'awaiting_approval': return 'รอตรวจสอบ'
+      case 'success': return 'สำเร็จ'
+      case 'canceled': return 'ยกเลิกแล้ว'
+      case 'refund_pending': return 'รอคืนเงิน'
+      case 'refund_completed': return 'คืนเงินสำเร็จ'
+      default: return status
+    }
+  }
+
   // 2. ฟังก์ชันโหลดข้อมูล จาก API ของจริง
   const loadBookings = async () => {
     try {
@@ -32,7 +45,7 @@ export default function MyBookingPage() {
         tourName: b.schedule?.tour?.name || 'Unknown Tour',
         date: `รอบเดินทางอ้างอิง: ${b.scheduleId}`,
         price: b.totalPrice,
-        status: b.status,
+        status: mapStatusToThai(b.status),
         adults: b.paxCount || 1, // mapping roughly
         children: 0,
         image: b.schedule?.tour?.images?.[0]?.url || b.schedule?.tour?.images?.[0] || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
@@ -47,16 +60,24 @@ export default function MyBookingPage() {
     }
   }
 
-  // 3. ระบบ Backend ยังไม่มีการเขียน Cancel Flow ในตอนนี้
-  const handleCancelBooking = (bookingId: string) => {
-    if (window.confirm('ฟังก์ชันนี้อยู่ระหว่างการพัฒนา ยังไม่สามารถยกเลิกผ่านระบบนี้ได้')) {
-      // placeholder 
+  // 3. เรียก API เพื่อยกเลิกรายการจอง
+  const handleCancelBooking = async (bookingId: string) => {
+    if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการจองนี้? \n(รายการจะถูกเปลี่ยนสถานะเป็นยกเลิกแล้ว)')) {
+      try {
+        await bookingService.cancelBooking(bookingId)
+        alert('ยกเลิกการจองสำเร็จ')
+        loadBookings() // โหลดข้อมูลใหม่เพื่อรีเฟรชหน้าจอ
+      } catch (err: any) {
+        console.error("Error canceling booking:", err)
+        alert(err.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก กรุณาลองใหม่อีกครั้ง')
+      }
     }
   }
 
   const filteredBookings = activeTab === 'ทั้งหมด'
     ? bookings
     : bookings.filter(b => b.status === activeTab)
+
 
   const getStatusBadge = (status: string) => {
     switch (status) {
