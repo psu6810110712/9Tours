@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null
   token: string | null
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string, remember?: boolean) => Promise<void>
   register: (name: string, email: string, phone: string, password: string) => Promise<void>
   logout: () => void
   isAdmin: boolean
@@ -21,21 +21,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // โหลดข้อมูล user จาก localStorage ตอนเปิดแอปครั้งแรก
   useEffect(() => {
-    const savedToken = localStorage.getItem('token')
-    const savedUser = localStorage.getItem('user')
+    const savedToken = localStorage.getItem('token') || sessionStorage.getItem('token')
+    const savedUser = localStorage.getItem('user') || sessionStorage.getItem('user')
+
     if (savedToken && savedUser) {
-      setToken(savedToken)
-      setUser(JSON.parse(savedUser))
+      authService.getMe() // ยิงเช็คว่า Token ยังไม่หมดอายุ
+        .then(() => {
+          setToken(savedToken)
+          setUser(JSON.parse(savedUser))
+        })
+        .catch(() => logout()) // ถ้า error (หมดอายุ) ให้เคลียร์ทิ้ง
+        .finally(() => setIsLoading(false))
+    } else {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }, [])
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, remember: boolean = false) => {
     const data = await authService.login({ email, password })
     setToken(data.access_token)
     setUser(data.user)
-    localStorage.setItem('token', data.access_token)
-    localStorage.setItem('user', JSON.stringify(data.user))
+
+    // ถ้าติ๊ก remember เก็บ localStorage ถ้าไม่ติ๊กเก็บ sessionStorage (ปิดแท็บแล้วหาย)
+    const storage = remember ? localStorage : sessionStorage
+    storage.setItem('token', data.access_token)
+    storage.setItem('user', JSON.stringify(data.user))
   }
 
   const register = async (name: string, email: string, phone: string, password: string) => {
@@ -46,11 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('user', JSON.stringify(data.user))
   }
 
+  // เคลียร์ storage ให้ครบทั้ง 2 ที่ตอน logout
   const logout = () => {
     setToken(null)
     setUser(null)
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('user')
   }
 
   return (
