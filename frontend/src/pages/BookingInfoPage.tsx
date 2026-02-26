@@ -12,7 +12,7 @@ export default function BookingInfoPage() {
   // 1. ดึงข้อมูลจาก URL
   const [adults] = useState(parseInt(searchParams.get('adults') || '1'))
   const [children] = useState(parseInt(searchParams.get('children') || '0'))
-  const scheduleId = searchParams.get('scheduleId') || '-' 
+  const scheduleId = searchParams.get('scheduleId') || '-'
 
   const [formData, setFormData] = useState({
     prefix: 'นาย', fullName: '', phoneCode: '+66', phone: '', email: '', specialRequest: '', useAccountInfo: 'yes'
@@ -58,38 +58,35 @@ export default function BookingInfoPage() {
   const totalPrice = totalAdultPrice + totalChildPrice
 
   // รูปภาพ
-  const tourImage = tour?.images && tour.images.length > 0 
-    ? (typeof tour.images[0] === 'string' ? tour.images[0] : tour.images[0].url) 
+  const tourImage = tour?.images && tour.images.length > 0
+    ? (typeof tour.images[0] === 'string' ? tour.images[0] : tour.images[0].url)
     : 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    const newBookingId = `BK-${Math.floor(1000 + Math.random() * 9000)}`
-    
-    // บันทึกข้อมูลของจริงลงไปใน Local Storage
-    const newBooking = {
-      id: newBookingId,
-      tourId: tour.id,
-      tourName: tour.name, 
-      date: scheduleId !== '-' ? `อ้างอิงรอบเดินทาง: ${scheduleId}` : 'รอการยืนยันวันเดินทาง', 
-      adults,
-      children,
-      price: totalPrice, 
-      status: 'รอชำระเงิน',
-      image: tourImage,
-      customerName: formData.fullName, // เก็บชื่อลูกค้าไว้ด้วยเพื่อโชว์ในหน้ารายละเอียด
-      phone: formData.phone
+
+    if (scheduleId === '-') {
+      alert('กรุณาเลือกรอบเดินทางที่ต้องการ')
+      return
     }
 
-    const existingBookings = JSON.parse(localStorage.getItem('myBookings') || '[]')
-    localStorage.setItem('myBookings', JSON.stringify([newBooking, ...existingBookings]))
-    
-    // แจ้งเตือนผู้ใช้
-    alert('บันทึกการจองสำเร็จ! คุณสามารถดูรายละเอียดและชำระเงินในภายหลังได้ที่ "การจองของฉัน"')
-    
-    // เด้งกลับไปหน้า Home (หน้าแรก)
-    navigate('/') 
+    try {
+      setLoading(true)
+      const paxCount = adults + children
+      // บันทึกข้อมูลของจริงไปที่ Backend
+      const response = await bookingService.createBooking({
+        scheduleId: Number(scheduleId),
+        paxCount: paxCount
+      })
+
+      // แจ้งเตือนผู้ใช้และไปหน้าจ่ายเงิน
+      navigate(`/payment/${response.id}`)
+    } catch (err: any) {
+      console.error("Error creating booking:", err)
+      alert(err.response?.data?.message || 'เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -130,7 +127,7 @@ export default function BookingInfoPage() {
         <h1 className="text-2xl font-bold text-gray-800 mb-6 mt-16 md:mt-0">การจองของท่าน</h1>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* ฝั่งซ้าย: ฟอร์มกรอกข้อมูล */}
           <div className="lg:col-span-7 bg-white p-8 rounded-[1.5rem] shadow-sm border border-gray-200">
             <h2 className="text-xl font-bold text-gray-800 mb-6">กรอกข้อมูลและตรวจสอบการจอง</h2>
@@ -142,20 +139,20 @@ export default function BookingInfoPage() {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="md:col-span-1">
                       <label className="block text-xs font-bold text-gray-600 mb-1">คำนำหน้า<span className="text-red-500">*</span></label>
-                      <select className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white" onChange={(e) => setFormData({...formData, prefix: e.target.value})}>
+                      <select className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white" onChange={(e) => setFormData({ ...formData, prefix: e.target.value })}>
                         <option>นาย</option><option>นาง</option><option>นางสาว</option>
                       </select>
                     </div>
                     <div className="md:col-span-3">
                       <label htmlFor="fullName" className="block text-xs font-bold text-gray-600 mb-1">ชื่อ-นามสกุล<span className="text-red-500">*</span></label>
-                      <input 
+                      <input
                         id="fullName"
-                        name="name" 
-                        autoComplete="name" 
-                        required 
-                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none" 
+                        name="name"
+                        autoComplete="name"
+                        required
+                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none"
                         placeholder="ตามที่ปรากฏอยู่บนบัตรประชาชน"
-                        onChange={(e) => setFormData({...formData, fullName: e.target.value})} 
+                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                       />
                     </div>
                   </div>
@@ -164,37 +161,37 @@ export default function BookingInfoPage() {
                       <label htmlFor="phone" className="block text-xs font-bold text-gray-600 mb-1">หมายเลขโทรศัพท์<span className="text-red-500">*</span></label>
                       <div className="flex">
                         <select className="p-2.5 border border-gray-300 rounded-l-lg border-r-0 text-sm focus:ring-0 outline-none bg-gray-50"><option value="+66">🇹🇭 +66</option></select>
-                        <input 
+                        <input
                           id="phone"
-                          name="tel" 
-                          autoComplete="tel" 
-                          required 
-                          type="tel" 
-                          className="w-full p-2.5 border border-gray-300 rounded-r-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none" 
+                          name="tel"
+                          autoComplete="tel"
+                          required
+                          type="tel"
+                          className="w-full p-2.5 border border-gray-300 rounded-r-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none"
                           placeholder="เช่น 0801234567"
-                          onChange={(e) => setFormData({...formData, phone: e.target.value})} 
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         />
                       </div>
                     </div>
                     <div>
                       <label htmlFor="email" className="block text-xs font-bold text-gray-600 mb-1">อีเมล<span className="text-red-500">*</span></label>
-                      <input 
+                      <input
                         id="email"
-                        name="email" 
-                        autoComplete="email" 
-                        required 
-                        type="email" 
-                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none" 
+                        name="email"
+                        autoComplete="email"
+                        required
+                        type="email"
+                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none"
                         placeholder="เช่น email@example.com"
-                        onChange={(e) => setFormData({...formData, email: e.target.value})} 
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       />
                     </div>
                   </div>
                 </div>
               </div>
               <div className="border border-gray-200 rounded-xl p-6 relative mt-6">
-                 <span className="absolute -top-3 left-4 bg-white px-2 text-sm font-bold text-gray-700">คำขอเพิ่มเติม (หากมี)</span>
-                 <textarea rows={3} className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none resize-none mt-2" placeholder="สามารถใส่คำขอพิเศษเพิ่มเติมได้" onChange={(e) => setFormData({...formData, specialRequest: e.target.value})}></textarea>
+                <span className="absolute -top-3 left-4 bg-white px-2 text-sm font-bold text-gray-700">คำขอเพิ่มเติม (หากมี)</span>
+                <textarea rows={3} className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none resize-none mt-2" placeholder="สามารถใส่คำขอพิเศษเพิ่มเติมได้" onChange={(e) => setFormData({ ...formData, specialRequest: e.target.value })}></textarea>
               </div>
             </div>
           </div>
@@ -208,15 +205,15 @@ export default function BookingInfoPage() {
                 <div className="flex-1 space-y-2 text-sm text-gray-600">
                   <p><span className="font-bold text-gray-800 w-24 inline-block">รหัสทัวร์</span> {tour.id}</p>
                   <p><span className="font-bold text-gray-800 w-24 inline-block align-top">ชื่อทัวร์</span> <span className="inline-block w-[140px] text-blue-600 font-bold">{tour.name}</span></p>
-                  
+
                   {scheduleId !== '-' && (
                     <p><span className="font-bold text-gray-800 w-24 inline-block">รอบเดินทาง</span> <span className="text-orange-500 font-bold">รหัส {scheduleId}</span></p>
                   )}
-                  
+
                   <p><span className="font-bold text-gray-800 w-24 inline-block">จำนวน</span> ผู้ใหญ่ {adults}, เด็ก {children}</p>
                 </div>
                 <div className="w-28 shrink-0">
-                  <img src={tourImage} alt="Tour" className="w-full h-24 object-cover rounded-xl shadow-sm"/>
+                  <img src={tourImage} alt="Tour" className="w-full h-24 object-cover rounded-xl shadow-sm" />
                 </div>
               </div>
 

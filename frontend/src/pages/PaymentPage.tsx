@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { bookingService } from '../services/bookingService'
 
 export default function PaymentPage() {
   const { bookingId } = useParams<{ bookingId: string }>()
@@ -9,6 +10,7 @@ export default function PaymentPage() {
 
   const [timeLeft, setTimeLeft] = useState(581)
   const [bookingData, setBookingData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // 1. ระบบนับเวลาถอยหลัง
@@ -16,28 +18,36 @@ export default function PaymentPage() {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0))
     }, 1000)
 
-    // 2. ดึงข้อมูลการจองจาก Local Storage
-    const existingBookings = JSON.parse(localStorage.getItem('myBookings') || '[]')
-    let currentBooking = existingBookings.find((b: any) => b.id === bookingId)
-    
-    // 🌟 เพิ่มระบบ Fallback: ถ้าหาบิลไม่เจอ (เช่น เผลอส่งเลข 5 มา) ให้ดึงข้อมูลมาจำลองไว้ก่อน หน้าเว็บจะได้ไม่พัง
-    if (!currentBooking) {
-      currentBooking = {
-        id: bookingId?.includes('BK') ? bookingId : `BK-${Math.floor(1000 + Math.random() * 9000)}`,
-        tourName: 'ทัวร์เขื่อนเชี่ยวหลาน (ข้อมูลจำลอง)',
-        date: '17 เม.ย. 2569 - 19 เม.ย. 2569',
-        price: 1800,
-        adults: 1,
-        children: 0,
-        status: 'รอชำระเงิน',
-        image: 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+    // 2. ดึงข้อมูลการจองจาก Backend
+    const fetchBooking = async () => {
+      try {
+        if (!bookingId) return
+        const data = await bookingService.getBookingById(bookingId)
+
+        // แปลงข้อมูลให้อยู่ในรูปแบบที่ UI เดิมคาดหวัง
+        setBookingData({
+          id: data.id,
+          tourName: data.schedule?.tour?.name || 'Loading...',
+          date: `อ้างอิงรอบเดินทาง: ${data.scheduleId}`,
+          price: data.totalPrice || 0,
+          adults: data.paxCount || 1, // backend return paxCount, we roughly map it here
+          children: 0,
+          status: data.status,
+          image: data.schedule?.tour?.images?.[0]?.url || data.schedule?.tour?.images?.[0] || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+        })
+      } catch (err) {
+        console.error("Error fetching booking details:", err)
+        alert('ไม่พบข้อมูลการจองนี้')
+        navigate('/my-bookings')
+      } finally {
+        setLoading(false)
       }
     }
 
-    setBookingData(currentBooking)
+    fetchBooking()
 
     return () => clearInterval(timer)
-  }, [bookingId])
+  }, [bookingId, navigate])
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
@@ -45,28 +55,14 @@ export default function PaymentPage() {
     return `${m}:${s < 10 ? '0' : ''}${s}`
   }
 
-  const handleConfirmPayment = () => {
-    const existingBookings = JSON.parse(localStorage.getItem('myBookings') || '[]')
-    
-    // เช็คว่ามีบิลนี้ในระบบไหม ถ้ามีให้อัปเดตสถานะ
-    const isExist = existingBookings.some((b: any) => b.id === bookingData.id)
-    
-    let updatedBookings;
-    if (isExist) {
-      updatedBookings = existingBookings.map((b: any) => 
-        b.id === bookingData.id ? { ...b, status: 'รอตรวจสอบ' } : b
-      )
-    } else {
-      // ถ้าไม่มีในระบบ (เป็นข้อมูลที่ Fallback สร้างขึ้นมา) ให้เพิ่มเข้าไปใหม่
-      updatedBookings = [{ ...bookingData, status: 'รอตรวจสอบ' }, ...existingBookings]
-    }
-    
-    localStorage.setItem('myBookings', JSON.stringify(updatedBookings))
-    alert('อัปโหลดสลิปสำเร็จ! รอการตรวจสอบจากระบบ')
+  const handleConfirmPayment = async () => {
+    // จำลองส่งข้อมูลหลักฐานไปยัง Backend
+    // Backend ปัจจุบันยังไม่มี Endpoint อัปโหลดสลิป
+    alert('อัปโหลดสลิปสำเร็จ! (Mock) รอการตรวจสอบจากระบบ')
     navigate('/my-bookings')
   }
 
-  if (!bookingData) {
+  if (loading || !bookingData) {
     return (
       <div className="min-h-screen flex flex-col bg-white">
         <Navbar />
@@ -124,13 +120,13 @@ export default function PaymentPage() {
         <h1 className="text-2xl font-bold text-gray-800 mb-8 mt-16 md:mt-0 text-center">สแกนเพื่อชำระเงิน</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start max-w-5xl mx-auto">
-          
+
           <div className="bg-white p-6 rounded-[1.5rem] border border-gray-200 shadow-sm flex flex-col items-center">
             <div className="bg-[#113566] text-white w-full py-2 rounded-t-lg text-center font-bold text-sm tracking-wider">THAI QR PAYMENT</div>
             <div className="bg-[#113566] w-full pb-4 px-4 rounded-b-lg flex flex-col items-center">
-               <div className="bg-white p-4 rounded-lg mt-2 w-48 h-48 flex items-center justify-center">
-                 <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QR Code" className="w-full h-full opacity-90" />
-               </div>
+              <div className="bg-white p-4 rounded-lg mt-2 w-48 h-48 flex items-center justify-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QR Code" className="w-full h-full opacity-90" />
+              </div>
             </div>
             <p className="mt-4 font-bold text-gray-700 text-lg">บจก. ไนน์ทัวร์</p>
           </div>
@@ -144,9 +140,9 @@ export default function PaymentPage() {
                 <p><span className="font-bold text-gray-800 w-16 inline-block align-top">วันที่เดินทาง</span> <span className="inline-block w-[100px]">{bookingData.date.replace(' - ', ' -\n')}</span></p>
                 <p><span className="font-bold text-gray-800 w-16 inline-block">จำนวน</span> ผู้ใหญ่ {bookingData.adults}, เด็ก {bookingData.children}</p>
               </div>
-              <img src={bookingData.image} alt="Tour" className="w-20 h-20 object-cover rounded-lg shadow-sm"/>
+              <img src={bookingData.image} alt="Tour" className="w-20 h-20 object-cover rounded-lg shadow-sm" />
             </div>
-            
+
             <div className="border-t border-gray-100 pt-4 mb-4 text-xs space-y-2">
               {bookingData.adults > 0 && (
                 <div className="flex justify-between items-center text-gray-600">
@@ -177,18 +173,18 @@ export default function PaymentPage() {
               <p className="text-[10px] text-gray-400">JPG, PNG หรือ PDF</p>
             </div>
             <div className="text-[11px] text-gray-500 space-y-2 mt-6">
-               <p className="font-bold text-gray-700 text-sm mb-3">ขั้นตอนการชำระเงิน</p>
-               <p className="flex items-start gap-2"><span className="text-sm">📱</span> เปิดแอปพลิเคชันธนาคาร</p>
-               <p className="flex items-start gap-2"><span className="text-sm">📷</span> สแกน QR Code เพื่อชำระเงิน</p>
-               <p className="flex items-start gap-2"><span className="text-sm">☑️</span> ตรวจสอบชื่อผู้รับโอนและยอดเงิน</p>
-               <p className="flex items-start gap-2"><span className="text-sm">✅</span> แนบสลิปการโอนเงิน</p>
+              <p className="font-bold text-gray-700 text-sm mb-3">ขั้นตอนการชำระเงิน</p>
+              <p className="flex items-start gap-2"><span className="text-sm">📱</span> เปิดแอปพลิเคชันธนาคาร</p>
+              <p className="flex items-start gap-2"><span className="text-sm">📷</span> สแกน QR Code เพื่อชำระเงิน</p>
+              <p className="flex items-start gap-2"><span className="text-sm">☑️</span> ตรวจสอบชื่อผู้รับโอนและยอดเงิน</p>
+              <p className="flex items-start gap-2"><span className="text-sm">✅</span> แนบสลิปการโอนเงิน</p>
             </div>
           </div>
 
         </div>
 
         <div className="flex justify-center mt-12">
-          <button 
+          <button
             onClick={handleConfirmPayment}
             className="bg-[#3b82f6] text-white font-black py-4 px-20 rounded-full hover:bg-blue-600 transition-all text-lg shadow-[0_10px_20px_rgba(59,130,246,0.25)] active:scale-95"
           >
