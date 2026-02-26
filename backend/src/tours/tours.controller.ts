@@ -1,11 +1,38 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { ToursService } from './tours.service';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('tours')
 export class ToursController {
   constructor(private readonly toursService: ToursService) {}
+
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads', // โฟลเดอร์สำหรับเก็บไฟล์
+        filename: (req, file, cb) => {
+          // สร้างชื่อไฟล์ใหม่ไม่ให้ซ้ำกัน (เช่น tour-1634567890.jpg)
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          cb(null, `tour-${uniqueSuffix}${ext}`);
+        },
+      }),
+    }),
+  )
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('ไม่พบไฟล์ที่อัปโหลด');
+    }
+    // คืนค่า URL กลับไปให้ React นำไปแสดงผล
+    return {
+      url: `http://localhost:3000/uploads/${file.filename}`,
+    };
+  }
 
   @Post()
   create(@Body() createTourDto: CreateTourDto) {
@@ -14,7 +41,6 @@ export class ToursController {
 
   @Get()
   findAll(@Query() query: any) {
-    // query จะมีค่า region / province / tourType / search ตามที่ frontend ส่งมา
     return this.toursService.findAll(query);
   }
 

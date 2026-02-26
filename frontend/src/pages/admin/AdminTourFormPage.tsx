@@ -47,7 +47,11 @@ export default function AdminTourFormPage() {
   const [minPeople, setMinPeople] = useState('')
   const [maxPeople, setMaxPeople] = useState('')
   const [duration, setDuration] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
+  
+  // State สำหรับรูปภาพ
+  const [images, setImages] = useState<string[]>([])
+  const [uploadingImage, setUploadingImage] = useState(false)
+  
   const [schedules, setSchedules] = useState<ScheduleRow[]>([])
   const [transportation, setTransportation] = useState('')
   const [accommodation, setAccommodation] = useState('')
@@ -58,9 +62,7 @@ export default function AdminTourFormPage() {
   const [bulkTo, setBulkTo] = useState('')
   const [bulkCapacity, setBulkCapacity] = useState(20)
   const [bulkDuration, setBulkDuration] = useState(1)
-  // วันในสัปดาห์ที่ต้องการเปิดรับ: 0=อา, 1=จ, 2=อ, 3=พ, 4=พฤ, 5=ศ, 6=ส
   const [bulkDays, setBulkDays] = useState<Set<number>>(new Set([6, 0]))
-  // Round Templates สำหรับ Join Trip — กำหนดรอบครั้งเดียว apply ทุกวัน
   const [roundTemplates, setRoundTemplates] = useState<{ roundName: string; timeSlot: string }[]>([{ roundName: '', timeSlot: '' }])
 
   // ถ้าเป็นหน้าแก้ไข → โหลดข้อมูลเดิมมาใส่ฟอร์ม
@@ -80,7 +82,7 @@ export default function AdminTourFormPage() {
       setMinPeople(tour.minPeople ? String(tour.minPeople) : '')
       setMaxPeople(tour.maxPeople ? String(tour.maxPeople) : '')
       setDuration(tour.duration || '')
-      setImageUrl(tour.images?.[0] || '')
+      setImages(tour.images || []) // โหลดรูปภาพเดิม
       setTransportation(tour.transportation || '')
       setAccommodation(tour.accommodation || '')
       setItinerary(tour.itinerary || [])
@@ -100,7 +102,6 @@ export default function AdminTourFormPage() {
 
   // ===== Handlers =====
 
-  // toggle chip: กด ซ้ำเพื่อเอาออก กดใหม่เพื่อเพิ่ม
   const toggleChip = (
     list: string[],
     setList: (v: string[]) => void,
@@ -113,6 +114,37 @@ export default function AdminTourFormPage() {
     )
   }
 
+  // ===== Image Handlers =====
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return
+    const file = e.target.files[0]
+
+    // ตรวจสอบประเภทไฟล์ (รับเฉพาะ jpg/jpeg และ png)
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
+    if (!validTypes.includes(file.type)) {
+      alert('กรุณาแนบเฉพาะไฟล์ประเภท .jpg หรือ .png เท่านั้นครับ')
+      e.target.value = '' 
+      return
+    }
+
+    try {
+      setUploadingImage(true)
+      const url = await tourService.uploadImage(file)
+      setImages((prev) => [...prev, url])
+    } catch (error) {
+      console.error(error)
+      alert('อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setUploadingImage(false)
+      e.target.value = '' 
+    }
+  }
+
+  const removeImage = (indexToRemove: number) => {
+    setImages((prev) => prev.filter((_, index) => index !== indexToRemove))
+  }
+
+  // ===== Schedule Handlers =====
   const addSchedule = () => {
     setSchedules([...schedules, { startDate: '', endDate: '', timeSlot: '', roundName: '', maxCapacity: 50, enabled: true }])
   }
@@ -125,41 +157,30 @@ export default function AdminTourFormPage() {
     setSchedules(schedules.map((s, i) => {
       if (i !== index) return s
       const updated = { ...s, [field]: value }
-
-      // วันเดย์ทริป: ตั้ง endDate = startDate อัตโนมัติ (จบภายในวันเดียว)
       if (tourType === 'one_day' && field === 'startDate') {
         updated.endDate = value as string
       }
-
       return updated
     }))
   }
 
-  // สร้าง schedule ทุกวันที่ตรงกับวันในสัปดาห์ที่เลือก ระหว่าง bulkFrom ถึง bulkTo
   const handleBulkAdd = () => {
     if (!bulkFrom || !bulkTo || bulkFrom > bulkTo) return
     const result: ScheduleRow[] = []
     const cur = new Date(bulkFrom)
     const end = new Date(bulkTo)
 
-    // ถ้าเป็น One Day -> ใช้ templates (อาจมีหลายรอบต่อวัน)
-    // ถ้าเป็น Package -> สร้างแค่ 1 รอบต่อวัน (หรือตาม logic อื่นที่ต้องการ)
     let rounds = [{ roundName: '', timeSlot: '' }]
     if (tourType === 'one_day') {
       const validRounds = roundTemplates.filter((r) => r.timeSlot || r.roundName)
       if (validRounds.length > 0) rounds = validRounds
     } else {
-      // Package: usually 1 round named "Private Group" or default
       rounds = [{ roundName: 'Private Group', timeSlot: '' }]
     }
 
     while (cur <= end) {
       if (bulkDays.has(cur.getDay())) {
         const startDateStr = cur.toISOString().slice(0, 10)
-
-        // คำนวณ endDate
-        // one_day: endDate = startDate
-        // package: endDate = startDate + duration - 1
         const endDateObj = new Date(cur)
         if (tourType === 'package' && bulkDuration > 1) {
           endDateObj.setDate(endDateObj.getDate() + (bulkDuration - 1))
@@ -167,7 +188,6 @@ export default function AdminTourFormPage() {
         const endDateStr = endDateObj.toISOString().slice(0, 10)
 
         for (const round of rounds) {
-          // ไม่เพิ่มซ้ำถ้ามีวัน+รอบเดียวกันอยู่แล้ว
           const alreadyExists = schedules.some(
             (s) => s.startDate === startDateStr && s.timeSlot === round.timeSlot
           )
@@ -185,7 +205,6 @@ export default function AdminTourFormPage() {
       }
       cur.setDate(cur.getDate() + 1)
     }
-
     setSchedules((prev) => [...prev, ...result])
   }
 
@@ -202,6 +221,7 @@ export default function AdminTourFormPage() {
     setItinerary(itinerary.map((item, i) => (i === index ? { ...item, [field]: value } : item)))
   }
 
+  // ===== Submit Handler =====
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -216,7 +236,7 @@ export default function AdminTourFormPage() {
       minPeople: minPeople ? Number(minPeople) : undefined,
       maxPeople: maxPeople ? Number(maxPeople) : undefined,
       highlights,
-      images: imageUrl ? [imageUrl] : [],
+      images: images, // ส่ง Array ของรูปภาพไปให้ Backend
       transportation,
       duration,
       region,
@@ -258,7 +278,6 @@ export default function AdminTourFormPage() {
     )
   }
 
-  // ===== CSS class ที่ใช้ซ้ำ =====
   const inputClass = 'w-full bg-gray-100 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-yellow-300'
   const labelClass = 'text-sm font-bold text-gray-800 block mb-1'
 
@@ -296,13 +315,10 @@ export default function AdminTourFormPage() {
             </label>
           </div>
 
-          {/* 2 คอลัมน์ */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* ========== ฝั่งซ้าย: ข้อมูลทัวร์ ========== */}
             <div className="bg-white rounded-2xl border-2 border-yellow-400 p-6 space-y-5">
-
-              {/* รหัสทัวร์ + ชื่อทัวร์ */}
               <div className="grid grid-cols-[1fr_2fr] gap-4">
                 <div>
                   <label className={labelClass}>รหัสทัวร์</label>
@@ -325,7 +341,6 @@ export default function AdminTourFormPage() {
                 </div>
               </div>
 
-              {/* แท็กประเภทของทัวร์ */}
               <div>
                 <span className={labelClass}>แท็กประเภทของทัวร์</span>
                 <div className="flex flex-wrap gap-2 mt-1">
@@ -345,7 +360,6 @@ export default function AdminTourFormPage() {
                 </div>
               </div>
 
-              {/* รายละเอียดทัวร์ */}
               <div>
                 <label className={labelClass}>รายละเอียดทัวร์*</label>
                 <textarea
@@ -358,7 +372,6 @@ export default function AdminTourFormPage() {
                 />
               </div>
 
-              {/* เกี่ยวกับทัวร์นี้ (highlights) */}
               <div>
                 <span className={labelClass}>เกี่ยวกับทัวร์นี้</span>
                 <div className="flex flex-wrap gap-2 mt-1">
@@ -378,7 +391,6 @@ export default function AdminTourFormPage() {
                 </div>
               </div>
 
-              {/* ภาค + จังหวัด */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>ภาค*</label>
@@ -404,7 +416,6 @@ export default function AdminTourFormPage() {
                 </div>
               </div>
 
-              {/* ระยะเวลา + ราคา */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>ระยะเวลา*</label>
@@ -433,7 +444,6 @@ export default function AdminTourFormPage() {
                 </div>
               </div>
 
-              {/* Private Settings (เฉพาะ Package) */}
               {tourType === 'package' && (
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                   <span className="text-sm font-bold text-blue-800 block mb-2">ตั้งค่า Private Tour</span>
@@ -472,37 +482,49 @@ export default function AdminTourFormPage() {
             {/* ========== ฝั่งขวา: รูปภาพ + กำหนดการ ========== */}
             <div className="bg-white rounded-2xl border-2 border-yellow-400 p-6 space-y-5">
 
-              <h2 className="text-sm font-bold text-gray-800">รูปภาพและกำหนดการ</h2>
-
-              {/* รูปภาพ — ใช้ URL input (backend ยังไม่มี file storage) */}
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
-                {imageUrl && (
-                  <img
-                    src={imageUrl}
-                    alt="preview"
-                    className="w-full h-32 object-cover rounded-lg mb-3"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                  />
+              {/* ระบบอัปโหลดรูปภาพ */}
+              <div className="mb-2">
+                <span className="text-sm font-bold text-gray-800 block mb-3">รูปภาพทัวร์ (เฉพาะ .jpg, .png)</span>
+                
+                {images.length > 0 && (
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    {images.map((url, i) => (
+                      <div key={i} className="relative group rounded-xl overflow-hidden h-24 border border-gray-200">
+                        <img src={url} alt={`Tour ${i}`} className="w-full h-full object-cover bg-gray-100" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(i)}
+                          className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          ลบ
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 )}
-                <p className="text-sm text-gray-400 mb-3">วาง URL รูปภาพด้านล่าง</p>
-                <input
-                  type="text"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none border border-gray-200 focus:border-yellow-400"
-                />
+
+                <label className="border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/80 h-24 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
+                  <span className="text-2xl mb-1 text-gray-400">📷</span>
+                  <span className="text-sm text-gray-500 font-medium">
+                    {uploadingImage ? 'กำลังอัปโหลด...' : 'คลิกเพื่อเลือกไฟล์รูปภาพ'}
+                  </span>
+                  <input 
+                    type="file" 
+                    accept="image/jpeg, image/png, image/jpg" 
+                    className="hidden" 
+                    onChange={handleImageUpload} 
+                    disabled={uploadingImage}
+                  />
+                </label>
               </div>
 
               {/* กำหนดการ (schedules) */}
               <div>
                 <span className="text-sm font-bold text-gray-800 block mb-3">กำหนดการ</span>
 
-                {/* เพิ่มหลายวันพร้อมกัน — ใช้ได้ทั้ง one_day และ package */}
                 <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 mb-3 space-y-2">
                   <p className="text-xs font-bold text-orange-700">เพิ่มหลายวันพร้อมกัน (Bulk Add)</p>
 
-                  {/* ช่วงวันที่ + จำนวนวัน */}
                   <div className="flex items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-1">
                       <span className="text-xs text-gray-500">จาก</span>
@@ -523,7 +545,6 @@ export default function AdminTourFormPage() {
                       />
                     </div>
 
-                    {/* Duration Input (เฉพาะ Package) */}
                     {tourType === 'package' && (
                       <div className="flex items-center gap-1">
                         <span className="text-xs text-gray-500">ระยะเวลา</span>
@@ -550,7 +571,6 @@ export default function AdminTourFormPage() {
                     </div>
                   </div>
 
-                  {/* เลือกวันในสัปดาห์ */}
                   <div className="flex gap-1.5 flex-wrap">
                     {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((label, dayIdx) => (
                       <button
@@ -571,7 +591,6 @@ export default function AdminTourFormPage() {
                     ))}
                   </div>
 
-                  {/* Round Templates — Join Trip (เฉพาะ one_day ถ้าเป็น package จะ auto round) */}
                   {tourType === 'one_day' && (
                     <div className="border border-blue-200 bg-blue-50 rounded-lg p-2 space-y-1.5">
                       <div className="flex items-center justify-between">
@@ -631,7 +650,6 @@ export default function AdminTourFormPage() {
                   </button>
                 </div>
 
-                {/* ปุ่มเพิ่มทีละรอบ (ใช้ได้ทั้ง one_day และ package) */}
                 <button
                   type="button"
                   onClick={addSchedule}
@@ -640,7 +658,6 @@ export default function AdminTourFormPage() {
                   + เพิ่มทีละรอบ
                 </button>
 
-                {/* รายการกำหนดการที่เพิ่มแล้ว */}
                 <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
                   {schedules.map((s, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm flex-wrap">
@@ -650,7 +667,6 @@ export default function AdminTourFormPage() {
                         onChange={(e) => updateSchedule(i, 'startDate', e.target.value)}
                         className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-yellow-400"
                       />
-                      {/* วันเดย์ทริป: endDate = startDate อัตโนมัติ จึงซ่อน */}
                       {tourType === 'package' && (
                         <>
                           <span className="text-gray-400">ถึง</span>
@@ -662,7 +678,6 @@ export default function AdminTourFormPage() {
                           />
                         </>
                       )}
-                      {/* Time Slot — Join Trip */}
                       {tourType === 'one_day' && (
                         <input
                           type="text"
@@ -673,7 +688,6 @@ export default function AdminTourFormPage() {
                           className="w-32 bg-gray-50 border border-blue-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-blue-400"
                         />
                       )}
-                      {/* Round Name */}
                       {tourType === 'one_day' && (
                         <input
                           type="text"
@@ -715,7 +729,6 @@ export default function AdminTourFormPage() {
                   )}
                 </div>
 
-                {/* Summary: แสดงแบบย่อ */}
                 {schedules.filter(s => s.enabled).length > 0 && (
                   <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-3">
                     <div className="flex items-center justify-between mb-2">
@@ -724,13 +737,12 @@ export default function AdminTourFormPage() {
                         รวม {schedules.filter(s => s.enabled).length} รอบ
                       </span>
                     </div>
-
                     <div className="text-xs text-gray-600 space-y-1">
                       <p>📅 <strong>จำนวนวัน:</strong> {new Set(schedules.filter(s => s.enabled).map(s => s.startDate)).size} วัน</p>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {Array.from(new Set(schedules.filter(s => s.enabled).map(s => s.startDate)))
                           .sort()
-                          .slice(0, 5) // โชว์แค่ 5 วันแรก
+                          .slice(0, 5)
                           .map(d => (
                             <span key={d} className="bg-white border border-gray-200 px-1.5 py-0.5 rounded text-[10px]">
                               {new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
@@ -745,8 +757,6 @@ export default function AdminTourFormPage() {
                   </div>
                 )}
               </div>
-
-
 
               {/* ตารางกิจกรรม (Itinerary) */}
               <div>
@@ -824,7 +834,6 @@ export default function AdminTourFormPage() {
                 />
               </div>
 
-              {/* รายละเอียดที่พัก — เฉพาะแพ็กเกจ */}
               {tourType === 'package' && (
                 <div>
                   <label className={labelClass}>รายละเอียดที่พัก*</label>
@@ -841,7 +850,6 @@ export default function AdminTourFormPage() {
             </div>
           </div>
 
-          {/* ปุ่มด้านล่าง */}
           {error && (
             <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg mt-4">{error}</p>
           )}
