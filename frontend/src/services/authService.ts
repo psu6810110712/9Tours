@@ -15,6 +15,7 @@ interface RegisterDto {
 
 interface AuthResponse {
   access_token: string
+  refresh_token: string
   user: User
 }
 
@@ -27,4 +28,7 @@ export const authService = {
 
   getMe: () =>
     api.get<User>('/auth/me').then((r) => r.data),
+
+  refresh: (refreshToken: string) =>
+    api.post<AuthResponse>('/auth/refresh', { refresh_token: refreshToken }).then((r) => r.data),
 }
