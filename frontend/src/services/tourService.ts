@@ -24,4 +24,14 @@ export const tourService = {
 
   remove: (id: number) =>
     api.delete(`/tours/${id}`).then((r) => r.data),
+
+  // ฟังก์ชันสำหรับอัปโหลดรูปภาพ
+  uploadImage: async (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await api.post<{ url: string }>('/tours/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data.url
+  },
 }

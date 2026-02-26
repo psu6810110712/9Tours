@@ -1,6 +1,8 @@
 import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
+import { UserRole } from '../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 
@@ -9,6 +11,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async register(createUserDto: CreateUserDto) {
@@ -21,12 +24,12 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    // Create new user (include role if provided in DTO)
+    // Create new user - SECURITY: Always set role to 'customer', ignore any role in DTO
     const user = await this.usersService.create({
       email: createUserDto.email,
       name: createUserDto.name,
       password: hashedPassword,
-      role: createUserDto.role,
+      role: UserRole.CUSTOMER, // ⚠️ SECURITY: Force role to customer for public registration
       phone: createUserDto.phone,
     });
 
@@ -49,9 +52,25 @@ export class AuthService {
 
   private generateToken(user: any) {
     const payload = { sub: user.id, email: user.email, role: user.role };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
+      refresh_token: refreshToken,
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
     };
+  }
+
+  async refreshToken(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+      const user = await this.usersService.findOne(payload.sub);
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+      return this.generateToken(user);
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 }

@@ -12,7 +12,11 @@
     "price": 2900,
     "originalPrice": 3200,
     "images": [
-      "/images/phuket-1.png"
+      "https://images.unsplash.com/photo-1541417904950-b855846fe074?w=800",
+      "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800",
+      "https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=800",
+      "https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=800",
+      "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=800"
     ],
     "highlights": [
       "บริการรถรับส่ง",
@@ -29,18 +33,18 @@
     "isActive": true,
     "schedules": [
       {
-        "id": 100,
+        "id": 101,
         "tourId": 1,
         "startDate": "2026-02-21",
         "endDate": "2026-02-21",
         "timeSlot": "09:00-17:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 20,
-        "currentBooked": 0
+        "currentBooked": 8
       }
     ],
-    "createdAt": "2026-02-19T16:26:18.071Z",
-    "updatedAt": "2026-02-19T18:23:46.807Z"
+    "createdAt": "2026-02-26T07:16:09.655Z",
+    "updatedAt": "2026-02-26T07:16:09.656Z"
   },
   {
     "id": 2,
@@ -55,7 +59,11 @@
     "price": 1800,
     "originalPrice": 2100,
     "images": [
-      "/images/cheowlan-1.png"
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+      "https://images.unsplash.com/photo-1504699894957-93f02c251aaa?w=800",
+      "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800",
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800",
+      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800"
     ],
     "highlights": [
       "ล่องเรือชมวิว",
@@ -72,100 +80,43 @@
     "isActive": true,
     "schedules": [
       {
-        "id": 200,
+        "id": 201,
         "tourId": 2,
         "startDate": "2026-02-22",
         "endDate": "2026-02-22",
         "timeSlot": "08:00-16:00",
         "roundName": "รอบปกติ",
         "maxCapacity": 25,
-        "currentBooked": 0
+        "currentBooked": 11
       }
     ],
-    "createdAt": "2026-02-19T16:26:18.071Z",
-    "updatedAt": "2026-02-19T18:24:20.779Z"
+    "createdAt": "2026-02-26T07:16:09.656Z",
+    "updatedAt": "2026-02-26T07:16:09.656Z"
   },
   {
     "id": 3,
     "tourCode": "20012026003",
     "name": "แพ็คเกจเชียงใหม่ 3 วัน 2 คืน ชมดอยอินทนนท์",
-    "description": "เพลิดเพลินกับการเดินทางที่เหนือระดับด้วย รถตู้ VIP ส่วนตัว ตลอดทริป พร้อมพักผ่อนในโรงแรม 3 ดาวใจกลาง ย่านนิมมานเหมินท์ แหล่งรวมคาเฟ่และร้านอาหารชื่อดัง ให้คุณเที่ยวครบทั้งธรรมชาติ วัฒนธรรม และไลฟ์สไตล์ในแพ็กเกจเดียว",
+    "description": "เที่ยวเชียงใหม่ครบทั้งดอยวัดคาเฟ่ ที่พักสบายย่านนิมมาน",
     "tourType": "package",
     "categories": [
       "สายธรรมชาติ",
       "สายชิล"
     ],
-    "price": 2900,
+    "price": 6900,
     "originalPrice": 7500,
     "images": [
-      "/images/chiangmai-1.png"
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
+      "https://images.unsplash.com/photo-1528181304800-259b08848526?w=800",
+      "https://images.unsplash.com/photo-1512100356356-de1b84283e18?w=800",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800"
     ],
     "highlights": [
       "รวมที่พัก",
       "รถรับส่งสนามบิน"
     ],
-    "itinerary": [
-      {
-        "day": 1,
-        "time": "09:00",
-        "title": "รับสนามบิน",
-        "description": "รถตู้ VIP รอรับท่านที่สนามบินเชียงใหม่"
-      },
-      {
-        "day": 1,
-        "time": "10:30",
-        "title": "ไหว้พระธาตุดอยคำ",
-        "description": "ขอพรหลวงพ่อทันใจ"
-      },
-      {
-        "day": 1,
-        "time": "12:00",
-        "title": "อาหารกลางวัน",
-        "description": "ร้านอาหารพื้นเมือง ข้าวซอยเสมอใจ"
-      },
-      {
-        "day": 1,
-        "time": "14:00",
-        "title": "เช็คอินเข้าที่พัก",
-        "description": "พักผ่อนตามอัธยาศัย ย่านนิมมาน"
-      },
-      {
-        "day": 2,
-        "time": "08:00",
-        "title": "ดอยอินทนนท์",
-        "description": "ชมจุดสูงสุดแดนสยาม และเดินเส้นทางศึกษาธรรมชาติกิ่วแม่ปาน"
-      },
-      {
-        "day": 2,
-        "time": "12:00",
-        "title": "อาหารกลางวัน",
-        "description": "ร้านอาหารโครงการหลวง"
-      },
-      {
-        "day": 2,
-        "time": "14:00",
-        "title": "น้ำตกวชิรธาร",
-        "description": "ชมความยิ่งใหญ่ของน้ำตกวชิรธาร"
-      },
-      {
-        "day": 3,
-        "time": "09:00",
-        "title": "คาเฟ่ ย่านแม่ริม",
-        "description": "แวะถ่ายรูปจิบกาแฟที่สวนพฤกษศาสตร์"
-      },
-      {
-        "day": 3,
-        "time": "12:00",
-        "title": "อาหารกลางวัน",
-        "description": "ร้านอาหารริมแม่น้ำปิง"
-      },
-      {
-        "day": 3,
-        "time": "15:00",
-        "title": "ส่งสนามบิน",
-        "description": "เดินทางกลับโดยสวัสดิภาพ"
-      }
-    ],
+    "itinerary": [],
     "transportation": "รถตู้ส่วนตัว",
     "duration": "3 วัน 2 คืน",
     "region": "ภาคเหนือ",
@@ -176,930 +127,18 @@
     "isActive": true,
     "schedules": [
       {
-        "id": 300,
-        "tourId": 3,
-        "startDate": "2026-11-01",
-        "endDate": "2026-11-03",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
         "id": 301,
         "tourId": 3,
-        "startDate": "2026-11-02",
-        "endDate": "2026-11-04",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 302,
-        "tourId": 3,
-        "startDate": "2026-11-03",
-        "endDate": "2026-11-05",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 303,
-        "tourId": 3,
-        "startDate": "2026-11-04",
-        "endDate": "2026-11-06",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 304,
-        "tourId": 3,
-        "startDate": "2026-11-05",
-        "endDate": "2026-11-07",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 305,
-        "tourId": 3,
-        "startDate": "2026-11-06",
-        "endDate": "2026-11-08",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 306,
-        "tourId": 3,
-        "startDate": "2026-11-07",
-        "endDate": "2026-11-09",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 307,
-        "tourId": 3,
-        "startDate": "2026-11-08",
-        "endDate": "2026-11-10",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 308,
-        "tourId": 3,
-        "startDate": "2026-11-09",
-        "endDate": "2026-11-11",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 309,
-        "tourId": 3,
-        "startDate": "2026-11-10",
-        "endDate": "2026-11-12",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 310,
-        "tourId": 3,
-        "startDate": "2026-11-11",
-        "endDate": "2026-11-13",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 311,
-        "tourId": 3,
-        "startDate": "2026-11-12",
-        "endDate": "2026-11-14",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 312,
-        "tourId": 3,
-        "startDate": "2026-11-13",
-        "endDate": "2026-11-15",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 313,
-        "tourId": 3,
-        "startDate": "2026-11-14",
-        "endDate": "2026-11-16",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 314,
-        "tourId": 3,
-        "startDate": "2026-11-15",
-        "endDate": "2026-11-17",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 315,
-        "tourId": 3,
-        "startDate": "2026-11-16",
-        "endDate": "2026-11-18",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 316,
-        "tourId": 3,
-        "startDate": "2026-11-17",
-        "endDate": "2026-11-19",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 317,
-        "tourId": 3,
-        "startDate": "2026-11-18",
-        "endDate": "2026-11-20",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 318,
-        "tourId": 3,
-        "startDate": "2026-11-19",
-        "endDate": "2026-11-21",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 319,
-        "tourId": 3,
-        "startDate": "2026-11-20",
-        "endDate": "2026-11-22",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 320,
-        "tourId": 3,
-        "startDate": "2026-11-21",
-        "endDate": "2026-11-23",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 321,
-        "tourId": 3,
-        "startDate": "2026-11-22",
-        "endDate": "2026-11-24",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 322,
-        "tourId": 3,
-        "startDate": "2026-11-23",
-        "endDate": "2026-11-25",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 323,
-        "tourId": 3,
-        "startDate": "2026-11-24",
-        "endDate": "2026-11-26",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 324,
-        "tourId": 3,
-        "startDate": "2026-11-25",
-        "endDate": "2026-11-27",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 325,
-        "tourId": 3,
-        "startDate": "2026-11-26",
-        "endDate": "2026-11-28",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 326,
-        "tourId": 3,
-        "startDate": "2026-11-27",
-        "endDate": "2026-11-29",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 327,
-        "tourId": 3,
-        "startDate": "2026-11-28",
-        "endDate": "2026-11-30",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 328,
-        "tourId": 3,
-        "startDate": "2026-11-29",
-        "endDate": "2026-12-01",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 329,
-        "tourId": 3,
-        "startDate": "2026-11-30",
-        "endDate": "2026-12-02",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 330,
-        "tourId": 3,
-        "startDate": "2026-12-01",
-        "endDate": "2026-12-03",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 331,
-        "tourId": 3,
-        "startDate": "2026-12-02",
-        "endDate": "2026-12-04",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 332,
-        "tourId": 3,
-        "startDate": "2026-12-03",
-        "endDate": "2026-12-05",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 333,
-        "tourId": 3,
-        "startDate": "2026-12-04",
-        "endDate": "2026-12-06",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 334,
-        "tourId": 3,
-        "startDate": "2026-12-05",
-        "endDate": "2026-12-07",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 335,
-        "tourId": 3,
-        "startDate": "2026-12-06",
-        "endDate": "2026-12-08",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 336,
-        "tourId": 3,
-        "startDate": "2026-12-07",
-        "endDate": "2026-12-09",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 337,
-        "tourId": 3,
-        "startDate": "2026-12-08",
-        "endDate": "2026-12-10",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 338,
-        "tourId": 3,
-        "startDate": "2026-12-09",
-        "endDate": "2026-12-11",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 339,
-        "tourId": 3,
-        "startDate": "2026-12-10",
-        "endDate": "2026-12-12",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 340,
-        "tourId": 3,
-        "startDate": "2026-12-11",
-        "endDate": "2026-12-13",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 341,
-        "tourId": 3,
-        "startDate": "2026-12-12",
-        "endDate": "2026-12-14",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 342,
-        "tourId": 3,
-        "startDate": "2026-12-13",
-        "endDate": "2026-12-15",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 343,
-        "tourId": 3,
-        "startDate": "2026-12-14",
-        "endDate": "2026-12-16",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 344,
-        "tourId": 3,
-        "startDate": "2026-12-15",
-        "endDate": "2026-12-17",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 345,
-        "tourId": 3,
-        "startDate": "2026-12-16",
-        "endDate": "2026-12-18",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 346,
-        "tourId": 3,
-        "startDate": "2026-12-17",
-        "endDate": "2026-12-19",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 347,
-        "tourId": 3,
-        "startDate": "2026-12-18",
-        "endDate": "2026-12-20",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 348,
-        "tourId": 3,
-        "startDate": "2026-12-19",
-        "endDate": "2026-12-21",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 349,
-        "tourId": 3,
-        "startDate": "2026-12-20",
-        "endDate": "2026-12-22",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 350,
-        "tourId": 3,
-        "startDate": "2026-12-21",
-        "endDate": "2026-12-23",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 351,
-        "tourId": 3,
-        "startDate": "2026-12-22",
-        "endDate": "2026-12-24",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 352,
-        "tourId": 3,
-        "startDate": "2026-12-23",
-        "endDate": "2026-12-25",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 353,
-        "tourId": 3,
-        "startDate": "2026-12-24",
-        "endDate": "2026-12-26",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 354,
-        "tourId": 3,
-        "startDate": "2026-12-25",
-        "endDate": "2026-12-27",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 355,
-        "tourId": 3,
-        "startDate": "2026-12-26",
-        "endDate": "2026-12-28",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 356,
-        "tourId": 3,
-        "startDate": "2026-12-27",
-        "endDate": "2026-12-29",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 357,
-        "tourId": 3,
-        "startDate": "2026-12-28",
-        "endDate": "2026-12-30",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 358,
-        "tourId": 3,
-        "startDate": "2026-12-29",
-        "endDate": "2026-12-31",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 359,
-        "tourId": 3,
-        "startDate": "2026-12-30",
-        "endDate": "2027-01-01",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 360,
-        "tourId": 3,
-        "startDate": "2026-12-31",
-        "endDate": "2027-01-02",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 361,
-        "tourId": 3,
-        "startDate": "2027-01-01",
-        "endDate": "2027-01-03",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 362,
-        "tourId": 3,
-        "startDate": "2027-01-02",
-        "endDate": "2027-01-04",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 363,
-        "tourId": 3,
-        "startDate": "2027-01-03",
-        "endDate": "2027-01-05",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 364,
-        "tourId": 3,
-        "startDate": "2027-01-04",
-        "endDate": "2027-01-06",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 365,
-        "tourId": 3,
-        "startDate": "2027-01-05",
-        "endDate": "2027-01-07",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 366,
-        "tourId": 3,
-        "startDate": "2027-01-06",
-        "endDate": "2027-01-08",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 367,
-        "tourId": 3,
-        "startDate": "2027-01-07",
-        "endDate": "2027-01-09",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 368,
-        "tourId": 3,
-        "startDate": "2027-01-08",
-        "endDate": "2027-01-10",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 369,
-        "tourId": 3,
-        "startDate": "2027-01-09",
-        "endDate": "2027-01-11",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 370,
-        "tourId": 3,
-        "startDate": "2027-01-10",
-        "endDate": "2027-01-12",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 371,
-        "tourId": 3,
-        "startDate": "2027-01-11",
-        "endDate": "2027-01-13",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 372,
-        "tourId": 3,
-        "startDate": "2027-01-12",
-        "endDate": "2027-01-14",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 373,
-        "tourId": 3,
-        "startDate": "2027-01-13",
-        "endDate": "2027-01-15",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 374,
-        "tourId": 3,
-        "startDate": "2027-01-14",
-        "endDate": "2027-01-16",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 375,
-        "tourId": 3,
-        "startDate": "2027-01-15",
-        "endDate": "2027-01-17",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 376,
-        "tourId": 3,
-        "startDate": "2027-01-16",
-        "endDate": "2027-01-18",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 377,
-        "tourId": 3,
-        "startDate": "2027-01-17",
-        "endDate": "2027-01-19",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 378,
-        "tourId": 3,
-        "startDate": "2027-01-18",
-        "endDate": "2027-01-20",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 379,
-        "tourId": 3,
-        "startDate": "2027-01-19",
-        "endDate": "2027-01-21",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 380,
-        "tourId": 3,
-        "startDate": "2027-01-20",
-        "endDate": "2027-01-22",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 381,
-        "tourId": 3,
-        "startDate": "2027-01-21",
-        "endDate": "2027-01-23",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 382,
-        "tourId": 3,
-        "startDate": "2027-01-22",
-        "endDate": "2027-01-24",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 383,
-        "tourId": 3,
-        "startDate": "2027-01-23",
-        "endDate": "2027-01-25",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 384,
-        "tourId": 3,
-        "startDate": "2027-01-24",
-        "endDate": "2027-01-26",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 385,
-        "tourId": 3,
-        "startDate": "2027-01-25",
-        "endDate": "2027-01-27",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 386,
-        "tourId": 3,
-        "startDate": "2027-01-26",
-        "endDate": "2027-01-28",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 387,
-        "tourId": 3,
-        "startDate": "2027-01-27",
-        "endDate": "2027-01-29",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 388,
-        "tourId": 3,
-        "startDate": "2027-01-28",
-        "endDate": "2027-01-30",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 389,
-        "tourId": 3,
-        "startDate": "2027-01-29",
-        "endDate": "2027-01-31",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 390,
-        "tourId": 3,
-        "startDate": "2027-01-30",
-        "endDate": "2027-02-01",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 391,
-        "tourId": 3,
-        "startDate": "2027-01-31",
-        "endDate": "2027-02-02",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
+        "startDate": "2026-02-24",
+        "endDate": "2026-02-26",
+        "timeSlot": null,
+        "roundName": "แพ็กเกจ 3 วัน 2 คืน",
+        "maxCapacity": 15,
+        "currentBooked": 6
       }
     ],
-    "createdAt": "2026-02-19T16:26:18.071Z",
-    "updatedAt": "2026-02-19T18:34:30.317Z",
-    "minPeople": 4,
-    "maxPeople": 6
+    "createdAt": "2026-02-26T07:16:09.656Z",
+    "updatedAt": "2026-02-26T07:16:09.656Z"
   },
   {
     "id": 4,
@@ -1114,7 +153,11 @@
     "price": 2300,
     "originalPrice": null,
     "images": [
-      "/images/phiphi-1.png"
+      "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800",
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
+      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800",
+      "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800",
+      "https://images.unsplash.com/photo-1518990034670-3eb04d6ea23b?w=800"
     ],
     "highlights": [
       "ดำน้ำดูปะการัง",
@@ -1131,85 +174,59 @@
     "isActive": true,
     "schedules": [
       {
-        "id": 400,
+        "id": 401,
         "tourId": 4,
         "startDate": "2026-02-23",
         "endDate": "2026-02-23",
         "timeSlot": "10:00-18:00",
         "roundName": "รอบทะเลสวย",
         "maxCapacity": 18,
-        "currentBooked": 0
+        "currentBooked": 18
       },
       {
-        "id": 401,
+        "id": 402,
         "tourId": 4,
         "startDate": "2026-02-25",
         "endDate": "2026-02-25",
         "timeSlot": "10:00-18:00",
         "roundName": "รอบพิเศษ",
         "maxCapacity": 18,
-        "currentBooked": 0
+        "currentBooked": 9
       }
     ],
-    "createdAt": "2026-02-19T16:26:18.071Z",
-    "updatedAt": "2026-02-19T18:24:28.214Z"
+    "createdAt": "2026-02-26T07:16:09.656Z",
+    "updatedAt": "2026-02-26T07:16:09.656Z"
   },
   {
     "id": 5,
     "tourCode": "ATV2026005",
-    "name": "ขับ ATV ตะลุยป่า พังงา (Join Trip)",
-    "description": "สัมผัสประสบการณ์ฉีดอะดรีนาลีนให้พุ่งพล่านกับการขับขี่ ATV ตะลุยเส้นทางธรรมชาติในจังหวัดพังงา ฝ่าเส้นทางวิบาก ลุยโคลน และชมความอุดมสมบูรณ์ของป่าเขตร้อนแบบใกล้ชิด",
+    "name": "ขับ ATV ตะลุยป่า ภูเก็ต (Join Trip)",
+    "description": "ผจญภัยขับ ATV เส้นทางธรรมชาติ วิวทะเลและภูเขา พร้อมครูฝึกดูแลอย่างใกล้ชิด",
     "tourType": "one_day",
     "categories": [
       "สายลุย",
       "สายกิจกรรม"
     ],
-    "price": 1600,
+    "price": 1500,
     "originalPrice": 1900,
     "images": [
-      "/images/atv-1.png"
+      "http://localhost:3000/uploads/tour-1772090996821-793008316.png",
+      "http://localhost:3000/uploads/tour-1772091011859-298134088.png",
+      "http://localhost:3000/uploads/tour-1772091040305-425371876.png",
+      "http://localhost:3000/uploads/tour-1772091069757-705715248.png",
+      "http://localhost:3000/uploads/tour-1772091074992-724468634.png",
+      "http://localhost:3000/uploads/tour-1772091080408-239752435.png"
     ],
     "highlights": [
       "ขับ ATV 1 ชั่วโมง",
       "รวมอุปกรณ์ความปลอดภัย",
       "ครูฝึกมืออาชีพ"
     ],
-    "itinerary": [
-      {
-        "time": "8:00/13:00",
-        "title": "รับท่านจากที่พัก: รถตู้บริการรับคณะเดินทางจากโรงแรม (ในเขตพื้นที่ที่กำหนด) มุ่งหน้าสู่ปางกิจกรรม จ.พังงา",
-        "description": ""
-      },
-      {
-        "time": "9:00/14:00",
-        "title": "ลงทะเบียน & เตรียมความพร้อม: ถึงจุดรวมพล รับเครื่องดื่มต้อนรับ พร้อมฟังบรีฟขั้นตอนการขับขี่อย่างปลอดภัยจากครูฝึก",
-        "description": ""
-      },
-      {
-        "time": "9:30/14:30",
-        "title": "Start Engine!: เริ่มต้นการผจญภัย ขับ ATV 1 ชั่วโมงเต็ม ตะลุยเส้นทางธรรมชาติ ผ่านสวนยางพารา ลำธาร และเส้นทาง Off-road สุดท้าทาย",
-        "description": ""
-      },
-      {
-        "time": "10:30/15:30",
-        "title": "พักผ่อนตามอัธยาศัย: จบโปรแกรมขับขี่ พักดื่มน้ำคลายร้อน ล้างตัว และเช็กภาพความประทับใจระหว่างเส้นทาง",
-        "description": ""
-      },
-      {
-        "time": "11:00/16:00",
-        "title": "เดินทางกลับ: ออกเดินทางออกจากปางกิจกรรม มุ่งหน้ากลับสู่ที่พักของท่าน",
-        "description": ""
-      },
-      {
-        "time": "12:00/17:00",
-        "title": "ส่งถึงโรงแรม: ถึงที่พักโดยสวัสดิภาพ",
-        "description": ""
-      }
-    ],
+    "itinerary": [],
     "transportation": "รถรับส่งในโซน",
     "duration": "4 ชั่วโมง",
     "region": "ภาคใต้",
-    "province": "พังงา",
+    "province": "ภูเก็ต",
     "accommodation": null,
     "rating": 4.8,
     "reviewCount": 42,
@@ -1218,9 +235,9 @@
       {
         "id": 500,
         "tourId": 5,
-        "startDate": "2026-03-01",
-        "endDate": "2026-03-01",
-        "timeSlot": "8:00-12:00",
+        "startDate": "2026-02-25",
+        "endDate": "2026-02-25",
+        "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
         "currentBooked": 0
@@ -1228,8 +245,8 @@
       {
         "id": 501,
         "tourId": 5,
-        "startDate": "2026-03-01",
-        "endDate": "2026-03-01",
+        "startDate": "2026-02-25",
+        "endDate": "2026-02-25",
         "timeSlot": "13:00-17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
@@ -1238,9 +255,9 @@
       {
         "id": 502,
         "tourId": 5,
-        "startDate": "2026-03-02",
-        "endDate": "2026-03-02",
-        "timeSlot": "8:00-12:00",
+        "startDate": "2026-02-26",
+        "endDate": "2026-02-26",
+        "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
         "currentBooked": 0
@@ -1248,135 +265,15 @@
       {
         "id": 503,
         "tourId": 5,
-        "startDate": "2026-03-02",
-        "endDate": "2026-03-02",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 504,
-        "tourId": 5,
-        "startDate": "2026-03-03",
-        "endDate": "2026-03-03",
-        "timeSlot": "8:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 505,
-        "tourId": 5,
-        "startDate": "2026-03-03",
-        "endDate": "2026-03-03",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 506,
-        "tourId": 5,
-        "startDate": "2026-03-04",
-        "endDate": "2026-03-04",
-        "timeSlot": "8:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 507,
-        "tourId": 5,
-        "startDate": "2026-03-04",
-        "endDate": "2026-03-04",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 508,
-        "tourId": 5,
-        "startDate": "2026-03-05",
-        "endDate": "2026-03-05",
-        "timeSlot": "8:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 509,
-        "tourId": 5,
-        "startDate": "2026-03-05",
-        "endDate": "2026-03-05",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 510,
-        "tourId": 5,
-        "startDate": "2026-03-06",
-        "endDate": "2026-03-06",
-        "timeSlot": "8:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 511,
-        "tourId": 5,
-        "startDate": "2026-03-06",
-        "endDate": "2026-03-06",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 512,
-        "tourId": 5,
-        "startDate": "2026-03-07",
-        "endDate": "2026-03-07",
-        "timeSlot": "8:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 513,
-        "tourId": 5,
-        "startDate": "2026-03-07",
-        "endDate": "2026-03-07",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 514,
-        "tourId": 5,
-        "startDate": "2026-03-08",
-        "endDate": "2026-03-08",
-        "timeSlot": "8:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 515,
-        "tourId": 5,
-        "startDate": "2026-03-08",
-        "endDate": "2026-03-08",
+        "startDate": "2026-02-26",
+        "endDate": "2026-02-26",
         "timeSlot": "13:00-17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
         "currentBooked": 0
       }
     ],
-    "createdAt": "2026-02-19T16:26:18.071Z",
-    "updatedAt": "2026-02-19T18:32:17.655Z"
+    "createdAt": "2026-02-26T07:16:09.656Z",
+    "updatedAt": "2026-02-26T07:32:48.962Z"
   }
 ]
