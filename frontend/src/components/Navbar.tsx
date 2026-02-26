@@ -18,12 +18,41 @@ export default function Navbar() {
   const location = useLocation()
   const { pathname, search } = location
 
+  const [modalError, setModalError] = useState('')
+
+  // จัดการ Redirect จาก ProtectedRoute หรือ state ข้ามหน้า
   useEffect(() => {
     if (location.state && (location.state as any).requireLogin) {
+      if ((location.state as any).authExpired) {
+        setModalError('เซสชันของคุณหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง')
+      }
       setModal('login')
       navigate(pathname, { replace: true, state: {} })
     }
   }, [location, navigate, pathname])
+
+  // จัดการ Token หมดอายุจาก api.ts interceptor
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      if (pathname === '/') {
+        // อยู่หน้า home อยู่แล้ว โชว์ Modal ได้เลย (ไม่เกิดการ Unmount Navbar)
+        logout() // ล้าง context และ storage ทุกอย่าง
+        setModalError('เซสชันของคุณหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง')
+        setModal('login')
+      } else {
+        // ย้ายคำสั่ง navigate ขึ้นมาก่อน logout เพื่อป้องกัน Race condition กับ ProtectedRoute
+        // ทำให้ Router เปลี่ยนหน้าเป็น '/' ทันทีใน Batch ถัดไป ป้องกันการเตะซ้ำจาก ProtectedRoute
+        navigate('/', { replace: true, state: { requireLogin: true, authExpired: true } })
+        logout()
+      }
+    }
+
+    window.addEventListener('auth:expired', handleAuthExpired as EventListener)
+
+    return () => {
+      window.removeEventListener('auth:expired', handleAuthExpired as EventListener)
+    }
+  }, [logout, navigate, pathname])
 
   const isActive = (path: string) => {
     const [p, q] = path.split('?')
@@ -81,8 +110,8 @@ export default function Navbar() {
                 <Link
                   to="/my-bookings"
                   className={`hidden md:block text-[15px] transition-colors ${pathname === '/my-bookings'
-                      ? 'text-[var(--color-primary)] font-semibold'
-                      : 'text-gray-500 hover:text-gray-900'
+                    ? 'text-[var(--color-primary)] font-semibold'
+                    : 'text-gray-500 hover:text-gray-900'
                     }`}
                 >
                   การจองของฉัน
@@ -139,7 +168,17 @@ export default function Navbar() {
       </nav>
 
       {modal === 'login' && (
-        <LoginModal onClose={() => setModal(null)} onSwitchToRegister={() => setModal('register')} />
+        <LoginModal
+          onClose={() => {
+            setModal(null)
+            setModalError('')
+          }}
+          onSwitchToRegister={() => {
+            setModal('register')
+            setModalError('')
+          }}
+          initialError={modalError}
+        />
       )}
       {modal === 'register' && (
         <RegisterModal onClose={() => setModal(null)} onSwitchToLogin={() => setModal('login')} />

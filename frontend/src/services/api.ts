@@ -19,16 +19,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // ล้างข้อมูลทั้งหมด
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      sessionStorage.removeItem('token')
-      sessionStorage.removeItem('user')
-
-      // บังคับเด้งกลับหน้าแรก (เฉพาะกรณีที่ไม่ได้อยู่หน้าแรก)
-      if (window.location.pathname !== '/') {
-        window.location.href = '/'
-      }
+      // แจ้งให้ React Component ทราบว่า Token หมดอายุ เพื่อให้จัดการ Logout และแสดง Modal
+      window.dispatchEvent(new CustomEvent('auth:expired'))
     }
     return Promise.reject(error)
   }
