@@ -5,9 +5,10 @@ import { authService } from '../services/authService'
 interface AuthContextType {
   user: User | null
   token: string | null
+  refreshToken: string | null
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
-  register: (name: string, email: string, phone: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<User>
+  register: (name: string, email: string, phone: string, password: string) => Promise<User>
   logout: () => void
   isAdmin: boolean
 }
@@ -17,14 +18,17 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
+  const [refreshToken, setRefreshToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   // โหลดข้อมูล user จาก localStorage ตอนเปิดแอปครั้งแรก
   useEffect(() => {
     const savedToken = localStorage.getItem('token')
+    const savedRefreshToken = localStorage.getItem('refresh_token')
     const savedUser = localStorage.getItem('user')
     if (savedToken && savedUser) {
       setToken(savedToken)
+      setRefreshToken(savedRefreshToken)
       setUser(JSON.parse(savedUser))
     }
     setIsLoading(false)
@@ -33,29 +37,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const data = await authService.login({ email, password })
     setToken(data.access_token)
+    setRefreshToken(data.refresh_token)
     setUser(data.user)
     localStorage.setItem('token', data.access_token)
+    localStorage.setItem('refresh_token', data.refresh_token)
     localStorage.setItem('user', JSON.stringify(data.user))
+    return data.user
   }
 
   const register = async (name: string, email: string, phone: string, password: string) => {
     const data = await authService.register({ name, email, phone, password })
     setToken(data.access_token)
+    setRefreshToken(data.refresh_token)
     setUser(data.user)
     localStorage.setItem('token', data.access_token)
+    localStorage.setItem('refresh_token', data.refresh_token)
     localStorage.setItem('user', JSON.stringify(data.user))
+    return data.user
   }
 
   const logout = () => {
     setToken(null)
+    setRefreshToken(null)
     setUser(null)
     localStorage.removeItem('token')
+    localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
   }
 
   return (
     <AuthContext.Provider value={{
-      user, token, isLoading,
+      user, token, refreshToken, isLoading,
       login, register, logout,
       isAdmin: user?.role === 'admin',
     }}>
