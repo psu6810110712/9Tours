@@ -51,6 +51,21 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const totalGuests = adults + children
   const totalPrice = Number(tour?.price || 1500) * adults + Number(tour?.childPrice || 1000) * children
 
+  // 🔴 1. Logic ล็อคปุ่ม + (ตรวจสอบว่าคนจองเกินที่ว่างหรือไม่)
+  const isMaxReached = tour?.minPeople
+    ? (tour?.maxPeople ? totalGuests >= tour.maxPeople : false) // กรณี Private Tour เช็คจาก maxPeople
+    : (totalGuests >= seatsLeft) // กรณี Join Trip เช็คจาก seatsLeft
+
+  // 🔴 2. Logic ล็อคปุ่ม "จองเลย"
+  const isSoldOut = !tour?.minPeople && selectedSchedule && seatsLeft <= 0
+  const isExceedCapacity = !tour?.minPeople && totalGuests > seatsLeft
+  const isBookingDisabled = !upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity
+
+  let buttonText = 'จองเลย'
+  if (!upcomingSchedules.length || !selectedSchedule) buttonText = 'ไม่มีรอบเปิดรับ'
+  else if (isSoldOut) buttonText = 'รอบนี้เต็มแล้ว'
+  else if (isExceedCapacity) buttonText = 'ที่นั่งไม่เพียงพอ'
+
   const handleBookingClick = () => {
     if (!user) {
       setShowLoginModal(true)
@@ -226,24 +241,20 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                             const endMonth = end.month
                             const year = start.year
 
-                            // กรณีเดือนเดียวกัน: 24-26 ก.พ. 2026
                             if (startMonth === endMonth) {
                               return `${start.day} – ${end.day} ${startMonth} ${year}`
                             }
-                            // กรณีคนละเดือน: 28 ก.พ. – 2 มี.ค. 2026
                             return `${start.day} ${startMonth} – ${end.day} ${endMonth} ${year}`
                           }
                           return `${start.day} ${start.month} ${start.year}`
                         })()}
                       </p>
-                      {/* แสดงชื่อรอบ หรือ ระยะเวลาแพ็กเกจ */}
                       {(selectedSchedule.roundName || selectedSchedule.timeSlot) && !tour.minPeople && (
                         <p className="text-xs text-gray-500 mt-0.5 font-medium">
                           {selectedSchedule.roundName}
                           {selectedSchedule.timeSlot && ` · ${selectedSchedule.timeSlot}`}
                         </p>
                       )}
-                      {/* กรณี Private Package */}
                       {tour.minPeople && (
                         <p className="text-xs text-blue-600 mt-0.5 font-bold bg-blue-50 px-2 py-0.5 rounded-md inline-block">
                           Private Trip (เริ่ม {selectedSchedule.startDate})
@@ -252,7 +263,6 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                     </div>
                   </div>
 
-                  {/* จำนวนที่เหลือ + progress bar (ซ่อนถ้าเป็น Private เพราะมันเหมา) */}
                   {!tour.minPeople && (
                     <div>
                       <div className="flex items-center justify-between mb-1">
@@ -261,7 +271,6 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                           ว่าง {seatsLeft} ท่าน
                         </span>
                       </div>
-                      {/* progress bar — แสดงสัดส่วนที่นั่งที่เหลือ (เขียว=เหลือเยอะ, แดง=ใกล้เต็ม) */}
                       <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${seatsLeft <= 5 ? 'bg-red-400' : 'bg-green-500'}`}
@@ -300,17 +309,20 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
               <div key={label}>
                 <label className="text-sm font-medium text-gray-500 mb-1 block">{label}</label>
                 <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                  {/* ปุ่ม - */}
                   <button
                     onClick={() => set(Math.max(min, value - 1))}
-                    className="px-3 py-2 text-gray-500 hover:bg-gray-50 font-semibold disabled:opacity-50"
+                    className="px-3 py-2 text-gray-500 hover:bg-gray-50 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={value <= min}
                   >
                     -
                   </button>
                   <span className="flex-1 text-center text-base font-semibold text-gray-900">{value}</span>
+                  {/* 🔴 ปุ่ม + (ใส่ isMaxReached เพื่อล็อคเมื่อคนเต็ม) */}
                   <button
                     onClick={() => set(value + 1)}
-                    className="px-3 py-2 text-gray-500 hover:bg-gray-50 font-semibold"
+                    className="px-3 py-2 text-gray-500 hover:bg-gray-50 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isMaxReached || !selectedSchedule}
                   >
                     +
                   </button>
@@ -331,27 +343,26 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
           </div>
         </div>
 
-        {/* ปุ่มจอง */}
+        {/* 🔴 ปุ่มจอง (เปลี่ยนสถานะและข้อความอัตโนมัติตาม Logic ที่เขียนไว้ด้านบน) */}
         <button
           onClick={handleBookingClick}
-          disabled={!upcomingSchedules.length}
-          className={`w-full font-semibold py-3 rounded-xl transition text-base 
-            ${!upcomingSchedules.length
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-[#F5A623] text-white hover:bg-orange-500 shadow-md'
+          disabled={isBookingDisabled}
+          className={`w-full font-semibold py-3 rounded-xl transition-all text-base 
+            ${isBookingDisabled
+              ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+              : 'bg-[#F5A623] text-white hover:bg-orange-500 shadow-md active:scale-[0.98]'
             }`}
         >
-          {upcomingSchedules.length ? 'จองเลย' : 'ไม่มีรอบเปิดรับ'}
+          {buttonText}
         </button>
       </div>
 
-      {/* ควบคุม Login Modal */}
       {showLoginModal && (
         <LoginModal
           onClose={() => setShowLoginModal(false)}
           onSwitchToRegister={() => {
             setShowLoginModal(false)
-            navigate('/') // หรือหน้า register 
+            navigate('/')
           }}
         />
       )}
