@@ -27,6 +27,7 @@ export default function BookingInfoPage() {
   const [tour, setTour] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorModal, setErrorModal] = useState({ isOpen: false, message: '' })
 
   useEffect(() => {
     if (tourId) {
@@ -68,7 +69,7 @@ export default function BookingInfoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (scheduleId === '-') {
-      alert('กรุณาระบุรอบเดินทางที่ต้องการ')
+      setErrorModal({ isOpen: true, message: 'กรุณาระบุรอบเดินทางที่ต้องการ' })
       return;
     }
     try {
@@ -78,26 +79,30 @@ export default function BookingInfoPage() {
         paxCount: adults + children
       }
       const response = await bookingService.createBooking(payload);
-      navigate(`/payment/${response.id}`)
+      // แนบข้อมูลทัวร์ติดตัวไปหน้า Payment ด้วย เพื่อป้องกัน Backend ไม่ส่งกลับมา
+      navigate(`/payment/${response.id}`, {
+        state: {
+          tourCode: tour?.tourCode || '-',
+          tourName: tour?.name || 'Loading...',
+          image: tourImage
+        }
+      })
     } catch (err: any) {
       console.error("Error creating booking:", err)
-      const errorMsg = err.response?.data?.message || 'เกิดข้อผิดพลาดในการสร้างการจอง กรุณาลองใหม่อีกครั้ง'
-      alert(errorMsg)
+      const errorMsg = err.response?.data?.message || 'ไม่สามารถทำการจองได้ กรุณาลองใหม่อีกครั้ง'
+      setErrorModal({ isOpen: true, message: errorMsg })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]"> {/* ปรับพื้นหลังให้เป็นสีเทาอ่อนๆ เหมือนในรูป */}
+    <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-6 py-10">
-
         {/* --- ส่วนหัว: ปุ่มย้อนกลับ & Progress Bar --- */}
         <div className="relative mb-12 flex justify-center mt-4">
-
-          {/* ปุ่มย้อนกลับ (Fixed Position relative to wrapper) */}
           <button
             onClick={() => navigate(-1)}
             className="absolute left-0 top-0 mt-1 text-[#3b82f6] font-bold hover:underline flex items-center gap-1.5 text-base z-20 transition-all hover:-translate-x-1"
@@ -108,37 +113,25 @@ export default function BookingInfoPage() {
             ย้อนกลับ
           </button>
 
-          {/* Progress Bar Container */}
           <div className="hidden md:flex items-start w-full max-w-3xl px-10 relative z-10 pt-1">
-
-            {/* Step 1 */}
             <div className="flex flex-col items-center w-24">
               <div className="w-10 h-10 rounded-full bg-[#3b82f6] text-white flex items-center justify-center font-bold text-lg shadow-md z-10">1</div>
               <span className="text-[#3b82f6] text-sm font-bold mt-2.5">จอง</span>
             </div>
-
-            {/* Line 1 */}
             <div className="flex-1 h-[2px] bg-[#3b82f6] mt-5 -mx-4 z-0"></div>
 
-            {/* Step 2 */}
             <div className="flex flex-col items-center w-32">
               <div className="w-10 h-10 rounded-full bg-[#3b82f6] text-white flex items-center justify-center font-bold text-lg shadow-md z-10">2</div>
               <span className="text-[#3b82f6] text-sm font-bold mt-2.5">ตรวจสอบข้อมูล</span>
             </div>
+            <div className="flex-1 h-[2px] bg-[#3b82f6] mt-5 -mx-4 z-0"></div>
 
-            {/* Line 2 */}
-            <div className="flex-1 h-[2px] bg-gray-200 mt-5 -mx-4 z-0"></div>
-
-            {/* Step 3 */}
             <div className="flex flex-col items-center w-24">
               <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg z-10">3</div>
               <span className="text-gray-400 text-sm font-bold mt-2.5">ชำระเงิน</span>
             </div>
-
-            {/* Line 3 */}
             <div className="flex-1 h-[2px] bg-gray-200 mt-5 -mx-4 z-0"></div>
 
-            {/* Step 4 */}
             <div className="flex flex-col items-center w-24">
               <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg z-10">4</div>
               <span className="text-gray-400 text-sm font-bold mt-2.5">รับตั๋ว</span>
@@ -149,7 +142,6 @@ export default function BookingInfoPage() {
         <h1 className="text-2xl font-bold text-gray-800 mb-8 mt-10">การจองของท่าน</h1>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
           {/* ฝั่งซ้าย: ฟอร์มกรอกข้อมูล */}
           <div className="lg:col-span-7 bg-white p-8 md:p-10 rounded-3xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05),0_10px_20px_-2px_rgba(0,0,0,0.03)] border border-gray-100">
             <h2 className="text-xl font-bold text-gray-800 mb-8">กรอกข้อมูลและตรวจสอบการจอง</h2>
@@ -157,7 +149,6 @@ export default function BookingInfoPage() {
             <div className="mb-10">
               <h3 className="text-lg font-bold text-gray-800 mb-6">รายละเอียดการติดต่อ</h3>
 
-              {/* กล่องข้อมูลติดต่อ */}
               <div className="border border-gray-200 rounded-2xl p-6 md:p-8 relative mt-4">
                 <span className="absolute -top-[14px] left-6 bg-white px-3 text-[15px] font-bold text-gray-800">
                   ข้อมูลติดต่อ (สำหรับส่งใบจอง)
@@ -215,7 +206,6 @@ export default function BookingInfoPage() {
                 </div>
               </div>
 
-              {/* Radio Buttons (ทำให้วงใหญ่ขึ้น จิ้มง่ายขึ้น) */}
               <div className="flex flex-col sm:flex-row gap-8 mt-8 px-2">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${formData.useAccountInfo === 'yes' ? 'border-[#3b82f6]' : 'border-gray-400 group-hover:border-blue-400'}`}>
@@ -235,7 +225,6 @@ export default function BookingInfoPage() {
               </div>
             </div>
 
-            {/* กล่องคำขอเพิ่มเติม */}
             <div className="border border-gray-200 rounded-2xl p-6 md:p-8 relative mt-10">
               <span className="absolute -top-[14px] left-6 bg-white px-3 text-[15px] font-bold text-gray-800">
                 คำขอเพิ่มเติม (หากมี)
@@ -251,14 +240,13 @@ export default function BookingInfoPage() {
             </div>
           </div>
 
-          {/* ฝั่งขวา: Card สรุปการจอง (ฉบับปรับปรุง UX สำหรับวัย 35-40 ปี) */}
+          {/* ฝั่งขวา: Card สรุปการจอง */}
           <aside className="lg:col-span-5 sticky top-10">
             <div className="bg-white p-6 md:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100">
               <h3 className="text-xl font-bold text-gray-800 mb-6 border-b border-gray-100 pb-4">
                 สรุปข้อมูลการจองของท่าน
               </h3>
 
-              {/* ส่วนรูปภาพและรายละเอียดทัวร์ */}
               <div className="flex flex-col sm:flex-row gap-5 mb-6">
                 <div className="flex-1 space-y-3 text-[15px] text-gray-700">
                   <div className="grid grid-cols-[110px_1fr] items-start gap-2">
@@ -283,7 +271,6 @@ export default function BookingInfoPage() {
                   </div>
                 </div>
 
-                {/* รูปภาพ (บังคับให้ไม่เบียด text) */}
                 <div className="w-full sm:w-[120px] shrink-0 order-first sm:order-last mb-4 sm:mb-0">
                   <img
                     src={tourImage}
@@ -293,7 +280,6 @@ export default function BookingInfoPage() {
                 </div>
               </div>
 
-              {/* ส่วนรายละเอียดราคา (ใส่พื้นหลังแยกโซนให้ชัดเจน) */}
               <div className="bg-slate-50 p-5 rounded-2xl mb-6 border border-slate-100">
                 <h4 className="font-bold text-gray-800 mb-4 text-base">รายละเอียดราคา</h4>
                 <div className="space-y-3 text-[15px] text-gray-700">
@@ -314,7 +300,6 @@ export default function BookingInfoPage() {
                 </div>
               </div>
 
-              {/* ส่วนยอดรวม */}
               <div className="flex justify-between items-end mb-8 px-1">
                 <span className="font-bold text-gray-800 text-lg">ยอดที่ต้องชำระ:</span>
                 <div className="text-right">
@@ -323,12 +308,10 @@ export default function BookingInfoPage() {
                 </div>
               </div>
 
-              {/* ปุ่มชำระเงิน */}
               <div className="flex justify-center">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  onClick={handleSubmit}
                   className={`w-full text-white font-bold py-4 rounded-2xl transition-all text-lg shadow-[0_8px_20px_rgba(37,99,235,0.25)] ${isSubmitting ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-[#2563EB] hover:bg-blue-700 hover:-translate-y-1 active:translate-y-0'}`}
                 >
                   {isSubmitting ? 'กำลังดำเนินการ...' : 'ชำระเงิน'}
@@ -339,6 +322,32 @@ export default function BookingInfoPage() {
         </form>
       </main>
       <Footer />
+
+      {/* --- Error Modal ย้ายมาวางตรงนี้ (ถูกหลัก React 100%) --- */}
+      {errorModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setErrorModal({ isOpen: false, message: '' })}></div>
+          <div className="bg-white rounded-[2rem] p-8 w-full max-w-sm relative z-10 flex flex-col items-center text-center shadow-2xl animate-fade-in-up border border-gray-100">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
+              <div className="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)]">
+                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+            </div>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">ไม่สามารถทำรายการได้</h2>
+            <p className="text-gray-500 text-[15px] mb-8 leading-relaxed font-medium">
+              {errorModal.message}
+            </p>
+            <button
+              onClick={() => setErrorModal({ isOpen: false, message: '' })}
+              className="w-full bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full hover:bg-gray-200 transition-colors text-base"
+            >
+              ตกลง
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

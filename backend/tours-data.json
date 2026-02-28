@@ -322,7 +322,7 @@
         "timeSlot": "08:00 - 12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 0
+        "currentBooked": 10
       },
       {
         "id": 501,
@@ -332,7 +332,7 @@
         "timeSlot": "13:00 - 17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
-        "currentBooked": 0
+        "currentBooked": 8
       },
       {
         "id": 502,
@@ -342,7 +342,7 @@
         "timeSlot": "08:00 - 12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 0
+        "currentBooked": 9
       },
       {
         "id": 503,
@@ -362,7 +362,7 @@
         "timeSlot": "08:00 - 12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 0
+        "currentBooked": 8
       },
       {
         "id": 505,
