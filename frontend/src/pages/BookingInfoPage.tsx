@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { tourService } from '../services/tourService'
+import { bookingService } from '../services/bookingService'
 
 export default function BookingInfoPage() {
   const { tourId } = useParams<{ tourId: string }>()
@@ -21,6 +22,7 @@ export default function BookingInfoPage() {
   // 2. State สำหรับเก็บข้อมูลทัวร์ของจริงจาก Database
   const [tour, setTour] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // 3. ดึงข้อมูลทัวร์
   useEffect(() => {
@@ -62,34 +64,37 @@ export default function BookingInfoPage() {
     ? (typeof tour.images[0] === 'string' ? tour.images[0] : tour.images[0].url)
     : 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const newBookingId = `BK-${Math.floor(1000 + Math.random() * 9000)}`
-
-    // บันทึกข้อมูลของจริงลงไปใน Local Storage
-    const newBooking = {
-      id: newBookingId,
-      tourId: tour.id,
-      tourName: tour.name,
-      date: scheduleId !== '-' ? `อ้างอิงรอบเดินทาง: ${scheduleId}` : 'รอการยืนยันวันเดินทาง',
-      adults,
-      children,
-      price: totalPrice,
-      status: 'รอชำระเงิน',
-      image: tourImage,
-      customerName: formData.fullName, // เก็บชื่อลูกค้าไว้ด้วยเพื่อโชว์ในหน้ารายละเอียด
-      phone: formData.phone
+    if (scheduleId === '-') {
+      alert('กรุณาระบุรอบเดินทางที่ต้องการ')
+      return;
     }
 
-    const existingBookings = JSON.parse(localStorage.getItem('myBookings') || '[]')
-    localStorage.setItem('myBookings', JSON.stringify([newBooking, ...existingBookings]))
+    try {
+      setIsSubmitting(true)
 
-    // แจ้งเตือนผู้ใช้
-    alert('บันทึกการจองสำเร็จ! คุณสามารถดูรายละเอียดและชำระเงินในภายหลังได้ที่ "การจองของฉัน"')
+      const payload = {
+        scheduleId: Number(scheduleId),
+        paxCount: adults + children
+      }
 
-    // เด้งกลับไปหน้า Home (หน้าแรก)
-    navigate('/')
+      const response = await bookingService.createBooking(payload);
+
+      // แจ้งเตือนผู้ใช้
+      alert('บันทึกการจองสำเร็จ! กรุณาตรวจสอบและชำระเงินในหน้าที่กำลังจะถึง')
+
+      // ไปหน้าชำระเงินอัตโนมัติ
+      navigate(`/payment/${response.id}`)
+
+    } catch (err: any) {
+      console.error("Error creating booking:", err)
+      const errorMsg = err.response?.data?.message || 'เกิดข้อผิดพลาดในการสร้างการจอง กรุณาลองใหม่อีกครั้ง'
+      alert(errorMsg)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -245,8 +250,8 @@ export default function BookingInfoPage() {
                 <span className="text-3xl font-bold text-gray-800">{totalPrice.toLocaleString()} <span className="text-xl font-medium">บาท</span></span>
               </div>
 
-              <button type="submit" className="w-full bg-[#3b82f6] text-white font-bold py-3.5 rounded-full hover:bg-blue-600 transition-all text-lg shadow-md">
-                ยืนยันการจอง
+              <button type="submit" disabled={isSubmitting} className={`w-full text-white font-bold py-3.5 rounded-full transition-all text-lg shadow-md ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#3b82f6] hover:bg-blue-600'}`}>
+                {isSubmitting ? 'กำลังดำเนินการ...' : 'ยืนยันการจอง'}
               </button>
             </div>
           </aside>
