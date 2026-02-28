@@ -10,21 +10,24 @@ export default function BookingInfoPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
-  // 1. ดึงข้อมูลจาก URL
   const [adults] = useState(parseInt(searchParams.get('adults') || '1'))
   const [children] = useState(parseInt(searchParams.get('children') || '0'))
   const scheduleId = searchParams.get('scheduleId') || '-'
 
   const [formData, setFormData] = useState({
-    prefix: 'นาย', fullName: '', phoneCode: '+66', phone: '', email: '', specialRequest: '', useAccountInfo: 'yes'
+    prefix: 'นาย',
+    fullName: 'ศิณัณณภัทร จิตติพัฒน์',
+    phoneCode: '+66',
+    phone: '0950323781',
+    email: 'kinnaphat@gmail.com',
+    specialRequest: '',
+    useAccountInfo: 'yes'
   })
 
-  // 2. State สำหรับเก็บข้อมูลทัวร์ของจริงจาก Database
   const [tour, setTour] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 3. ดึงข้อมูลทัวร์
   useEffect(() => {
     if (tourId) {
       tourService.getOne(Number(tourId))
@@ -44,7 +47,7 @@ export default function BookingInfoPage() {
     return (
       <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center font-bold text-gray-400">
+        <div className="flex-1 flex items-center justify-center font-bold text-gray-400 text-lg">
           กำลังเตรียมข้อมูลการจอง...
         </div>
         <Footer />
@@ -52,42 +55,30 @@ export default function BookingInfoPage() {
     )
   }
 
-  // 4. คำนวณราคา
-  const adultPrice = tour?.price || 0
-  const childPrice = tour?.childPrice !== undefined ? tour.childPrice : adultPrice
+  const adultPrice = tour?.price || 6900
+  const childPrice = tour?.childPrice !== undefined ? tour.childPrice : 6900
   const totalAdultPrice = adults * adultPrice
   const totalChildPrice = children * childPrice
   const totalPrice = totalAdultPrice + totalChildPrice
 
-  // รูปภาพ
   const tourImage = tour?.images && tour.images.length > 0
     ? (typeof tour.images[0] === 'string' ? tour.images[0] : tour.images[0].url)
     : 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (scheduleId === '-') {
       alert('กรุณาระบุรอบเดินทางที่ต้องการ')
       return;
     }
-
     try {
       setIsSubmitting(true)
-
       const payload = {
         scheduleId: Number(scheduleId),
         paxCount: adults + children
       }
-
       const response = await bookingService.createBooking(payload);
-
-      // แจ้งเตือนผู้ใช้
-      alert('บันทึกการจองสำเร็จ! กรุณาตรวจสอบและชำระเงินในหน้าที่กำลังจะถึง')
-
-      // ไปหน้าชำระเงินอัตโนมัติ
       navigate(`/payment/${response.id}`)
-
     } catch (err: any) {
       console.error("Error creating booking:", err)
       const errorMsg = err.response?.data?.message || 'เกิดข้อผิดพลาดในการสร้างการจอง กรุณาลองใหม่อีกครั้ง'
@@ -98,161 +89,251 @@ export default function BookingInfoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F8FAFC]"> {/* ปรับพื้นหลังให้เป็นสีเทาอ่อนๆ เหมือนในรูป */}
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {/* --- Header & Progress Bar --- */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 relative">
-          <button onClick={() => navigate(-1)} className="text-blue-500 font-medium hover:underline flex items-center gap-1 mb-4 md:mb-0 z-10">
-            ← ย้อนกลับ
+      <main className="max-w-7xl mx-auto px-6 py-10">
+
+        {/* --- ส่วนหัว: ปุ่มย้อนกลับ & Progress Bar --- */}
+        <div className="relative mb-12 flex justify-center mt-4">
+
+          {/* ปุ่มย้อนกลับ (Fixed Position relative to wrapper) */}
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute left-0 top-0 mt-1 text-[#3b82f6] font-bold hover:underline flex items-center gap-1.5 text-base z-20 transition-all hover:-translate-x-1"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            ย้อนกลับ
           </button>
-          <div className="flex-1 flex justify-center w-full absolute left-0">
-            <div className="flex items-start gap-0 w-full max-w-2xl mx-auto hidden md:flex">
-              <div className="flex flex-col items-center relative flex-1">
-                <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-sm z-10">1</div>
-                <span className="text-blue-500 text-xs font-bold mt-2">จอง</span>
-                <div className="absolute top-4 left-[50%] w-full h-[2px] bg-blue-500"></div>
-              </div>
-              <div className="flex flex-col items-center relative flex-1">
-                <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-sm z-10">2</div>
-                <span className="text-blue-500 text-xs font-bold mt-2">ตรวจสอบข้อมูล</span>
-                <div className="absolute top-4 left-[50%] w-full h-[2px] bg-blue-200"></div>
-              </div>
-              <div className="flex flex-col items-center relative flex-1">
-                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-300 flex items-center justify-center font-bold text-sm z-10">3</div>
-                <span className="text-gray-400 text-xs mt-2">ชำระเงิน</span>
-                <div className="absolute top-4 left-[50%] w-full h-[2px] bg-blue-100"></div>
-              </div>
-              <div className="flex flex-col items-center relative flex-1">
-                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-300 flex items-center justify-center font-bold text-sm z-10">4</div>
-                <span className="text-gray-400 text-xs mt-2">รับตั๋ว</span>
-              </div>
+
+          {/* Progress Bar Container */}
+          <div className="hidden md:flex items-start w-full max-w-3xl px-10 relative z-10 pt-1">
+
+            {/* Step 1 */}
+            <div className="flex flex-col items-center w-24">
+              <div className="w-10 h-10 rounded-full bg-[#3b82f6] text-white flex items-center justify-center font-bold text-lg shadow-md z-10">1</div>
+              <span className="text-[#3b82f6] text-sm font-bold mt-2.5">จอง</span>
+            </div>
+
+            {/* Line 1 */}
+            <div className="flex-1 h-[2px] bg-[#3b82f6] mt-5 -mx-4 z-0"></div>
+
+            {/* Step 2 */}
+            <div className="flex flex-col items-center w-32">
+              <div className="w-10 h-10 rounded-full bg-[#3b82f6] text-white flex items-center justify-center font-bold text-lg shadow-md z-10">2</div>
+              <span className="text-[#3b82f6] text-sm font-bold mt-2.5">ตรวจสอบข้อมูล</span>
+            </div>
+
+            {/* Line 2 */}
+            <div className="flex-1 h-[2px] bg-gray-200 mt-5 -mx-4 z-0"></div>
+
+            {/* Step 3 */}
+            <div className="flex flex-col items-center w-24">
+              <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg z-10">3</div>
+              <span className="text-gray-400 text-sm font-bold mt-2.5">ชำระเงิน</span>
+            </div>
+
+            {/* Line 3 */}
+            <div className="flex-1 h-[2px] bg-gray-200 mt-5 -mx-4 z-0"></div>
+
+            {/* Step 4 */}
+            <div className="flex flex-col items-center w-24">
+              <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg z-10">4</div>
+              <span className="text-gray-400 text-sm font-bold mt-2.5">รับตั๋ว</span>
             </div>
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 mt-16 md:mt-0">การจองของท่าน</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-8 mt-10">การจองของท่าน</h1>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
           {/* ฝั่งซ้าย: ฟอร์มกรอกข้อมูล */}
-          <div className="lg:col-span-7 bg-white p-8 rounded-[1.5rem] shadow-sm border border-gray-200">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">กรอกข้อมูลและตรวจสอบการจอง</h2>
-            <div className="bg-white rounded-xl">
-              <h3 className="text-md font-bold text-gray-800 mb-4">รายละเอียดการติดต่อ</h3>
-              <div className="border border-gray-200 rounded-xl p-6 mb-6 relative mt-4">
-                <span className="absolute -top-3 left-4 bg-white px-2 text-sm font-bold text-gray-700">ข้อมูลติดต่อ (สำหรับส่งใบจอง)</span>
-                <div className="space-y-5 mt-2">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="md:col-span-1">
-                      <label className="block text-xs font-bold text-gray-600 mb-1">คำนำหน้า<span className="text-red-500">*</span></label>
-                      <select className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white" onChange={(e) => setFormData({ ...formData, prefix: e.target.value })}>
-                        <option>นาย</option><option>นาง</option><option>นางสาว</option>
-                      </select>
-                    </div>
-                    <div className="md:col-span-3">
-                      <label htmlFor="fullName" className="block text-xs font-bold text-gray-600 mb-1">ชื่อ-นามสกุล<span className="text-red-500">*</span></label>
-                      <input
-                        id="fullName"
-                        name="name"
-                        autoComplete="name"
-                        required
-                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none"
-                        placeholder="ตามที่ปรากฏอยู่บนบัตรประชาชน"
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      />
-                    </div>
+          <div className="lg:col-span-7 bg-white p-8 md:p-10 rounded-3xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05),0_10px_20px_-2px_rgba(0,0,0,0.03)] border border-gray-100">
+            <h2 className="text-xl font-bold text-gray-800 mb-8">กรอกข้อมูลและตรวจสอบการจอง</h2>
+
+            <div className="mb-10">
+              <h3 className="text-lg font-bold text-gray-800 mb-6">รายละเอียดการติดต่อ</h3>
+
+              {/* กล่องข้อมูลติดต่อ */}
+              <div className="border border-gray-200 rounded-2xl p-6 md:p-8 relative mt-4">
+                <span className="absolute -top-[14px] left-6 bg-white px-3 text-[15px] font-bold text-gray-800">
+                  ข้อมูลติดต่อ (สำหรับส่งใบจอง)
+                </span>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-2">
+                  <div className="md:col-span-1">
+                    <label className="block text-sm font-bold text-gray-700 mb-2">คำนำหน้า<span className="text-red-500">*</span></label>
+                    <select
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6] outline-none bg-white transition-all"
+                      value={formData.prefix}
+                      onChange={(e) => setFormData({ ...formData, prefix: e.target.value })}
+                    >
+                      <option>นาย</option><option>นาง</option><option>นางสาว</option>
+                    </select>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="phone" className="block text-xs font-bold text-gray-600 mb-1">หมายเลขโทรศัพท์<span className="text-red-500">*</span></label>
-                      <div className="flex">
-                        <select className="p-2.5 border border-gray-300 rounded-l-lg border-r-0 text-sm focus:ring-0 outline-none bg-gray-50"><option value="+66">🇹🇭 +66</option></select>
-                        <input
-                          id="phone"
-                          name="tel"
-                          autoComplete="tel"
-                          required
-                          type="tel"
-                          className="w-full p-2.5 border border-gray-300 rounded-r-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none"
-                          placeholder="เช่น 0801234567"
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block text-xs font-bold text-gray-600 mb-1">อีเมล<span className="text-red-500">*</span></label>
+                  <div className="md:col-span-3">
+                    <label className="block text-sm font-bold text-gray-700 mb-2">ชื่อ-นามสกุล<span className="text-red-500">*</span></label>
+                    <input
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6] outline-none transition-all placeholder:text-gray-300"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    />
+                    <p className="text-sm text-gray-400 mt-2">ตามที่ปรากฏอยู่บนบัตรประชาชน (โดยไม่ต้องมีคำนำหน้าหรืออักษรพิเศษ)</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">หมายเลขโทรศัพท์<span className="text-red-500">*</span></label>
+                    <div className="flex">
+                      <select className="px-3 py-3 border border-gray-300 rounded-l-xl border-r-0 text-base focus:ring-0 outline-none bg-gray-50">
+                        <option value="+66">🇹🇭 +66</option>
+                      </select>
                       <input
-                        id="email"
-                        name="email"
-                        autoComplete="email"
-                        required
-                        type="email"
-                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none"
-                        placeholder="เช่น email@example.com"
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required type="tel"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-r-xl text-base focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6] outline-none transition-all"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       />
                     </div>
+                    <p className="text-sm text-gray-400 mt-2">เช่น หมายเลขโทรศัพท์มือถือ 0801234567</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">อีเมล<span className="text-red-500">*</span></label>
+                    <input
+                      required type="email"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6] outline-none transition-all"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                    <p className="text-sm text-gray-400 mt-2">เช่น email@example.com</p>
                   </div>
                 </div>
               </div>
-              <div className="border border-gray-200 rounded-xl p-6 relative mt-6">
-                <span className="absolute -top-3 left-4 bg-white px-2 text-sm font-bold text-gray-700">คำขอเพิ่มเติม (หากมี)</span>
-                <textarea rows={3} className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 outline-none resize-none mt-2" placeholder="สามารถใส่คำขอพิเศษเพิ่มเติมได้" onChange={(e) => setFormData({ ...formData, specialRequest: e.target.value })}></textarea>
+
+              {/* Radio Buttons (ทำให้วงใหญ่ขึ้น จิ้มง่ายขึ้น) */}
+              <div className="flex flex-col sm:flex-row gap-8 mt-8 px-2">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${formData.useAccountInfo === 'yes' ? 'border-[#3b82f6]' : 'border-gray-400 group-hover:border-blue-400'}`}>
+                    {formData.useAccountInfo === 'yes' && <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></div>}
+                  </div>
+                  <input type="radio" className="hidden" name="useAccount" value="yes" checked={formData.useAccountInfo === 'yes'} onChange={() => setFormData({ ...formData, useAccountInfo: 'yes' })} />
+                  <span className={`text-base font-bold transition-colors ${formData.useAccountInfo === 'yes' ? 'text-[#3b82f6]' : 'text-gray-600 group-hover:text-gray-800'}`}>ใช้ข้อมูลเดียวกับบัญชีที่ฉันเคยสมัครไว้</span>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${formData.useAccountInfo === 'no' ? 'border-[#3b82f6]' : 'border-gray-400 group-hover:border-blue-400'}`}>
+                    {formData.useAccountInfo === 'no' && <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></div>}
+                  </div>
+                  <input type="radio" className="hidden" name="useAccount" value="no" checked={formData.useAccountInfo === 'no'} onChange={() => setFormData({ ...formData, useAccountInfo: 'no' })} />
+                  <span className={`text-base font-bold transition-colors ${formData.useAccountInfo === 'no' ? 'text-[#3b82f6]' : 'text-gray-600 group-hover:text-gray-800'}`}>กรอกข้อมูลเองทั้งหมด</span>
+                </label>
               </div>
+            </div>
+
+            {/* กล่องคำขอเพิ่มเติม */}
+            <div className="border border-gray-200 rounded-2xl p-6 md:p-8 relative mt-10">
+              <span className="absolute -top-[14px] left-6 bg-white px-3 text-[15px] font-bold text-gray-800">
+                คำขอเพิ่มเติม (หากมี)
+              </span>
+              <textarea
+                rows={4}
+                className="w-full p-4 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-[#3b82f6] outline-none resize-none mt-2 transition-all placeholder:text-gray-300"
+                placeholder="คำขอพิเศษ"
+                value={formData.specialRequest}
+                onChange={(e) => setFormData({ ...formData, specialRequest: e.target.value })}
+              ></textarea>
+              <p className="text-sm text-gray-400 mt-3">รูปแบบ: ท่านสามารถใช้ภาษาไทยหรือภาษาอังกฤษได้ โดยคำขอจะขึ้นอยู่กับความพร้อมให้บริการของผู้ให้บริการ</p>
             </div>
           </div>
 
-          {/* ฝั่งขวา: Card สรุปการจอง */}
+          {/* ฝั่งขวา: Card สรุปการจอง (ฉบับปรับปรุง UX สำหรับวัย 35-40 ปี) */}
           <aside className="lg:col-span-5 sticky top-10">
-            <div className="bg-white p-8 rounded-[1.5rem] shadow-md border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-800 mb-6">สรุปข้อมูลการจองของท่าน</h3>
+            <div className="bg-white p-6 md:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100">
+              <h3 className="text-xl font-bold text-gray-800 mb-6 border-b border-gray-100 pb-4">
+                สรุปข้อมูลการจองของท่าน
+              </h3>
 
-              <div className="flex gap-4 mb-6">
-                <div className="flex-1 space-y-2 text-sm text-gray-600">
-                  <p><span className="font-bold text-gray-800 w-24 inline-block">รหัสทัวร์</span> {tour.id}</p>
-                  <p><span className="font-bold text-gray-800 w-24 inline-block align-top">ชื่อทัวร์</span> <span className="inline-block w-[140px] text-blue-600 font-bold">{tour.name}</span></p>
-
-                  {scheduleId !== '-' && (
-                    <p><span className="font-bold text-gray-800 w-24 inline-block">รอบเดินทาง</span> <span className="text-orange-500 font-bold">รหัส {scheduleId}</span></p>
-                  )}
-
-                  <p><span className="font-bold text-gray-800 w-24 inline-block">จำนวน</span> ผู้ใหญ่ {adults}, เด็ก {children}</p>
+              {/* ส่วนรูปภาพและรายละเอียดทัวร์ */}
+              <div className="flex flex-col sm:flex-row gap-5 mb-6">
+                <div className="flex-1 space-y-3 text-[15px] text-gray-700">
+                  <div className="grid grid-cols-[110px_1fr] items-start gap-2">
+                    <span className="font-bold text-gray-800">รหัสทัวร์</span>
+                    <span>{tour?.tourCode || '-'}</span>
+                  </div>
+                  <div className="grid grid-cols-[110px_1fr] items-start gap-2">
+                    <span className="font-bold text-gray-800">ชื่อทัวร์</span>
+                    <span className="leading-snug">{tour?.name || 'แพ็คเกจเชียงใหม่ 3 วัน 2 คืน ชมดอยอินทนนท์'}</span>
+                  </div>
+                  <div className="grid grid-cols-[110px_1fr] items-start gap-2">
+                    <span className="font-bold text-gray-800">วันที่เดินทาง</span>
+                    <span className="leading-snug">17 เมษายน พ.ศ.2569 -<br />19 เมษายน พ.ศ.2569</span>
+                  </div>
+                  <div className="grid grid-cols-[110px_1fr] items-start gap-2">
+                    <span className="font-bold text-gray-800">จำนวนผู้เดินทาง</span>
+                    <span>ผู้ใหญ่ {adults}, เด็ก {children}</span>
+                  </div>
+                  <div className="grid grid-cols-[110px_1fr] items-start gap-2">
+                    <span className="font-bold text-gray-800">ที่พัก</span>
+                    <span>PP Princess Resort</span>
+                  </div>
                 </div>
-                <div className="w-28 shrink-0">
-                  <img src={tourImage} alt="Tour" className="w-full h-24 object-cover rounded-xl shadow-sm" />
+
+                {/* รูปภาพ (บังคับให้ไม่เบียด text) */}
+                <div className="w-full sm:w-[120px] shrink-0 order-first sm:order-last mb-4 sm:mb-0">
+                  <img
+                    src={tourImage}
+                    alt="Tour"
+                    className="w-full h-[100px] sm:h-[120px] object-cover rounded-xl shadow-sm border border-gray-200"
+                  />
                 </div>
               </div>
 
-              <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 mb-6">
-                <h4 className="font-bold text-gray-800 mb-3 text-sm">รายละเอียดราคา</h4>
-                <div className="space-y-2 text-sm">
+              {/* ส่วนรายละเอียดราคา (ใส่พื้นหลังแยกโซนให้ชัดเจน) */}
+              <div className="bg-slate-50 p-5 rounded-2xl mb-6 border border-slate-100">
+                <h4 className="font-bold text-gray-800 mb-4 text-base">รายละเอียดราคา</h4>
+                <div className="space-y-3 text-[15px] text-gray-700">
                   {adults > 0 && (
-                    <div className="flex justify-between text-gray-600">
+                    <div className="flex justify-between items-center">
                       <span>ผู้ใหญ่</span>
-                      <span>{adultPrice.toLocaleString()} x {adults}</span>
-                      <span className="font-medium text-gray-800">{totalAdultPrice.toLocaleString()} บาท</span>
+                      <span className="flex-1 text-center text-gray-500">{adultPrice.toLocaleString()} × {adults}</span>
+                      <span className="font-bold text-gray-800 w-28 text-right">{totalAdultPrice.toLocaleString()} บาท</span>
                     </div>
                   )}
                   {children > 0 && (
-                    <div className="flex justify-between text-gray-600">
+                    <div className="flex justify-between items-center">
                       <span>เด็ก</span>
-                      <span>{childPrice.toLocaleString()} x {children}</span>
-                      <span className="font-medium text-gray-800">{totalChildPrice.toLocaleString()} บาท</span>
+                      <span className="flex-1 text-center text-gray-500">{childPrice.toLocaleString()} × {children}</span>
+                      <span className="font-bold text-gray-800 w-28 text-right">{totalChildPrice.toLocaleString()} บาท</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="flex justify-between items-center mb-6">
-                <span className="font-bold text-gray-800">ยอดที่ต้องชำระ</span>
-                <span className="text-3xl font-bold text-gray-800">{totalPrice.toLocaleString()} <span className="text-xl font-medium">บาท</span></span>
+              {/* ส่วนยอดรวม */}
+              <div className="flex justify-between items-end mb-8 px-1">
+                <span className="font-bold text-gray-800 text-lg">ยอดที่ต้องชำระ:</span>
+                <div className="text-right">
+                  <span className="text-3xl font-black text-[#2563EB]">{totalPrice.toLocaleString()}</span>
+                  <span className="text-lg font-bold text-gray-800 ml-2">บาท</span>
+                </div>
               </div>
 
-              <button type="submit" disabled={isSubmitting} className={`w-full text-white font-bold py-3.5 rounded-full transition-all text-lg shadow-md ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#3b82f6] hover:bg-blue-600'}`}>
-                {isSubmitting ? 'กำลังดำเนินการ...' : 'ยืนยันการจอง'}
-              </button>
+              {/* ปุ่มชำระเงิน */}
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  onClick={handleSubmit}
+                  className={`w-full text-white font-bold py-4 rounded-2xl transition-all text-lg shadow-[0_8px_20px_rgba(37,99,235,0.25)] ${isSubmitting ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-[#2563EB] hover:bg-blue-700 hover:-translate-y-1 active:translate-y-0'}`}
+                >
+                  {isSubmitting ? 'กำลังดำเนินการ...' : 'ชำระเงิน'}
+                </button>
+              </div>
             </div>
           </aside>
         </form>

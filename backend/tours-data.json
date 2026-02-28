@@ -317,9 +317,9 @@
       {
         "id": 500,
         "tourId": 5,
-        "startDate": "2026-02-25",
-        "endDate": "2026-02-25",
-        "timeSlot": "08:00-12:00",
+        "startDate": "2026-03-01",
+        "endDate": "2026-03-01",
+        "timeSlot": "08:00 - 12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
         "currentBooked": 0
@@ -327,9 +327,9 @@
       {
         "id": 501,
         "tourId": 5,
-        "startDate": "2026-02-25",
-        "endDate": "2026-02-25",
-        "timeSlot": "13:00-17:00",
+        "startDate": "2026-03-01",
+        "endDate": "2026-03-01",
+        "timeSlot": "13:00 - 17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
         "currentBooked": 0
@@ -337,9 +337,9 @@
       {
         "id": 502,
         "tourId": 5,
-        "startDate": "2026-02-26",
-        "endDate": "2026-02-26",
-        "timeSlot": "08:00-12:00",
+        "startDate": "2026-03-07",
+        "endDate": "2026-03-07",
+        "timeSlot": "08:00 - 12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
         "currentBooked": 0
@@ -347,16 +347,156 @@
       {
         "id": 503,
         "tourId": 5,
-        "startDate": "2026-02-26",
-        "endDate": "2026-02-26",
-        "timeSlot": "13:00-17:00",
+        "startDate": "2026-03-07",
+        "endDate": "2026-03-07",
+        "timeSlot": "13:00 - 17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 504,
+        "tourId": 5,
+        "startDate": "2026-03-08",
+        "endDate": "2026-03-08",
+        "timeSlot": "08:00 - 12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 505,
+        "tourId": 5,
+        "startDate": "2026-03-08",
+        "endDate": "2026-03-08",
+        "timeSlot": "13:00 - 17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 506,
+        "tourId": 5,
+        "startDate": "2026-03-14",
+        "endDate": "2026-03-14",
+        "timeSlot": "08:00 - 12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 507,
+        "tourId": 5,
+        "startDate": "2026-03-14",
+        "endDate": "2026-03-14",
+        "timeSlot": "13:00 - 17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 508,
+        "tourId": 5,
+        "startDate": "2026-03-15",
+        "endDate": "2026-03-15",
+        "timeSlot": "08:00 - 12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 509,
+        "tourId": 5,
+        "startDate": "2026-03-15",
+        "endDate": "2026-03-15",
+        "timeSlot": "13:00 - 17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 510,
+        "tourId": 5,
+        "startDate": "2026-03-21",
+        "endDate": "2026-03-21",
+        "timeSlot": "08:00 - 12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 511,
+        "tourId": 5,
+        "startDate": "2026-03-21",
+        "endDate": "2026-03-21",
+        "timeSlot": "13:00 - 17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 512,
+        "tourId": 5,
+        "startDate": "2026-03-22",
+        "endDate": "2026-03-22",
+        "timeSlot": "08:00 - 12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 513,
+        "tourId": 5,
+        "startDate": "2026-03-22",
+        "endDate": "2026-03-22",
+        "timeSlot": "13:00 - 17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 514,
+        "tourId": 5,
+        "startDate": "2026-03-28",
+        "endDate": "2026-03-28",
+        "timeSlot": "08:00 - 12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 515,
+        "tourId": 5,
+        "startDate": "2026-03-28",
+        "endDate": "2026-03-28",
+        "timeSlot": "13:00 - 17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 516,
+        "tourId": 5,
+        "startDate": "2026-03-29",
+        "endDate": "2026-03-29",
+        "timeSlot": "08:00 - 12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 517,
+        "tourId": 5,
+        "startDate": "2026-03-29",
+        "endDate": "2026-03-29",
+        "timeSlot": "13:00 - 17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
         "currentBooked": 0
       }
     ],
     "createdAt": "2026-02-19T16:26:18.071Z",
-    "updatedAt": "2026-02-26T13:06:55.029Z"
+    "updatedAt": "2026-02-28T05:25:36.283Z"
   },
   {
     "id": 100,

@@ -117,6 +117,7 @@ export class BookingsService {
           name: tour.name,
           price: tour.price,
           images: tour.images,
+          accommodation: tour.accommodation || null,
         },
       },
     };
@@ -141,6 +142,7 @@ export class BookingsService {
               name: found.tour.name,
               price: found.tour.price,
               images: found.tour.images,
+              accommodation: found.tour.accommodation || null,
             },
           }
           : null,
@@ -173,6 +175,7 @@ export class BookingsService {
             name: found.tour.name,
             price: found.tour.price,
             images: found.tour.images,
+            accommodation: found.tour.accommodation || null,
           },
         }
         : null,
@@ -199,6 +202,7 @@ export class BookingsService {
             name: found.tour.name,
             price: found.tour.price,
             images: found.tour.images,
+            accommodation: found.tour.accommodation || null,
           },
         }
         : null,
@@ -240,6 +244,7 @@ export class BookingsService {
             name: found.tour.name,
             price: found.tour.price,
             images: found.tour.images,
+            accommodation: found.tour.accommodation || null,
           },
         }
         : null,
