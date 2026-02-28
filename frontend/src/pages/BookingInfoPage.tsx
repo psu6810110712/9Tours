@@ -4,6 +4,7 @@ import { tourService } from '../services/tourService'
 import { bookingService } from '../services/bookingService'
 
 import type { Tour } from '../types/tour'
+import { useAuth } from '../context/AuthContext'
 
 export default function BookingInfoPage() {
   const { tourId } = useParams<{ tourId: string }>()
@@ -14,15 +15,36 @@ export default function BookingInfoPage() {
   const [children] = useState(parseInt(searchParams.get('children') || '0'))
   const scheduleId = searchParams.get('scheduleId') || '-'
 
+  const { user } = useAuth()
+
   const [formData, setFormData] = useState({
     prefix: 'นาย',
-    fullName: 'ศิณัณณภัทร จิตติพัฒน์',
+    fullName: user?.name || '',
     phoneCode: '+66',
-    phone: '0950323781',
-    email: 'kinnaphat@gmail.com',
+    phone: user?.phone || '',
+    email: user?.email || '',
     specialRequest: '',
     useAccountInfo: 'yes'
   })
+
+  // Auto-fill user info when toggling 'useAccountInfo'
+  useEffect(() => {
+    if (formData.useAccountInfo === 'yes' && user) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: user.name || '',
+        email: user.email || '',
+        phone: user.phone || ''
+      }))
+    } else if (formData.useAccountInfo === 'no') {
+      setFormData(prev => ({
+        ...prev,
+        fullName: '',
+        email: '',
+        phone: ''
+      }))
+    }
+  }, [formData.useAccountInfo, user])
 
   const [tour, setTour] = useState<Tour | null>(null)
   const [loading, setLoading] = useState(true)
@@ -57,6 +79,17 @@ export default function BookingInfoPage() {
   const totalAdultPrice = adults * adultPrice
   const totalChildPrice = children * childPrice
   const totalPrice = totalAdultPrice + totalChildPrice
+
+  // Get selected schedule
+  const selectedSchedule = tour?.schedules?.find(s => s.id === Number(scheduleId))
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '-'
+    const timestamp = Date.parse(dateStr)
+    if (isNaN(timestamp)) return dateStr
+    return new Date(dateStr).toLocaleDateString('th-TH', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    })
+  }
 
   const tourImage = tour?.images && tour.images.length > 0
     ? (typeof tour.images[0] === 'string' ? tour.images[0] : tour.images[0].url)
@@ -251,11 +284,14 @@ export default function BookingInfoPage() {
                   </div>
                   <div className="grid grid-cols-[110px_1fr] items-start gap-2">
                     <span className="font-bold text-gray-800">ชื่อทัวร์</span>
-                    <span className="leading-snug">{tour?.name || 'แพ็คเกจเชียงใหม่ 3 วัน 2 คืน ชมดอยอินทนนท์'}</span>
+                    <span className="leading-snug">{tour?.name || '-'}</span>
                   </div>
                   <div className="grid grid-cols-[110px_1fr] items-start gap-2">
                     <span className="font-bold text-gray-800">วันที่เดินทาง</span>
-                    <span className="leading-snug">17 เมษายน พ.ศ.2569 -<br />19 เมษายน พ.ศ.2569</span>
+                    <span className="leading-snug">
+                      {formatDate(selectedSchedule?.startDate)} -<br />
+                      {formatDate(selectedSchedule?.endDate)}
+                    </span>
                   </div>
                   <div className="grid grid-cols-[110px_1fr] items-start gap-2">
                     <span className="font-bold text-gray-800">จำนวนผู้เดินทาง</span>
@@ -263,7 +299,7 @@ export default function BookingInfoPage() {
                   </div>
                   <div className="grid grid-cols-[110px_1fr] items-start gap-2">
                     <span className="font-bold text-gray-800">ที่พัก</span>
-                    <span>PP Princess Resort</span>
+                    <span>{tour?.accommodation || '-'}</span>
                   </div>
                 </div>
 
