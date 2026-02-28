@@ -2,10 +2,21 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { bookingService } from '../services/bookingService'
 
+interface MyBookingItem {
+  id: number
+  tourName: string
+  date: string
+  price: number
+  status: string
+  adults: number
+  children: number
+  image: string
+}
+
 export default function MyBookingPage() {
   const [activeTab, setActiveTab] = useState('ทั้งหมด')
-  const [bookings, setBookings] = useState<any[]>([])
-  const [selectedBooking, setSelectedBooking] = useState<any>(null)
+  const [bookings, setBookings] = useState<MyBookingItem[]>([])
+  const [selectedBooking, setSelectedBooking] = useState<MyBookingItem | null>(null)
   const [loading, setLoading] = useState(true)
 
   const navigate = useNavigate()
@@ -65,9 +76,10 @@ export default function MyBookingPage() {
         await bookingService.cancelBooking(bookingId)
         alert('ยกเลิกการจองสำเร็จ')
         loadBookings() // โหลดข้อมูลใหม่เพื่อรีเฟรชหน้าจอ
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { message?: string } } }
         console.error("Error canceling booking:", err)
-        alert(err.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก กรุณาลองใหม่อีกครั้ง')
+        alert(error.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก กรุณาลองใหม่อีกครั้ง')
       }
     }
   }

@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import LoginModal from '../LoginModal'
 
 interface BookingSidebarProps {
-  tour: Tour | any // Allow any temporarily to accommodate mixed typing
+  tour: Tour
 }
 
 // แปลงวันที่ 'YYYY-MM-DD' → { day: '21', month: 'ก.พ.', year: '2026', weekday: 'ศ' }
@@ -30,13 +30,13 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   // กรองเฉพาะรอบในอนาคต เรียงตามวันที่
   const upcomingSchedules = useMemo(() =>
     tour?.schedules
-      ? tour.schedules.filter((s: any) => s.startDate >= today).sort((a: any, b: any) => a.startDate.localeCompare(b.startDate))
+      ? tour.schedules.filter((s: TourSchedule) => s.startDate >= today).sort((a: TourSchedule, b: TourSchedule) => a.startDate.localeCompare(b.startDate))
       : [],
     [tour?.schedules]
   )
 
   const [selectedSchedule, setSelectedSchedule] = useState<TourSchedule | null>(
-    upcomingSchedules.find((s: any) => s.maxCapacity - s.currentBooked > 0)
+    upcomingSchedules.find((s: TourSchedule) => s.maxCapacity - s.currentBooked > 0)
     ?? upcomingSchedules[0]
     ?? null
   )
@@ -119,12 +119,12 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
               >
                 {(() => {
                   // Group schedules by date to show unique dates
-                  const uniqueDates = Array.from(new Set(upcomingSchedules.map((s: any) => s.startDate)))
+                  const uniqueDates = Array.from(new Set(upcomingSchedules.map((s: TourSchedule) => s.startDate)))
                     .sort()
-                    .map((dateStr: any) => {
+                    .map((dateStr: string) => {
                       // Find *any* schedule for this date to check availability
-                      const schedulesOnDate = upcomingSchedules.filter((s: any) => s.startDate === dateStr)
-                      const isFullyBooked = schedulesOnDate.every((s: any) => s.maxCapacity - s.currentBooked <= 0)
+                      const schedulesOnDate = upcomingSchedules.filter((s: TourSchedule) => s.startDate === dateStr)
+                      const isFullyBooked = schedulesOnDate.every((s: TourSchedule) => s.maxCapacity - s.currentBooked <= 0)
                       const isSelected = selectedSchedule?.startDate === dateStr
                       const { day, month, weekday } = parseDate(dateStr)
 
@@ -137,7 +137,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                       disabled={isFullyBooked}
                       onClick={() => {
                         // When date is clicked, auto-select the first available round for that date
-                        const firstAvailable = upcomingSchedules.find((s: any) => s.startDate === dateStr && s.maxCapacity - s.currentBooked > 0)
+                        const firstAvailable = upcomingSchedules.find((s: TourSchedule) => s.startDate === dateStr && s.maxCapacity - s.currentBooked > 0)
                         if (firstAvailable) setSelectedSchedule(firstAvailable)
                       }}
                       className={`flex-shrink-0 flex flex-col items-center px-3 py-2 rounded-xl border text-center transition-all duration-150 min-w-[56px]
@@ -163,7 +163,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
               {selectedSchedule && !tour.minPeople && (
                 <div className="mt-4">
                   {(() => {
-                    const schedulesOnSelectedDate = upcomingSchedules.filter((s: any) => s.startDate === selectedSchedule.startDate)
+                    const schedulesOnSelectedDate = upcomingSchedules.filter((s: TourSchedule) => s.startDate === selectedSchedule.startDate)
                     const hasMultipleRounds = schedulesOnSelectedDate.length > 1
 
                     // ถ้ามีหลายรอบ หรือเป็นทัวร์ที่มี TimeSlot ให้แสดงรายการรอบ
@@ -172,7 +172,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                         <div className="space-y-2">
                           <label className="text-sm font-semibold text-gray-600 block">เลือกรอบเวลา (Join Trip)</label>
                           <div className="grid gap-2">
-                            {schedulesOnSelectedDate.map((s: any) => {
+                            {schedulesOnSelectedDate.map((s: TourSchedule) => {
                               const left = s.maxCapacity - s.currentBooked
                               const isFull = left <= 0
                               const isActiveRound = selectedSchedule.id === s.id

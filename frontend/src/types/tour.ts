@@ -37,3 +37,32 @@ export interface Tour {
   createdAt: string
   updatedAt: string
 }
+
+// === Payload types for creating/updating tours ===
+export interface CreateSchedulePayload {
+  startDate: string
+  endDate: string
+  timeSlot: string | null
+  roundName: string | null
+  maxCapacity: number
+}
+
+export interface CreateTourPayload {
+  name: string
+  description: string
+  tourType: TourType
+  categories: string[]
+  price: number
+  minPeople?: number
+  maxPeople?: number
+  highlights: string[]
+  images: string[]
+  transportation: string
+  duration: string
+  region: string
+  province: string
+  accommodation: string | null
+  itinerary: { day?: number; time: string; title: string; description: string }[]
+  schedules: CreateSchedulePayload[]
+}
+

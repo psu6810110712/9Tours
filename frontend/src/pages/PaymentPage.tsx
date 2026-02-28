@@ -2,6 +2,18 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { bookingService } from '../services/bookingService'
 
+interface PaymentPageData {
+  id: string | number
+  tourCode: string
+  tourName: string
+  date: string
+  price: number
+  adults: number
+  children: number
+  status: string
+  image: string
+}
+
 export default function PaymentPage() {
   const { bookingId } = useParams<{ bookingId: string }>()
   const navigate = useNavigate()
@@ -12,7 +24,7 @@ export default function PaymentPage() {
   const [isExpired, setIsExpired] = useState(false)
 
   // --- State สำหรับข้อมูลและการอัปโหลด ---
-  const [bookingData, setBookingData] = useState<any>(null)
+  const [bookingData, setBookingData] = useState<PaymentPageData | null>(null)
   const [loading, setLoading] = useState(true)
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)

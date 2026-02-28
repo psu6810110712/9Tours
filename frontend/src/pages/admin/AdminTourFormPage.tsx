@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { tourService } from '../../services/tourService'
+import type { CreateTourPayload } from '../../types/tour'
 
 // ===== ค่าคงที่ที่ใช้ในฟอร์ม =====
 const CATEGORIES = ['สายธรรมชาติ', 'สายคาเฟ่', 'สายกิจกรรม', 'สายมู', 'สายชิล']
@@ -225,7 +226,7 @@ export default function AdminTourFormPage() {
     setError('')
     setSaving(true)
 
-    const payload = {
+    const payload: CreateTourPayload = {
       name,
       description,
       tourType,
@@ -254,9 +255,9 @@ export default function AdminTourFormPage() {
 
     try {
       if (isEditing) {
-        await tourService.update(Number(id), payload as any)
+        await tourService.update(Number(id), payload)
       } else {
-        await tourService.create(payload as any)
+        await tourService.create(payload)
       }
       navigate('/admin/tours')
     } catch {

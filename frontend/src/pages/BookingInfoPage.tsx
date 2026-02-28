@@ -3,6 +3,8 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { tourService } from '../services/tourService'
 import { bookingService } from '../services/bookingService'
 
+import type { Tour } from '../types/tour'
+
 export default function BookingInfoPage() {
   const { tourId } = useParams<{ tourId: string }>()
   const [searchParams] = useSearchParams()
@@ -22,7 +24,7 @@ export default function BookingInfoPage() {
     useAccountInfo: 'yes'
   })
 
-  const [tour, setTour] = useState<any>(null)
+  const [tour, setTour] = useState<Tour | null>(null)
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorModal, setErrorModal] = useState({ isOpen: false, message: '' })
@@ -81,9 +83,10 @@ export default function BookingInfoPage() {
           image: tourImage
         }
       })
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error creating booking:", err)
-      const errorMsg = err.response?.data?.message || 'ไม่สามารถทำการจองได้ กรุณาลองใหม่อีกครั้ง'
+      const error = err as { response?: { data?: { message?: string } } }
+      const errorMsg = error.response?.data?.message || 'ไม่สามารถทำการจองได้ กรุณาลองใหม่อีกครั้ง'
       setErrorModal({ isOpen: true, message: errorMsg })
     } finally {
       setIsSubmitting(false)
