@@ -19,6 +19,7 @@ export interface Tour {
   tourType: TourType
   categories: string[]
   price: number
+  childPrice?: number | null
   originalPrice: number | null
   images: string[]
   highlights: string[]
@@ -53,6 +54,7 @@ export interface CreateTourPayload {
   tourType: TourType
   categories: string[]
   price: number
+  childPrice?: number | null
   minPeople?: number
   maxPeople?: number
   highlights: string[]

@@ -30,6 +30,7 @@
     background-color: var(--color-bg);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-weight: medium;
   }
 
   /* ป้องกัน Default Font ของ Browser */

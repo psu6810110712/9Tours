@@ -43,6 +43,7 @@ export default function AdminTourFormPage() {
   const [region, setRegion] = useState('')
   const [province, setProvince] = useState('')
   const [price, setPrice] = useState('')
+  const [childPrice, setChildPrice] = useState('')
   const [minPeople, setMinPeople] = useState('')
   const [maxPeople, setMaxPeople] = useState('')
   const [duration, setDuration] = useState('')
@@ -78,6 +79,7 @@ export default function AdminTourFormPage() {
       setRegion(tour.region)
       setProvince(tour.province)
       setPrice(String(tour.price))
+      if (tour.childPrice) setChildPrice(String(tour.childPrice))
       setMinPeople(tour.minPeople ? String(tour.minPeople) : '')
       setMaxPeople(tour.maxPeople ? String(tour.maxPeople) : '')
       setDuration(tour.duration || '')
@@ -232,6 +234,7 @@ export default function AdminTourFormPage() {
       tourType,
       categories,
       price: Number(price),
+      childPrice: childPrice ? Number(childPrice) : null,
       minPeople: minPeople ? Number(minPeople) : undefined,
       maxPeople: maxPeople ? Number(maxPeople) : undefined,
       highlights,
@@ -409,7 +412,7 @@ export default function AdminTourFormPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className={labelClass}>ระยะเวลา*</label>
                   <input
@@ -422,7 +425,7 @@ export default function AdminTourFormPage() {
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>ราคา*</label>
+                  <label className={labelClass}>ราคาผู้ใหญ่*</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -430,6 +433,20 @@ export default function AdminTourFormPage() {
                       onChange={(e) => setPrice(e.target.value)}
                       required
                       min={0}
+                      className={inputClass}
+                    />
+                    <span className="text-sm text-gray-600 whitespace-nowrap">บาท</span>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>ราคาเด็ก</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      value={childPrice}
+                      onChange={(e) => setChildPrice(e.target.value)}
+                      min={0}
+                      placeholder="ไม่บังคับ"
                       className={inputClass}
                     />
                     <span className="text-sm text-gray-600 whitespace-nowrap">บาท</span>

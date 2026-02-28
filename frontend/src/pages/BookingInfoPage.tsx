@@ -53,7 +53,7 @@ export default function BookingInfoPage() {
   }
 
   const adultPrice = tour?.price || 6900
-  const childPrice = tour?.childPrice !== undefined ? tour.childPrice : 6900
+  const childPrice = (tour?.childPrice !== null && tour?.childPrice !== undefined) ? tour.childPrice : adultPrice
   const totalAdultPrice = adults * adultPrice
   const totalChildPrice = children * childPrice
   const totalPrice = totalAdultPrice + totalChildPrice
