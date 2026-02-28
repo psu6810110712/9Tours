@@ -5,6 +5,8 @@ import { bookingService } from '../services/bookingService'
 
 import type { Tour } from '../types/tour'
 import { useAuth } from '../context/AuthContext'
+import ProgressBar from '../components/common/ProgressBar'
+import BookingSummaryCard from '../components/booking/BookingSummaryCard'
 
 export default function BookingInfoPage() {
   const { tourId } = useParams<{ tourId: string }>()
@@ -113,7 +115,9 @@ export default function BookingInfoPage() {
         state: {
           tourCode: tour?.tourCode || '-',
           tourName: tour?.name || 'Loading...',
-          image: tourImage
+          image: tourImage,
+          adults,
+          children
         }
       })
     } catch (err: unknown) {
@@ -142,30 +146,7 @@ export default function BookingInfoPage() {
             ย้อนกลับ
           </button>
 
-          <div className="hidden md:flex items-start w-full max-w-3xl px-10 relative z-10 pt-1">
-            <div className="flex flex-col items-center w-24">
-              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-md z-10">1</div>
-              <span className="text-primary text-sm font-bold mt-2.5">จอง</span>
-            </div>
-            <div className="flex-1 h-[2px] bg-primary mt-5 -mx-4 z-0"></div>
-
-            <div className="flex flex-col items-center w-32">
-              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-md z-10">2</div>
-              <span className="text-primary text-sm font-bold mt-2.5">ตรวจสอบข้อมูล</span>
-            </div>
-            <div className="flex-1 h-[2px] bg-primary mt-5 -mx-4 z-0"></div>
-
-            <div className="flex flex-col items-center w-24">
-              <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg z-10">3</div>
-              <span className="text-gray-400 text-sm font-bold mt-2.5">ชำระเงิน</span>
-            </div>
-            <div className="flex-1 h-[2px] bg-gray-200 mt-5 -mx-4 z-0"></div>
-
-            <div className="flex flex-col items-center w-24">
-              <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg z-10">4</div>
-              <span className="text-gray-400 text-sm font-bold mt-2.5">รับตั๋ว</span>
-            </div>
-          </div>
+          <ProgressBar currentStep={2} />
         </div>
 
         <h1 className="text-2xl font-bold text-gray-800 mb-8 mt-10">การจองของท่าน</h1>
@@ -271,114 +252,64 @@ export default function BookingInfoPage() {
 
           {/* ฝั่งขวา: Card สรุปการจอง */}
           <aside className="lg:col-span-5 sticky top-10">
-            <div className="bg-white p-6 md:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100">
-              <h3 className="text-xl font-bold text-gray-800 mb-6 border-b border-gray-100 pb-4">
-                สรุปข้อมูลการจองของท่าน
-              </h3>
+            <BookingSummaryCard
+              tourCode={tour?.tourCode || '-'}
+              tourName={tour?.name || '-'}
+              date={
+                <>
+                  {formatDate(selectedSchedule?.startDate)} -<br />
+                  {formatDate(selectedSchedule?.endDate)}
+                </>
+              }
+              adults={adults}
+              children={children}
+              adultPrice={adultPrice}
+              childPrice={childPrice}
+              image={tourImage}
+              accommodation={tour?.accommodation || undefined}
+              totalPrice={totalPrice}
+            />
 
-              <div className="flex flex-col sm:flex-row gap-5 mb-6">
-                <div className="flex-1 space-y-3 text-[15px] text-gray-700">
-                  <div className="grid grid-cols-[110px_1fr] items-start gap-2">
-                    <span className="font-bold text-gray-800">รหัสทัวร์</span>
-                    <span>{tour?.tourCode || '-'}</span>
-                  </div>
-                  <div className="grid grid-cols-[110px_1fr] items-start gap-2">
-                    <span className="font-bold text-gray-800">ชื่อทัวร์</span>
-                    <span className="leading-snug">{tour?.name || '-'}</span>
-                  </div>
-                  <div className="grid grid-cols-[110px_1fr] items-start gap-2">
-                    <span className="font-bold text-gray-800">วันที่เดินทาง</span>
-                    <span className="leading-snug">
-                      {formatDate(selectedSchedule?.startDate)} -<br />
-                      {formatDate(selectedSchedule?.endDate)}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-[110px_1fr] items-start gap-2">
-                    <span className="font-bold text-gray-800">จำนวนผู้เดินทาง</span>
-                    <span>ผู้ใหญ่ {adults}, เด็ก {children}</span>
-                  </div>
-                  <div className="grid grid-cols-[110px_1fr] items-start gap-2">
-                    <span className="font-bold text-gray-800">ที่พัก</span>
-                    <span>{tour?.accommodation || '-'}</span>
-                  </div>
-                </div>
-
-                <div className="w-full sm:w-[120px] shrink-0 order-first sm:order-last mb-4 sm:mb-0">
-                  <img
-                    src={tourImage}
-                    alt="Tour"
-                    className="w-full h-[100px] sm:h-[120px] object-cover rounded-xl shadow-sm border border-gray-200"
-                  />
-                </div>
-              </div>
-
-              <div className="bg-slate-50 p-5 rounded-2xl mb-6 border border-slate-100">
-                <h4 className="font-bold text-gray-800 mb-4 text-base">รายละเอียดราคา</h4>
-                <div className="space-y-3 text-[15px] text-gray-700">
-                  {adults > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span>ผู้ใหญ่</span>
-                      <span className="flex-1 text-center text-gray-500">{adultPrice.toLocaleString()} × {adults}</span>
-                      <span className="font-bold text-gray-800 w-28 text-right">{totalAdultPrice.toLocaleString()} บาท</span>
-                    </div>
-                  )}
-                  {children > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span>เด็ก</span>
-                      <span className="flex-1 text-center text-gray-500">{childPrice.toLocaleString()} × {children}</span>
-                      <span className="font-bold text-gray-800 w-28 text-right">{totalChildPrice.toLocaleString()} บาท</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-between items-end mb-8 px-1">
-                <span className="font-bold text-gray-800 text-lg">ยอดที่ต้องชำระ:</span>
-                <div className="text-right">
-                  <span className="text-3xl font-black text-primary">{totalPrice.toLocaleString()}</span>
-                  <span className="text-lg font-bold text-gray-800 ml-2">บาท</span>
-                </div>
-              </div>
-
-              <div className="flex justify-center">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`w-full text-white font-bold py-4 rounded-2xl transition-all text-lg shadow-[0_8px_20px_rgba(37,99,235,0.25)] ${isSubmitting ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-primary hover:bg-primary-dark hover:-translate-y-1 active:translate-y-0'}`}
-                >
-                  {isSubmitting ? 'กำลังดำเนินการ...' : 'ชำระเงิน'}
-                </button>
-              </div>
+            <div className="flex justify-center mt-6">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full text-white font-bold py-4 rounded-2xl transition-all text-lg shadow-[0_8px_20px_rgba(37,99,235,0.25)] ${isSubmitting ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-primary hover:bg-primary-dark hover:-translate-y-1 active:translate-y-0'}`}
+              >
+                {isSubmitting ? 'กำลังดำเนินการ...' : 'ชำระเงิน'}
+              </button>
             </div>
           </aside>
         </form>
       </main>
 
       {/* --- Error Modal ย้ายมาวางตรงนี้ (ถูกหลัก React 100%) --- */}
-      {errorModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setErrorModal({ isOpen: false, message: '' })}></div>
-          <div className="bg-white rounded-[2rem] p-8 w-full max-w-sm relative z-10 flex flex-col items-center text-center shadow-2xl animate-fade-in-up border border-gray-100">
-            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
-              <div className="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)]">
-                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+      {
+        errorModal.isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setErrorModal({ isOpen: false, message: '' })}></div>
+            <div className="bg-white rounded-[2rem] p-8 w-full max-w-sm relative z-10 flex flex-col items-center text-center shadow-2xl animate-fade-in-up border border-gray-100">
+              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
+                <div className="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)]">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
               </div>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">ไม่สามารถทำรายการได้</h2>
+              <p className="text-gray-500 text-[15px] mb-8 leading-relaxed font-medium">
+                {errorModal.message}
+              </p>
+              <button
+                onClick={() => setErrorModal({ isOpen: false, message: '' })}
+                className="w-full bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full hover:bg-gray-200 transition-colors text-base"
+              >
+                ตกลง
+              </button>
             </div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">ไม่สามารถทำรายการได้</h2>
-            <p className="text-gray-500 text-[15px] mb-8 leading-relaxed font-medium">
-              {errorModal.message}
-            </p>
-            <button
-              onClick={() => setErrorModal({ isOpen: false, message: '' })}
-              className="w-full bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full hover:bg-gray-200 transition-colors text-base"
-            >
-              ตกลง
-            </button>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   )
 }

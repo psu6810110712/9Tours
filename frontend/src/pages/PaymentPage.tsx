@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { bookingService } from '../services/bookingService'
+import ProgressBar from '../components/common/ProgressBar'
+import BookingSummaryCard from '../components/booking/BookingSummaryCard'
 
 interface PaymentPageData {
   id: string | number
@@ -10,6 +12,8 @@ interface PaymentPageData {
   price: number
   adults: number
   children: number
+  adultPrice: number
+  childPrice: number
   status: string
   image: string
 }
@@ -46,8 +50,10 @@ export default function PaymentPage() {
           tourName: data.schedule?.tour?.name || location.state?.tourName || 'Loading...',
           date: `อ้างอิงรอบเดินทาง: ${data.scheduleId}`,
           price: data.totalPrice || 0,
-          adults: data.paxCount || 1,
-          children: 0,
+          adults: location.state?.adults ?? (data.paxCount || 1),
+          children: location.state?.children ?? 0,
+          adultPrice: data.schedule?.tour?.price || 0,
+          childPrice: data.schedule?.tour?.childPrice || data.schedule?.tour?.price || 0,
           status: data.status,
           image: data.schedule?.tour?.images?.[0]?.url || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
         })
@@ -55,7 +61,7 @@ export default function PaymentPage() {
         console.error("Error fetching booking details:", err)
         // กรณีดึงข้อมูลไม่สำเร็จ หรือเป็นการ Mock ให้ใส่ข้อมูลจำลองไปก่อน
         setBookingData({
-          id: bookingId,
+          id: bookingId || '',
           tourCode: 'ATV2026005',
           tourName: 'ทัวร์เกาะพีพีดําน้ำชมปะการัง',
           date: '17 เม.ย. พ.ศ.2569 - 19 เม.ย. พ.ศ.2569',
@@ -148,9 +154,6 @@ export default function PaymentPage() {
     )
   }
 
-  const adultPrice = 1500
-  const childPrice = 1000
-
   // ข้อมูลขั้นตอนการชำระเงิน (Icon images)
   const paymentSteps = [
     { icon: '/Icon_open_app.svg', text: 'เปิดแอปพลิเคชันธนาคารของคุณ' },
@@ -183,36 +186,13 @@ export default function PaymentPage() {
             ย้อนกลับ
           </button>
 
-          <div className="hidden md:flex items-start w-full max-w-3xl px-10 relative z-10 pt-1">
-            <div className="flex flex-col items-center w-24">
-              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-md z-10">1</div>
-              <span className="text-primary text-sm font-bold mt-2.5">จอง</span>
-            </div>
-            <div className="flex-1 h-[2px] bg-primary mt-5 -mx-4 z-0"></div>
-
-            <div className="flex flex-col items-center w-32">
-              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-md z-10">2</div>
-              <span className="text-primary text-sm font-bold mt-2.5">ตรวจสอบข้อมูล</span>
-            </div>
-            <div className="flex-1 h-[2px] bg-primary mt-5 -mx-4 z-0"></div>
-
-            <div className="flex flex-col items-center w-24">
-              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-md z-10">3</div>
-              <span className="text-primary text-sm font-bold mt-2.5">ชำระเงิน</span>
-            </div>
-            <div className="flex-1 h-[2px] bg-gray-200 mt-5 -mx-4 z-0"></div>
-
-            <div className="flex flex-col items-center w-24">
-              <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg z-10">4</div>
-              <span className="text-gray-400 text-sm font-bold mt-2.5">รับตั๋ว</span>
-            </div>
-          </div>
+          <ProgressBar currentStep={3} />
         </div>
 
         <h1 className="text-2xl font-bold text-gray-800 mb-8 mt-10 text-center">สแกนเพื่อชำระเงิน</h1>
 
-        {/* --- 3 Columns Layout (Equal Height) --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch max-w-6xl mx-auto">
+        {/* --- 3 Columns Layout (Middle container wider) --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] xl:grid-cols-[1fr_1.8fr_1fr] gap-6 items-stretch max-w-7xl mx-auto">
 
           {/* คอลัมน์ 1: QR Code */}
           <div className="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col items-center pb-8 h-full">
@@ -228,65 +208,18 @@ export default function PaymentPage() {
           </div>
 
           {/* คอลัมน์ 2: สรุปข้อมูลการจอง */}
-          <div className="bg-white p-8 md:p-10 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 h-full flex flex-col">
-            <h3 className="text-xl font-bold text-gray-800 mb-8 text-center">สรุปข้อมูลการจองของท่าน</h3>
-
-            <div className="flex-grow flex flex-col">
-              <img src={bookingData.image} alt="Tour" className="w-full h-[160px] object-cover rounded-2xl shadow-sm border border-gray-200 mb-6" />
-
-              <div className="space-y-3.5 text-[15px] text-gray-700 font-medium">
-                <div className="grid grid-cols-[100px_1fr] items-start gap-2">
-                  <span className="font-bold text-gray-800">รหัสทัวร์</span>
-                  <span>{bookingData.tourCode}</span>
-                </div>
-                <div className="grid grid-cols-[100px_1fr] items-start gap-2">
-                  <span className="font-bold text-gray-800">ชื่อทัวร์</span>
-                  <span className="leading-snug">{bookingData.tourName}</span>
-                </div>
-                <div className="grid grid-cols-[100px_1fr] items-start gap-2">
-                  <span className="font-bold text-gray-800">วันที่เดินทาง</span>
-                  <span className="leading-snug">{bookingData.date}</span>
-                </div>
-                <div className="grid grid-cols-[100px_1fr] items-start gap-2 mb-1">
-                  <span className="font-bold text-gray-800">จำนวน</span>
-                  <span>ผู้ใหญ่ {bookingData.adults}, เด็ก {bookingData.children}</span>
-                </div>
-              </div>
-
-              {/* เส้นแบ่ง 1 */}
-              <hr className="border-t border-gray-300 my-6" />
-
-              <div className="bg-slate-50 p-1 rounded-2xl mb-1 border border-slate-50">
-                <div className="space-y-2 text-[15px] text-gray-700 font-medium">
-                  {bookingData.adults > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span>ผู้ใหญ่</span>
-                      <span className="text-gray-500">{adultPrice.toLocaleString()} × {bookingData.adults}</span>
-                      <span className="font-bold text-gray-800">{(bookingData.adults * adultPrice).toLocaleString()} บาท</span>
-                    </div>
-                  )}
-                  {bookingData.children > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span>เด็ก</span>
-                      <span className="text-gray-500">{childPrice.toLocaleString()} × {bookingData.children}</span>
-                      <span className="font-bold text-gray-800">{(bookingData.children * childPrice).toLocaleString()} บาท</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* เส้นแบ่ง 2 */}
-              <hr className="border-t border-gray-300 mt-auto mb-6" />
-
-              <div className="flex justify-between items-end px-1">
-                <span className="font-bold text-gray-800 text-base">ยอดที่ต้องชำระ</span>
-                <div className="text-right">
-                  {/* เปลี่ยน font-black เป็น font-bold และขนาด text-3xl */}
-                  <span className="text-3xl font-bold text-primary">{bookingData.price.toLocaleString()}</span>
-                  <span className="text-base font-bold text-gray-800 ml-1.5">บาท</span>
-                </div>
-              </div>
-            </div>
+          <div className="h-full flex flex-col">
+            <BookingSummaryCard
+              tourCode={bookingData.tourCode}
+              tourName={bookingData.tourName}
+              date={bookingData.date}
+              adults={bookingData.adults}
+              children={bookingData.children}
+              adultPrice={bookingData.adultPrice}
+              childPrice={bookingData.childPrice}
+              image={bookingData.image}
+              totalPrice={bookingData.price}
+            />
           </div>
 
           {/* คอลัมน์ 3: อัปโหลดสลิป */}
