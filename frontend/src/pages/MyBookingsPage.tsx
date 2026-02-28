@@ -130,7 +130,11 @@ export default function MyBookingPage() {
         </div>
 
         <div className="space-y-4">
-          {filteredBookings.length > 0 ? filteredBookings.map((booking, index) => (
+          {loading ? (
+            <div className="text-center text-gray-400 py-16 bg-white rounded-[1.5rem] border border-gray-100">
+              <p className="font-bold">กำลังโหลด...</p>
+            </div>
+          ) : filteredBookings.length > 0 ? filteredBookings.map((booking, index) => (
             <div key={index} className={`bg-white p-5 rounded-[1.5rem] shadow-sm border flex flex-col md:flex-row gap-6 items-center hover:shadow-md transition-all ${booking.status === 'ยกเลิกแล้ว' ? 'border-red-100 opacity-70' : 'border-gray-100'}`}>
 
               <img src={booking.image} alt="tour" className={`w-full md:w-40 h-28 object-cover rounded-xl ${booking.status === 'ยกเลิกแล้ว' ? 'grayscale' : ''}`} />
