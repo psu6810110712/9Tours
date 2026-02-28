@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import TourCard from '../components/TourCard'
 import { tourService } from '../services/tourService'
 import type { Tour } from '../types/tour'
@@ -72,9 +70,7 @@ export default function HomePage() {
     : 'ที่เที่ยวยอดนิยมห้ามพลาด'
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
+    <>
       {/* ===== Hero — rounded card ไม่เต็มจอ ===== */}
       <div className="max-w-7xl mx-auto px-8 pt-6">
         <section
@@ -258,8 +254,6 @@ export default function HomePage() {
         </section>
 
       </div>
-
-      <Footer />
-    </div>
+    </>
   )
 }

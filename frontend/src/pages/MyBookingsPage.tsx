@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import { bookingService } from '../services/bookingService'
 
 export default function MyBookingPage() {
@@ -111,8 +109,7 @@ export default function MyBookingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] relative">
-      <Navbar />
+    <div className="relative">
       <main className="max-w-5xl mx-auto px-4 py-10">
         <h1 className="text-2xl font-black text-gray-800 mb-8">การจองของฉัน</h1>
 
@@ -260,7 +257,6 @@ export default function MyBookingPage() {
           </div>
         </div>
       )}
-      <Footer />
     </div>
   )
 }

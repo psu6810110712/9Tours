@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import { tourService } from '../services/tourService'
 import { bookingService } from '../services/bookingService'
 
@@ -46,12 +44,8 @@ export default function BookingInfoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center font-bold text-gray-400 text-lg">
-          กำลังเตรียมข้อมูลการจอง...
-        </div>
-        <Footer />
+      <div className="flex-1 flex items-center justify-center font-bold text-gray-400 text-lg">
+        กำลังเตรียมข้อมูลการจอง...
       </div>
     )
   }
@@ -97,8 +91,7 @@ export default function BookingInfoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <Navbar />
+    <div className="bg-[#F8FAFC]">
 
       <main className="max-w-7xl mx-auto px-6 py-10">
         {/* --- ส่วนหัว: ปุ่มย้อนกลับ & Progress Bar --- */}
@@ -321,7 +314,6 @@ export default function BookingInfoPage() {
           </aside>
         </form>
       </main>
-      <Footer />
 
       {/* --- Error Modal ย้ายมาวางตรงนี้ (ถูกหลัก React 100%) --- */}
       {errorModal.isOpen && (

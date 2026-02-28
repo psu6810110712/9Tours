@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import Navbar from '../../components/Navbar'
-import Footer from '../../components/Footer'
 import { tourService } from '../../services/tourService'
 
 // ===== ค่าคงที่ที่ใช้ในฟอร์ม =====
@@ -47,11 +45,11 @@ export default function AdminTourFormPage() {
   const [minPeople, setMinPeople] = useState('')
   const [maxPeople, setMaxPeople] = useState('')
   const [duration, setDuration] = useState('')
-  
+
   // State สำหรับรูปภาพ
   const [images, setImages] = useState<string[]>([])
   const [uploadingImage, setUploadingImage] = useState(false)
-  
+
   const [schedules, setSchedules] = useState<ScheduleRow[]>([])
   const [transportation, setTransportation] = useState('')
   const [accommodation, setAccommodation] = useState('')
@@ -123,7 +121,7 @@ export default function AdminTourFormPage() {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
     if (!validTypes.includes(file.type)) {
       alert('กรุณาแนบเฉพาะไฟล์ประเภท .jpg หรือ .png เท่านั้นครับ')
-      e.target.value = '' 
+      e.target.value = ''
       return
     }
 
@@ -136,7 +134,7 @@ export default function AdminTourFormPage() {
       alert('อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
     } finally {
       setUploadingImage(false)
-      e.target.value = '' 
+      e.target.value = ''
     }
   }
 
@@ -270,11 +268,7 @@ export default function AdminTourFormPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar />
-        <p className="flex-1 flex items-center justify-center text-gray-400">กำลังโหลด...</p>
-        <Footer />
-      </div>
+      <p className="flex-1 flex items-center justify-center text-gray-400">กำลังโหลด...</p>
     )
   }
 
@@ -282,9 +276,7 @@ export default function AdminTourFormPage() {
   const labelClass = 'text-sm font-bold text-gray-800 block mb-1'
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
-
+    <>
       <main className="flex-1">
         <form onSubmit={handleSubmit} className="max-w-6xl mx-auto px-8 py-8">
 
@@ -485,7 +477,7 @@ export default function AdminTourFormPage() {
               {/* ระบบอัปโหลดรูปภาพ */}
               <div className="mb-2">
                 <span className="text-sm font-bold text-gray-800 block mb-3">รูปภาพทัวร์ (เฉพาะ .jpg, .png)</span>
-                
+
                 {images.length > 0 && (
                   <div className="grid grid-cols-3 gap-3 mb-3">
                     {images.map((url, i) => (
@@ -508,11 +500,11 @@ export default function AdminTourFormPage() {
                   <span className="text-sm text-gray-500 font-medium">
                     {uploadingImage ? 'กำลังอัปโหลด...' : 'คลิกเพื่อเลือกไฟล์รูปภาพ'}
                   </span>
-                  <input 
-                    type="file" 
-                    accept="image/jpeg, image/png, image/jpg" 
-                    className="hidden" 
-                    onChange={handleImageUpload} 
+                  <input
+                    type="file"
+                    accept="image/jpeg, image/png, image/jpg"
+                    className="hidden"
+                    onChange={handleImageUpload}
                     disabled={uploadingImage}
                   />
                 </label>
@@ -871,8 +863,6 @@ export default function AdminTourFormPage() {
           </div>
         </form>
       </main>
-
-      <Footer />
-    </div >
+    </>
   )
 }

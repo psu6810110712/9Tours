@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import TourCard from '../components/TourCard'
 import TourGallery from '../components/tour/TourGallery'
 import TourInfo from '../components/tour/TourInfo'
@@ -28,17 +26,12 @@ export default function TourDetailPage() {
 
   if (!tour) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="flex items-center justify-center h-96 text-gray-400">กำลังโหลด...</div>
-      </div>
+      <div className="flex items-center justify-center h-96 text-gray-400">กำลังโหลด...</div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
+    <>
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Breadcrumb */}
         <nav className="text-sm font-medium text-gray-400 mb-5 flex gap-2">
@@ -76,8 +69,6 @@ export default function TourDetailPage() {
           </section>
         )}
       </div>
-
-      <Footer />
-    </div>
+    </>
   )
 }

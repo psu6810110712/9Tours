@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import { bookingService } from '../services/bookingService'
 
 export default function PaymentPage() {
@@ -132,12 +130,8 @@ export default function PaymentPage() {
 
   if (loading || !bookingData) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center font-bold text-gray-400 text-lg">
-          กำลังเตรียมข้อมูลการชำระเงิน...
-        </div>
-        <Footer />
+      <div className="flex-1 flex items-center justify-center font-bold text-gray-400 text-lg">
+        กำลังเตรียมข้อมูลการชำระเงิน...
       </div>
     )
   }
@@ -148,15 +142,13 @@ export default function PaymentPage() {
   // ข้อมูลขั้นตอนการชำระเงิน (Icon images)
   const paymentSteps = [
     { icon: '/Icon_open_app.svg', text: 'เปิดแอปพลิเคชันธนาคารของคุณ' },
-    { icon: '/Icon_scan.svg', text: 'สแกน QR Code ที่ปรากฏบนหน้าจอ' },
-    { icon: '/Icon_check.svg', text: 'ตรวจสอบยอดเงินและชื่อผู้รับโอนให้ถูกต้อง' },
+    { icon: '/Icon_scan.svg', text: 'สแกน QR ที่ปรากฏบนหน้าจอ' },
+    { icon: '/Icon_check.svg', text: 'ตรวจสอบยอดเงินและชื่อผู้รับ' },
     { icon: '/Icon_ticket.svg', text: 'อัปโหลดภาพสลิปและกดปุ่มยืนยันการชำระเงิน' }
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] relative">
-      <Navbar />
-
+    <div className="bg-[#F8FAFC] relative">
       {/* แถบแจ้งเตือนเวลา (Full width) */}
       <div className={`${isExpired ? 'bg-red-500 text-white' : 'bg-red-50 text-red-500'} py-3 text-center text-base font-bold flex items-center justify-center gap-2 shadow-sm transition-colors`}>
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -391,7 +383,6 @@ export default function PaymentPage() {
         </div>
 
       </main>
-      <Footer />
 
       {/* --- Success Modal --- */}
       {showSuccessModal && (

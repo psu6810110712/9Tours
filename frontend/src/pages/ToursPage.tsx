@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import TourCard from '../components/TourCard'
 import FilterSidebar from '../components/tour/FilterSidebar'
 import { tourService } from '../services/tourService'
@@ -60,9 +58,7 @@ export default function ToursPage() {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
+    <>
       {/* ===== แถบค้นหา — style เดียวกับ Hero search ใน HomePage ===== */}
       <div className="max-w-7xl mx-auto px-4 pt-6 pb-2">
         <div className="bg-white rounded-2xl shadow-sm p-2 flex items-center gap-1 max-w-2xl mx-auto">
@@ -120,8 +116,6 @@ export default function ToursPage() {
           )}
         </main>
       </div>
-
-      <Footer />
-    </div>
+    </>
   )
 }

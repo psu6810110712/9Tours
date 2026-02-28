@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Navbar from '../../components/Navbar'
-import Footer from '../../components/Footer'
 import { tourService } from '../../services/tourService'
 import type { Tour } from '../../types/tour'
 
@@ -57,9 +55,7 @@ export default function AdminTourListPage() {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
-
+    <>
       <main className="flex-1 max-w-6xl w-full mx-auto px-8 py-8">
         {/* หัวข้อ + ปุ่มเพิ่มทัวร์ */}
         <div className="flex items-center justify-between mb-6">
@@ -78,11 +74,10 @@ export default function AdminTourListPage() {
             <button
               key={tab.value}
               onClick={() => setFilter(tab.value)}
-              className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
-                filter === tab.value
+              className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${filter === tab.value
                   ? 'bg-yellow-400 border-yellow-400 text-gray-900'
                   : 'bg-white border-gray-300 text-gray-600 hover:border-yellow-300'
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -130,11 +125,10 @@ export default function AdminTourListPage() {
                     <td className="px-5 py-4 text-gray-500 font-mono text-xs">{tour.tourCode}</td>
                     <td className="px-5 py-4 font-medium text-gray-800">{tour.name}</td>
                     <td className="px-5 py-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                        tour.tourType === 'one_day'
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${tour.tourType === 'one_day'
                           ? 'bg-blue-50 text-blue-700'
                           : 'bg-purple-50 text-purple-700'
-                      }`}>
+                        }`}>
                         {tour.tourType === 'one_day' ? 'วันเดย์ทริป' : 'แพ็กเกจ'}
                       </span>
                     </td>
@@ -145,11 +139,10 @@ export default function AdminTourListPage() {
                     <td className="px-5 py-4">
                       <button
                         onClick={() => handleToggleActive(tour)}
-                        className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-                          tour.isActive
+                        className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${tour.isActive
                             ? 'bg-green-100 text-green-700 hover:bg-green-200'
                             : 'bg-red-100 text-red-600 hover:bg-red-200'
-                        }`}
+                          }`}
                       >
                         {tour.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
                       </button>
@@ -183,8 +176,6 @@ export default function AdminTourListPage() {
           </div>
         )}
       </main>
-
-      <Footer />
-    </div>
+    </>
   )
 }
