@@ -57,7 +57,7 @@ export default function MyBookingPage() {
         status: mapStatusToThai(b.status),
         adults: b.paxCount || 1, // mapping roughly
         children: 0,
-        image: b.schedule?.tour?.images?.[0]?.url || b.schedule?.tour?.images?.[0] || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+        image: b.schedule?.tour?.images?.[0] || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
       }))
 
       setBookings(formattedBookings)
@@ -186,7 +186,7 @@ export default function MyBookingPage() {
                         ชำระเงิน
                       </button>
                       <button
-                        onClick={() => handleCancelBooking(booking.id)}
+                        onClick={() => handleCancelBooking(String(booking.id))}
                         className="flex-1 md:flex-none px-6 py-2 bg-white border border-red-200 text-red-500 rounded-full text-xs font-bold hover:bg-red-50 transition-all"
                       >
                         ยกเลิก
