@@ -61,7 +61,7 @@ export default function TourItinerary({ items }: TourItineraryProps) {
         {Object.entries(scheduleByDay).sort(([a], [b]) => Number(a) - Number(b)).map(([day, dayItems]) => (
           <div key={day}>
             <div className="flex items-center gap-3 mb-3">
-              <span className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full shadow-sm">
+              <span className="bg-primary text-white text-sm font-bold px-3 py-1 rounded-full shadow-sm">
                 วันที่ {day}
               </span>
               <div className="h-[1px] flex-1 bg-gray-200"></div>
@@ -71,7 +71,7 @@ export default function TourItinerary({ items }: TourItineraryProps) {
               {dayItems.map((item, i) => (
                 <div key={i} className="flex gap-3 relative">
                   <div className="relative flex-shrink-0 w-5 flex flex-col items-center pt-1.5">
-                    <span className="w-2 h-2 rounded-full border-2 border-blue-400 bg-white z-10" />
+                    <span className="w-2 h-2 rounded-full border-2 border-primary bg-white z-10" />
                     {i < dayItems.length - 1 && (
                       <span className="absolute top-3 bottom-[-12px] w-[1px] bg-blue-100" />
                     )}
@@ -79,7 +79,7 @@ export default function TourItinerary({ items }: TourItineraryProps) {
 
                   <div className="flex-1 pb-1">
                     <div className="flex flex-col sm:flex-row sm:gap-2 sm:items-baseline">
-                      <span className="font-mono text-sm font-bold text-blue-600 min-w-[45px]">{item.time}</span>
+                      <span className="font-mono text-sm font-bold text-primary min-w-[45px]">{item.time}</span>
                       <span className="font-semibold text-gray-800">{item.title}</span>
                     </div>
                     {item.description && (

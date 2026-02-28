@@ -35,9 +35,9 @@ export default function TourDetailPage() {
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Breadcrumb */}
         <nav className="text-sm font-medium text-gray-400 mb-5 flex gap-2">
-          <Link to="/" className="hover:text-[#F5A623]">หน้าแรก</Link>
+          <Link to="/" className="hover:text-accent">หน้าแรก</Link>
           <span>/</span>
-          <Link to={`/tours?province=${tour.province}`} className="hover:text-[#F5A623]">{tour.province}</Link>
+          <Link to={`/tours?province=${tour.province}`} className="hover:text-accent">{tour.province}</Link>
           <span>/</span>
           <span className="text-gray-600 line-clamp-1">{tour.name}</span>
         </nav>

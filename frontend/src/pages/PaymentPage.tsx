@@ -164,7 +164,7 @@ export default function PaymentPage() {
 
         {/* --- ส่วนหัว: ปุ่มย้อนกลับ & Progress Bar --- */}
         <div className="relative mb-12 flex justify-center mt-4">
-          <button onClick={() => navigate(-1)} className="absolute left-0 top-0 mt-1 text-[#3b82f6] font-bold hover:underline flex items-center gap-1.5 text-base z-20 transition-all hover:-translate-x-1">
+          <button onClick={() => navigate(-1)} className="absolute left-0 top-0 mt-1 text-primary font-bold hover:underline flex items-center gap-1.5 text-base z-20 transition-all hover:-translate-x-1">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
@@ -173,20 +173,20 @@ export default function PaymentPage() {
 
           <div className="hidden md:flex items-start w-full max-w-3xl px-10 relative z-10 pt-1">
             <div className="flex flex-col items-center w-24">
-              <div className="w-10 h-10 rounded-full bg-[#3b82f6] text-white flex items-center justify-center font-bold text-lg shadow-md z-10">1</div>
-              <span className="text-[#3b82f6] text-sm font-bold mt-2.5">จอง</span>
+              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-md z-10">1</div>
+              <span className="text-primary text-sm font-bold mt-2.5">จอง</span>
             </div>
-            <div className="flex-1 h-[2px] bg-[#3b82f6] mt-5 -mx-4 z-0"></div>
+            <div className="flex-1 h-[2px] bg-primary mt-5 -mx-4 z-0"></div>
 
             <div className="flex flex-col items-center w-32">
-              <div className="w-10 h-10 rounded-full bg-[#3b82f6] text-white flex items-center justify-center font-bold text-lg shadow-md z-10">2</div>
-              <span className="text-[#3b82f6] text-sm font-bold mt-2.5">ตรวจสอบข้อมูล</span>
+              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-md z-10">2</div>
+              <span className="text-primary text-sm font-bold mt-2.5">ตรวจสอบข้อมูล</span>
             </div>
-            <div className="flex-1 h-[2px] bg-[#3b82f6] mt-5 -mx-4 z-0"></div>
+            <div className="flex-1 h-[2px] bg-primary mt-5 -mx-4 z-0"></div>
 
             <div className="flex flex-col items-center w-24">
-              <div className="w-10 h-10 rounded-full bg-[#3b82f6] text-white flex items-center justify-center font-bold text-lg shadow-md z-10">3</div>
-              <span className="text-[#3b82f6] text-sm font-bold mt-2.5">ชำระเงิน</span>
+              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-md z-10">3</div>
+              <span className="text-primary text-sm font-bold mt-2.5">ชำระเงิน</span>
             </div>
             <div className="flex-1 h-[2px] bg-gray-200 mt-5 -mx-4 z-0"></div>
 
@@ -270,7 +270,7 @@ export default function PaymentPage() {
                 <span className="font-bold text-gray-800 text-base">ยอดที่ต้องชำระ</span>
                 <div className="text-right">
                   {/* เปลี่ยน font-black เป็น font-bold และขนาด text-3xl */}
-                  <span className="text-3xl font-bold text-[#2563EB]">{bookingData.price.toLocaleString()}</span>
+                  <span className="text-3xl font-bold text-primary">{bookingData.price.toLocaleString()}</span>
                   <span className="text-base font-bold text-gray-800 ml-1.5">บาท</span>
                 </div>
               </div>
@@ -354,7 +354,7 @@ export default function PaymentPage() {
             className={`flex items-center justify-center gap-3 text-white font-bold py-4.5 px-24 rounded-full transition-all text-lg min-w-[340px] shadow-[0_10px_25px_rgba(37,99,235,0.25)] 
               ${isSubmitting || isExpired
                 ? 'bg-gray-400 cursor-not-allowed shadow-none'
-                : 'bg-[#2563EB] hover:bg-blue-700 hover:-translate-y-[1.5px] active:translate-y-0'
+                : 'bg-primary hover:bg-primary-dark hover:-translate-y-[1.5px] active:translate-y-0'
               }`}
           >
             {isSubmitting ? (
@@ -405,7 +405,7 @@ export default function PaymentPage() {
 
             <button
               onClick={() => navigate('/my-bookings')}
-              className="w-full bg-[#2563EB] text-white font-bold py-4 rounded-full hover:bg-blue-700 transition-colors shadow-lg text-lg"
+              className="w-full bg-primary text-white font-bold py-4 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
             >
               การจองของฉัน
             </button>

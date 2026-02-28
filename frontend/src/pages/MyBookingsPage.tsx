@@ -118,7 +118,7 @@ export default function MyBookingPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 font-bold text-sm whitespace-nowrap transition-all border-b-2 ${activeTab === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-400 hover:text-gray-600'
+              className={`pb-3 font-bold text-sm whitespace-nowrap transition-all border-b-2 ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'
                 }`}
             >
               {tab}
@@ -169,7 +169,7 @@ export default function MyBookingPage() {
                     <>
                       <button
                         onClick={() => navigate(`/payment/${booking.id}`)}
-                        className="flex-1 md:flex-none px-6 py-2 bg-[#3b82f6] text-white rounded-full text-xs font-bold hover:bg-blue-600 transition-all shadow-sm"
+                        className="flex-1 md:flex-none px-6 py-2 bg-primary text-white rounded-full text-xs font-bold hover:bg-primary-dark transition-all shadow-sm"
                       >
                         ชำระเงิน
                       </button>
@@ -248,7 +248,7 @@ export default function MyBookingPage() {
                     setSelectedBooking(null);
                     navigate(`/payment/${selectedBooking.id}`);
                   }}
-                  className="w-full mt-6 bg-[#3b82f6] text-white font-bold py-3 rounded-full hover:bg-blue-600 transition-all text-sm shadow-md"
+                  className="w-full mt-6 bg-primary text-white font-bold py-3 rounded-full hover:bg-primary-dark transition-all text-sm shadow-md"
                 >
                   ชำระเงิน
                 </button>

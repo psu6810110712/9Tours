@@ -97,7 +97,7 @@ export default function LoginModal({ onClose, onSwitchToRegister, initialError =
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-semibold py-3 rounded-full transition-colors"
+            className="w-full bg-primary hover:bg-primary-dark disabled:opacity-60 text-white font-semibold py-3 rounded-full transition-colors"
           >
             {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
           </button>
@@ -105,7 +105,7 @@ export default function LoginModal({ onClose, onSwitchToRegister, initialError =
 
         <p className="text-sm text-center text-gray-500 mt-4">
           หากยังไม่มีบัญชี{' '}
-          <button onClick={onSwitchToRegister} className="text-[#F5A623] font-medium hover:underline">
+          <button onClick={onSwitchToRegister} className="text-accent font-medium hover:underline">
             สมัครเลย
           </button>
         </p>

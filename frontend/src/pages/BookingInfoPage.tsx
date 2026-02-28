@@ -98,7 +98,7 @@ export default function BookingInfoPage() {
         <div className="relative mb-12 flex justify-center mt-4">
           <button
             onClick={() => navigate(-1)}
-            className="absolute left-0 top-0 mt-1 text-[#3b82f6] font-bold hover:underline flex items-center gap-1.5 text-base z-20 transition-all hover:-translate-x-1"
+            className="absolute left-0 top-0 mt-1 text-primary font-bold hover:underline flex items-center gap-1.5 text-base z-20 transition-all hover:-translate-x-1"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -108,16 +108,16 @@ export default function BookingInfoPage() {
 
           <div className="hidden md:flex items-start w-full max-w-3xl px-10 relative z-10 pt-1">
             <div className="flex flex-col items-center w-24">
-              <div className="w-10 h-10 rounded-full bg-[#3b82f6] text-white flex items-center justify-center font-bold text-lg shadow-md z-10">1</div>
-              <span className="text-[#3b82f6] text-sm font-bold mt-2.5">จอง</span>
+              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-md z-10">1</div>
+              <span className="text-primary text-sm font-bold mt-2.5">จอง</span>
             </div>
-            <div className="flex-1 h-[2px] bg-[#3b82f6] mt-5 -mx-4 z-0"></div>
+            <div className="flex-1 h-[2px] bg-primary mt-5 -mx-4 z-0"></div>
 
             <div className="flex flex-col items-center w-32">
-              <div className="w-10 h-10 rounded-full bg-[#3b82f6] text-white flex items-center justify-center font-bold text-lg shadow-md z-10">2</div>
-              <span className="text-[#3b82f6] text-sm font-bold mt-2.5">ตรวจสอบข้อมูล</span>
+              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-md z-10">2</div>
+              <span className="text-primary text-sm font-bold mt-2.5">ตรวจสอบข้อมูล</span>
             </div>
-            <div className="flex-1 h-[2px] bg-[#3b82f6] mt-5 -mx-4 z-0"></div>
+            <div className="flex-1 h-[2px] bg-primary mt-5 -mx-4 z-0"></div>
 
             <div className="flex flex-col items-center w-24">
               <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg z-10">3</div>
@@ -151,7 +151,7 @@ export default function BookingInfoPage() {
                   <div className="md:col-span-1">
                     <label className="block text-sm font-bold text-gray-700 mb-2">คำนำหน้า<span className="text-red-500">*</span></label>
                     <select
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6] outline-none bg-white transition-all"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white transition-all"
                       value={formData.prefix}
                       onChange={(e) => setFormData({ ...formData, prefix: e.target.value })}
                     >
@@ -162,7 +162,7 @@ export default function BookingInfoPage() {
                     <label className="block text-sm font-bold text-gray-700 mb-2">ชื่อ-นามสกุล<span className="text-red-500">*</span></label>
                     <input
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6] outline-none transition-all placeholder:text-gray-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-gray-300"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     />
@@ -179,7 +179,7 @@ export default function BookingInfoPage() {
                       </select>
                       <input
                         required type="tel"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-r-xl text-base focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6] outline-none transition-all"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-r-xl text-base focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       />
@@ -190,7 +190,7 @@ export default function BookingInfoPage() {
                     <label className="block text-sm font-bold text-gray-700 mb-2">อีเมล<span className="text-red-500">*</span></label>
                     <input
                       required type="email"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6] outline-none transition-all"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     />
@@ -201,19 +201,19 @@ export default function BookingInfoPage() {
 
               <div className="flex flex-col sm:flex-row gap-8 mt-8 px-2">
                 <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${formData.useAccountInfo === 'yes' ? 'border-[#3b82f6]' : 'border-gray-400 group-hover:border-blue-400'}`}>
-                    {formData.useAccountInfo === 'yes' && <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></div>}
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${formData.useAccountInfo === 'yes' ? 'border-primary' : 'border-gray-400 group-hover:border-blue-400'}`}>
+                    {formData.useAccountInfo === 'yes' && <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>}
                   </div>
                   <input type="radio" className="hidden" name="useAccount" value="yes" checked={formData.useAccountInfo === 'yes'} onChange={() => setFormData({ ...formData, useAccountInfo: 'yes' })} />
-                  <span className={`text-base font-bold transition-colors ${formData.useAccountInfo === 'yes' ? 'text-[#3b82f6]' : 'text-gray-600 group-hover:text-gray-800'}`}>ใช้ข้อมูลเดียวกับบัญชีที่ฉันเคยสมัครไว้</span>
+                  <span className={`text-base font-bold transition-colors ${formData.useAccountInfo === 'yes' ? 'text-primary' : 'text-gray-600 group-hover:text-gray-800'}`}>ใช้ข้อมูลเดียวกับบัญชีที่ฉันเคยสมัครไว้</span>
                 </label>
 
                 <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${formData.useAccountInfo === 'no' ? 'border-[#3b82f6]' : 'border-gray-400 group-hover:border-blue-400'}`}>
-                    {formData.useAccountInfo === 'no' && <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></div>}
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${formData.useAccountInfo === 'no' ? 'border-primary' : 'border-gray-400 group-hover:border-blue-400'}`}>
+                    {formData.useAccountInfo === 'no' && <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>}
                   </div>
                   <input type="radio" className="hidden" name="useAccount" value="no" checked={formData.useAccountInfo === 'no'} onChange={() => setFormData({ ...formData, useAccountInfo: 'no' })} />
-                  <span className={`text-base font-bold transition-colors ${formData.useAccountInfo === 'no' ? 'text-[#3b82f6]' : 'text-gray-600 group-hover:text-gray-800'}`}>กรอกข้อมูลเองทั้งหมด</span>
+                  <span className={`text-base font-bold transition-colors ${formData.useAccountInfo === 'no' ? 'text-primary' : 'text-gray-600 group-hover:text-gray-800'}`}>กรอกข้อมูลเองทั้งหมด</span>
                 </label>
               </div>
             </div>
@@ -224,7 +224,7 @@ export default function BookingInfoPage() {
               </span>
               <textarea
                 rows={4}
-                className="w-full p-4 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-[#3b82f6] outline-none resize-none mt-2 transition-all placeholder:text-gray-300"
+                className="w-full p-4 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-primary outline-none resize-none mt-2 transition-all placeholder:text-gray-300"
                 placeholder="คำขอพิเศษ"
                 value={formData.specialRequest}
                 onChange={(e) => setFormData({ ...formData, specialRequest: e.target.value })}
@@ -296,7 +296,7 @@ export default function BookingInfoPage() {
               <div className="flex justify-between items-end mb-8 px-1">
                 <span className="font-bold text-gray-800 text-lg">ยอดที่ต้องชำระ:</span>
                 <div className="text-right">
-                  <span className="text-3xl font-black text-[#2563EB]">{totalPrice.toLocaleString()}</span>
+                  <span className="text-3xl font-black text-primary">{totalPrice.toLocaleString()}</span>
                   <span className="text-lg font-bold text-gray-800 ml-2">บาท</span>
                 </div>
               </div>
@@ -305,7 +305,7 @@ export default function BookingInfoPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`w-full text-white font-bold py-4 rounded-2xl transition-all text-lg shadow-[0_8px_20px_rgba(37,99,235,0.25)] ${isSubmitting ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-[#2563EB] hover:bg-blue-700 hover:-translate-y-1 active:translate-y-0'}`}
+                  className={`w-full text-white font-bold py-4 rounded-2xl transition-all text-lg shadow-[0_8px_20px_rgba(37,99,235,0.25)] ${isSubmitting ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-primary hover:bg-primary-dark hover:-translate-y-1 active:translate-y-0'}`}
                 >
                   {isSubmitting ? 'กำลังดำเนินการ...' : 'ชำระเงิน'}
                 </button>

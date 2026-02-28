@@ -142,10 +142,10 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                       }}
                       className={`flex-shrink-0 flex flex-col items-center px-3 py-2 rounded-xl border text-center transition-all duration-150 min-w-[56px]
                                 ${isSelected
-                          ? 'bg-[#F5A623] border-[#F5A623] text-white shadow-sm'
+                          ? 'bg-accent border-accent text-white shadow-sm'
                           : isFullyBooked
                             ? 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed'
-                            : 'bg-white border-gray-200 text-gray-700 hover:border-[#F5A623] hover:text-[#F5A623]'
+                            : 'bg-white border-gray-200 text-gray-700 hover:border-accent hover:text-accent'
                         }`}
                     >
                       <span className="text-[10px] font-medium opacity-80">{weekday}</span>
@@ -184,7 +184,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                                   onClick={() => setSelectedSchedule(s)}
                                   className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left group
                                     ${isActiveRound
-                                      ? 'border-[#F5A623] bg-orange-50 ring-1 ring-[#F5A623]'
+                                      ? 'border-accent bg-orange-50 ring-1 ring-accent'
                                       : isFull
                                         ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
                                         : 'border-gray-200 hover:border-gray-300'
@@ -339,7 +339,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
           </div>
           <div className="flex justify-between font-bold text-gray-900 text-base">
             <span>รวมทั้งหมด</span>
-            <span className="text-[#F5A623]">฿{totalPrice.toLocaleString()}</span>
+            <span className="text-accent">฿{totalPrice.toLocaleString()}</span>
           </div>
         </div>
 
@@ -350,7 +350,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
           className={`w-full font-semibold py-3 rounded-xl transition-all text-base 
             ${isBookingDisabled
               ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-              : 'bg-[#F5A623] text-white hover:bg-orange-500 shadow-md active:scale-[0.98]'
+              : 'bg-accent text-white hover:bg-orange-500 shadow-md active:scale-[0.98]'
             }`}
         >
           {buttonText}

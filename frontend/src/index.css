@@ -1,25 +1,26 @@
 @import "tailwindcss";
 
+@theme {
+  /* Primary Blue */
+  --color-primary: #2563EB;
+  --color-primary-dark: #1D4ED8;
+  --color-primary-light: #EFF6FF;
+
+  /* Accent Orange */
+  --color-accent: #F5A623;
+  --color-accent-dark: #E09415;
+  --color-accent-light: rgba(245, 166, 35, 0.10);
+
+  /* Neutrals */
+  --color-text: #1F2937;
+  --color-text-muted: #6B7280;
+  --color-text-faint: #9CA3AF;
+  --color-bg: #FFFFFF;
+  --color-surface: #F9FAFB;
+  --color-border: #E5E7EB;
+}
+
 @layer base {
-  :root {
-    /* Primary Blue */
-    --color-primary: #2563EB;
-    --color-primary-dark: #1D4ED8;
-    --color-primary-light: #EFF6FF;
-
-    /* Accent Orange */
-    --color-accent: #F5A623;
-    --color-accent-dark: #E09415;
-    --color-accent-light: rgba(245, 166, 35, 0.10);
-
-    /* Neutrals */
-    --color-text: #1F2937;
-    --color-text-muted: #6B7280;
-    --color-text-faint: #9CA3AF;
-    --color-bg: #FFFFFF;
-    --color-surface: #F9FAFB;
-    --color-border: #E5E7EB;
-  }
 
   /* บังคับใช้ฟอนต์ IBM Plex Sans Thai ทั้งเว็บ */
   html,

@@ -116,9 +116,9 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
             />
             <span className="text-sm text-gray-600">
               ฉันยอมรับ{' '}
-              <span className="text-[#F5A623] cursor-pointer hover:underline">ข้อกำหนดและเงื่อนไข</span>
+              <span className="text-accent cursor-pointer hover:underline">ข้อกำหนดและเงื่อนไข</span>
               {' '}และ{' '}
-              <span className="text-[#F5A623] cursor-pointer hover:underline">นโยบายความเป็นส่วนตัว</span>
+              <span className="text-accent cursor-pointer hover:underline">นโยบายความเป็นส่วนตัว</span>
             </span>
           </label>
 
@@ -130,7 +130,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-semibold py-3 rounded-full transition-colors"
+            className="w-full bg-primary hover:bg-primary-dark disabled:opacity-60 text-white font-semibold py-3 rounded-full transition-colors"
           >
             {loading ? 'กำลังสมัคร...' : 'ยืนยัน'}
           </button>
@@ -138,7 +138,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
 
         <p className="text-sm text-center text-gray-500 mt-4">
           หากมีบัญชีแล้ว{' '}
-          <button onClick={onSwitchToLogin} className="text-[#F5A623] font-medium hover:underline">
+          <button onClick={onSwitchToLogin} className="text-accent font-medium hover:underline">
             เข้าสู่ระบบที่นี่
           </button>
         </p>
