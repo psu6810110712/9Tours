@@ -3,7 +3,6 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { tourService } from '../services/tourService'
-import { bookingService } from '../services/bookingService'
 
 export default function BookingInfoPage() {
   const { tourId } = useParams<{ tourId: string }>()
@@ -63,31 +62,34 @@ export default function BookingInfoPage() {
     ? (typeof tour.images[0] === 'string' ? tour.images[0] : tour.images[0].url)
     : 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (scheduleId === '-') {
-      alert('กรุณาเลือกรอบเดินทางที่ต้องการ')
-      return
+    const newBookingId = `BK-${Math.floor(1000 + Math.random() * 9000)}`
+
+    // บันทึกข้อมูลของจริงลงไปใน Local Storage
+    const newBooking = {
+      id: newBookingId,
+      tourId: tour.id,
+      tourName: tour.name,
+      date: scheduleId !== '-' ? `อ้างอิงรอบเดินทาง: ${scheduleId}` : 'รอการยืนยันวันเดินทาง',
+      adults,
+      children,
+      price: totalPrice,
+      status: 'รอชำระเงิน',
+      image: tourImage,
+      customerName: formData.fullName, // เก็บชื่อลูกค้าไว้ด้วยเพื่อโชว์ในหน้ารายละเอียด
+      phone: formData.phone
     }
 
-    try {
-      setLoading(true)
-      const paxCount = adults + children
-      // บันทึกข้อมูลของจริงไปที่ Backend
-      const response = await bookingService.createBooking({
-        scheduleId: Number(scheduleId),
-        paxCount: paxCount
-      })
+    const existingBookings = JSON.parse(localStorage.getItem('myBookings') || '[]')
+    localStorage.setItem('myBookings', JSON.stringify([newBooking, ...existingBookings]))
 
-      // แจ้งเตือนผู้ใช้และไปหน้าจ่ายเงิน
-      navigate(`/payment/${response.id}`)
-    } catch (err: any) {
-      console.error("Error creating booking:", err)
-      alert(err.response?.data?.message || 'เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่อีกครั้ง')
-    } finally {
-      setLoading(false)
-    }
+    // แจ้งเตือนผู้ใช้
+    alert('บันทึกการจองสำเร็จ! คุณสามารถดูรายละเอียดและชำระเงินในภายหลังได้ที่ "การจองของฉัน"')
+
+    // เด้งกลับไปหน้า Home (หน้าแรก)
+    navigate('/')
   }
 
   return (
