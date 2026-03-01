@@ -3,12 +3,12 @@ import { AuthProvider } from './context/AuthContext'
 import HomePage from './pages/HomePage'
 import ToursPage from './pages/ToursPage'
 import TourDetailPage from './pages/TourDetailPage'
-import BookingPage from './pages/BookingPage'
 import MyBookingsPage from './pages/MyBookingsPage'
 import AdminTourListPage from './pages/admin/AdminTourListPage'
 import AdminTourFormPage from './pages/admin/AdminTourFormPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import BookingInfoPage from './pages/BookingInfoPage'
+import PaymentPage from './pages/PaymentPage'
 
 function App() {
   return (
@@ -18,14 +18,19 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/tours" element={<ToursPage />} />
           <Route path="/tours/:id" element={<TourDetailPage />} />
-          <Route path="/booking/:tourId" element={<BookingInfoPage />} />
-
 
           <Route path="/booking/:tourId" element={
             <ProtectedRoute>
-              <BookingPage />
+              <BookingInfoPage />
             </ProtectedRoute>
           } />
+
+          <Route path="/payment/:bookingId" element={
+            <ProtectedRoute>
+              <PaymentPage />
+            </ProtectedRoute>
+          } />
+
           <Route path="/my-bookings" element={
             <ProtectedRoute>
               <MyBookingsPage />
@@ -48,7 +53,7 @@ function App() {
             </ProtectedRoute>
           } />
 
-        </Routes>    
+        </Routes>
       </BrowserRouter>
     </AuthProvider>
   )

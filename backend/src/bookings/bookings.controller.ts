@@ -20,7 +20,7 @@ import { UserRole } from '../users/entities/user.entity';
 
 @Controller('bookings')
 export class BookingsController {
-  constructor(private readonly bookingsService: BookingsService) {}
+  constructor(private readonly bookingsService: BookingsService) { }
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -34,6 +34,12 @@ export class BookingsController {
     return this.bookingsService.getMyBookings(req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.bookingsService.findOne(+id);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
@@ -45,4 +51,13 @@ export class BookingsController {
   ) {
     return this.bookingsService.updateStatus(+id, updateBookingStatusDto, req.user.id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Patch(':id/cancel')
+  async cancelBooking(@Param('id') id: string, @Req() req: any) {
+    return this.bookingsService.cancelBooking(+id, req.user.id);
+  }
 }
+
+
