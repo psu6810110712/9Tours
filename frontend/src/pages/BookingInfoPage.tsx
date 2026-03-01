@@ -113,11 +113,7 @@ export default function BookingInfoPage() {
   }
 
   const tourImage = tour?.images && tour.images.length > 0
-<<<<<<< HEAD
     ? (typeof tour.images[0] === 'string' ? tour.images[0] : (tour.images[0] as any).url)
-=======
-    ? tour.images[0]
->>>>>>> cedece5284d58a4600fc717c1c6619c176e92df6
     : 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
 
   const handleSubmit = async (e: React.FormEvent) => {
