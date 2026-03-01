@@ -17,6 +17,13 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
   const [loading, setLoading] = useState(false)
   const { register } = useAuth()
 
+  // ฟังก์ชันลบคำนำหน้า
+  const sanitizeName = (fullName: string) => {
+    // Regex เพื่อค้นหาคำนำหน้าทั้งไทยและอังกฤษที่อาจมีจุด (.) และช่องว่างตามหลัง
+    const prefixRegex = /^(นาย|นาง|นางสาว|เด็กชาย|เด็กหญิง|ด\.ช\.|ด\.ญ\.|Mr\.|Mrs\.|Ms\.|Miss)\s*/i;
+    return fullName.replace(prefixRegex, '').trim();
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     // ตรวจสอบว่ากดยอมรับข้อตกลงก่อนส่งฟอร์ม
@@ -27,7 +34,11 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
     setError('')
     setLoading(true)
     try {
-      await register(name, email, phone, password)
+      // 1. นำชื่อมาทำความสะอาด (ตัดคำนำหน้าออก)
+      const cleanName = sanitizeName(name);
+
+      // 2. ส่ง cleanName ให้ Backend แทน name ดิบ
+      await register(cleanName, email, phone, password)
       onClose()
     } catch {
       setError('ไม่สามารถสมัครสมาชิกได้ อีเมลอาจถูกใช้งานแล้ว')
@@ -59,10 +70,11 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="natee"
+            placeholder="นที เสรีกุล"
             required
             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-400 transition-colors"
           />
+          <p className="text-xs text-gray-400 mt-1">ไม่ต้องใส่คำนำหน้า (นาย, นาง, นางสาว)</p>
         </div>
 
         <div>
