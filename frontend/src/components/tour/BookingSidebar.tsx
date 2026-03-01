@@ -10,16 +10,13 @@ interface BookingSidebarProps {
 
 // แปลงวันที่ 'YYYY-MM-DD' → { day: '21', month: 'ก.พ.', year: '2026', weekday: 'ศ' }
 function parseDate(dateStr: string) {
-  const d = new Date(dateStr + 'T00:00:00')
-  const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
-    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
-  const thaiDays = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส']
+  const d = new Date(dateStr + 'T00:00:00');
   return {
-    day: String(d.getDate()).padStart(2, '0'),
-    month: thaiMonths[d.getMonth()],
-    year: String(d.getFullYear()),
-    weekday: thaiDays[d.getDay()],
-  }
+    day: d.toLocaleString('th-TH', { day: '2-digit' }),
+    month: d.toLocaleString('th-TH', { month: 'short' }),
+    year: d.getFullYear().toString(),
+    weekday: d.toLocaleString('th-TH', { weekday: 'short' }),
+  };
 }
 
 export default function BookingSidebar({ tour }: BookingSidebarProps) {
@@ -40,6 +37,18 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
     ?? upcomingSchedules[0]
     ?? null
   )
+
+  const [selectedMonth, setSelectedMonth] = useState<string>('all')
+
+  const availableMonths = useMemo(() => {
+    const months = new Set<string>();
+    upcomingSchedules.forEach((s: TourSchedule) => {
+      const parts = s.startDate.split('-');
+      if (parts.length >= 2) months.add(`${parts[0]}-${parts[1]}`);
+    });
+    return Array.from(months).sort();
+  }, [upcomingSchedules])
+
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -103,7 +112,23 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
 
         {/* เลือกวันที่ — date card ribbon */}
         <div className="mb-4">
-          <label className="text-sm font-semibold text-gray-600 mb-2 block">เลือกวันที่เดินทาง</label>
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-sm font-semibold text-gray-600 block">เลือกวันที่เดินทาง</label>
+            {upcomingSchedules.length > 0 && availableMonths.length > 1 && (
+              <select
+                value={selectedMonth}
+                onChange={e => setSelectedMonth(e.target.value)}
+                className="text-xs font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg py-1 px-2 outline-none focus:border-accent"
+              >
+                <option value="all">ทุกช่วงเวลา</option>
+                {availableMonths.map(m => (
+                  <option key={m} value={m}>
+                    {new Date(m + "-01").toLocaleString('th-TH', { month: 'long', year: 'numeric' })}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
 
           {upcomingSchedules.length === 0 ? (
             <div className="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center">
@@ -119,19 +144,36 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
               >
                 {(() => {
                   // Group schedules by date to show unique dates
-                  const uniqueDates = Array.from(new Set(upcomingSchedules.map((s: TourSchedule) => s.startDate)))
-                    .sort()
-                    .map((dateStr: string) => {
-                      // Find *any* schedule for this date to check availability
-                      const schedulesOnDate = upcomingSchedules.filter((s: TourSchedule) => s.startDate === dateStr)
-                      const isFullyBooked = schedulesOnDate.every((s: TourSchedule) => s.maxCapacity - s.currentBooked <= 0)
-                      const isSelected = selectedSchedule?.startDate === dateStr
-                      const { day, month, weekday } = parseDate(dateStr)
+                  let datesList = Array.from(new Set(upcomingSchedules.map((s: TourSchedule) => s.startDate))).sort()
 
-                      return { dateStr, day, month, weekday, isFullyBooked, isSelected }
-                    })
+                  // 1. กรองตามเดือนที่เลือก
+                  if (selectedMonth !== 'all') {
+                    datesList = datesList.filter((d: string) => d.startsWith(selectedMonth));
+                  }
 
-                  return uniqueDates.map(({ dateStr, day, month, weekday, isFullyBooked, isSelected }) => (
+                  const resultList = datesList.map((dateStr: string) => {
+                    // Find *any* schedule for this date to check availability
+                    const schedulesOnDate = upcomingSchedules.filter((s: TourSchedule) => s.startDate === dateStr)
+                    const isFullyBooked = schedulesOnDate.every((s: TourSchedule) => s.maxCapacity - s.currentBooked <= 0)
+                    const isSelected = selectedSchedule?.startDate === dateStr
+                    const { day, month, weekday } = parseDate(dateStr)
+
+                    return { dateStr, day, month, weekday, isFullyBooked, isSelected }
+                  })
+
+                  // 2. Logic ตัวกรองลดขยะ: วันแบบ FullyBooked เอาแค่ 2 อันแรกสุด (FOMO)
+                  let fullyBookedCount = 0;
+                  const finalDates = resultList.filter(item => {
+                    if (item.isFullyBooked) fullyBookedCount++;
+                    if (item.isFullyBooked && fullyBookedCount > 2) return false;
+                    return true;
+                  });
+
+                  if (finalDates.length === 0) {
+                    return <div className="text-sm text-gray-400 py-2 w-full text-center">ไม่มีรอบทัวร์ในเดือนนี้</div>
+                  }
+
+                  return finalDates.map(({ dateStr, day, month, weekday, isFullyBooked, isSelected }) => (
                     <button
                       key={dateStr}
                       disabled={isFullyBooked}

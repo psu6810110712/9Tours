@@ -419,27 +419,27 @@
         "id": 300,
         "tourId": 3,
         "startDate": "2026-03-01",
-        "endDate": "2026-03-03",
+        "endDate": "2026-03-01",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
-        "currentBooked": 5
+        "currentBooked": 0
       },
       {
         "id": 301,
         "tourId": 3,
         "startDate": "2026-03-07",
-        "endDate": "2026-03-09",
+        "endDate": "2026-03-07",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
-        "currentBooked": 1
+        "currentBooked": 0
       },
       {
         "id": 302,
         "tourId": 3,
         "startDate": "2026-03-08",
-        "endDate": "2026-03-10",
+        "endDate": "2026-03-08",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -449,7 +449,7 @@
         "id": 303,
         "tourId": 3,
         "startDate": "2026-03-14",
-        "endDate": "2026-03-16",
+        "endDate": "2026-03-14",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -459,17 +459,17 @@
         "id": 304,
         "tourId": 3,
         "startDate": "2026-03-15",
-        "endDate": "2026-03-17",
+        "endDate": "2026-03-15",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
-        "currentBooked": 4
+        "currentBooked": 0
       },
       {
         "id": 305,
         "tourId": 3,
         "startDate": "2026-03-21",
-        "endDate": "2026-03-23",
+        "endDate": "2026-03-21",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -479,7 +479,7 @@
         "id": 306,
         "tourId": 3,
         "startDate": "2026-03-22",
-        "endDate": "2026-03-24",
+        "endDate": "2026-03-22",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -489,7 +489,7 @@
         "id": 307,
         "tourId": 3,
         "startDate": "2026-03-28",
-        "endDate": "2026-03-30",
+        "endDate": "2026-03-28",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -499,7 +499,7 @@
         "id": 308,
         "tourId": 3,
         "startDate": "2026-03-29",
-        "endDate": "2026-03-31",
+        "endDate": "2026-03-29",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -507,9 +507,10 @@
       }
     ],
     "createdAt": "2026-02-26T07:16:09.656Z",
-    "updatedAt": "2026-02-26T12:45:25.655Z",
+    "updatedAt": "2026-03-01T04:28:21.647Z",
     "minPeople": 4,
-    "maxPeople": 6
+    "maxPeople": 6,
+    "childPrice": null
   },
   {
     "id": 4,
@@ -808,9 +809,9 @@
     "accommodation": null,
     "rating": 0,
     "reviewCount": 0,
-    "isActive": true,
+    "isActive": false,
     "schedules": [],
     "createdAt": "2026-02-26T06:59:24.897Z",
-    "updatedAt": "2026-03-01T03:41:21.668Z"
+    "updatedAt": "2026-03-01T04:27:06.741Z"
   }
 ]
