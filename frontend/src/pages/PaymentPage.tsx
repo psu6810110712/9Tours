@@ -50,8 +50,8 @@ export default function PaymentPage() {
           tourName: data.schedule?.tour?.name || location.state?.tourName || 'Loading...',
           date: `อ้างอิงรอบเดินทาง: ${data.scheduleId}`,
           price: data.totalPrice || 0,
-          adults: location.state?.adults ?? (data.paxCount || 1),
-          children: location.state?.children ?? 0,
+          adults: data.adults ?? location.state?.adults ?? (data.paxCount || 1),
+          children: data.children ?? location.state?.children ?? 0,
           adultPrice: data.schedule?.tour?.price || 0,
           childPrice: ((data.schedule?.tour as any)?.childPrice) || data.schedule?.tour?.price || 0,
           status: data.status,
@@ -153,7 +153,7 @@ export default function PaymentPage() {
         selectedFile,
         'BANK_TRANSFER'
       )
-      
+
       setIsSubmitting(false)
       setShowSuccessModal(true)
       localStorage.removeItem(`payment_expiry_${bookingId}`)

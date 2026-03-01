@@ -69,7 +69,7 @@ export class BookingsService {
   ) { }
 
   async create(userId: number, createBookingDto: CreateBookingDto) {
-    const { scheduleId, paxCount } = createBookingDto;
+    const { scheduleId, paxCount, adults = 1, children = 0 } = createBookingDto;
 
     // ค้นหา schedule จาก tours-data.json (แหล่งข้อมูลเดียวกันกับ ToursService)
     const found = findScheduleInJson(scheduleId);
@@ -90,13 +90,16 @@ export class BookingsService {
     }
 
     // คำนวณ total price
-    const totalPrice = paxCount * tour.price;
+    const childPrice = tour.childPrice ?? tour.price;
+    const totalPrice = (adults * tour.price) + (children * childPrice);
 
     // สร้าง booking ใหม่  (เราเก็บ scheduleId ไว้เฉยๆ เพื่อ reference)
     const booking = this.bookingsRepository.create({
       userId,
       scheduleId,
       paxCount,
+      adults,
+      children,
       totalPrice,
       status: BookingStatus.PENDING_PAYMENT,
     });

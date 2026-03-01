@@ -28,6 +28,8 @@ export interface Booking {
   userId: number
   scheduleId: number
   paxCount: number
+  adults: number
+  children: number
   totalPrice: number
   status: string // 'PENDING_PAYMENT' | 'CONFIRMED' | 'CANCELED'
   createdAt: string
@@ -38,4 +40,6 @@ export interface Booking {
 export interface CreateBookingDto {
   scheduleId: number
   paxCount: number
+  adults?: number
+  children?: number
 }

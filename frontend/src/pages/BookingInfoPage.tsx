@@ -126,7 +126,9 @@ export default function BookingInfoPage() {
       setIsSubmitting(true)
       const payload = {
         scheduleId: Number(scheduleId),
-        paxCount: adults + children
+        paxCount: adults + children,
+        adults: adults,
+        children: children
       }
       const response = await bookingService.createBooking(payload);
       // แนบข้อมูลทัวร์ติดตัวไปหน้า Payment ด้วย เพื่อป้องกัน Backend ไม่ส่งกลับมา

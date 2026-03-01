@@ -39,6 +39,12 @@ export class Booking {
     @Column({ name: 'pax_count', nullable: true })
     paxCount: number;
 
+    @Column({ name: 'adults', default: 1 })
+    adults: number;
+
+    @Column({ name: 'children', default: 0 })
+    children: number;
+
     @Column({ name: 'total_price', type: 'decimal', precision: 10, scale: 2, nullable: true })
     totalPrice: number;
 
