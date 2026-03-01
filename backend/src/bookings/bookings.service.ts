@@ -123,10 +123,36 @@ export class BookingsService {
     };
   }
 
+  // สำหรับ Admin: ดึงรายการจองทั้งหมด (เพื่อตรวจสอบสลิป)
+  async findAll() {
+    const bookings = await this.bookingsRepository.find({
+      order: { createdAt: 'DESC' },
+      relations: ['payments'],
+    });
+
+    return bookings.map((booking) => {
+      const found = findScheduleInJson(booking.scheduleId);
+      return {
+        ...booking,
+        schedule: found
+          ? {
+            ...found.schedule,
+            tour: {
+              id: found.tour.id,
+              name: found.tour.name,
+              price: found.tour.price,
+            },
+          }
+          : null,
+      };
+    });
+  }
+
   async getMyBookings(userId: number) {
     const bookings = await this.bookingsRepository.find({
       where: { userId },
       order: { createdAt: 'DESC' },
+      relations: ['payments'],
     });
 
     // เติมข้อมูล schedule + tour จาก JSON
@@ -185,6 +211,7 @@ export class BookingsService {
   async findOne(id: number) {
     const booking = await this.bookingsRepository.findOne({
       where: { id },
+      relations: ['payments'],
     });
 
     if (!booking) {
