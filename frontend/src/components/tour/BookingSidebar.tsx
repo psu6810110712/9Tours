@@ -91,6 +91,11 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-20">
         {/* ราคา */}
         <div className="mb-4">
+          {tour.minPeople && (
+            <div className="text-[13px] font-bold text-amber-600 mb-1.5 flex items-center gap-1.5">
+              <span></span>Private Trip (ส่วนตัวเฉพาะกลุ่มคุณ)
+            </div>
+          )}
           {tour.originalPrice && (
             <div className="flex items-center gap-2 mb-0.5">
               <p className="text-sm font-medium text-gray-400 line-through">
@@ -106,7 +111,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
             <span className="text-[32px] leading-none font-bold text-[#111827]">
               ฿{Number(tour.price).toLocaleString()}
             </span>
-            <span className="text-base font-medium text-gray-500">บาท / คน</span>
+            <span className="text-base font-medium text-gray-600">บาท / คน</span>
           </div>
         </div>
 
@@ -184,10 +189,10 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                       }}
                       className={`flex-shrink-0 flex flex-col items-center px-3 py-2 rounded-xl border text-center transition-all duration-150 min-w-[56px]
                                 ${isSelected
-                          ? 'bg-accent border-accent text-white shadow-sm'
+                          ? 'bg-accent border-accent text-white shadow-md'
                           : isFullyBooked
-                            ? 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed'
-                            : 'bg-white border-gray-200 text-gray-700 hover:border-accent hover:text-accent'
+                            ? 'bg-transparent border-transparent text-gray-300 cursor-not-allowed'
+                            : 'bg-transparent border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700'
                         }`}
                     >
                       <span className="text-[10px] font-medium opacity-80">{weekday}</span>
@@ -226,25 +231,32 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                                   onClick={() => setSelectedSchedule(s)}
                                   className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left group
                                     ${isActiveRound
-                                      ? 'border-accent bg-orange-50 ring-1 ring-accent'
+                                      ? 'border-orange-200 bg-orange-50'
                                       : isFull
                                         ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
-                                        : 'border-gray-200 hover:border-gray-300'
+                                        : 'border-gray-200 hover:border-gray-300 bg-white'
                                     }`}
                                 >
-                                  <div>
-                                    <div className={`text-sm font-bold ${isActiveRound ? 'text-gray-900' : 'text-gray-700'}`}>
-                                      {s.timeSlot ? s.timeSlot : 'ไม่ระบุเวลา'}
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-4 h-4 rounded-full border flex flex-shrink-0 items-center justify-center
+                                      ${isActiveRound ? 'border-accent bg-accent' : 'border-gray-300 bg-white'}`}
+                                    >
+                                      {isActiveRound && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                                     </div>
-                                    {s.roundName && (
-                                      <div className="text-xs text-gray-500">{s.roundName}</div>
-                                    )}
+                                    <div>
+                                      <div className={`text-base font-bold ${isActiveRound ? 'text-gray-900' : 'text-gray-700'}`}>
+                                        {s.timeSlot ? s.timeSlot : 'ไม่ระบุเวลา'}
+                                      </div>
+                                      {s.roundName && (
+                                        <div className="text-[13px] text-gray-500">{s.roundName}</div>
+                                      )}
+                                    </div>
                                   </div>
                                   <div className="text-right">
                                     {isFull ? (
-                                      <span className="text-xs font-bold text-red-400">เต็มแล้ว</span>
+                                      <span className="text-[13.5px] font-bold text-red-500">เต็มแล้ว</span>
                                     ) : (
-                                      <span className={`text-xs font-medium ${left <= 5 ? 'text-red-500' : 'text-green-600'}`}>
+                                      <span className={`text-[13.5px] font-medium ${left <= 5 ? 'text-red-500' : 'text-green-600'}`}>
                                         เหลือ {left} ที่
                                       </span>
                                     )}
@@ -261,8 +273,8 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                 </div>
               )}
 
-              {/* ข้อมูลสรุปของรอบที่เลือก */}
-              {selectedSchedule && (
+              {/* ข้อมูลสรุปของรอบที่เลือก (ซ่อนถ้าเป็น Join Trip => เพราะ !tour.minPeople คือ Join Trip) */}
+              {selectedSchedule && tour.minPeople && (
                 <div className="mt-3 bg-gray-50 rounded-xl p-3.5 space-y-2.5 border border-gray-100">
                   {/* วันที่ + ชื่อรอบ/แพ็กเกจ */}
                   <div className="flex items-start gap-3">
@@ -273,10 +285,12 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium mb-0.5">วันที่เดินทาง</p>
-                      <p className="text-sm font-bold text-gray-900">
+                      <p className="text-[13px] text-gray-500 font-medium mb-0.5">วันที่เดินทาง</p>
+                      <p className="text-base font-bold text-gray-900">
                         {(() => {
                           const start = parseDate(selectedSchedule.startDate)
+                          let dateText = ''
+                          let durationText = ''
                           if (selectedSchedule.startDate !== selectedSchedule.endDate) {
                             const end = parseDate(selectedSchedule.endDate)
                             const startMonth = start.month
@@ -284,43 +298,25 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
                             const year = start.year
 
                             if (startMonth === endMonth) {
-                              return `${start.day} – ${end.day} ${startMonth} ${year}`
+                              dateText = `${start.day} – ${end.day} ${startMonth} ${year}`
+                            } else {
+                              dateText = `${start.day} ${startMonth} – ${end.day} ${endMonth} ${year}`
                             }
-                            return `${start.day} ${startMonth} – ${end.day} ${endMonth} ${year}`
+
+                            const d1 = new Date(selectedSchedule.startDate)
+                            const d2 = new Date(selectedSchedule.endDate)
+                            const diffDays = Math.round((d2.getTime() - d1.getTime()) / (1000 * 3600 * 24)) + 1
+                            if (diffDays > 1) {
+                              durationText = ` (${diffDays} วัน ${diffDays - 1} คืน)`
+                            }
+                          } else {
+                            dateText = `${start.day} ${start.month} ${start.year}`
                           }
-                          return `${start.day} ${start.month} ${start.year}`
+                          return dateText + durationText
                         })()}
                       </p>
-                      {(selectedSchedule.roundName || selectedSchedule.timeSlot) && !tour.minPeople && (
-                        <p className="text-xs text-gray-500 mt-0.5 font-medium">
-                          {selectedSchedule.roundName}
-                          {selectedSchedule.timeSlot && ` · ${selectedSchedule.timeSlot}`}
-                        </p>
-                      )}
-                      {tour.minPeople && (
-                        <p className="text-xs text-blue-600 mt-0.5 font-bold bg-blue-50 px-2 py-0.5 rounded-md inline-block">
-                          Private Trip (เริ่ม {selectedSchedule.startDate})
-                        </p>
-                      )}
                     </div>
                   </div>
-
-                  {!tour.minPeople && (
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-gray-500">สถานะที่นั่ง</span>
-                        <span className={`text-xs font-bold ${seatsLeft <= 5 ? 'text-red-500' : 'text-green-600'}`}>
-                          ว่าง {seatsLeft} ท่าน
-                        </span>
-                      </div>
-                      <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all ${seatsLeft <= 5 ? 'bg-red-400' : 'bg-green-500'}`}
-                          style={{ width: `${(seatsLeft / selectedSchedule.maxCapacity) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </>
@@ -329,16 +325,15 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
 
         {/* จำนวนคน */}
         <div className="mb-4">
-          <label className="text-sm font-semibold text-gray-600 mb-1.5 block">จำนวนผู้เดินทาง</label>
-          {tour.minPeople && (
-            <div className="mb-2 p-2 bg-blue-50 text-blue-700 text-xs rounded-lg border border-blue-100 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>แพ็กเกจนี้ต้องจองขั้นต่ำ {tour.minPeople} ท่าน</span>
-            </div>
-          )}
-          <div className="grid grid-cols-2 gap-3">
+          <label className="text-sm font-semibold text-gray-600 mb-0 block">
+            จำนวนผู้เดินทาง
+            {tour.minPeople && (
+              <span className="block text-[11.5px] font-normal text-gray-500 mt-0.5 mb-2.5">
+                *แพ็กเกจไพรเวท ต้องจองขั้นต่ำ {tour.minPeople} ท่านขึ้นไป
+              </span>
+            )}
+          </label>
+          <div className={`grid grid-cols-2 gap-3 ${!tour.minPeople ? 'mt-3' : ''}`}>
             {[
               {
                 label: 'ผู้ใหญ่',
@@ -375,13 +370,31 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
         </div>
 
         {/* ราคารวม */}
-        <div className="border-t border-gray-100 pt-4 mb-4">
-          <div className="flex justify-between text-sm font-medium text-gray-500 mb-1.5">
-            <span>฿{Number(tour.price).toLocaleString()} x {totalGuests} คน</span>
-          </div>
-          <div className="flex justify-between font-bold text-gray-900 text-base">
-            <span>รวมทั้งหมด</span>
-            <span className="text-accent">฿{totalPrice.toLocaleString()}</span>
+        <div className="border-t border-gray-100 pt-4 mb-4 space-y-2">
+          {adults > 0 && (
+            <div className="flex justify-between items-center text-[15px]">
+              <span className="text-gray-600 font-medium">
+                ผู้ใหญ่ <span className="text-gray-400 text-[13px] font-normal">(฿{Number(tour.price).toLocaleString()} x {adults})</span>
+              </span>
+              <span className="text-gray-700 font-medium whitespace-nowrap">
+                ฿{(Number(tour.price || 1500) * adults).toLocaleString()}
+              </span>
+            </div>
+          )}
+          {children > 0 && (
+            <div className="flex justify-between items-center text-[15px]">
+              <span className="text-gray-600 font-medium">
+                เด็ก <span className="text-gray-400 text-[13px] font-normal">(฿{Number(tour.childPrice || 1000).toLocaleString()} x {children})</span>
+              </span>
+              <span className="text-gray-700 font-medium whitespace-nowrap">
+                ฿{(Number(tour.childPrice || 1000) * children).toLocaleString()}
+              </span>
+            </div>
+          )}
+
+          <div className="flex justify-between items-end pt-1">
+            <span className="font-bold text-gray-900 text-base pb-0.5">รวมทั้งหมด</span>
+            <span className="font-bold text-accent text-[22px] leading-none">฿{totalPrice.toLocaleString()}</span>
           </div>
         </div>
 
