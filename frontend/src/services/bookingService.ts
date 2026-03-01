@@ -21,4 +21,18 @@ export const bookingService = {
     const response = await api.patch(`/bookings/${id}/cancel`)
     return response.data
   },
+
+  // ฟังก์ชันสำหรับอัปโหลดสลิปการชำระเงิน
+  uploadPaymentSlip: async (bookingId: number, amount: number, slipFile: File, paymentMethod: string = 'BANK_TRANSFER'): Promise<any> => {
+    const formData = new FormData()
+    formData.append('bookingId', bookingId.toString())
+    formData.append('amount', amount.toString())
+    formData.append('slip', slipFile)
+    formData.append('paymentMethod', paymentMethod)
+
+    const response = await api.post('/payments', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data
+  },
 }

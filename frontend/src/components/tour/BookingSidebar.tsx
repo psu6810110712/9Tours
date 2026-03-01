@@ -1,7 +1,8 @@
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Tour, TourSchedule } from '../../types/tour'
 import { useAuth } from '../../context/AuthContext'
+import { tourService } from '../../services/tourService'
 import LoginModal from '../LoginModal'
 
 interface BookingSidebarProps {
@@ -52,10 +53,36 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [availableSeatsData, setAvailableSeatsData] = useState<{ [key: number]: number | null }>({})
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  // ดึงข้อมูล available seats จาก API เมื่อ schedule เปลี่ยน
+  useEffect(() => {
+    if (!selectedSchedule || !tour?.id) return
+
+    const fetchAvailableSeats = async () => {
+      try {
+        const data = await tourService.getAvailableSeats(tour.id, selectedSchedule.id)
+        setAvailableSeatsData(prev => ({
+          ...prev,
+          [selectedSchedule.id]: data.availableSeats
+        }))
+      } catch (err) {
+        console.error('Error fetching available seats:', err)
+        // ใช้ข้อมูลเก่าจาก state ของ tour ถ้า API error
+        setAvailableSeatsData(prev => ({
+          ...prev,
+          [selectedSchedule.id]: selectedSchedule.maxCapacity - selectedSchedule.currentBooked
+        }))
+      }
+    }
+
+    fetchAvailableSeats()
+  }, [selectedSchedule?.id, tour?.id])
+
+  // ใช้ available seats จาก API ถ้ามี มิฉะนั้นใช้จากข้อมูลเก่า
   const seatsLeft = selectedSchedule
-    ? selectedSchedule.maxCapacity - selectedSchedule.currentBooked
+    ? (availableSeatsData[selectedSchedule.id] ?? (selectedSchedule.maxCapacity - selectedSchedule.currentBooked))
     : 0
   const totalGuests = adults + children
   const totalPrice = Number(tour?.price || 1500) * adults + Number(tour?.childPrice || 1000) * children

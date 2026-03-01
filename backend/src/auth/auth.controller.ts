@@ -15,7 +15,7 @@ export class AuthController {
 			httpOnly: true,        // JS อ่านไม่ได้ → ป้องกัน XSS
 			secure: false,         // dev ใช้ HTTP, production เปลี่ยนเป็น true
 			sameSite: 'lax',
-			path: '/auth',         // ส่ง cookie เฉพาะ request ไป /auth
+			path: '/',            // ส่ง cookie ไปยังทุก request
 			...(remember && { maxAge: 30 * 24 * 60 * 60 * 1000 }), // 30 วัน หรือ session
 		});
 	}
@@ -64,7 +64,7 @@ export class AuthController {
 	@HttpCode(HttpStatus.OK)
 	@Post('logout')
 	async logout(@Res({ passthrough: true }) res: Response) {
-		res.clearCookie('refresh_token', { path: '/auth' });
+		res.clearCookie('refresh_token', { path: '/' });
 		return { message: 'ออกจากระบบสำเร็จ' };
 	}
 }

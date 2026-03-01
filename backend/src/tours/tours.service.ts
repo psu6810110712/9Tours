@@ -377,6 +377,30 @@ export class ToursService {
     return DEMO_TOURS.find((t) => t.id === id) || null;
   }
 
+  getAvailableSeats(tourId: number, scheduleId: number) {
+    const tour = DEMO_TOURS.find((t) => t.id === tourId);
+    if (!tour) {
+      throw new Error(`Tour ${tourId} not found`);
+    }
+
+    const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
+    if (!schedule) {
+      throw new Error(`Schedule ${scheduleId} not found for tour ${tourId}`);
+    }
+
+    const currentBooked = schedule.currentBooked || 0;
+    const availableSeats = schedule.maxCapacity - currentBooked;
+
+    return {
+      tourId,
+      scheduleId,
+      maxCapacity: schedule.maxCapacity,
+      currentBooked,
+      availableSeats,
+      isFull: availableSeats <= 0,
+    };
+  }
+
   update(id: number, dto: UpdateTourDto) {
     const tour = DEMO_TOURS.find((t) => t.id === id);
     if (!tour) return null;

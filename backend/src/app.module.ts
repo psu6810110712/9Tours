@@ -27,7 +27,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, // เฉพาะตอน Dev เท่านั้น: จะสร้าง Table ให้เราอัตโนมัติ
+        synchronize: true,
       }),
     }),
 

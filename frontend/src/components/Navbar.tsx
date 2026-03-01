@@ -100,7 +100,7 @@ export default function Navbar() {
                       : 'text-gray-500 hover:text-gray-900 transition-colors border-b-2 border-transparent pb-0.5'
                   }
                 >
-                  Dashboard
+                  แดชบอร์ด
                 </Link>
                 <Link
                   to="/admin/tours"
@@ -146,15 +146,6 @@ export default function Navbar() {
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 text-sm z-20">
-                        {isAdmin && (
-                          <Link
-                            to="/admin/tours"
-                            className="block px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
-                            onClick={() => setMenuOpen(false)}
-                          >
-                            จัดการทัวร์ (Admin)
-                          </Link>
-                        )}
                         <hr className="my-1 border-gray-100" />
                         <button
                           onClick={handleLogout}
