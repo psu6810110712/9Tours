@@ -55,7 +55,11 @@ export default function PaymentPage() {
           adultPrice: data.schedule?.tour?.price || 0,
           childPrice: data.schedule?.tour?.childPrice || data.schedule?.tour?.price || 0,
           status: data.status,
+<<<<<<< HEAD
           image: typeof data.schedule?.tour?.images?.[0] === 'string' ? data.schedule.tour.images[0] : (data.schedule?.tour?.images?.[0] as any)?.url || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+=======
+          image: data.schedule?.tour?.images?.[0] || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+>>>>>>> cedece5284d58a4600fc717c1c6619c176e92df6
         })
       } catch (err) {
         console.error("Error fetching booking details:", err)

@@ -423,7 +423,11 @@
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
+<<<<<<< HEAD
         "currentBooked": 0
+=======
+        "currentBooked": 6
+>>>>>>> cedece5284d58a4600fc717c1c6619c176e92df6
       },
       {
         "id": 301,
@@ -433,7 +437,11 @@
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
+<<<<<<< HEAD
         "currentBooked": 0
+=======
+        "currentBooked": 3
+>>>>>>> cedece5284d58a4600fc717c1c6619c176e92df6
       },
       {
         "id": 302,
@@ -443,7 +451,7 @@
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
-        "currentBooked": 0
+        "currentBooked": 4
       },
       {
         "id": 303,
@@ -652,7 +660,11 @@
         "timeSlot": "08:00 - 12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
+<<<<<<< HEAD
         "currentBooked": 10
+=======
+        "currentBooked": 9
+>>>>>>> cedece5284d58a4600fc717c1c6619c176e92df6
       },
       {
         "id": 505,

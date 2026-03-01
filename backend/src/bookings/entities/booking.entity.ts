@@ -8,11 +8,12 @@ import {
     CreateDateColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Payment } from './payment.entity';
+import { Payment } from '../../payments/entities/payment.entity';
 
 export enum BookingStatus {
     PENDING_PAYMENT = 'pending_payment',
     AWAITING_APPROVAL = 'awaiting_approval',
+    CONFIRMED = 'confirmed',
     SUCCESS = 'success',
     CANCELED = 'canceled',
     REFUND_PENDING = 'refund_pending',

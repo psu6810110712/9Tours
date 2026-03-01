@@ -1,4 +1,3 @@
-
 export interface SearchBarProps {
     search: string;
     setSearch: (value: string) => void;

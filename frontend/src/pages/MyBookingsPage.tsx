@@ -57,7 +57,11 @@ export default function MyBookingPage() {
         status: mapStatusToThai(b.status),
         adults: b.paxCount || 1, // mapping roughly
         children: 0,
+<<<<<<< HEAD
         image: typeof b.schedule?.tour?.images?.[0] === 'string' ? b.schedule.tour.images[0] : (b.schedule?.tour?.images?.[0] as any)?.url || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+=======
+        image: b.schedule?.tour?.images?.[0] || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+>>>>>>> cedece5284d58a4600fc717c1c6619c176e92df6
       }))
 
       setBookings(formattedBookings)
