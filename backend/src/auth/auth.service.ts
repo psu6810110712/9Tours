@@ -12,7 +12,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   async register(createUserDto: CreateUserDto) {
     // Check if user already exists
@@ -36,7 +36,7 @@ export class AuthService {
     return this.generateToken(user);
   }
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string, rememberMe: boolean = false) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
@@ -47,7 +47,8 @@ export class AuthService {
       throw new UnauthorizedException('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     }
 
-    return this.generateToken(user);
+    // ✅ ส่ง rememberMe ไปด้วยเพื่อให้ controller ตั้งค่า cookie
+    return { ...this.generateToken(user), rememberMe };
   }
 
   private generateToken(user: any) {
