@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsBoolean } from 'class-validator';
 
 export class LoginDto {
   @IsEmail()
@@ -9,4 +9,9 @@ export class LoginDto {
   @MinLength(1)
   @IsNotEmpty()
   password: string;
+
+  // ✅ "จดจำฉัน" — ถ้า true → cookie อยู่ 30 วัน, false → session cookie
+  @IsOptional()
+  @IsBoolean()
+  rememberMe?: boolean;
 }

@@ -2,19 +2,23 @@ import api from './api'
 import type { Booking, CreateBookingDto } from '../types/booking'
 
 export const bookingService = {
-  create: (data: CreateBookingDto) =>
-    api.post<Booking>('/bookings', data).then((r) => r.data),
+  createBooking: async (data: CreateBookingDto): Promise<Booking> => {
+    const response = await api.post('/bookings', data)
+    return response.data
+  },
 
-  getMy: () =>
-    api.get<Booking[]>('/bookings/my').then((r) => r.data),
+  getMyBookings: async (): Promise<Booking[]> => {
+    const response = await api.get('/bookings/my')
+    return response.data
+  },
 
-  cancel: (bookingCode: string) =>
-    api.patch(`/bookings/${bookingCode}/cancel`).then((r) => r.data),
+  getBookingById: async (id: string): Promise<Booking> => {
+    const response = await api.get(`/bookings/${id}`)
+    return response.data
+  },
 
-  // admin
-  getAll: () =>
-    api.get<Booking[]>('/bookings').then((r) => r.data),
-
-  updateStatus: (bookingCode: string, status: string) =>
-    api.patch(`/bookings/${bookingCode}/status`, { status }).then((r) => r.data),
+  cancelBooking: async (id: string): Promise<Booking> => {
+    const response = await api.patch(`/bookings/${id}/cancel`)
+    return response.data
+  },
 }

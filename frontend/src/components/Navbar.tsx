@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import LoginModal from './LoginModal'
@@ -15,7 +15,45 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [modal, setModal] = useState<'login' | 'register' | null>(null)
   const navigate = useNavigate()
-  const { pathname, search } = useLocation()
+  const location = useLocation()
+  const { pathname, search } = location
+
+  const [modalError, setModalError] = useState('')
+
+  // จัดการ Redirect จาก ProtectedRoute หรือ state ข้ามหน้า
+  useEffect(() => {
+    const state = location.state as { requireLogin?: boolean; authExpired?: boolean } | null
+    if (state?.requireLogin) {
+      if (state.authExpired) {
+        setModalError('เซสชันของคุณหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง')
+      }
+      setModal('login')
+      navigate(pathname, { replace: true, state: {} })
+    }
+  }, [location, navigate, pathname])
+
+  // จัดการ Token หมดอายุจาก api.ts interceptor
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      if (pathname === '/') {
+        // อยู่หน้า home อยู่แล้ว โชว์ Modal ได้เลย (ไม่เกิดการ Unmount Navbar)
+        logout() // ล้าง context และ storage ทุกอย่าง
+        setModalError('เซสชันของคุณหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง')
+        setModal('login')
+      } else {
+        // ย้ายคำสั่ง navigate ขึ้นมาก่อน logout เพื่อป้องกัน Race condition กับ ProtectedRoute
+        // ทำให้ Router เปลี่ยนหน้าเป็น '/' ทันทีใน Batch ถัดไป ป้องกันการเตะซ้ำจาก ProtectedRoute
+        navigate('/', { replace: true, state: { requireLogin: true, authExpired: true } })
+        logout()
+      }
+    }
+
+    window.addEventListener('auth:expired', handleAuthExpired as EventListener)
+
+    return () => {
+      window.removeEventListener('auth:expired', handleAuthExpired as EventListener)
+    }
+  }, [logout, navigate, pathname])
 
   const isActive = (path: string) => {
     const [p, q] = path.split('?')
@@ -53,16 +91,28 @@ export default function Navbar() {
               </Link>
             ))}
             {isAdmin && (
-              <Link
-                to="/admin/tours"
-                className={
-                  pathname.startsWith('/admin')
-                    ? 'text-[var(--color-primary)] font-semibold border-b-2 border-[var(--color-primary)] pb-0.5'
-                    : 'text-gray-500 hover:text-gray-900 transition-colors border-b-2 border-transparent pb-0.5'
-                }
-              >
-                จัดการทัวร์
-              </Link>
+              <>
+                <Link
+                  to="/admin/dashboard"
+                  className={
+                    pathname === '/admin/dashboard'
+                      ? 'text-[var(--color-primary)] font-semibold border-b-2 border-[var(--color-primary)] pb-0.5'
+                      : 'text-gray-500 hover:text-gray-900 transition-colors border-b-2 border-transparent pb-0.5'
+                  }
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/admin/tours"
+                  className={
+                    pathname.startsWith('/admin/tours')
+                      ? 'text-[var(--color-primary)] font-semibold border-b-2 border-[var(--color-primary)] pb-0.5'
+                      : 'text-gray-500 hover:text-gray-900 transition-colors border-b-2 border-transparent pb-0.5'
+                  }
+                >
+                  จัดการทัวร์
+                </Link>
+              </>
             )}
           </div>
 
@@ -72,11 +122,10 @@ export default function Navbar() {
               <>
                 <Link
                   to="/my-bookings"
-                  className={`hidden md:block text-[15px] transition-colors ${
-                    pathname === '/my-bookings'
-                      ? 'text-[var(--color-primary)] font-semibold'
-                      : 'text-gray-500 hover:text-gray-900'
-                  }`}
+                  className={`hidden md:block text-[15px] transition-colors ${pathname === '/my-bookings'
+                    ? 'text-[var(--color-primary)] font-semibold'
+                    : 'text-gray-500 hover:text-gray-900'
+                    }`}
                 >
                   การจองของฉัน
                 </Link>
@@ -132,7 +181,17 @@ export default function Navbar() {
       </nav>
 
       {modal === 'login' && (
-        <LoginModal onClose={() => setModal(null)} onSwitchToRegister={() => setModal('register')} />
+        <LoginModal
+          onClose={() => {
+            setModal(null)
+            setModalError('')
+          }}
+          onSwitchToRegister={() => {
+            setModal('register')
+            setModalError('')
+          }}
+          initialError={modalError}
+        />
       )}
       {modal === 'register' && (
         <RegisterModal onClose={() => setModal(null)} onSwitchToLogin={() => setModal('login')} />

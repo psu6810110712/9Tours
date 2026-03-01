@@ -8,12 +8,12 @@ import {
     CreateDateColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { TourSchedule } from '../../tours/entities/tour-schedule.entity';
-import { Payment } from './payment.entity';
+import { Payment } from '../../payments/entities/payment.entity';
 
 export enum BookingStatus {
     PENDING_PAYMENT = 'pending_payment',
     AWAITING_APPROVAL = 'awaiting_approval',
+    CONFIRMED = 'confirmed',
     SUCCESS = 'success',
     CANCELED = 'canceled',
     REFUND_PENDING = 'refund_pending',
@@ -32,10 +32,7 @@ export class Booking {
     @Column({ name: 'user_id' })
     userId: number;
 
-    @ManyToOne(() => TourSchedule, (schedule) => schedule.bookings, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'schedule_id' })
-    schedule: TourSchedule;
-
+    // scheduleId เก็บเป็นตัวเลขอ้างอิง — ข้อมูล schedule จริงอ่านจาก tours-data.json
     @Column({ name: 'schedule_id' })
     scheduleId: number;
 
@@ -61,3 +58,4 @@ export class Booking {
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
 }
+

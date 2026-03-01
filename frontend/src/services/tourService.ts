@@ -1,11 +1,12 @@
 import api from './api'
-import type { Tour } from '../types/tour'
+import type { Tour, CreateTourPayload } from '../types/tour'
 
 export interface TourFilters {
   region?: string
   province?: string
   tourType?: string
   search?: string
+  admin?: string
 }
 
 export const tourService = {
@@ -15,20 +16,22 @@ export const tourService = {
   getOne: (id: number) =>
     api.get<Tour>(`/tours/${id}`).then((r) => r.data),
 
-  create: (data: Partial<Tour>) =>
+  create: (data: CreateTourPayload) =>
     api.post<Tour>('/tours', data).then((r) => r.data),
 
-  update: (id: number, data: Partial<Tour>) =>
+  update: (id: number, data: Partial<Tour> | CreateTourPayload) =>
     api.patch<Tour>(`/tours/${id}`, data).then((r) => r.data),
 
   remove: (id: number) =>
     api.delete(`/tours/${id}`).then((r) => r.data),
 
-  uploadImage: (file: File) => {
+  // ฟังก์ชันสำหรับอัปโหลดรูปภาพ
+  uploadImage: async (file: File) => {
     const formData = new FormData()
     formData.append('file', file)
-    return api.post<{ url: string }>('/tours/upload', formData, {
+    const response = await api.post<{ url: string }>('/tours/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-    }).then((r) => r.data.url)
+    })
+    return response.data.url
   },
 }

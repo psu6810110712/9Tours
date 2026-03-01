@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import TourCard from '../components/TourCard'
 import TourGallery from '../components/tour/TourGallery'
 import TourInfo from '../components/tour/TourInfo'
@@ -28,23 +26,18 @@ export default function TourDetailPage() {
 
   if (!tour) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="flex items-center justify-center h-96 text-gray-400">กำลังโหลด...</div>
-      </div>
+      <div className="flex items-center justify-center h-96 text-gray-400">กำลังโหลด...</div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
+    <>
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Breadcrumb */}
-        <nav className="text-xs text-gray-400 mb-4 flex gap-2">
-          <Link to="/" className="hover:text-[#F5A623]">หน้าแรก</Link>
+        <nav className="text-sm font-medium text-gray-400 mb-5 flex gap-2">
+          <Link to="/" className="hover:text-accent">หน้าแรก</Link>
           <span>/</span>
-          <Link to={`/tours?province=${tour.province}`} className="hover:text-[#F5A623]">{tour.province}</Link>
+          <Link to={`/tours?province=${tour.province}`} className="hover:text-accent">{tour.province}</Link>
           <span>/</span>
           <span className="text-gray-600 line-clamp-1">{tour.name}</span>
         </nav>
@@ -69,15 +62,13 @@ export default function TourDetailPage() {
         {/* ทัวร์แนะนำ */}
         {related.length > 0 && (
           <section className="mt-10">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">ทัวร์แนะนำใน{tour.province}</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-5">ทัวร์แนะนำใน{tour.province}</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {related.map((t) => <TourCard key={t.id} tour={t} />)}
             </div>
           </section>
         )}
       </div>
-
-      <Footer />
-    </div>
+    </>
   )
 }

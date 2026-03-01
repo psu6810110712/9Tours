@@ -1,40 +1,39 @@
-export type BookingStatus = 'pending' | 'paid' | 'cancelled' | 'completed'
+export interface Payment {
+  id: number
+  amountPaid: number
+  slipUrl: string
+  paymentMethod: string
+  uploadedAt: string
+}
+
+export interface Tour {
+  id: number
+  name: string
+  price: number
+  images: string[]
+  accommodation?: string
+}
+
+export interface Schedule {
+  id: number
+  startDate: string
+  endDate: string
+  tour: Tour
+}
 
 export interface Booking {
-  bookingCode: string
-  tourId: number
-  scheduleId: number
+  id: number
   userId: number
-  contactName: string
-  contactEmail: string
-  contactPhone: string
-  adults: number
-  children: number
-  specialRequests: string | null
+  scheduleId: number
+  paxCount: number
   totalPrice: number
-  status: BookingStatus
-  paymentProof: string | null
+  status: string // 'PENDING_PAYMENT' | 'CONFIRMED' | 'CANCELED'
   createdAt: string
-  tour?: {
-    name: string
-    images: string[]
-    province: string
-    duration: string
-  }
-  schedule?: {
-    startDate: string
-    endDate: string
-    roundName: string | null
-  }
+  payments: Payment[]
+  schedule: Schedule | null
 }
 
 export interface CreateBookingDto {
-  tourId: number
   scheduleId: number
-  contactName: string
-  contactEmail: string
-  contactPhone: string
-  adults: number
-  children: number
-  specialRequests?: string
+  paxCount: number
 }

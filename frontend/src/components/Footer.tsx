@@ -57,12 +57,12 @@ export default function Footer() {
           <h3 className="font-bold text-gray-900 text-sm mb-4">เกี่ยวกับ</h3>
           <ul className="space-y-2.5">
             <li>
-              <a href="#" className="text-sm text-gray-700 underline hover:text-[#F5A623] transition-colors">
+              <a href="#" className="text-sm text-gray-700 underline hover:text-accent transition-colors">
                 ข้อกำหนดและเงื่อนไข
               </a>
             </li>
             <li>
-              <a href="#" className="text-sm text-gray-700 underline hover:text-[#F5A623] transition-colors">
+              <a href="#" className="text-sm text-gray-700 underline hover:text-accent transition-colors">
                 นโยบายความเป็นส่วนตัว
               </a>
             </li>

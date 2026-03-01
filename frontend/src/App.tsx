@@ -1,30 +1,70 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
 import ToursPage from './pages/ToursPage'
 import TourDetailPage from './pages/TourDetailPage'
-import BookingPage from './pages/BookingPage'
 import MyBookingsPage from './pages/MyBookingsPage'
 import AdminTourListPage from './pages/admin/AdminTourListPage'
 import AdminTourFormPage from './pages/admin/AdminTourFormPage'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import ProtectedRoute from './components/ProtectedRoute'
+import BookingInfoPage from './pages/BookingInfoPage'
+import PaymentPage from './pages/PaymentPage'
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/tours" element={<ToursPage />} />
-          <Route path="/tours/:id" element={<TourDetailPage />} />
-          <Route path="/booking/:tourId" element={<BookingPage />} />
-          <Route path="/my-bookings" element={<MyBookingsPage />} />
-          <Route path="/admin/tours" element={<AdminTourListPage />} />
-          <Route path="/admin/tours/new" element={<AdminTourFormPage />} />
-          <Route path="/admin/tours/:id/edit" element={<AdminTourFormPage />} />
+          <Route element={<Layout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/tours" element={<ToursPage />} />
+            <Route path="/tours/:id" element={<TourDetailPage />} />
+
+            <Route path="/booking/:tourId" element={
+              <ProtectedRoute>
+                <BookingInfoPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/payment/:bookingId" element={
+              <ProtectedRoute>
+                <PaymentPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/my-bookings" element={
+              <ProtectedRoute>
+                <MyBookingsPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/tours" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminTourListPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/tours/new" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminTourFormPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/tours/:id/edit" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminTourFormPage />
+              </ProtectedRoute>
+            } />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
   )
 }
 
-export default App;
+export default App
