@@ -103,20 +103,38 @@
       "สายธรรมชาติ",
       "สายชิล"
     ],
-    "price": 6900,
+    "price": 3900,
     "originalPrice": 7500,
     "images": [
-      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
-      "https://images.unsplash.com/photo-1528181304800-259b08848526?w=800",
-      "https://images.unsplash.com/photo-1512100356356-de1b84283e18?w=800",
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
-      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800"
+      "http://localhost:3000/uploads/tour-1772344317892-951047197.png",
+      "http://localhost:3000/uploads/tour-1772344320311-277579752.png",
+      "http://localhost:3000/uploads/tour-1772344329079-484288789.png",
+      "http://localhost:3000/uploads/tour-1772344331863-21477368.png",
+      "http://localhost:3000/uploads/tour-1772344334862-481150391.png"
     ],
     "highlights": [
       "รวมที่พัก",
       "รถรับส่งสนามบิน"
     ],
-    "itinerary": [],
+    "itinerary": [
+      {
+        "day": 1,
+        "time": "",
+        "title": "",
+        "description": ""
+      },
+      {
+        "day": 1,
+        "time": "",
+        "title": "",
+        "description": ""
+      },
+      {
+        "time": "",
+        "title": "",
+        "description": ""
+      }
+    ],
     "transportation": "รถตู้ส่วนตัว",
     "duration": "3 วัน 2 คืน",
     "region": "ภาคเหนือ",
@@ -127,18 +145,91 @@
     "isActive": true,
     "schedules": [
       {
+        "id": 300,
+        "tourId": 3,
+        "startDate": "2026-04-04",
+        "endDate": "2026-04-06",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 3
+      },
+      {
         "id": 301,
         "tourId": 3,
-        "startDate": "2026-02-24",
-        "endDate": "2026-02-26",
-        "timeSlot": null,
-        "roundName": "แพ็กเกจ 3 วัน 2 คืน",
-        "maxCapacity": 15,
-        "currentBooked": 6
+        "startDate": "2026-04-05",
+        "endDate": "2026-04-07",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 302,
+        "tourId": 3,
+        "startDate": "2026-04-11",
+        "endDate": "2026-04-13",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 303,
+        "tourId": 3,
+        "startDate": "2026-04-12",
+        "endDate": "2026-04-14",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 304,
+        "tourId": 3,
+        "startDate": "2026-04-18",
+        "endDate": "2026-04-20",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 305,
+        "tourId": 3,
+        "startDate": "2026-04-19",
+        "endDate": "2026-04-21",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 306,
+        "tourId": 3,
+        "startDate": "2026-04-25",
+        "endDate": "2026-04-27",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 307,
+        "tourId": 3,
+        "startDate": "2026-04-26",
+        "endDate": "2026-04-28",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
       }
     ],
     "createdAt": "2026-03-01T05:05:17.105Z",
-    "updatedAt": "2026-03-01T05:05:17.105Z"
+    "updatedAt": "2026-03-01T05:53:05.378Z",
+    "childPrice": null,
+    "minPeople": 5,
+    "maxPeople": 10
   },
   {
     "id": 4,

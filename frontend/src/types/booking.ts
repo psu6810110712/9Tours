@@ -10,6 +10,8 @@ export interface Tour {
   id: number
   name: string
   price: number
+  tourCode?: string
+  childPrice?: number
   images: string[]
   accommodation?: string
 }

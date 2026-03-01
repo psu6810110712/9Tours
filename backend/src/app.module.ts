@@ -5,10 +5,7 @@ import { ToursModule } from './tours/tours.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { BookingsModule } from './bookings/bookings.module';
-<<<<<<< HEAD
-=======
 import { PaymentsModule } from './payments/payments.module';
->>>>>>> 967b61065be25f83ed78c3d6fb65e4efddb1d28f
 import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
@@ -38,10 +35,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     UsersModule,
     AuthModule,
     BookingsModule,
-<<<<<<< HEAD
-=======
     PaymentsModule,
->>>>>>> 967b61065be25f83ed78c3d6fb65e4efddb1d28f
     AnalyticsModule,
   ],
 })
