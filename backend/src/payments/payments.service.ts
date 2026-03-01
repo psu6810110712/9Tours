@@ -50,13 +50,14 @@ export class PaymentsService {
       bookingId,
       amountPaid: booking.totalPrice,
       paymentMethod,
-      slipUrl: slipFile.path,
+      slipUrl: slipFile.path.replace(/\\/g, '/'), // แปลง backslash เป็น forward slash สำหรับ URL
     });
 
     const savedPayment = await this.paymentsRepository.save(newPayment);
 
     // อัปเดตสถานะ Booking
-    booking.status = BookingStatus.CONFIRMED;
+    // เปลี่ยนเป็น AWAITING_APPROVAL เพื่อรอ Admin ตรวจสอบสลิปก่อน
+    booking.status = BookingStatus.AWAITING_APPROVAL;
     await this.bookingsRepository.save(booking);
 
     return {

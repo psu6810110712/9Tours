@@ -16,6 +16,9 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // เปิดใช้งาน ValidationPipe ทั่วทั้งแอป
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
   //โค้ดสำหรับเปิดใช้งานโฟลเดอร์ uploads
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
