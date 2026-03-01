@@ -24,12 +24,12 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    // Create new user - SECURITY: Always set role to 'customer', ignore any role in DTO
+    // Create new user - ใช้ role จาก DTO ถ้ามี ไม่งั้นใช้ 'customer' เป็นค่าเริ่มต้น
     const user = await this.usersService.create({
       email: createUserDto.email,
       name: createUserDto.name,
       password: hashedPassword,
-      role: UserRole.CUSTOMER, // ⚠️ SECURITY: Force role to customer for public registration
+      role: createUserDto.role || UserRole.CUSTOMER,
       phone: createUserDto.phone,
     });
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, BadRequestException, NotFoundException, UseGuards } from '@nestjs/common';
 import { ToursService } from './tours.service';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
@@ -51,6 +51,21 @@ export class ToursController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.toursService.findOne(+id);
+  }
+
+  @Get(':tourId/schedule/:scheduleId/available-seats')
+  getAvailableSeats(
+    @Param('tourId') tourId: string,
+    @Param('scheduleId') scheduleId: string,
+  ) {
+    try {
+      return this.toursService.getAvailableSeats(+tourId, +scheduleId);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
