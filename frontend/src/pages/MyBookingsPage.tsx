@@ -1,13 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
 import { bookingService } from '../services/bookingService'
+
+interface MyBookingItem {
+  id: number
+  tourName: string
+  date: string
+  price: number
+  status: string
+  adults: number
+  children: number
+  image: string
+}
 
 export default function MyBookingPage() {
   const [activeTab, setActiveTab] = useState('ทั้งหมด')
-  const [bookings, setBookings] = useState<any[]>([])
-  const [selectedBooking, setSelectedBooking] = useState<any>(null)
+  const [bookings, setBookings] = useState<MyBookingItem[]>([])
+  const [selectedBooking, setSelectedBooking] = useState<MyBookingItem | null>(null)
   const [loading, setLoading] = useState(true)
 
   const navigate = useNavigate()
@@ -48,7 +57,7 @@ export default function MyBookingPage() {
         status: mapStatusToThai(b.status),
         adults: b.paxCount || 1, // mapping roughly
         children: 0,
-        image: b.schedule?.tour?.images?.[0]?.url || b.schedule?.tour?.images?.[0] || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+        image: b.schedule?.tour?.images?.[0] || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
       }))
 
       setBookings(formattedBookings)
@@ -67,9 +76,10 @@ export default function MyBookingPage() {
         await bookingService.cancelBooking(bookingId)
         alert('ยกเลิกการจองสำเร็จ')
         loadBookings() // โหลดข้อมูลใหม่เพื่อรีเฟรชหน้าจอ
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { message?: string } } }
         console.error("Error canceling booking:", err)
-        alert(err.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก กรุณาลองใหม่อีกครั้ง')
+        alert(error.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก กรุณาลองใหม่อีกครั้ง')
       }
     }
   }
@@ -111,8 +121,7 @@ export default function MyBookingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] relative">
-      <Navbar />
+    <div className="relative">
       <main className="max-w-5xl mx-auto px-4 py-10">
         <h1 className="text-2xl font-black text-gray-800 mb-8">การจองของฉัน</h1>
 
@@ -121,7 +130,7 @@ export default function MyBookingPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 font-bold text-sm whitespace-nowrap transition-all border-b-2 ${activeTab === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-400 hover:text-gray-600'
+              className={`pb-3 font-bold text-sm whitespace-nowrap transition-all border-b-2 ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'
                 }`}
             >
               {tab}
@@ -172,12 +181,12 @@ export default function MyBookingPage() {
                     <>
                       <button
                         onClick={() => navigate(`/payment/${booking.id}`)}
-                        className="flex-1 md:flex-none px-6 py-2 bg-[#3b82f6] text-white rounded-full text-xs font-bold hover:bg-blue-600 transition-all shadow-sm"
+                        className="flex-1 md:flex-none px-6 py-2 bg-primary text-white rounded-full text-xs font-bold hover:bg-primary-dark transition-all shadow-sm"
                       >
                         ชำระเงิน
                       </button>
                       <button
-                        onClick={() => handleCancelBooking(booking.id)}
+                        onClick={() => handleCancelBooking(String(booking.id))}
                         className="flex-1 md:flex-none px-6 py-2 bg-white border border-red-200 text-red-500 rounded-full text-xs font-bold hover:bg-red-50 transition-all"
                       >
                         ยกเลิก
@@ -251,7 +260,7 @@ export default function MyBookingPage() {
                     setSelectedBooking(null);
                     navigate(`/payment/${selectedBooking.id}`);
                   }}
-                  className="w-full mt-6 bg-[#3b82f6] text-white font-bold py-3 rounded-full hover:bg-blue-600 transition-all text-sm shadow-md"
+                  className="w-full mt-6 bg-primary text-white font-bold py-3 rounded-full hover:bg-primary-dark transition-all text-sm shadow-md"
                 >
                   ชำระเงิน
                 </button>
@@ -260,7 +269,6 @@ export default function MyBookingPage() {
           </div>
         </div>
       )}
-      <Footer />
     </div>
   )
 }

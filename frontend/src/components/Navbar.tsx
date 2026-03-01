@@ -22,8 +22,9 @@ export default function Navbar() {
 
   // จัดการ Redirect จาก ProtectedRoute หรือ state ข้ามหน้า
   useEffect(() => {
-    if (location.state && (location.state as any).requireLogin) {
-      if ((location.state as any).authExpired) {
+    const state = location.state as { requireLogin?: boolean; authExpired?: boolean } | null
+    if (state?.requireLogin) {
+      if (state.authExpired) {
         setModalError('เซสชันของคุณหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง')
       }
       setModal('login')

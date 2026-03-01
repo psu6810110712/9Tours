@@ -25,7 +25,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
         return (
             <div className="flex flex-col items-center justify-center min-h-screen">
                 <h1 className="text-3xl font-bold text-red-500 mb-4">ไม่มีสิทธิ์เข้าถึง</h1>
-                <a href="/" className="text-blue-500 hover:underline">กลับหน้าแรก</a>
+                <a href="/" className="text-primary hover:underline">กลับหน้าแรก</a>
             </div>
         )
     }

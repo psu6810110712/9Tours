@@ -64,7 +64,7 @@ export default function TourCard({ tour }: TourCardProps) {
               ฿{Number(tour.originalPrice).toLocaleString()}
             </span>
           )}
-          <span className="text-lg font-bold text-[#F5A623]">
+          <span className="text-lg font-bold text-accent">
             ฿{Number(tour.price).toLocaleString()}
           </span>
           <span className="text-sm font-medium text-gray-400">/ ท่าน</span>

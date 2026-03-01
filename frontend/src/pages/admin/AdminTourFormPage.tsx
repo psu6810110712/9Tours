@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import Navbar from '../../components/Navbar'
-import Footer from '../../components/Footer'
 import { tourService } from '../../services/tourService'
+import type { CreateTourPayload } from '../../types/tour'
 
 // ===== ค่าคงที่ที่ใช้ในฟอร์ม =====
 const CATEGORIES = ['สายธรรมชาติ', 'สายคาเฟ่', 'สายกิจกรรม', 'สายมู', 'สายชิล']
@@ -44,14 +43,15 @@ export default function AdminTourFormPage() {
   const [region, setRegion] = useState('')
   const [province, setProvince] = useState('')
   const [price, setPrice] = useState('')
+  const [childPrice, setChildPrice] = useState('')
   const [minPeople, setMinPeople] = useState('')
   const [maxPeople, setMaxPeople] = useState('')
   const [duration, setDuration] = useState('')
-  
+
   // State สำหรับรูปภาพ
   const [images, setImages] = useState<string[]>([])
   const [uploadingImage, setUploadingImage] = useState(false)
-  
+
   const [schedules, setSchedules] = useState<ScheduleRow[]>([])
   const [transportation, setTransportation] = useState('')
   const [accommodation, setAccommodation] = useState('')
@@ -79,6 +79,7 @@ export default function AdminTourFormPage() {
       setRegion(tour.region)
       setProvince(tour.province)
       setPrice(String(tour.price))
+      if (tour.childPrice) setChildPrice(String(tour.childPrice))
       setMinPeople(tour.minPeople ? String(tour.minPeople) : '')
       setMaxPeople(tour.maxPeople ? String(tour.maxPeople) : '')
       setDuration(tour.duration || '')
@@ -123,7 +124,7 @@ export default function AdminTourFormPage() {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
     if (!validTypes.includes(file.type)) {
       alert('กรุณาแนบเฉพาะไฟล์ประเภท .jpg หรือ .png เท่านั้นครับ')
-      e.target.value = '' 
+      e.target.value = ''
       return
     }
 
@@ -136,7 +137,7 @@ export default function AdminTourFormPage() {
       alert('อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
     } finally {
       setUploadingImage(false)
-      e.target.value = '' 
+      e.target.value = ''
     }
   }
 
@@ -227,12 +228,13 @@ export default function AdminTourFormPage() {
     setError('')
     setSaving(true)
 
-    const payload = {
+    const payload: CreateTourPayload = {
       name,
       description,
       tourType,
       categories,
       price: Number(price),
+      childPrice: childPrice ? Number(childPrice) : null,
       minPeople: minPeople ? Number(minPeople) : undefined,
       maxPeople: maxPeople ? Number(maxPeople) : undefined,
       highlights,
@@ -256,9 +258,9 @@ export default function AdminTourFormPage() {
 
     try {
       if (isEditing) {
-        await tourService.update(Number(id), payload as any)
+        await tourService.update(Number(id), payload)
       } else {
-        await tourService.create(payload as any)
+        await tourService.create(payload)
       }
       navigate('/admin/tours')
     } catch {
@@ -270,11 +272,7 @@ export default function AdminTourFormPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar />
-        <p className="flex-1 flex items-center justify-center text-gray-400">กำลังโหลด...</p>
-        <Footer />
-      </div>
+      <p className="flex-1 flex items-center justify-center text-gray-400">กำลังโหลด...</p>
     )
   }
 
@@ -282,9 +280,7 @@ export default function AdminTourFormPage() {
   const labelClass = 'text-sm font-bold text-gray-800 block mb-1'
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
-
+    <>
       <main className="flex-1">
         <form onSubmit={handleSubmit} className="max-w-6xl mx-auto px-8 py-8">
 
@@ -416,7 +412,7 @@ export default function AdminTourFormPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className={labelClass}>ระยะเวลา*</label>
                   <input
@@ -429,7 +425,7 @@ export default function AdminTourFormPage() {
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>ราคา*</label>
+                  <label className={labelClass}>ราคาผู้ใหญ่*</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -437,6 +433,20 @@ export default function AdminTourFormPage() {
                       onChange={(e) => setPrice(e.target.value)}
                       required
                       min={0}
+                      className={inputClass}
+                    />
+                    <span className="text-sm text-gray-600 whitespace-nowrap">บาท</span>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>ราคาเด็ก</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      value={childPrice}
+                      onChange={(e) => setChildPrice(e.target.value)}
+                      min={0}
+                      placeholder="ไม่บังคับ"
                       className={inputClass}
                     />
                     <span className="text-sm text-gray-600 whitespace-nowrap">บาท</span>
@@ -485,7 +495,7 @@ export default function AdminTourFormPage() {
               {/* ระบบอัปโหลดรูปภาพ */}
               <div className="mb-2">
                 <span className="text-sm font-bold text-gray-800 block mb-3">รูปภาพทัวร์ (เฉพาะ .jpg, .png)</span>
-                
+
                 {images.length > 0 && (
                   <div className="grid grid-cols-3 gap-3 mb-3">
                     {images.map((url, i) => (
@@ -508,11 +518,11 @@ export default function AdminTourFormPage() {
                   <span className="text-sm text-gray-500 font-medium">
                     {uploadingImage ? 'กำลังอัปโหลด...' : 'คลิกเพื่อเลือกไฟล์รูปภาพ'}
                   </span>
-                  <input 
-                    type="file" 
-                    accept="image/jpeg, image/png, image/jpg" 
-                    className="hidden" 
-                    onChange={handleImageUpload} 
+                  <input
+                    type="file"
+                    accept="image/jpeg, image/png, image/jpg"
+                    className="hidden"
+                    onChange={handleImageUpload}
                     disabled={uploadingImage}
                   />
                 </label>
@@ -871,8 +881,6 @@ export default function AdminTourFormPage() {
           </div>
         </form>
       </main>
-
-      <Footer />
-    </div >
+    </>
   )
 }

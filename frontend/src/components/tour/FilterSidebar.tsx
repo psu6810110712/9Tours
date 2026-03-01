@@ -35,7 +35,7 @@ export default function FilterSidebar({
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-bold text-gray-800">ตัวกรอง</h2>
           {hasFilter && (
-            <button onClick={onClear} className="text-xs text-[#F5A623] hover:underline">
+            <button onClick={onClear} className="text-xs text-accent hover:underline">
               ล้างทั้งหมด
             </button>
           )}
@@ -54,7 +54,7 @@ export default function FilterSidebar({
                 key={opt.value}
                 onClick={() => onTourTypeChange(opt.value)}
                 className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${tourType === opt.value
-                  ? 'bg-[#F5A623] text-white'
+                  ? 'bg-accent text-white'
                   : 'text-gray-600 hover:bg-gray-50'
                   }`}
               >
