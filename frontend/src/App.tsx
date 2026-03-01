@@ -7,6 +7,7 @@ import TourDetailPage from './pages/TourDetailPage'
 import MyBookingsPage from './pages/MyBookingsPage'
 import AdminTourListPage from './pages/admin/AdminTourListPage'
 import AdminTourFormPage from './pages/admin/AdminTourFormPage'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import BookingInfoPage from './pages/BookingInfoPage'
 import PaymentPage from './pages/PaymentPage'
@@ -39,6 +40,11 @@ function App() {
               </ProtectedRoute>
             } />
 
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboardPage />
+              </ProtectedRoute>
+            } />
             <Route path="/admin/tours" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminTourListPage />

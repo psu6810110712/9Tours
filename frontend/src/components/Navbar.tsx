@@ -91,16 +91,28 @@ export default function Navbar() {
               </Link>
             ))}
             {isAdmin && (
-              <Link
-                to="/admin/tours"
-                className={
-                  pathname.startsWith('/admin')
-                    ? 'text-[var(--color-primary)] font-semibold border-b-2 border-[var(--color-primary)] pb-0.5'
-                    : 'text-gray-500 hover:text-gray-900 transition-colors border-b-2 border-transparent pb-0.5'
-                }
-              >
-                จัดการทัวร์
-              </Link>
+              <>
+                <Link
+                  to="/admin/dashboard"
+                  className={
+                    pathname === '/admin/dashboard'
+                      ? 'text-[var(--color-primary)] font-semibold border-b-2 border-[var(--color-primary)] pb-0.5'
+                      : 'text-gray-500 hover:text-gray-900 transition-colors border-b-2 border-transparent pb-0.5'
+                  }
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/admin/tours"
+                  className={
+                    pathname.startsWith('/admin/tours')
+                      ? 'text-[var(--color-primary)] font-semibold border-b-2 border-[var(--color-primary)] pb-0.5'
+                      : 'text-gray-500 hover:text-gray-900 transition-colors border-b-2 border-transparent pb-0.5'
+                  }
+                >
+                  จัดการทัวร์
+                </Link>
+              </>
             )}
           </div>
 
