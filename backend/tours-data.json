@@ -631,7 +631,7 @@
         "timeSlot": "08:00 - 12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 9
+        "currentBooked": 10
       },
       {
         "id": 503,

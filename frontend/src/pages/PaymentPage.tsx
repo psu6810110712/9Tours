@@ -192,7 +192,7 @@ export default function PaymentPage() {
         <h1 className="text-2xl font-bold text-gray-800 mb-8 mt-10 text-center">สแกนเพื่อชำระเงิน</h1>
 
         {/* --- 3 Columns Layout (Middle container wider) --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] xl:grid-cols-[1fr_1.8fr_1fr] gap-6 items-stretch max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr_1fr] xl:grid-cols-[1fr_1.4fr_1fr] gap-6 items-stretch max-w-7xl mx-auto">
 
           {/* คอลัมน์ 1: QR Code */}
           <div className="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col items-center pb-8 h-full">
