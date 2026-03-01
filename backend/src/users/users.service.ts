@@ -10,16 +10,16 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-  ) {}
+  ) { }
 
   // 1. ฟังก์ชันค้นหาด้วย Email (ที่เราทำไว้ก่อนหน้า)
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  // 2. ฟังก์ชัน Create (ที่เราทำไว้ก่อนหน้า)
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const newUser = this.usersRepository.create(createUserDto);
+  // 2. ฟังก์ชัน Create
+  async create(userData: Partial<User>): Promise<User> {
+    const newUser = this.usersRepository.create(userData);
     return this.usersRepository.save(newUser);
   }
 

@@ -1,5 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
-import { UserRole } from '../entities/user.entity';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -18,8 +17,4 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   phone?: string;
-
-  @IsEnum(UserRole, { message: 'Role ต้องเป็น admin หรือ customer เท่านั้น' })
-  @IsOptional()
-  role?: UserRole;
 }
