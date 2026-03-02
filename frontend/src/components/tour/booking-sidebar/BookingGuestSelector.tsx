@@ -23,9 +23,9 @@ export default function BookingGuestSelector({
         <div className="mb-4">
             <label className="text-sm font-semibold text-gray-600 mb-0 block">
                 จำนวนผู้เดินทาง
-                {tour.minPeople && (
+                {tour.minPeople && tour.maxPeople && (
                     <span className="block text-[11.5px] font-normal text-gray-500 mt-0.5 mb-2.5">
-                        *แพ็กเกจไพรเวท ต้องจองขั้นต่ำ {tour.minPeople} ท่านขึ้นไป
+                        *ทัวร์ส่วนตัว (ราคาเหมา) รองรับผู้เดินทางสูงสุด {tour.maxPeople} ท่าน
                     </span>
                 )}
             </label>
@@ -34,7 +34,7 @@ export default function BookingGuestSelector({
                     {
                         label: 'ผู้ใหญ่',
                         value: adults,
-                        min: tour.minPeople ? Math.max(1, tour.minPeople) : 1,
+                        min: 1, // ราคาเหมาไม่ต้องกำหนดขั้นต่ำ
                         set: setAdults
                     },
                     { label: 'เด็ก', value: children, min: 0, set: setChildren },

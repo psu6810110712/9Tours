@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { tourService } from '../../services/tourService'
+import ConfirmModal from '../../components/common/ConfirmModal'
+import { toast } from 'react-hot-toast'
 import type { Tour } from '../../types/tour'
 
 // ตัวเลือก tab สำหรับกรองทัวร์
@@ -18,6 +20,7 @@ export default function AdminTourListPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<FilterValue>('all')
   const [search, setSearch] = useState('')
+  const [deleteModalTour, setDeleteModalTour] = useState<Tour | null>(null)
   const navigate = useNavigate()
 
   // โหลดทัวร์ทั้งหมด (รวมที่ปิดใช้งาน) ตอนเปิดหน้า
@@ -29,9 +32,16 @@ export default function AdminTourListPage() {
   }, [])
 
   const handleDelete = async (tour: Tour) => {
-    if (!confirm(`ยืนยันการลบ "${tour.name}" ?`)) return
-    await tourService.remove(tour.id)
-    setTours((prev) => prev.filter((t) => t.id !== tour.id))
+    try {
+      await tourService.remove(tour.id)
+      setTours((prev) => prev.filter((t) => t.id !== tour.id))
+      toast.success('ลบทัวร์สำเร็จ')
+      setDeleteModalTour(null)
+    } catch (error) {
+      console.error(error)
+      toast.error('ไม่สามารถลบทัวร์ได้ กรุณาลองใหม่อีกครั้ง')
+      setDeleteModalTour(null)
+    }
   }
 
   // สลับสถานะเปิด/ปิดทัวร์ แล้วอัปเดต state ทันทีโดยไม่ต้อง reload
@@ -156,7 +166,7 @@ export default function AdminTourListPage() {
                           แก้ไข
                         </button>
                         <button
-                          onClick={() => handleDelete(tour)}
+                          onClick={() => setDeleteModalTour(tour)}
                           className="bg-red-100 hover:bg-red-200 text-red-600 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
                         >
                           ลบ
@@ -176,6 +186,18 @@ export default function AdminTourListPage() {
           </div>
         )}
       </main>
+
+      {/* 🛑 Confirm Delete Modal 🛑 */}
+      <ConfirmModal
+        isOpen={deleteModalTour !== null}
+        title="ยืนยันการลบทัวร์"
+        message={`คุณแน่ใจหรือไม่ว่าต้องการลบทัวร์ "${deleteModalTour?.name}"? การกระทำนี้ไม่สามารถย้อนกลับได้`}
+        confirmText="ยืนยันลบทัวร์"
+        cancelText="ยกเลิก"
+        confirmStyle="danger"
+        onConfirm={() => deleteModalTour && handleDelete(deleteModalTour)}
+        onCancel={() => setDeleteModalTour(null)}
+      />
     </>
   )
 }

@@ -123,75 +123,73 @@ export default function BookingDateSelector({
                         })()}
                     </div>
 
-                    {/* 2. Round Selection (If selected date has multiple rounds AND NOT Private Package) */}
+                    {/* 2. Round Selection / Seat Availability (For Join Trips) */}
                     {selectedSchedule && !tour.minPeople && (
                         <div className="mt-4">
                             {(() => {
                                 const schedulesOnSelectedDate = upcomingSchedules.filter((s: TourSchedule) => s.startDate === selectedSchedule.startDate)
                                 const hasMultipleRounds = schedulesOnSelectedDate.length > 1
 
-                                // ถ้ามีหลายรอบ หรือเป็นทัวร์ที่มี TimeSlot ให้แสดงรายการรอบ
-                                if (hasMultipleRounds || selectedSchedule.timeSlot) {
-                                    return (
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-semibold text-gray-600 block">เลือกรอบเวลา (Join Trip)</label>
-                                            <div className="grid gap-2">
-                                                {schedulesOnSelectedDate.map((s: TourSchedule) => {
-                                                    const left = s.maxCapacity - s.currentBooked
-                                                    const isFull = left <= 0
-                                                    const isActiveRound = selectedSchedule.id === s.id
+                                return (
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-gray-600 block">
+                                            {hasMultipleRounds ? 'เลือกรอบเวลา (Join Trip)' : 'รายละเอียดรอบ / จำนวนที่นั่งว่าง (Join Trip)'}
+                                        </label>
+                                        <div className="grid gap-2">
+                                            {schedulesOnSelectedDate.map((s: TourSchedule) => {
+                                                const left = s.maxCapacity - s.currentBooked
+                                                const isFull = left <= 0
+                                                const isActiveRound = selectedSchedule.id === s.id
 
-                                                    return (
-                                                        <button
-                                                            key={s.id}
-                                                            disabled={isFull}
-                                                            onClick={() => setSelectedSchedule(s)}
-                                                            className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left group
+                                                return (
+                                                    <button
+                                                        key={s.id}
+                                                        disabled={isFull}
+                                                        onClick={() => setSelectedSchedule(s)}
+                                                        className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left group
                                 ${isActiveRound
-                                                                    ? 'border-orange-200 bg-orange-50'
-                                                                    : isFull
-                                                                        ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
-                                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
-                                                                }`}
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <div className={`w-4 h-4 rounded-full border flex flex-shrink-0 items-center justify-center
+                                                                ? 'border-orange-200 bg-orange-50'
+                                                                : isFull
+                                                                    ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`w-4 h-4 rounded-full border flex flex-shrink-0 items-center justify-center
                                   ${isActiveRound ? 'border-accent bg-accent' : 'border-gray-300 bg-white'}`}
-                                                                >
-                                                                    {isActiveRound && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                                                </div>
-                                                                <div>
-                                                                    <div className={`text-base font-bold ${isActiveRound ? 'text-gray-900' : 'text-gray-700'}`}>
-                                                                        {s.timeSlot ? s.timeSlot : 'ไม่ระบุเวลา'}
-                                                                    </div>
-                                                                    {s.roundName && (
-                                                                        <div className="text-[13px] text-gray-500">{s.roundName}</div>
-                                                                    )}
-                                                                </div>
+                                                            >
+                                                                {isActiveRound && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                                                             </div>
-                                                            <div className="text-right">
-                                                                {isFull ? (
-                                                                    <span className="text-[13.5px] font-bold text-red-500">เต็มแล้ว</span>
-                                                                ) : (
-                                                                    <span className={`text-[13.5px] font-medium ${left <= 5 ? 'text-red-500' : 'text-green-600'}`}>
-                                                                        เหลือ {left} ที่
-                                                                    </span>
+                                                            <div>
+                                                                <div className={`text-base font-bold ${isActiveRound ? 'text-gray-900' : 'text-gray-700'}`}>
+                                                                    {s.timeSlot ? s.timeSlot : (hasMultipleRounds ? 'ไม่ระบุเวลา' : 'รอบออกเดินทาง')}
+                                                                </div>
+                                                                {s.roundName && (
+                                                                    <div className="text-[13px] text-gray-500">{s.roundName}</div>
                                                                 )}
                                                             </div>
-                                                        </button>
-                                                    )
-                                                })}
-                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            {isFull ? (
+                                                                <span className="text-[13.5px] font-bold text-red-500">เต็มแล้ว</span>
+                                                            ) : (
+                                                                <span className={`text-[13.5px] font-medium ${left <= 5 ? 'text-red-500' : 'text-green-600'}`}>
+                                                                    เหลือ {left} ที่
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </button>
+                                                )
+                                            })}
                                         </div>
-                                    )
-                                }
-                                return null
+                                    </div>
+                                )
                             })()}
                         </div>
                     )}
 
-                    {/* ข้อมูลสรุปของรอบที่เลือก (ซ่อนถ้าเป็น Join Trip => เพราะ !tour.minPeople คือ Join Trip) */}
-                    {selectedSchedule && tour.minPeople && (
+                    {/* ข้อมูลสรุปของรอบที่เลือก (โชว์ถ้าเป็น Private หรือ Package ให้เห็นจำนวนวัน) */}
+                    {selectedSchedule && (tour.minPeople || tour.tourType === 'package') && (
                         <div className="mt-3 bg-gray-50 rounded-xl p-3.5 space-y-2.5 border border-gray-100">
                             {/* วันที่ + ชื่อรอบ/แพ็กเกจ */}
                             <div className="flex items-start gap-3">

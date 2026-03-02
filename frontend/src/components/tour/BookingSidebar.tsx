@@ -79,16 +79,19 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
     ? (availableSeatsData[selectedSchedule.id] ?? (selectedSchedule.maxCapacity - selectedSchedule.currentBooked))
     : 0
   const totalGuests = adults + children
-  const totalPrice = Number(tour?.price || 1500) * adults + Number(tour?.childPrice || 1000) * children
+  const isPrivate = !!tour?.minPeople
+  const totalPrice = isPrivate
+    ? Number(tour?.price || 0)
+    : Number(tour?.price || 1500) * adults + Number(tour?.childPrice || 1000) * children
 
   // 1. Logic ล็อคปุ่ม + (ตรวจสอบว่าคนจองเกินที่ว่างหรือไม่)
-  const isMaxReached = tour?.minPeople
+  const isMaxReached = isPrivate
     ? (tour?.maxPeople ? totalGuests >= tour.maxPeople : false) // กรณี Private Tour เช็คจาก maxPeople
     : (totalGuests >= seatsLeft) // กรณี Join Trip เช็คจาก seatsLeft
 
   // 2. Logic ล็อคปุ่ม "จองเลย"
-  const isSoldOut = !tour?.minPeople && selectedSchedule && seatsLeft <= 0
-  const isExceedCapacity = !tour?.minPeople && totalGuests > seatsLeft
+  const isSoldOut = !isPrivate && selectedSchedule && seatsLeft <= 0
+  const isExceedCapacity = !isPrivate && totalGuests > seatsLeft
   const isBookingDisabled = !upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity
 
   let buttonText = 'จองเลย'

@@ -26,7 +26,9 @@ export default function BookingPriceHeader({ tour }: BookingPriceHeaderProps) {
                 <span className="text-[32px] leading-none font-bold text-[#111827]">
                     ฿{Number(tour.price).toLocaleString()}
                 </span>
-                <span className="text-base font-medium text-gray-600">บาท / คน</span>
+                <span className="text-base font-medium text-gray-600">
+                    {tour.minPeople ? 'บาท / กรุ๊ป' : 'บาท / คน'}
+                </span>
             </div>
         </div>
     );

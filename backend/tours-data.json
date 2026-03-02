@@ -119,20 +119,21 @@
     "itinerary": [
       {
         "day": 1,
-        "time": "",
-        "title": "",
-        "description": ""
+        "time": "09:00-10:30",
+        "title": "เดินทางถึงเชียงใหม่และเติมพลังมื้อแรก",
+        "description": "รับรถเช่าหรือเดินทางเข้าตัวเมือง แวะทาน \"ข้าวซอยแม่สาย\" หรือ \"กาดมณี\" สัมผัสรสชาติอาหารเหนือต้นตำรับ"
       },
       {
         "day": 1,
-        "time": "",
-        "title": "",
-        "description": ""
+        "time": "11:00-13:00",
+        "title": "เสพงานดีไซน์ที่ One Nimman (ย่านนิมมานเหมินท์)",
+        "description": "เดินชมโครงการที่มีสถาปัตยกรรมแบบก่ออิฐสีส้ม สไตล์ยุโรปผสมล้านนา มีจังหวะของโครงสร้างที่สวยงาม (Rhythm & Pattern) เหมาะกับการถ่ายภาพแนวสตรีทและสถาปัตยกรรม"
       },
       {
-        "time": "",
-        "title": "",
-        "description": ""
+        "time": "13:30-15:30",
+        "title": "พักผ่อนที่ คาเฟ่ Pluto (ย่านแม่โจ้)",
+        "description": "คาเฟ่ที่มีการออกแบบในธีมดาวเคราะห์ลึกลับ เน้นโทนสีเทาดำ การเล่นกับแสงธรรมชาติและเงา (Light & Shadow) เหมาะมากสำหรับการถ่ายภาพแนว Minimal หรือ Liminal Space ที่ดูแปลกตา",
+        "day": 1
       }
     ],
     "transportation": "รถตู้ส่วนตัว",
@@ -147,89 +148,89 @@
       {
         "id": 300,
         "tourId": 3,
-        "startDate": "2026-04-04",
-        "endDate": "2026-04-06",
+        "startDate": "2026-03-07",
+        "endDate": "2026-03-09",
         "timeSlot": "",
         "roundName": "Private Group",
-        "maxCapacity": 10,
-        "currentBooked": -7
+        "maxCapacity": 6,
+        "currentBooked": 0
       },
       {
         "id": 301,
         "tourId": 3,
-        "startDate": "2026-04-05",
-        "endDate": "2026-04-07",
+        "startDate": "2026-03-08",
+        "endDate": "2026-03-10",
         "timeSlot": "",
         "roundName": "Private Group",
-        "maxCapacity": 10,
-        "currentBooked": -1
+        "maxCapacity": 6,
+        "currentBooked": 0
       },
       {
         "id": 302,
         "tourId": 3,
-        "startDate": "2026-04-11",
-        "endDate": "2026-04-13",
+        "startDate": "2026-03-14",
+        "endDate": "2026-03-16",
         "timeSlot": "",
         "roundName": "Private Group",
-        "maxCapacity": 10,
-        "currentBooked": -7
+        "maxCapacity": 6,
+        "currentBooked": 0
       },
       {
         "id": 303,
         "tourId": 3,
-        "startDate": "2026-04-12",
-        "endDate": "2026-04-14",
+        "startDate": "2026-03-15",
+        "endDate": "2026-03-17",
         "timeSlot": "",
         "roundName": "Private Group",
-        "maxCapacity": 10,
+        "maxCapacity": 6,
         "currentBooked": 0
       },
       {
         "id": 304,
         "tourId": 3,
-        "startDate": "2026-04-18",
-        "endDate": "2026-04-20",
+        "startDate": "2026-03-21",
+        "endDate": "2026-03-23",
         "timeSlot": "",
         "roundName": "Private Group",
-        "maxCapacity": 10,
+        "maxCapacity": 6,
         "currentBooked": 0
       },
       {
         "id": 305,
         "tourId": 3,
-        "startDate": "2026-04-19",
-        "endDate": "2026-04-21",
+        "startDate": "2026-03-22",
+        "endDate": "2026-03-24",
         "timeSlot": "",
         "roundName": "Private Group",
-        "maxCapacity": 10,
+        "maxCapacity": 6,
         "currentBooked": 0
       },
       {
         "id": 306,
         "tourId": 3,
-        "startDate": "2026-04-25",
-        "endDate": "2026-04-27",
+        "startDate": "2026-03-28",
+        "endDate": "2026-03-30",
         "timeSlot": "",
         "roundName": "Private Group",
-        "maxCapacity": 10,
+        "maxCapacity": 6,
         "currentBooked": 0
       },
       {
         "id": 307,
         "tourId": 3,
-        "startDate": "2026-04-26",
-        "endDate": "2026-04-28",
+        "startDate": "2026-03-29",
+        "endDate": "2026-03-31",
         "timeSlot": "",
         "roundName": "Private Group",
-        "maxCapacity": 10,
+        "maxCapacity": 6,
         "currentBooked": 0
       }
     ],
     "createdAt": "2026-03-01T05:05:17.105Z",
-    "updatedAt": "2026-03-01T05:53:05.378Z",
+    "updatedAt": "2026-03-02T06:59:31.629Z",
     "childPrice": null,
-    "minPeople": 5,
-    "maxPeople": 10
+    "minPeople": 4,
+    "maxPeople": 6
   },
   {
     "id": 4,
@@ -241,7 +242,7 @@
       "สายกิจกรรม",
       "สายธรรมชาติ"
     ],
-    "price": 2300,
+    "price": 1200,
     "originalPrice": null,
     "images": [
       "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800",
@@ -265,28 +266,29 @@
     "isActive": true,
     "schedules": [
       {
-        "id": 401,
+        "id": 400,
         "tourId": 4,
         "startDate": "2026-02-23",
         "endDate": "2026-02-23",
         "timeSlot": "10:00-18:00",
         "roundName": "รอบทะเลสวย",
         "maxCapacity": 18,
-        "currentBooked": 18
+        "currentBooked": 0
       },
       {
-        "id": 402,
+        "id": 401,
         "tourId": 4,
         "startDate": "2026-02-25",
         "endDate": "2026-02-25",
         "timeSlot": "10:00-18:00",
         "roundName": "รอบพิเศษ",
         "maxCapacity": 18,
-        "currentBooked": 9
+        "currentBooked": 0
       }
     ],
     "createdAt": "2026-03-01T05:05:17.105Z",
-    "updatedAt": "2026-03-01T05:05:17.105Z"
+    "updatedAt": "2026-03-02T07:48:03.846Z",
+    "childPrice": null
   },
   {
     "id": 5,
@@ -359,7 +361,7 @@
         "timeSlot": "13:00-17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
-        "currentBooked": 0
+        "currentBooked": 10
       },
       {
         "id": 504,

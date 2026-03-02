@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { tourService } from '../../services/tourService'
+import ConfirmModal from '../../components/common/ConfirmModal'
+import { toast } from 'react-hot-toast'
 import type { CreateTourPayload } from '../../types/tour'
 import ImageUploadSection from '../../components/admin/tour-form/ImageUploadSection'
 import ItinerarySection from '../../components/admin/tour-form/ItinerarySection'
@@ -34,6 +36,7 @@ export default function AdminTourFormPage() {
 
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [error, setError] = useState('')
   const [tourCode, setTourCode] = useState('')
 
@@ -126,7 +129,7 @@ export default function AdminTourFormPage() {
     // ตรวจสอบประเภทไฟล์ (รับเฉพาะ jpg/jpeg และ png)
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
     if (!validTypes.includes(file.type)) {
-      alert('กรุณาแนบเฉพาะไฟล์ประเภท .jpg หรือ .png เท่านั้นครับ')
+      toast.error('กรุณาแนบเฉพาะไฟล์ประเภท .jpg หรือ .png เท่านั้นครับ')
       e.target.value = ''
       return
     }
@@ -137,7 +140,7 @@ export default function AdminTourFormPage() {
       setImages((prev) => [...prev, url])
     } catch (error) {
       console.error(error)
-      alert('อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
+      toast.error('อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
     } finally {
       setUploadingImage(false)
       e.target.value = ''
@@ -572,7 +575,7 @@ export default function AdminTourFormPage() {
           <div className="flex justify-end gap-3 mt-6">
             <button
               type="button"
-              onClick={() => navigate('/admin/tours')}
+              onClick={() => setCancelModalOpen(true)}
               className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold px-6 py-2.5 rounded-xl transition-colors"
             >
               ยกเลิก
@@ -587,6 +590,18 @@ export default function AdminTourFormPage() {
           </div>
         </form>
       </main>
+
+      {/* 🛑 Confirm Cancel Modal 🛑 */}
+      <ConfirmModal
+        isOpen={cancelModalOpen}
+        title="ยกเลิกการแก้ไข?"
+        message="ข้อมูลที่คุณพิมพ์ไว้จะหายไปทั้งหมด ยืนยันที่จะยกเลิกหรือไม่?"
+        confirmText="ยืนยันยกเลิก"
+        cancelText="กลับไปหน้าทัวร์"
+        confirmStyle="danger"
+        onConfirm={() => navigate('/admin/tours')}
+        onCancel={() => setCancelModalOpen(false)}
+      />
     </>
   )
 }

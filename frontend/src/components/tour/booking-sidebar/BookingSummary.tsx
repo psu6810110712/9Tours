@@ -22,25 +22,38 @@ export default function BookingSummary({
     return (
         <>
             <div className="border-t border-gray-100 pt-4 mb-4 space-y-2">
-                {adults > 0 && (
+                {tour.minPeople ? (
                     <div className="flex justify-between items-center text-[15px]">
                         <span className="text-gray-600 font-medium">
-                            ผู้ใหญ่ <span className="text-gray-400 text-[13px] font-normal">(฿{Number(tour.price).toLocaleString()} x {adults})</span>
+                            ราคาเหมา (Private Tour) <span className="text-gray-400 text-[13px] font-normal">({adults + children} ท่าน)</span>
                         </span>
                         <span className="text-gray-700 font-medium whitespace-nowrap">
-                            ฿{(Number(tour.price || 1500) * adults).toLocaleString()}
+                            ฿{Number(tour.price || 0).toLocaleString()}
                         </span>
                     </div>
-                )}
-                {children > 0 && (
-                    <div className="flex justify-between items-center text-[15px]">
-                        <span className="text-gray-600 font-medium">
-                            เด็ก <span className="text-gray-400 text-[13px] font-normal">(฿{Number(tour.childPrice || 1000).toLocaleString()} x {children})</span>
-                        </span>
-                        <span className="text-gray-700 font-medium whitespace-nowrap">
-                            ฿{(Number(tour.childPrice || 1000) * children).toLocaleString()}
-                        </span>
-                    </div>
+                ) : (
+                    <>
+                        {adults > 0 && (
+                            <div className="flex justify-between items-center text-[15px]">
+                                <span className="text-gray-600 font-medium">
+                                    ผู้ใหญ่ <span className="text-gray-400 text-[13px] font-normal">(฿{Number(tour.price).toLocaleString()} x {adults})</span>
+                                </span>
+                                <span className="text-gray-700 font-medium whitespace-nowrap">
+                                    ฿{(Number(tour.price || 1500) * adults).toLocaleString()}
+                                </span>
+                            </div>
+                        )}
+                        {children > 0 && (
+                            <div className="flex justify-between items-center text-[15px]">
+                                <span className="text-gray-600 font-medium">
+                                    เด็ก <span className="text-gray-400 text-[13px] font-normal">(฿{Number(tour.childPrice || 1000).toLocaleString()} x {children})</span>
+                                </span>
+                                <span className="text-gray-700 font-medium whitespace-nowrap">
+                                    ฿{(Number(tour.childPrice || 1000) * children).toLocaleString()}
+                                </span>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 <div className="flex justify-between items-end pt-1">

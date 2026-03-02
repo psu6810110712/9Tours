@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { bookingService } from '../services/bookingService'
 import ProgressBar from '../components/common/ProgressBar'
 import BookingSummaryCard from '../components/booking/BookingSummaryCard'
+import { toast } from 'react-hot-toast'
 
 interface PaymentPageData {
   id: string | number
@@ -135,12 +136,12 @@ export default function PaymentPage() {
   // 4. ส่งข้อมูลการชำระเงิน (Upload slip)
   const handleConfirmPayment = async () => {
     if (!selectedFile) {
-      alert('กรุณาแนบหลักฐานการชำระเงินก่อนยืนยันครับ')
+      toast.error('กรุณาแนบหลักฐานการชำระเงินก่อนยืนยันครับ')
       return
     }
 
     if (!bookingId || !bookingData) {
-      alert('ไม่พบข้อมูลการจอง')
+      toast.error('ไม่พบข้อมูลการจอง')
       return
     }
 
@@ -161,7 +162,7 @@ export default function PaymentPage() {
       setIsSubmitting(false)
       const error = err as { response?: { data?: { message?: string } } }
       const errorMsg = error.response?.data?.message || 'ไม่สามารถอัปโหลดสลิปได้ กรุณาลองใหม่อีกครั้ง'
-      alert(errorMsg)
+      toast.error(errorMsg)
       console.error('Error uploading payment slip:', err)
     }
   }
