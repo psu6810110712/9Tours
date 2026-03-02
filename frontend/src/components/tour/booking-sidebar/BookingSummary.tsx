@@ -25,10 +25,8 @@ export default function BookingSummary({
                 {tour.minPeople ? (
                     <div className="flex justify-between items-center text-[15px]">
                         <span className="text-gray-600 font-medium">
-                            ราคาเหมา (Private Tour) <span className="text-gray-400 text-[13px] font-normal">({adults + children} ท่าน)</span>
                         </span>
                         <span className="text-gray-700 font-medium whitespace-nowrap">
-                            ฿{Number(tour.price || 0).toLocaleString()}
                         </span>
                     </div>
                 ) : (

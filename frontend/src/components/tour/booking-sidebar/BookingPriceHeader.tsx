@@ -11,7 +11,7 @@ export default function BookingPriceHeader({ tour }: BookingPriceHeaderProps) {
         <div className="mb-4">
             {isPrivate && (
                 <div className="text-[13px] font-bold text-amber-600 mb-1.5 flex items-center gap-1.5">
-                    <span></span>Private Trip (ส่วนตัวเฉพาะกลุ่มคุณ)
+                    <span></span>
                 </div>
             )}
             {tour.originalPrice && (
@@ -34,7 +34,7 @@ export default function BookingPriceHeader({ tour }: BookingPriceHeaderProps) {
                             ฿{Number(tour.price).toLocaleString()}
                         </span>
                         <span className="text-base font-medium text-gray-600">
-                            บาท / กรุ๊ป
+                            บาท
                         </span>
                     </div>
                 </div>

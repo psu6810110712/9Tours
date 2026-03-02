@@ -103,7 +103,7 @@
       "สายธรรมชาติ",
       "สายชิล"
     ],
-    "price": 6900,
+    "price": 4500,
     "originalPrice": 7500,
     "images": [
       "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
@@ -127,18 +127,61 @@
     "isActive": true,
     "schedules": [
       {
+        "id": 300,
+        "tourId": 3,
+        "startDate": "2026-03-01",
+        "endDate": "2026-03-03",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
         "id": 301,
         "tourId": 3,
-        "startDate": "2026-02-24",
-        "endDate": "2026-02-26",
-        "timeSlot": null,
-        "roundName": "แพ็กเกจ 3 วัน 2 คืน",
-        "maxCapacity": 15,
-        "currentBooked": 6
+        "startDate": "2026-03-07",
+        "endDate": "2026-03-09",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
+        "id": 302,
+        "tourId": 3,
+        "startDate": "2026-03-08",
+        "endDate": "2026-03-10",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
+        "id": 303,
+        "tourId": 3,
+        "startDate": "2026-03-14",
+        "endDate": "2026-03-16",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
+        "id": 304,
+        "tourId": 3,
+        "startDate": "2026-03-15",
+        "endDate": "2026-03-17",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
       }
     ],
     "createdAt": "2026-03-02T08:46:26.747Z",
-    "updatedAt": "2026-03-02T08:46:26.747Z"
+    "updatedAt": "2026-03-02T12:24:29.125Z",
+    "childPrice": null,
+    "minPeople": 1,
+    "maxPeople": 6
   },
   {
     "id": 4,
@@ -255,7 +298,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 10
+        "currentBooked": 0
       },
       {
         "id": 503,
@@ -285,7 +328,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 6
+        "currentBooked": 0
       },
       {
         "id": 506,
