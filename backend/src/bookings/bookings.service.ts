@@ -117,8 +117,10 @@ export class BookingsService {
         ...schedule,
         tour: {
           id: tour.id,
+          tourCode: tour.tourCode,
           name: tour.name,
           price: tour.price,
+          childPrice: tour.childPrice,
           images: tour.images,
           accommodation: tour.accommodation || null,
         },
@@ -142,8 +144,10 @@ export class BookingsService {
             ...found.schedule,
             tour: {
               id: found.tour.id,
+              tourCode: found.tour.tourCode,
               name: found.tour.name,
               price: found.tour.price,
+              childPrice: found.tour.childPrice,
             },
           }
           : null,
@@ -168,8 +172,10 @@ export class BookingsService {
             ...found.schedule,
             tour: {
               id: found.tour.id,
+              tourCode: found.tour.tourCode,
               name: found.tour.name,
               price: found.tour.price,
+              childPrice: found.tour.childPrice,
               images: found.tour.images,
               accommodation: found.tour.accommodation || null,
             },
@@ -201,8 +207,10 @@ export class BookingsService {
           ...found.schedule,
           tour: {
             id: found.tour.id,
+            tourCode: found.tour.tourCode,
             name: found.tour.name,
             price: found.tour.price,
+            childPrice: found.tour.childPrice,
             images: found.tour.images,
             accommodation: found.tour.accommodation || null,
           },
@@ -229,8 +237,10 @@ export class BookingsService {
           ...found.schedule,
           tour: {
             id: found.tour.id,
+            tourCode: found.tour.tourCode,
             name: found.tour.name,
             price: found.tour.price,
+            childPrice: found.tour.childPrice,
             images: found.tour.images,
             accommodation: found.tour.accommodation || null,
           },
@@ -271,8 +281,10 @@ export class BookingsService {
           ...found.schedule,
           tour: {
             id: found.tour.id,
+            tourCode: found.tour.tourCode,
             name: found.tour.name,
             price: found.tour.price,
+            childPrice: found.tour.childPrice,
             images: found.tour.images,
             accommodation: found.tour.accommodation || null,
           },
