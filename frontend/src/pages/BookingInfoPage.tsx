@@ -138,7 +138,8 @@ export default function BookingInfoPage() {
           tourName: tour?.name || 'Loading...',
           image: tourImage,
           adults,
-          children
+          children,
+          isPrivate: !!tour?.minPeople
         }
       })
     } catch (err: unknown) {
@@ -289,6 +290,7 @@ export default function BookingInfoPage() {
               image={tourImage}
               accommodation={tour?.accommodation || undefined}
               totalPrice={totalPrice}
+              isPrivate={!!tour?.minPeople}
             />
 
             <div className="flex justify-center mt-6">

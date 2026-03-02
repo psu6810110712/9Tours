@@ -17,6 +17,7 @@ interface PaymentPageData {
   childPrice: number
   status: string
   image: string
+  isPrivate: boolean
 }
 
 export default function PaymentPage() {
@@ -56,7 +57,8 @@ export default function PaymentPage() {
           adultPrice: data.schedule?.tour?.price || 0,
           childPrice: (data.schedule?.tour as any)?.childPrice || data.schedule?.tour?.price || 0,
           status: data.status,
-          image: typeof data.schedule?.tour?.images?.[0] === 'string' ? data.schedule.tour.images[0] : (data.schedule?.tour?.images?.[0] as any)?.url || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+          image: typeof data.schedule?.tour?.images?.[0] === 'string' ? data.schedule.tour.images[0] : (data.schedule?.tour?.images?.[0] as any)?.url || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
+          isPrivate: !!data.schedule?.tour?.minPeople || location.state?.isPrivate || false
         })
       } catch (err) {
         console.error("Error fetching booking details:", err)
@@ -72,7 +74,8 @@ export default function PaymentPage() {
           adultPrice: 1500,
           childPrice: 1000,
           status: 'pending_payment',
-          image: 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+          image: 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
+          isPrivate: false
         })
       } finally {
         setLoading(false)
@@ -240,6 +243,7 @@ export default function PaymentPage() {
               childPrice={bookingData.childPrice}
               image={bookingData.image}
               totalPrice={bookingData.price}
+              isPrivate={bookingData.isPrivate}
             />
           </div>
 

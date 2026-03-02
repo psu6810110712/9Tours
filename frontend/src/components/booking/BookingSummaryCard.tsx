@@ -11,6 +11,7 @@ interface BookingSummaryCardProps {
     image: string;
     accommodation?: string; // Optional because PaymentPage data fetching logic may not have it immediately
     totalPrice?: number; // Optional because PaymentPage already has it, but BookingInfo calculates it. If not provided, it will calculate.
+    isPrivate?: boolean;
 }
 
 export default function BookingSummaryCard({
@@ -23,12 +24,13 @@ export default function BookingSummaryCard({
     childPrice,
     image,
     accommodation,
-    totalPrice
+    totalPrice,
+    isPrivate
 }: BookingSummaryCardProps) {
 
     const calculatedTotal = totalPrice !== undefined
         ? totalPrice
-        : (adults * adultPrice) + (children * childPrice);
+        : (isPrivate ? adultPrice : (adults * adultPrice) + (children * childPrice));
 
     return (
         <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 h-full flex flex-col">
@@ -53,7 +55,9 @@ export default function BookingSummaryCard({
                         </div>
                         <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[110px_1fr] items-start gap-2">
                             <span className="font-bold text-gray-800">จำนวน</span>
-                            <span className="break-words">ผู้ใหญ่ {adults}, เด็ก {children}</span>
+                            <span className="break-words">
+                                {isPrivate ? 'กรุ๊ปเหมาส่วนตัว' : `ผู้ใหญ่ ${adults}, เด็ก ${children}`}
+                            </span>
                         </div>
                         {accommodation && (
                             <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[110px_1fr] items-start gap-2">
@@ -78,19 +82,29 @@ export default function BookingSummaryCard({
                 <div className="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-100">
                     <h4 className="font-bold text-gray-800 mb-4 text-base hidden md:block">รายละเอียดราคา</h4>
                     <div className="space-y-3 text-[15px] text-gray-700 font-medium">
-                        {adults > 0 && (
+                        {isPrivate ? (
                             <div className="flex justify-between items-center">
-                                <span>ผู้ใหญ่</span>
-                                <span className="flex-1 text-center text-gray-500">{adultPrice.toLocaleString()} × {adults}</span>
-                                <span className="font-bold text-gray-800 w-28 text-right">{(adults * adultPrice).toLocaleString()} บาท</span>
+                                <span>ราคาเหมาแบบส่วนตัว</span>
+                                <span className="flex-1"></span>
+                                <span className="font-bold text-gray-800 w-28 text-right">{adultPrice.toLocaleString()} บาท</span>
                             </div>
-                        )}
-                        {children > 0 && (
-                            <div className="flex justify-between items-center">
-                                <span>เด็ก</span>
-                                <span className="flex-1 text-center text-gray-500">{childPrice.toLocaleString()} × {children}</span>
-                                <span className="font-bold text-gray-800 w-28 text-right">{(children * childPrice).toLocaleString()} บาท</span>
-                            </div>
+                        ) : (
+                            <>
+                                {adults > 0 && (
+                                    <div className="flex justify-between items-center">
+                                        <span>ผู้ใหญ่</span>
+                                        <span className="flex-1 text-center text-gray-500">{adultPrice.toLocaleString()} × {adults}</span>
+                                        <span className="font-bold text-gray-800 w-28 text-right">{(adults * adultPrice).toLocaleString()} บาท</span>
+                                    </div>
+                                )}
+                                {children > 0 && (
+                                    <div className="flex justify-between items-center">
+                                        <span>เด็ก</span>
+                                        <span className="flex-1 text-center text-gray-500">{childPrice.toLocaleString()} × {children}</span>
+                                        <span className="font-bold text-gray-800 w-28 text-right">{(children * childPrice).toLocaleString()} บาท</span>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
