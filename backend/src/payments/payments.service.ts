@@ -8,6 +8,44 @@ import { Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { CreatePaymentDto } from './dto/create-payment.dto';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// === อ่าน tours-data.json ===
+const DATA_FILE = path.join(process.cwd(), 'tours-data.json');
+
+function loadToursData(): any[] {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    }
+  } catch (e) {
+    console.error('❌ PaymentsService: cannot read tours-data.json', e);
+  }
+  return [];
+}
+
+function persistToursData(tours: any[]) {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(tours, null, 2));
+  } catch (e) {
+    console.error('❌ PaymentsService: cannot write tours-data.json', e);
+  }
+}
+
+// อัปเดต currentBooked ของ schedule ใน JSON
+function updateScheduleBookedCount(scheduleId: number, addPax: number) {
+  const tours = loadToursData();
+  for (const tour of tours) {
+    if (!tour.schedules) continue;
+    const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
+    if (schedule) {
+      schedule.currentBooked = (schedule.currentBooked || 0) + addPax;
+      persistToursData(tours);
+      return;
+    }
+  }
+}
 
 @Injectable()
 export class PaymentsService {
@@ -59,6 +97,9 @@ export class PaymentsService {
     // เปลี่ยนเป็น AWAITING_APPROVAL เพื่อรอ Admin ตรวจสอบสลิปก่อน
     booking.status = BookingStatus.AWAITING_APPROVAL;
     await this.bookingsRepository.save(booking);
+
+    // ✅ อัปเดต currentBooked เมื่อ payment upload (booking status -> AWAITING_APPROVAL)
+    updateScheduleBookedCount(booking.scheduleId, booking.paxCount);
 
     return {
       message: 'การชำระเงินสำเร็จ',
