@@ -34,6 +34,13 @@ export class BookingsController {
     return this.bookingsService.getMyBookings(req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get('admin/all')
+  async findAll() {
+    return this.bookingsService.findAll();
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string) {
@@ -59,5 +66,3 @@ export class BookingsController {
     return this.bookingsService.cancelBooking(+id, req.user.id);
   }
 }
-
-

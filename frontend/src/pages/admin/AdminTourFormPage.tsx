@@ -158,8 +158,18 @@ export default function AdminTourFormPage() {
     setSchedules(schedules.map((s, i) => {
       if (i !== index) return s
       const updated = { ...s, [field]: value }
-      if (tourType === 'one_day' && field === 'startDate') {
-        updated.endDate = value as string
+
+      // Auto-calculate endDate 
+      if (field === 'startDate') {
+        if (tourType === 'one_day') {
+          updated.endDate = value as string
+        } else if (tourType === 'package') {
+          const startD = new Date(value as string);
+          if (!isNaN(startD.getTime()) && bulkDuration > 1) {
+            startD.setDate(startD.getDate() + (bulkDuration - 1));
+            updated.endDate = startD.toISOString().slice(0, 10);
+          }
+        }
       }
       return updated
     }))

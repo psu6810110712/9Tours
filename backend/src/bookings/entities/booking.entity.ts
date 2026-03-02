@@ -8,11 +8,12 @@ import {
     CreateDateColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Payment } from './payment.entity';
+import { Payment } from '../../payments/entities/payment.entity';
 
 export enum BookingStatus {
     PENDING_PAYMENT = 'pending_payment',
     AWAITING_APPROVAL = 'awaiting_approval',
+    CONFIRMED = 'confirmed',
     SUCCESS = 'success',
     CANCELED = 'canceled',
     REFUND_PENDING = 'refund_pending',
@@ -28,23 +29,24 @@ export class Booking {
     @JoinColumn({ name: 'user_id' })
     user: User;
 
-    @Column({ name: 'user_id' })
+    @Column({ name: 'user_id', nullable: true })
     userId: number;
 
     // scheduleId เก็บเป็นตัวเลขอ้างอิง — ข้อมูล schedule จริงอ่านจาก tours-data.json
-    @Column({ name: 'schedule_id' })
+    @Column({ name: 'schedule_id', nullable: true })
     scheduleId: number;
 
-    @Column({ name: 'pax_count' })
+    @Column({ name: 'pax_count', nullable: true })
     paxCount: number;
 
-    @Column({ name: 'total_price', type: 'decimal', precision: 10, scale: 2 })
+    @Column({ name: 'total_price', type: 'decimal', precision: 10, scale: 2, nullable: true })
     totalPrice: number;
 
     @Column({
         type: 'enum',
         enum: BookingStatus,
         default: BookingStatus.PENDING_PAYMENT,
+        nullable: true,
     })
     status: BookingStatus;
 

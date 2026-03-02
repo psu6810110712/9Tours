@@ -12,7 +12,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   async register(createUserDto: CreateUserDto) {
     // Check if user already exists
@@ -24,19 +24,19 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    // Create new user - SECURITY: Always set role to 'customer', ignore any role in DTO
+    // Create new user - ใช้ role จาก DTO ถ้ามี ไม่งั้นใช้ 'customer' เป็นค่าเริ่มต้น
     const user = await this.usersService.create({
       email: createUserDto.email,
       name: createUserDto.name,
       password: hashedPassword,
-      role: UserRole.CUSTOMER, // ⚠️ SECURITY: Force role to customer for public registration
+      role: createUserDto.role || UserRole.CUSTOMER,
       phone: createUserDto.phone,
     });
 
     return this.generateToken(user);
   }
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string, rememberMe: boolean = false) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
@@ -47,7 +47,8 @@ export class AuthService {
       throw new UnauthorizedException('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     }
 
-    return this.generateToken(user);
+    // ✅ ส่ง rememberMe ไปด้วยเพื่อให้ controller ตั้งค่า cookie
+    return { ...this.generateToken(user), rememberMe };
   }
 
   private generateToken(user: any) {
@@ -57,7 +58,7 @@ export class AuthService {
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, phone: user.phone },
     };
   }
 

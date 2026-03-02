@@ -5,6 +5,7 @@ import { ToursModule } from './tours/tours.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { BookingsModule } from './bookings/bookings.module';
+import { PaymentsModule } from './payments/payments.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
@@ -26,7 +27,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, // เฉพาะตอน Dev เท่านั้น: จะสร้าง Table ให้เราอัตโนมัติ
+        synchronize: true,
       }),
     }),
 
@@ -34,6 +35,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     UsersModule,
     AuthModule,
     BookingsModule,
+    PaymentsModule,
     AnalyticsModule,
   ],
 })

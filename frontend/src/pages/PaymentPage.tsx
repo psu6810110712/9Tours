@@ -46,16 +46,16 @@ export default function PaymentPage() {
         setBookingData({
           id: data.id,
           // ถ้า Backend มีส่งมาให้ใช้ของ Backend ถ้าไม่มีให้ใช้ที่ถือข้ามหน้ามา
-          tourCode: data.schedule?.tour?.tourCode || location.state?.tourCode || '-',
+          tourCode: (data.schedule?.tour as any)?.tourCode || location.state?.tourCode || '-',
           tourName: data.schedule?.tour?.name || location.state?.tourName || 'Loading...',
           date: `อ้างอิงรอบเดินทาง: ${data.scheduleId}`,
           price: data.totalPrice || 0,
           adults: location.state?.adults ?? (data.paxCount || 1),
           children: location.state?.children ?? 0,
           adultPrice: data.schedule?.tour?.price || 0,
-          childPrice: data.schedule?.tour?.childPrice || data.schedule?.tour?.price || 0,
+          childPrice: ((data.schedule?.tour as any)?.childPrice) || data.schedule?.tour?.price || 0,
           status: data.status,
-          image: data.schedule?.tour?.images?.[0] || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+          image: typeof data.schedule?.tour?.images?.[0] === 'string' ? data.schedule.tour.images[0] : (data.schedule?.tour?.images?.[0] as any)?.url || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
         })
       } catch (err) {
         console.error("Error fetching booking details:", err)
@@ -132,20 +132,38 @@ export default function PaymentPage() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  // 4. จำลองการส่งข้อมูล (Mock Submit)
-  const handleConfirmPayment = () => {
+  // 4. ส่งข้อมูลการชำระเงิน (Upload slip)
+  const handleConfirmPayment = async () => {
     if (!selectedFile) {
       alert('กรุณาแนบหลักฐานการชำระเงินก่อนยืนยันครับ')
       return
     }
 
+    if (!bookingId || !bookingData) {
+      alert('ไม่พบข้อมูลการจอง')
+      return
+    }
+
     setIsSubmitting(true)
 
-    setTimeout(() => {
+    try {
+      await bookingService.uploadPaymentSlip(
+        Number(bookingId),
+        bookingData.price,
+        selectedFile,
+        'BANK_TRANSFER'
+      )
+      
       setIsSubmitting(false)
       setShowSuccessModal(true)
       localStorage.removeItem(`payment_expiry_${bookingId}`)
-    }, 1500)
+    } catch (err: unknown) {
+      setIsSubmitting(false)
+      const error = err as { response?: { data?: { message?: string } } }
+      const errorMsg = error.response?.data?.message || 'ไม่สามารถอัปโหลดสลิปได้ กรุณาลองใหม่อีกครั้ง'
+      alert(errorMsg)
+      console.error('Error uploading payment slip:', err)
+    }
   }
 
   if (loading || !bookingData) {

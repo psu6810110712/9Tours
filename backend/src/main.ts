@@ -2,15 +2,22 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import { ValidationPipe } from '@nestjs/common'; // 1. อิมพอร์ต ValidationPipe
+import { ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // เปิดใช้ cookie-parser เพื่อให้อ่าน cookie จาก request ได้
+  app.use(cookieParser());
 
   app.enableCors({
     origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
     credentials: true,
   });
+
+  // เปิดใช้งาน ValidationPipe ทั่วทั้งแอป
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   //โค้ดสำหรับเปิดใช้งานโฟลเดอร์ uploads
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
