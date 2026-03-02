@@ -53,7 +53,7 @@ export default function PaymentPage() {
           adults: location.state?.adults ?? (data.paxCount || 1),
           children: location.state?.children ?? 0,
           adultPrice: data.schedule?.tour?.price || 0,
-          childPrice: ((data.schedule?.tour as any)?.childPrice) || data.schedule?.tour?.price || 0,
+          childPrice: (data.schedule?.tour as any)?.childPrice || data.schedule?.tour?.price || 0,
           status: data.status,
           image: typeof data.schedule?.tour?.images?.[0] === 'string' ? data.schedule.tour.images[0] : (data.schedule?.tour?.images?.[0] as any)?.url || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
         })
