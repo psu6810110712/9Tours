@@ -188,8 +188,8 @@ export default function BookingDateSelector({
                         </div>
                     )}
 
-                    {/* ข้อมูลสรุปของรอบที่เลือก (โชว์ถ้าเป็น Private หรือ Package ให้เห็นจำนวนวัน) */}
-                    {selectedSchedule && (tour.minPeople || tour.tourType === 'package') && (
+                    {/* ข้อมูลสรุปของรอบที่เลือก (โชว์ถ้าเป็น Package ให้เห็นช่วงวัน หรือ Private ให้เห็น info) */}
+                    {selectedSchedule && (tour.tourType === 'package' || !!tour.minPeople) && (
                         <div className="mt-3 bg-gray-50 rounded-xl p-3.5 space-y-2.5 border border-gray-100">
                             {/* วันที่ + ชื่อรอบ/แพ็กเกจ */}
                             <div className="flex items-start gap-3">

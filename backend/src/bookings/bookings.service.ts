@@ -89,9 +89,17 @@ export class BookingsService {
       );
     }
 
-    // คำนวณ total price
-    const childPrice = tour.childPrice ?? tour.price;
-    const totalPrice = (adults * tour.price) + (children * childPrice);
+    // คำนวณ total price — แยก Join (ราคาต่อคน) vs Private (ราคาเหมา)
+    const isPrivate = !!tour.minPeople;
+    let totalPrice: number;
+    if (isPrivate) {
+      // Private tour = ราคาเหมา (flat price) ไม่ว่าจะมากี่คน
+      totalPrice = Number(tour.price);
+    } else {
+      // Join tour = คิดตามจำนวนคน
+      const childPrice = tour.childPrice ?? tour.price;
+      totalPrice = (adults * tour.price) + (children * childPrice);
+    }
 
     // สร้าง booking ใหม่  (เราเก็บ scheduleId ไว้เฉยๆ เพื่อ reference)
     const booking = this.bookingsRepository.create({
@@ -107,8 +115,9 @@ export class BookingsService {
     // บันทึก booking ลง DB
     const savedBooking = await this.bookingsRepository.save(booking);
 
-    // อัปเดต currentBooked ใน JSON
-    updateScheduleBookedCount(scheduleId, paxCount);
+    // ⚠️ ไม่อัปเดต currentBooked ในขั้นนี้
+    // เพราะ booking ยังอยู่ในสถานะ PENDING_PAYMENT
+    // จะอัปเดตเมื่อ payment upload แล้ว (AWAITING_APPROVAL status)
 
     // คืนข้อมูล booking พร้อมข้อมูลทัวร์
     return {
@@ -262,16 +271,21 @@ export class BookingsService {
       throw new UnauthorizedException('คุณไม่มีสิทธิ์ยกเลิก Booking นี้');
     }
 
-    if (booking.status !== BookingStatus.PENDING_PAYMENT) {
-      throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงินเท่านั้น');
+    if (booking.status !== BookingStatus.PENDING_PAYMENT && booking.status !== BookingStatus.AWAITING_APPROVAL) {
+      throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงินหรือรอการยืนยันเท่านั้น');
     }
+
+    const previousStatus = booking.status;
 
     // อัปเดต status เป็น canceled
     booking.status = BookingStatus.CANCELED;
     const updated = await this.bookingsRepository.save(booking);
 
-    // คืนจำนวนที่นั่งกลับไปที่ JSON
-    updateScheduleBookedCount(booking.scheduleId, -booking.paxCount);
+    // ✅ คืนจำนวนที่นั่งกลับไปที่ JSON เฉพาะเมื่อ booking มี status AWAITING_APPROVAL
+    // (เนื่องจาก seats ลดลงไปแล้วเมื่อ payment upload)
+    if (previousStatus === BookingStatus.AWAITING_APPROVAL) {
+      updateScheduleBookedCount(booking.scheduleId, -booking.paxCount);
+    }
 
     const found = findScheduleInJson(updated.scheduleId);
     return {
