@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { bookingService } from '../services/bookingService'
 import ProgressBar from '../components/common/ProgressBar'
 import BookingSummaryCard from '../components/booking/BookingSummaryCard'
+import { toast } from 'react-hot-toast'
 
 interface PaymentPageData {
   id: string | number
@@ -50,8 +51,8 @@ export default function PaymentPage() {
           tourName: data.schedule?.tour?.name || location.state?.tourName || 'Loading...',
           date: `อ้างอิงรอบเดินทาง: ${data.scheduleId}`,
           price: data.totalPrice || 0,
-          adults: location.state?.adults ?? (data.paxCount || 1),
-          children: location.state?.children ?? 0,
+          adults: data.adults ?? location.state?.adults ?? (data.paxCount || 1),
+          children: data.children ?? location.state?.children ?? 0,
           adultPrice: data.schedule?.tour?.price || 0,
           childPrice: (data.schedule?.tour as any)?.childPrice || data.schedule?.tour?.price || 0,
           status: data.status,
@@ -135,12 +136,12 @@ export default function PaymentPage() {
   // 4. ส่งข้อมูลการชำระเงิน (Upload slip)
   const handleConfirmPayment = async () => {
     if (!selectedFile) {
-      alert('กรุณาแนบหลักฐานการชำระเงินก่อนยืนยันครับ')
+      toast.error('กรุณาแนบหลักฐานการชำระเงินก่อนยืนยันครับ')
       return
     }
 
     if (!bookingId || !bookingData) {
-      alert('ไม่พบข้อมูลการจอง')
+      toast.error('ไม่พบข้อมูลการจอง')
       return
     }
 
@@ -153,7 +154,7 @@ export default function PaymentPage() {
         selectedFile,
         'BANK_TRANSFER'
       )
-      
+
       setIsSubmitting(false)
       setShowSuccessModal(true)
       localStorage.removeItem(`payment_expiry_${bookingId}`)
@@ -161,7 +162,7 @@ export default function PaymentPage() {
       setIsSubmitting(false)
       const error = err as { response?: { data?: { message?: string } } }
       const errorMsg = error.response?.data?.message || 'ไม่สามารถอัปโหลดสลิปได้ กรุณาลองใหม่อีกครั้ง'
-      alert(errorMsg)
+      toast.error(errorMsg)
       console.error('Error uploading payment slip:', err)
     }
   }

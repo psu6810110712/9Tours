@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
@@ -15,6 +16,19 @@ import PaymentPage from './pages/PaymentPage'
 function App() {
   return (
     <AuthProvider>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            fontSize: '14px',
+            padding: '12px 16px',
+            fontWeight: 500
+          },
+        }}
+      />
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>

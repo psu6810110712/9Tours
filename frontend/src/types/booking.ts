@@ -10,6 +10,8 @@ export interface Tour {
   id: number
   name: string
   price: number
+  tourCode?: string
+  childPrice?: number
   images: string[]
   accommodation?: string
 }
@@ -26,6 +28,8 @@ export interface Booking {
   userId: number
   scheduleId: number
   paxCount: number
+  adults: number
+  children: number
   totalPrice: number
   status: string // 'PENDING_PAYMENT' | 'CONFIRMED' | 'CANCELED'
   createdAt: string
@@ -36,4 +40,6 @@ export interface Booking {
 export interface CreateBookingDto {
   scheduleId: number
   paxCount: number
+  adults?: number
+  children?: number
 }
