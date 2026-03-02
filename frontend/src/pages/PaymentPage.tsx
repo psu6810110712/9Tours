@@ -46,14 +46,14 @@ export default function PaymentPage() {
         setBookingData({
           id: data.id,
           // ถ้า Backend มีส่งมาให้ใช้ของ Backend ถ้าไม่มีให้ใช้ที่ถือข้ามหน้ามา
-          tourCode: data.schedule?.tour?.tourCode || location.state?.tourCode || '-',
+          tourCode: (data.schedule?.tour as any)?.tourCode || location.state?.tourCode || '-',
           tourName: data.schedule?.tour?.name || location.state?.tourName || 'Loading...',
           date: `อ้างอิงรอบเดินทาง: ${data.scheduleId}`,
           price: data.totalPrice || 0,
           adults: location.state?.adults ?? (data.paxCount || 1),
           children: location.state?.children ?? 0,
           adultPrice: data.schedule?.tour?.price || 0,
-          childPrice: data.schedule?.tour?.childPrice || data.schedule?.tour?.price || 0,
+          childPrice: (data.schedule?.tour as any)?.childPrice || data.schedule?.tour?.price || 0,
           status: data.status,
           image: data.schedule?.tour?.images?.[0] || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
         })

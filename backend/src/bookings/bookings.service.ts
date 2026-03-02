@@ -144,6 +144,7 @@ export class BookingsService {
               tourCode: found.tour.tourCode,
               name: found.tour.name,
               price: found.tour.price,
+              childPrice: found.tour.childPrice,
             },
           }
           : null,
