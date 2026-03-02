@@ -32,9 +32,28 @@ export default function BookingInfoPage() {
   // Auto-fill user info when toggling 'useAccountInfo'
   useEffect(() => {
     if (formData.useAccountInfo === 'yes' && user) {
+      //  สมาร์ทพาร์สเซอร์ แยกคำนำหน้าออกจากชื่อสำหรับข้อมูลผู้ใช้เก่า
+      let parsedPrefix = formData.prefix; // ค่าเริ่มต้น
+      let cleanName = user.name || '';
+
+      const prefixPatterns = [
+        { pattern: /^(นาย|Mr\.)\s*/i, value: 'นาย' },
+        { pattern: /^(นาง|Mrs\.)\s*/i, value: 'นาง' },
+        { pattern: /^(นางสาว|Ms\.|Miss)\s*/i, value: 'นางสาว' }
+      ];
+
+      for (const p of prefixPatterns) {
+        if (p.pattern.test(cleanName)) {
+          parsedPrefix = p.value; // พบคำนำหน้าให้เปลี่ยนไปใช้ค่านั้นใน Dropdown ให้ด้วย
+          cleanName = cleanName.replace(p.pattern, '').trim(); // ลบคำกําหน้าออกจากช่องชื่อ
+          break;
+        }
+      }
+
       setFormData(prev => ({
         ...prev,
-        fullName: user.name || '',
+        prefix: parsedPrefix,     // เลือกคำนำหน้าให้ถูกอิงจากชื่อเดิม
+        fullName: cleanName,      //  ชื่อที่ไม่มีคำนำหน้าแล้ว
         email: user.email || '',
         phone: user.phone || ''
       }))
@@ -94,7 +113,7 @@ export default function BookingInfoPage() {
   }
 
   const tourImage = tour?.images && tour.images.length > 0
-    ? tour.images[0]
+    ? (typeof tour.images[0] === 'string' ? tour.images[0] : (tour.images[0] as any).url)
     : 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
 
   const handleSubmit = async (e: React.FormEvent) => {

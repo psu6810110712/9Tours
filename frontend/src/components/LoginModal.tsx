@@ -21,7 +21,7 @@ export default function LoginModal({ onClose, onSwitchToRegister, initialError =
     setError('')
     setLoading(true)
     try {
-      await login(email, password)
+      await login(email, password, remember)
 
       onClose()
     } catch {

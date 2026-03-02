@@ -9,6 +9,15 @@ export interface TourFilters {
   admin?: string
 }
 
+export interface AvailableSeatsResponse {
+  tourId: number
+  scheduleId: number
+  maxCapacity: number
+  currentBooked: number
+  availableSeats: number
+  isFull: boolean
+}
+
 export const tourService = {
   getAll: (filters?: TourFilters) =>
     api.get<Tour[]>('/tours', { params: filters }).then((r) => r.data),
@@ -33,5 +42,13 @@ export const tourService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     return response.data.url
+  },
+
+  // ฟังก์ชันสำหรับดึงจำนวนที่นั่งว่าง
+  getAvailableSeats: async (tourId: number, scheduleId: number): Promise<AvailableSeatsResponse> => {
+    const response = await api.get<AvailableSeatsResponse>(
+      `/tours/${tourId}/schedule/${scheduleId}/available-seats`
+    )
+    return response.data
   },
 }

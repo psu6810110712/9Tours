@@ -1,4 +1,6 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, IsIn } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { UserRole } from '../entities/user.entity';
 
 export class CreateUserDto {
   @IsString()
@@ -17,4 +19,9 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   phone?: string;
+
+  @IsOptional()
+  @IsIn(['admin', 'customer'], { message: 'Role ต้องเป็น admin หรือ customer' })
+  @Transform(({ value }) => value as UserRole | undefined)
+  role?: UserRole;
 }
