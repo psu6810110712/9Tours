@@ -6,6 +6,7 @@ import TourInfo from '../components/tour/TourInfo'
 import TourItinerary from '../components/tour/TourItinerary'
 import BookingSidebar from '../components/tour/BookingSidebar'
 import { tourService } from '../services/tourService'
+import { useAuth } from '../context/AuthContext'
 import type { Tour } from '../types/tour'
 
 export default function TourDetailPage() {
@@ -13,6 +14,7 @@ export default function TourDetailPage() {
   const [tour, setTour] = useState<Tour | null>(null)
   const [related, setRelated] = useState<Tour[]>([])
   const navigate = useNavigate()
+  const { isAdmin } = useAuth()
 
   useEffect(() => {
     if (!id) return
@@ -33,14 +35,27 @@ export default function TourDetailPage() {
   return (
     <>
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Breadcrumb */}
-        <nav className="text-sm font-medium text-gray-400 mb-5 flex gap-2">
-          <Link to="/" className="hover:text-accent">หน้าแรก</Link>
-          <span>/</span>
-          <Link to={`/tours?province=${tour.province}`} className="hover:text-accent">{tour.province}</Link>
-          <span>/</span>
-          <span className="text-gray-600 line-clamp-1">{tour.name}</span>
-        </nav>
+        {/* Breadcrumb + Admin Edit */}
+        <div className="flex items-center justify-between mb-5">
+          <nav className="text-sm font-medium text-gray-400 flex gap-2">
+            <Link to="/" className="hover:text-accent">หน้าแรก</Link>
+            <span>/</span>
+            <Link to={`/tours?province=${tour.province}`} className="hover:text-accent">{tour.province}</Link>
+            <span>/</span>
+            <span className="text-gray-600 line-clamp-1">{tour.name}</span>
+          </nav>
+          {isAdmin && (
+            <Link
+              to={`/admin/tours/${tour.id}/edit`}
+              className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 text-amber-700 rounded-xl text-sm font-bold hover:bg-amber-100 transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              แก้ไขทัวร์
+            </Link>
+          )}
+        </div>
 
         {/* แถวบน: รูป + thumbnail เต็มความกว้างคอนเทนต์ */}
         <div className="mb-6">

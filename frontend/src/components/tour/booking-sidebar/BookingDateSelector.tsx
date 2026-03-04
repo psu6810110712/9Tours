@@ -20,6 +20,7 @@ interface BookingDateSelectorProps {
     selectedSchedule: TourSchedule | null;
     setSelectedSchedule: (schedule: TourSchedule) => void;
     scrollRef: Ref<HTMLDivElement | null>;
+    availableSeatsData?: { [key: number]: number | null };
 }
 
 export default function BookingDateSelector({
@@ -30,7 +31,8 @@ export default function BookingDateSelector({
     setSelectedMonth,
     selectedSchedule,
     setSelectedSchedule,
-    scrollRef
+    scrollRef,
+    availableSeatsData = {}
 }: BookingDateSelectorProps) {
     return (
         <div className="mb-4">
@@ -76,7 +78,10 @@ export default function BookingDateSelector({
                             const resultList = datesList.map((dateStr: string) => {
                                 // Find *any* schedule for this date to check availability
                                 const schedulesOnDate = upcomingSchedules.filter((s: TourSchedule) => s.startDate === dateStr)
-                                const isFullyBooked = schedulesOnDate.every((s: TourSchedule) => s.maxCapacity - s.currentBooked <= 0)
+                                const isFullyBooked = schedulesOnDate.every((s: TourSchedule) => {
+                                    const seats = availableSeatsData[s.id] ?? (s.maxCapacity - s.currentBooked);
+                                    return Math.max(0, seats) <= 0;
+                                })
                                 const isSelected = selectedSchedule?.startDate === dateStr
                                 const { day, month, weekday } = parseDate(dateStr)
 
@@ -101,7 +106,10 @@ export default function BookingDateSelector({
                                     disabled={isFullyBooked}
                                     onClick={() => {
                                         // When date is clicked, auto-select the first available round for that date
-                                        const firstAvailable = upcomingSchedules.find((s: TourSchedule) => s.startDate === dateStr && s.maxCapacity - s.currentBooked > 0)
+                                        const firstAvailable = upcomingSchedules.find((s: TourSchedule) => {
+                                            const seats = availableSeatsData[s.id] ?? (s.maxCapacity - s.currentBooked);
+                                            return s.startDate === dateStr && Math.max(0, seats) > 0;
+                                        })
                                         if (firstAvailable) setSelectedSchedule(firstAvailable)
                                     }}
                                     className={`flex-shrink-0 flex flex-col items-center px-3 py-2 rounded-xl border text-center transition-all duration-150 min-w-[56px]
@@ -137,7 +145,7 @@ export default function BookingDateSelector({
                                         </label>
                                         <div className="grid gap-2">
                                             {schedulesOnSelectedDate.map((s: TourSchedule) => {
-                                                const left = s.maxCapacity - s.currentBooked
+                                                const left = Math.max(0, availableSeatsData[s.id] ?? (s.maxCapacity - s.currentBooked))
                                                 const isFull = left <= 0
                                                 const isActiveRound = selectedSchedule.id === s.id
 

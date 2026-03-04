@@ -20,7 +20,7 @@ export default function BookingPriceHeader({ tour }: BookingPriceHeaderProps) {
                         ฿{Number(tour.originalPrice).toLocaleString()}
                     </p>
                     <span className="text-xs font-bold text-white bg-red-500 px-2 py-0.5 rounded-full">
-                        -{Math.round((1 - Number(tour.price) / Number(tour.originalPrice)) * 100)}%
+                        -{Math.abs(Math.round((1 - Number(tour.price) / Number(tour.originalPrice)) * 100))}%
                     </span>
                 </div>
             )}

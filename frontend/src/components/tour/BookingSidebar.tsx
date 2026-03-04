@@ -50,33 +50,33 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const [availableSeatsData, setAvailableSeatsData] = useState<{ [key: number]: number | null }>({})
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // ดึงข้อมูล available seats จาก API เมื่อ schedule เปลี่ยน
-  useEffect(() => {
-    if (!selectedSchedule || !tour?.id) return
 
-    const fetchAvailableSeats = async () => {
-      try {
-        const data = await tourService.getAvailableSeats(tour.id, selectedSchedule.id)
-        setAvailableSeatsData(prev => ({
-          ...prev,
-          [selectedSchedule.id]: data.availableSeats
-        }))
-      } catch (err) {
-        console.error('Error fetching available seats:', err)
-        // ใช้ข้อมูลเก่าจาก state ของ tour ถ้า API error
-        setAvailableSeatsData(prev => ({
-          ...prev,
-          [selectedSchedule.id]: selectedSchedule.maxCapacity - selectedSchedule.currentBooked
-        }))
-      }
+
+  // ดึงข้อมูล available seats จาก API สำหรับทุก schedule (เพื่อให้ date selector แสดงสถานะล่าสุด)
+  useEffect(() => {
+    if (!tour?.id || upcomingSchedules.length === 0) return
+
+    const fetchAllSeats = async () => {
+      const results: { [key: number]: number | null } = {}
+      await Promise.all(
+        upcomingSchedules.map(async (s: TourSchedule) => {
+          try {
+            const data = await tourService.getAvailableSeats(tour.id, s.id)
+            results[s.id] = Math.max(0, data.availableSeats)
+          } catch {
+            results[s.id] = Math.max(0, s.maxCapacity - s.currentBooked)
+          }
+        })
+      )
+      setAvailableSeatsData(results)
     }
 
-    fetchAvailableSeats()
-  }, [selectedSchedule?.id, tour?.id])
+    fetchAllSeats()
+  }, [tour?.id, upcomingSchedules])
 
   // ใช้ available seats จาก API ถ้ามี มิฉะนั้นใช้จากข้อมูลเก่า
   const seatsLeft = selectedSchedule
-    ? (availableSeatsData[selectedSchedule.id] ?? (selectedSchedule.maxCapacity - selectedSchedule.currentBooked))
+    ? Math.max(0, availableSeatsData[selectedSchedule.id] ?? (selectedSchedule.maxCapacity - selectedSchedule.currentBooked))
     : 0
   const totalGuests = adults + children
   const isPrivate = !!tour?.minPeople
@@ -90,12 +90,13 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
     : (totalGuests >= seatsLeft) // กรณี Join Trip เช็คจาก seatsLeft
 
   // 2. Logic ล็อคปุ่ม "จองเลย"
-  const isSoldOut = !isPrivate && selectedSchedule && seatsLeft <= 0
+  const isSoldOut = selectedSchedule && seatsLeft <= 0
   const isExceedCapacity = !isPrivate && totalGuests > seatsLeft
   const isBookingDisabled = !upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity
 
   let buttonText = 'จองเลย'
   if (!upcomingSchedules.length || !selectedSchedule) buttonText = 'ไม่มีรอบเปิดรับ'
+  else if (isSoldOut && isPrivate) buttonText = 'รอบนี้ถูกจองแล้ว'
   else if (isSoldOut) buttonText = 'รอบนี้เต็มแล้ว'
   else if (isExceedCapacity) buttonText = 'ที่นั่งไม่เพียงพอ'
 
@@ -124,6 +125,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
           selectedSchedule={selectedSchedule}
           setSelectedSchedule={setSelectedSchedule}
           scrollRef={scrollRef}
+          availableSeatsData={availableSeatsData}
         />
 
         <BookingGuestSelector
