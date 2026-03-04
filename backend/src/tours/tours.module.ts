@@ -10,5 +10,6 @@ import { ToursSeederService } from './tours.seeder';
   imports: [TypeOrmModule.forFeature([Tour, TourSchedule])],
   controllers: [ToursController],
   providers: [ToursService, ToursSeederService],
+  exports: [ToursService], // ✅ เพิ่มเพื่อให้อนุญาตให้ Module อื่นเรียกใช้ ToursService ได้
 })
-export class ToursModule {}
+export class ToursModule { }

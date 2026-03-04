@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { CreatePaymentDto } from './dto/create-payment.dto';
+import { ToursService } from '../tours/tours.service';
 
 @Injectable()
 export class PaymentsService {
@@ -16,6 +17,7 @@ export class PaymentsService {
     private paymentsRepository: Repository<Payment>,
     @InjectRepository(Booking)
     private bookingsRepository: Repository<Booking>,
+    private toursService: ToursService, // ✅ เพิ่ม ToursService
   ) { }
 
   async createPayment(
