@@ -102,7 +102,7 @@ export class BookingsService {
   async findAll() {
     const bookings = await this.bookingsRepository.find({
       order: { createdAt: 'DESC' },
-      relations: ['payments'],
+      relations: ['payments', 'user'],
     });
 
     return bookings.map((booking) => {

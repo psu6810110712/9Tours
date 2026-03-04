@@ -9,6 +9,7 @@ import MyBookingsPage from './pages/MyBookingsPage'
 import AdminTourListPage from './pages/admin/AdminTourListPage'
 import AdminTourFormPage from './pages/admin/AdminTourFormPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import AdminBookings from './pages/admin/AdminBookings'
 import ProtectedRoute from './components/ProtectedRoute'
 import BookingInfoPage from './pages/BookingInfoPage'
 import PaymentPage from './pages/PaymentPage'
@@ -57,6 +58,11 @@ function App() {
             <Route path="/admin/dashboard" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminDashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/bookings" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminBookings />
               </ProtectedRoute>
             } />
             <Route path="/admin/tours" element={
