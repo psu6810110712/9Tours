@@ -12,67 +12,36 @@ import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// === อ่าน tours-data.json (แหล่งข้อมูลเดียวกันกับ ToursService) ===
-const DATA_FILE = path.join(process.cwd(), 'tours-data.json');
+// ไม่ต้องอ่าน tours-data.json ตรงๆ แล้ว เพราะจะใช้ข้อมูลจาก ToursService ที่มี Cache ใน Memory
 
-function loadToursData(): any[] {
-  try {
-    if (fs.existsSync(DATA_FILE)) {
-      return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-    }
-  } catch (e) {
-    console.error('❌ BookingsService: cannot read tours-data.json', e);
-  }
-  return [];
-}
-
-function persistToursData(tours: any[]) {
-  try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(tours, null, 2));
-  } catch (e) {
-    console.error('❌ BookingsService: cannot write tours-data.json', e);
-  }
-}
-
-// ค้นหา schedule ใน JSON
-function findScheduleInJson(scheduleId: number): { tour: any; schedule: any } | null {
-  const tours = loadToursData();
-  for (const tour of tours) {
-    if (!tour.schedules) continue;
-    const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
-    if (schedule) {
-      return { tour, schedule };
-    }
-  }
-  return null;
-}
-
-// อัปเดต currentBooked ของ schedule ใน JSON
-function updateScheduleBookedCount(scheduleId: number, addPax: number) {
-  const tours = loadToursData();
-  for (const tour of tours) {
-    if (!tour.schedules) continue;
-    const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
-    if (schedule) {
-      schedule.currentBooked = (schedule.currentBooked || 0) + addPax;
-      persistToursData(tours);
-      return;
-    }
-  }
-}
+import { ToursService } from '../tours/tours.service';
 
 @Injectable()
 export class BookingsService {
   constructor(
     @InjectRepository(Booking)
     private bookingsRepository: Repository<Booking>,
+    private toursService: ToursService, // ✅ เพิ่ม ToursService
   ) { }
+
+  // ดึงข้อมูลทัวร์จาก ToursService แทนการอ่านไฟล์ตรงๆ
+  private findScheduleInData(scheduleId: number): { tour: any; schedule: any } | null {
+    const tours = this.toursService.findAll({ admin: 'true' });
+    for (const tour of tours) {
+      if (!tour.schedules) continue;
+      const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
+      if (schedule) {
+        return { tour, schedule };
+      }
+    }
+    return null;
+  }
 
   async create(userId: number, createBookingDto: CreateBookingDto) {
     const { scheduleId, paxCount } = createBookingDto;
 
-    // ค้นหา schedule จาก tours-data.json (แหล่งข้อมูลเดียวกันกับ ToursService)
-    const found = findScheduleInJson(scheduleId);
+    // ค้นหา schedule จาก ToursService (ใช้ตัวเดียวกับ frontend)
+    const found = this.findScheduleInData(scheduleId);
 
     if (!found) {
       throw new NotFoundException('ไม่พบ Tour Schedule นี้');
@@ -132,7 +101,7 @@ export class BookingsService {
     });
 
     return bookings.map((booking) => {
-      const found = findScheduleInJson(booking.scheduleId);
+      const found = this.findScheduleInData(booking.scheduleId);
       return {
         ...booking,
         schedule: found
@@ -158,7 +127,7 @@ export class BookingsService {
 
     // เติมข้อมูล schedule + tour จาก JSON
     return bookings.map((booking) => {
-      const found = findScheduleInJson(booking.scheduleId);
+      const found = this.findScheduleInData(booking.scheduleId);
       return {
         ...booking,
         schedule: found
@@ -186,12 +155,17 @@ export class BookingsService {
       throw new NotFoundException('ไม่พบ Booking นี้');
     }
 
+    // ✅ ลดจำนวนที่นั่งลงในเมื่ออัปเดตเป็น AWAITING_APPROVAL
+    if (updateBookingStatusDto.status === BookingStatus.AWAITING_APPROVAL && booking.status !== BookingStatus.AWAITING_APPROVAL) {
+      this.toursService.updateScheduleBookedCount(booking.scheduleId, booking.paxCount);
+    }
+
     // อัปเดต status
     booking.status = updateBookingStatusDto.status;
     const updated = await this.bookingsRepository.save(booking);
 
     // เติมข้อมูล schedule จาก JSON  
-    const found = findScheduleInJson(updated.scheduleId);
+    const found = this.findScheduleInData(updated.scheduleId);
     return {
       ...updated,
       schedule: found
@@ -219,7 +193,7 @@ export class BookingsService {
       throw new NotFoundException('ไม่พบ Booking นี้');
     }
 
-    const found = findScheduleInJson(booking.scheduleId);
+    const found = this.findScheduleInData(booking.scheduleId);
     return {
       ...booking,
       schedule: found
@@ -254,17 +228,18 @@ export class BookingsService {
       throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงินหรือรอการยืนยันเท่านั้น');
     }
 
+    // ✅ คืนจำนวนที่นั่งกลับไปที่ JSON เฉพาะเมื่อ booking มี status AWAITING_APPROVAL
+    // (เนื่องจาก seats ลดลงไปแล้วเมื่อ payment upload)
+    // ต้องเช็คก่อนเปลี่ยน status
+    if (booking.status === BookingStatus.AWAITING_APPROVAL) {
+      this.toursService.updateScheduleBookedCount(booking.scheduleId, -booking.paxCount);
+    }
+
     // อัปเดต status เป็น canceled
     booking.status = BookingStatus.CANCELED;
     const updated = await this.bookingsRepository.save(booking);
 
-    // ✅ คืนจำนวนที่นั่งกลับไปที่ JSON เฉพาะเมื่อ booking มี status AWAITING_APPROVAL
-    // (เนื่องจาก seats ลดลงไปแล้วเมื่อ payment upload)
-    if (booking.status === BookingStatus.AWAITING_APPROVAL) {
-      updateScheduleBookedCount(booking.scheduleId, -booking.paxCount);
-    }
-
-    const found = findScheduleInJson(updated.scheduleId);
+    const found = this.findScheduleInData(updated.scheduleId);
     return {
       ...updated,
       schedule: found

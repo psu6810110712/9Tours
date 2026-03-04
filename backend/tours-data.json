@@ -44,7 +44,7 @@
       }
     ],
     "createdAt": "2026-03-01T05:05:17.105Z",
-    "updatedAt": "2026-03-01T05:05:17.105Z"
+    "updatedAt": "2026-03-02T08:50:16.167Z"
   },
   {
     "id": 2,
@@ -257,7 +257,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 2
+        "currentBooked": 5
       },
       {
         "id": 503,
@@ -267,7 +267,7 @@
         "timeSlot": "13:00-17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
-        "currentBooked": 0
+        "currentBooked": 1
       },
       {
         "id": 504,
@@ -412,6 +412,48 @@
     ],
     "createdAt": "2026-03-01T05:05:17.106Z",
     "updatedAt": "2026-03-01T05:14:57.948Z",
+    "childPrice": null
+  },
+  {
+    "id": 100,
+    "tourCode": "04032026006",
+    "name": "พักใจกับเมืองกรุง",
+    "description": "กิจกรรมผ่อนคลายในเมืองกรุง",
+    "tourType": "one_day",
+    "categories": [],
+    "price": 4000,
+    "originalPrice": null,
+    "images": [
+      "http://localhost:3000/uploads/tour-1772591240066-770601382.jpg"
+    ],
+    "highlights": [
+      "มีไกด์นำเที่ยว",
+      "ยกเลิกฟรี",
+      "มีรถรับส่ง"
+    ],
+    "itinerary": [],
+    "transportation": "",
+    "duration": "4",
+    "region": "ภาคกลาง",
+    "province": "กรุงเทพฯ",
+    "accommodation": null,
+    "rating": 0,
+    "reviewCount": 0,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 10000,
+        "tourId": 100,
+        "startDate": "2026-03-07",
+        "endDate": "2026-03-07",
+        "timeSlot": "08:00-12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 20,
+        "currentBooked": 2
+      }
+    ],
+    "createdAt": "2026-03-04T02:27:24.272Z",
+    "updatedAt": "2026-03-04T02:31:51.815Z",
     "childPrice": null
   }
 ]
