@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { Tour, TourSchedule } from '../../types/tour'
 import { useAuth } from '../../context/AuthContext'
 import { tourService } from '../../services/tourService'
+import { bookingService } from '../../services/bookingService'
 import LoginModal from '../LoginModal'
 
 interface BookingSidebarProps {
@@ -48,9 +49,21 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const [children, setChildren] = useState(0)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [availableSeatsData, setAvailableSeatsData] = useState<{ [key: number]: number | null }>({})
+  const [bookedScheduleIds, setBSubmittedScheduleIds] = useState<Set<number>>(new Set())
   const scrollRef = useRef<HTMLDivElement>(null)
 
-
+  // ดึง booking ที่ active ของ user เพื่อเช็คว่าจองรอบนี้ไปแล้วหรือยัง
+  useEffect(() => {
+    if (!user) return
+    bookingService.getMyBookings().then(bookings => {
+      const activeIds = new Set<number>(
+        bookings
+          .filter(b => !['canceled', 'refund_completed'].includes(b.status))
+          .map(b => b.scheduleId)
+      )
+      setBSubmittedScheduleIds(activeIds)
+    }).catch(() => { /* ignore */ })
+  }, [user])
 
   // ดึงข้อมูล available seats จาก API สำหรับทุก schedule (เพื่อให้ date selector แสดงสถานะล่าสุด)
   useEffect(() => {
@@ -92,10 +105,12 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   // 2. Logic ล็อคปุ่ม "จองเลย"
   const isSoldOut = selectedSchedule && seatsLeft <= 0
   const isExceedCapacity = !isPrivate && totalGuests > seatsLeft
-  const isBookingDisabled = !upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity
+  const isAlreadyBooked = selectedSchedule ? bookedScheduleIds.has(selectedSchedule.id) : false
+  const isBookingDisabled = !upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity || isAlreadyBooked
 
   let buttonText = 'จองเลย'
   if (!upcomingSchedules.length || !selectedSchedule) buttonText = 'ไม่มีรอบเปิดรับ'
+  else if (isAlreadyBooked) buttonText = 'คุณจองรอบนี้แล้ว'
   else if (isSoldOut && isPrivate) buttonText = 'รอบนี้ถูกจองแล้ว'
   else if (isSoldOut) buttonText = 'รอบนี้เต็มแล้ว'
   else if (isExceedCapacity) buttonText = 'ที่นั่งไม่เพียงพอ'

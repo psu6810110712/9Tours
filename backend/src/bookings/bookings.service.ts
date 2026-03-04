@@ -84,86 +84,16 @@ export class BookingsService {
     const { tour, schedule } = found;
     const isPrivate = !!tour.minPeople;
 
-    // เช็คว่ามี booking ที่ยังรอจ่ายเงิน (PENDING_PAYMENT) อยู่หรือไม่
-    // กรณีผู้ใช้กดย้อนกลับจากหน้า Payment แล้วมาแก้ไขข้อมูล → อัปเดต booking เดิมแทนที่จะสร้างใหม่
-    const pendingBooking = await this.bookingsRepository.findOne({
+    // D4: ป้องกันจอง schedule เดียวกันซ้ำ (active booking ที่ยังไม่ถูก cancel)
+    const existingBooking = await this.bookingsRepository.findOne({
       where: {
         userId,
         scheduleId,
-        status: BookingStatus.PENDING_PAYMENT,
+        status: Not(In([BookingStatus.CANCELED, BookingStatus.REFUND_COMPLETED])),
       },
     });
-
-    if (pendingBooking) {
-      // คืน seat เก่าก่อน แล้ว hold seat ใหม่ตามจำนวนที่แก้ไข
-      const oldSeatsHeld = isPrivate ? schedule.maxCapacity : pendingBooking.paxCount;
-      updateScheduleBookedCount(scheduleId, -oldSeatsHeld);
-
-      // โหลด schedule ใหม่หลังคืน seat
-      const refreshed = findScheduleInJson(scheduleId);
-      const freshSchedule = refreshed ? refreshed.schedule : schedule;
-
-      const newSeatsToHold = isPrivate ? freshSchedule.maxCapacity : paxCount;
-      const freshBooked = Math.max(0, freshSchedule.currentBooked || 0);
-      if (freshBooked + newSeatsToHold > freshSchedule.maxCapacity) {
-        // hold seat เดิมกลับไปก่อน (rollback)
-        updateScheduleBookedCount(scheduleId, oldSeatsHeld);
-        const availableSlots = freshSchedule.maxCapacity - freshBooked;
-        throw new BadRequestException(
-          isPrivate
-            ? 'รอบนี้ถูกจองแล้ว'
-            : `ที่ว่างที่สามารถจองได้ ${availableSlots} ที่`,
-        );
-      }
-
-      // คำนวณราคาใหม่
-      let totalPrice: number;
-      if (isPrivate) {
-        totalPrice = Number(tour.price);
-      } else {
-        const childPrice = tour.childPrice ?? tour.price;
-        totalPrice = (adults * tour.price) + (children * childPrice);
-      }
-
-      // อัปเดต booking เดิม
-      pendingBooking.paxCount = paxCount;
-      pendingBooking.adults = adults;
-      pendingBooking.children = children;
-      pendingBooking.totalPrice = totalPrice;
-      const updatedBooking = await this.bookingsRepository.save(pendingBooking);
-
-      // Hold seat ใหม่
-      updateScheduleBookedCount(scheduleId, newSeatsToHold);
-
-      return {
-        ...updatedBooking,
-        schedule: {
-          ...freshSchedule,
-          tour: {
-            id: tour.id,
-            tourCode: tour.tourCode,
-            name: tour.name,
-            price: tour.price,
-            childPrice: tour.childPrice,
-            images: tour.images,
-            accommodation: tour.accommodation || null,
-          },
-        },
-      };
-    }
-
-    // สำหรับ Private Tour: ป้องกันจองซ้ำถ้ามี active booking อยู่แล้ว (ที่ไม่ใช่ PENDING_PAYMENT)
-    if (isPrivate) {
-      const activeBooking = await this.bookingsRepository.findOne({
-        where: {
-          userId,
-          scheduleId,
-          status: Not(In([BookingStatus.CANCELED, BookingStatus.REFUND_COMPLETED, BookingStatus.PENDING_PAYMENT])),
-        },
-      });
-      if (activeBooking) {
-        throw new BadRequestException('คุณมีการจองรอบนี้อยู่แล้ว ไม่สามารถจองซ้ำได้');
-      }
+    if (existingBooking) {
+      throw new BadRequestException('คุณมีการจองรอบนี้อยู่แล้ว ไม่สามารถจองซ้ำได้');
     }
 
     // Hold seat: Private = เต็มทั้งรอบ, Join = ตามจำนวนคน
@@ -174,7 +104,7 @@ export class BookingsService {
       throw new BadRequestException(
         isPrivate
           ? 'รอบนี้ถูกจองแล้ว'
-          : `ที่ว่างไม่พอ มี ${availableSlots} ที่ว่าง แต่คุณต้องการ ${paxCount} ที่`,
+          : `คุณสามารถจองได้สูงสุด ${availableSlots} ที่`,
       );
     }
 
@@ -187,7 +117,7 @@ export class BookingsService {
       totalPrice = (adults * tour.price) + (children * childPrice);
     }
 
-    // สร้าง booking ใหม่
+    // สร้าง booking
     const booking = this.bookingsRepository.create({
       userId,
       scheduleId,

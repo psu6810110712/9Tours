@@ -282,17 +282,6 @@ const persistData = () => {
   }
 };
 
-// โหลดข้อมูลใหม่จากไฟล์ (เพื่ออ่านค่า currentBooked ล่าสุดที่ถูก bookings.service อัปเดต)
-const reloadTours = () => {
-  try {
-    if (fs.existsSync(DATA_FILE)) {
-      DEMO_TOURS = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-    }
-  } catch (e) {
-    console.error('❌ reloadTours error:', e);
-  }
-};
-
 @Injectable()
 export class ToursService {
   private nextId = Math.max(...DEMO_TOURS.map(t => t.id), 99) + 1;
@@ -359,7 +348,6 @@ export class ToursService {
     search?: string;
     admin?: string;
   }) {
-    reloadTours(); // โหลดข้อมูลล่าสุดจากไฟล์
     const { region, province, tourType, search, admin } = filters || {};
 
     let result = admin === 'true'
@@ -389,12 +377,10 @@ export class ToursService {
   }
 
   findOne(id: number) {
-    reloadTours(); // โหลดข้อมูลล่าสุดจากไฟล์
     return DEMO_TOURS.find((t) => t.id === id) || null;
   }
 
   getAvailableSeats(tourId: number, scheduleId: number) {
-    reloadTours(); // โหลดข้อมูลล่าสุดจากไฟล์
     const tour = DEMO_TOURS.find((t) => t.id === tourId);
     if (!tour) {
       throw new Error(`Tour ${tourId} not found`);
