@@ -212,7 +212,7 @@ export default function AdminTourFormPage() {
     }
 
     while (cur <= end) {
-      if (bulkDays.has(cur.getDay())) {
+      if (tourType === 'one_day' || bulkDays.has(cur.getDay())) {
         const startDateStr = cur.toISOString().slice(0, 10)
         const endDateObj = new Date(cur)
         if (tourType === 'package' && bulkDuration > 1) {
