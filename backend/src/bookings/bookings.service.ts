@@ -5,14 +5,12 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, In, Repository, LessThan } from 'typeorm';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { Booking, BookingStatus } from './entities/booking.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
-import * as fs from 'fs';
-import * as path from 'path';
 
-// ไม่ต้องอ่าน tours-data.json ตรงๆ แล้ว เพราะจะใช้ข้อมูลจาก ToursService ที่มี Cache ใน Memory
 
 import { ToursService } from '../tours/tours.service';
 
@@ -24,7 +22,7 @@ export class BookingsService {
     private toursService: ToursService, // ✅ เพิ่ม ToursService
   ) { }
 
-  // ดึงข้อมูลทัวร์จาก ToursService แทนการอ่านไฟล์ตรงๆ
+  // ดึงข้อมูลทัวร์จาก ToursService
   private findScheduleInData(scheduleId: number): { tour: any; schedule: any } | null {
     const tours = this.toursService.findAll({ admin: 'true' });
     for (const tour of tours) {
@@ -37,10 +35,43 @@ export class BookingsService {
     return null;
   }
 
-  async create(userId: number, createBookingDto: CreateBookingDto) {
-    const { scheduleId, paxCount, adults = 1, children = 0 } = createBookingDto;
+  // ระบบคืนที่นั่งอัตโนมัติ: ทำงานทุก 1 นาที ตรวจสอบ booking ที่ค้างเกิน 18 นาที
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleExpiredBookings() {
+    const cutoffTime = new Date(Date.now() - 18 * 60 * 1000);
 
-    // ค้นหา schedule จาก ToursService (ใช้ตัวเดียวกับ frontend)
+    const expiredBookings = await this.bookingsRepository.find({
+      where: {
+        status: BookingStatus.PENDING_PAYMENT,
+        createdAt: LessThan(cutoffTime),
+      },
+    });
+
+    if (expiredBookings.length === 0) return;
+
+    for (const booking of expiredBookings) {
+      if (booking.status !== BookingStatus.PENDING_PAYMENT) continue;
+
+      booking.status = BookingStatus.CANCELED;
+      booking.adminNotes = 'ระบบยกเลิกอัตโนมัติเนื่องจากเกินกำหนดชำระเงิน (18 นาที)';
+      await this.bookingsRepository.save(booking);
+
+      const found = this.findScheduleInData(booking.scheduleId);
+      if (found) {
+        const { tour, schedule } = found;
+        const isPrivate = !!tour.minPeople;
+        const seatsToRelease = isPrivate ? schedule.maxCapacity : booking.paxCount;
+        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+        console.log(`[Cron] ยกเลิกการจอง ID ${booking.id} และคืนที่นั่ง ${seatsToRelease} ที่`);
+      }
+    }
+  }
+
+  async create(userId: number, createBookingDto: CreateBookingDto) {
+    const { scheduleId, adults = 1, children = 0 } = createBookingDto;
+
+    const paxCount = adults + children;
+
     const found = this.findScheduleInData(scheduleId);
 
     if (!found) {
@@ -48,21 +79,56 @@ export class BookingsService {
     }
 
     const { tour, schedule } = found;
+    const isPrivate = !!tour.minPeople;
 
-    // ตรวจสอบ capacity
-    const currentBooked = schedule.currentBooked || 0;
-    if (currentBooked + paxCount > schedule.maxCapacity) {
+    // ตรวจสอบว่าผู้ใช้มี booking ค้างชำระอยู่หรือไม่ (ป้องกันการจองซ้อนทุกกรณี ไม่ว่าจะทัวร์ไหน)
+    const existingPendingBooking = await this.bookingsRepository.findOne({
+      where: {
+        userId,
+        status: BookingStatus.PENDING_PAYMENT,
+      },
+    });
+    if (existingPendingBooking) {
+      throw new BadRequestException('คุณมีรายการรอชำระเงินอยู่ กรุณาชำระเงินหรือยกเลิกรายการดังกล่าวให้เสร็จสมบูรณ์ก่อนเริ่มการจองใหม่');
+    }
+
+    // ตรวจสอบการจองซ้ำ: แยกตรรกะ Join Tour กับ Private Tour
+    if (isPrivate) {
+      // Private Tour: บล็อกจองซ้ำถ้ามี booking active อยู่แล้ว (ทุกสถานะยกเว้น canceled/refund)
+      const existingBooking = await this.bookingsRepository.findOne({
+        where: {
+          userId,
+          scheduleId,
+          status: Not(In([BookingStatus.CANCELED, BookingStatus.REFUND_COMPLETED])),
+        },
+      });
+      if (existingBooking) {
+        throw new BadRequestException('คุณมีการจองรอบนี้อยู่แล้ว ไม่สามารถจองซ้ำได้');
+      }
+    }
+
+    // Hold seat: Private = เต็มทั้งรอบ, Join = ตามจำนวนคน
+    const seatsToHold = isPrivate ? schedule.maxCapacity : paxCount;
+    const currentBooked = Math.max(0, schedule.currentBooked || 0);
+    if (currentBooked + seatsToHold > schedule.maxCapacity) {
       const availableSlots = schedule.maxCapacity - currentBooked;
       throw new BadRequestException(
-        `ที่ว่างไม่พอ มี ${availableSlots} ที่ว่าง แต่คุณต้องการ ${paxCount} ที่`,
+        isPrivate
+          ? 'รอบนี้ถูกจองแล้ว'
+          : `คุณสามารถจองได้สูงสุด ${availableSlots} ที่`,
       );
     }
 
-    // คำนวณ total price
-    const childPrice = tour.childPrice ?? tour.price;
-    const totalPrice = (adults * tour.price) + (children * childPrice);
+    // คำนวณ total price — แยก Join (ราคาต่อคน) vs Private (ราคาเหมา)
+    let totalPrice: number;
+    if (isPrivate) {
+      totalPrice = Number(tour.price);
+    } else {
+      const childPrice = tour.childPrice ?? tour.price;
+      totalPrice = (adults * tour.price) + (children * childPrice);
+    }
 
-    // สร้าง booking ใหม่  (เราเก็บ scheduleId ไว้เฉยๆ เพื่อ reference)
+    // สร้าง booking
     const booking = this.bookingsRepository.create({
       userId,
       scheduleId,
@@ -73,12 +139,10 @@ export class BookingsService {
       status: BookingStatus.PENDING_PAYMENT,
     });
 
-    // บันทึก booking ลง DB
     const savedBooking = await this.bookingsRepository.save(booking);
 
-    // ⚠️ ไม่อัปเดต currentBooked ในขั้นนี้
-    // เพราะ booking ยังอยู่ในสถานะ PENDING_PAYMENT
-    // จะอัปเดตเมื่อ payment upload แล้ว (AWAITING_APPROVAL status)
+    // Hold seat ทันที
+    this.toursService.updateScheduleBookedCount(scheduleId, seatsToHold);
 
     // คืนข้อมูล booking พร้อมข้อมูลทัวร์
     return {
@@ -164,19 +228,21 @@ export class BookingsService {
       throw new NotFoundException('ไม่พบ Booking นี้');
     }
 
-    // ✅ ลดจำนวนที่นั่งลงในเมื่ออัปเดตเป็น AWAITING_APPROVAL
-    if (updateBookingStatusDto.status === BookingStatus.AWAITING_APPROVAL && booking.status !== BookingStatus.AWAITING_APPROVAL) {
-      this.toursService.updateScheduleBookedCount(booking.scheduleId, booking.paxCount);
-    } else if (booking.status === BookingStatus.AWAITING_APPROVAL &&
-      (updateBookingStatusDto.status === BookingStatus.CANCELED || updateBookingStatusDto.status === BookingStatus.PENDING_PAYMENT)) {
-      this.toursService.updateScheduleBookedCount(booking.scheduleId, -booking.paxCount);
+    const previousStatus = booking.status;
+    const newStatus = updateBookingStatusDto.status;
+
+    if (newStatus === BookingStatus.CANCELED && previousStatus !== BookingStatus.CANCELED) {
+      const found = this.findScheduleInData(booking.scheduleId);
+      if (found) {
+        const isPrivate = !!found.tour.minPeople;
+        const seatsToRelease = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
+        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+      }
     }
 
-    // อัปเดต status
-    booking.status = updateBookingStatusDto.status;
+    booking.status = newStatus;
     const updated = await this.bookingsRepository.save(booking);
 
-    // เติมข้อมูล schedule จาก JSON  
     const found = this.findScheduleInData(updated.scheduleId);
     return {
       ...updated,
@@ -197,7 +263,8 @@ export class BookingsService {
     };
   }
 
-  async findOne(id: number) {
+  // D1: เช็คเจ้าของ Booking — ผู้ใช้ดูได้เฉพาะ booking ของตัวเอง
+  async findOne(id: number, userId?: number, isAdmin?: boolean) {
     const booking = await this.bookingsRepository.findOne({
       where: { id },
       relations: ['payments'],
@@ -205,6 +272,11 @@ export class BookingsService {
 
     if (!booking) {
       throw new NotFoundException('ไม่พบ Booking นี้');
+    }
+
+    // ถ้าไม่ใช่ admin ต้องเป็นเจ้าของเท่านั้น
+    if (!isAdmin && userId && booking.userId !== userId) {
+      throw new UnauthorizedException('คุณไม่มีสิทธิ์เข้าถึง Booking นี้');
     }
 
     const found = this.findScheduleInData(booking.scheduleId);
@@ -219,6 +291,8 @@ export class BookingsService {
             name: found.tour.name,
             price: found.tour.price,
             childPrice: found.tour.childPrice,
+            minPeople: found.tour.minPeople || null,
+            maxPeople: found.tour.maxPeople || null,
             images: found.tour.images,
             accommodation: found.tour.accommodation || null,
           },
@@ -240,20 +314,22 @@ export class BookingsService {
       throw new UnauthorizedException('คุณไม่มีสิทธิ์ยกเลิก Booking นี้');
     }
 
-    if (booking.status !== BookingStatus.PENDING_PAYMENT && booking.status !== BookingStatus.AWAITING_APPROVAL) {
-      throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงินหรือรอการยืนยันเท่านั้น');
+    // อนุญาตยกเลิกได้ทั้ง PENDING_PAYMENT, AWAITING_APPROVAL, SUCCESS
+    const cancellableStatuses = [BookingStatus.PENDING_PAYMENT, BookingStatus.AWAITING_APPROVAL, BookingStatus.SUCCESS];
+    if (!cancellableStatuses.includes(booking.status)) {
+      throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงิน รอตรวจสอบ หรือสำเร็จเท่านั้น');
     }
 
-    // ✅ คืนจำนวนที่นั่งกลับไปที่ JSON เฉพาะเมื่อ booking มี status AWAITING_APPROVAL
-    // (เนื่องจาก seats ลดลงไปแล้วเมื่อ payment upload)
-    // ต้องเช็คก่อนเปลี่ยน status
-    if (booking.status === BookingStatus.AWAITING_APPROVAL) {
-      this.toursService.updateScheduleBookedCount(booking.scheduleId, -booking.paxCount);
-    }
-
-    // อัปเดต status เป็น canceled
     booking.status = BookingStatus.CANCELED;
     const updated = await this.bookingsRepository.save(booking);
+
+    // คืน seat กลับทุกกรณี (เพราะ hold ตั้งแต่สร้าง booking)
+    const foundForCancel = this.findScheduleInData(booking.scheduleId);
+    if (foundForCancel) {
+      const isPrivate = !!foundForCancel.tour.minPeople;
+      const seatsToRelease = isPrivate ? foundForCancel.schedule.maxCapacity : booking.paxCount;
+      this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+    }
 
     const found = this.findScheduleInData(updated.scheduleId);
     return {

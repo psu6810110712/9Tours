@@ -278,9 +278,21 @@ const persistData = () => {
   try {
     fs.writeFileSync(DATA_FILE, JSON.stringify(DEMO_TOURS, null, 2));
   } catch (error) {
-    console.error('❌ Save error:', error);
+    console.error('Save error:', error);
   }
 };
+
+// โหลดข้อมูลใหม่จากไฟล์ทุกครั้งที่ต้องการอ่าน เพราะ bookings.service.ts อาจแก้ไขไฟล์โดยตรง
+function reloadTours() {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+      DEMO_TOURS = JSON.parse(raw);
+    }
+  } catch (e) {
+    console.error('reloadTours error:', e);
+  }
+}
 
 @Injectable()
 export class ToursService {
@@ -305,6 +317,9 @@ export class ToursService {
       tourType: dto.tourType as unknown as TourType,
       categories: dto.categories || [],
       price: Number(dto.price),
+      childPrice: dto.childPrice ? Number(dto.childPrice) : null,
+      minPeople: dto.minPeople ? Number(dto.minPeople) : null,
+      maxPeople: dto.maxPeople ? Number(dto.maxPeople) : null,
       originalPrice: dto.originalPrice ? Number(dto.originalPrice) : null,
       images: dto.images || [],
       highlights: dto.highlights || [],
@@ -347,6 +362,8 @@ export class ToursService {
   }) {
     const { region, province, tourType, search, admin } = filters || {};
 
+    reloadTours(); // อ่านข้อมูลล่าสุดจากไฟล์ทุกครั้ง
+
     let result = admin === 'true'
       ? [...DEMO_TOURS]
       : DEMO_TOURS.filter((t) => t.isActive);
@@ -374,10 +391,12 @@ export class ToursService {
   }
 
   findOne(id: number) {
+    reloadTours(); // อ่านข้อมูลล่าสุดจากไฟล์ทุกครั้ง
     return DEMO_TOURS.find((t) => t.id === id) || null;
   }
 
   getAvailableSeats(tourId: number, scheduleId: number) {
+    reloadTours(); // อ่านข้อมูลล่าสุดจากไฟล์ทุกครั้ง
     const tour = DEMO_TOURS.find((t) => t.id === tourId);
     if (!tour) {
       throw new Error(`Tour ${tourId} not found`);

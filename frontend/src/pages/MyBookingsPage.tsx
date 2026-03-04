@@ -24,7 +24,7 @@ export default function MyBookingPage() {
 
   const navigate = useNavigate()
 
-  // 1. เพิ่มแท็บ "ยกเลิกแล้ว" กลับเข้ามา
+  // 1. เพิ่มแท็บ "ยกเลิกแล้ว"
   const tabs = ['ทั้งหมด', 'รอชำระเงิน', 'รอตรวจสอบ', 'สำเร็จ', 'ยกเลิกแล้ว']
 
   // ดึงข้อมูลเมื่อโหลดหน้าเว็บ
@@ -181,20 +181,21 @@ export default function MyBookingPage() {
 
                   {/* ปุ่มชำระเงิน/ยกเลิก จะไม่โชว์ถ้ายกเลิกไปแล้ว */}
                   {booking.status === 'รอชำระเงิน' && (
-                    <>
-                      <button
-                        onClick={() => navigate(`/payment/${booking.id}`)}
-                        className="flex-1 md:flex-none px-6 py-2 bg-primary text-white rounded-full text-xs font-bold hover:bg-primary-dark transition-all shadow-sm"
-                      >
-                        ชำระเงิน
-                      </button>
-                      <button
-                        onClick={() => setCancelModalId(String(booking.id))}
-                        className="flex-1 md:flex-none px-6 py-2 bg-white border border-red-200 text-red-500 rounded-full text-xs font-bold hover:bg-red-50 transition-all"
-                      >
-                        ยกเลิก
-                      </button>
-                    </>
+                    <button
+                      onClick={() => navigate(`/payment/${booking.id}`)}
+                      className="flex-1 md:flex-none px-6 py-2 bg-primary text-white rounded-full text-xs font-bold hover:bg-primary-dark transition-all shadow-sm"
+                    >
+                      ชำระเงิน
+                    </button>
+                  )}
+
+                  {['รอชำระเงิน', 'รอตรวจสอบ', 'สำเร็จ'].includes(booking.status) && (
+                    <button
+                      onClick={() => setCancelModalId(String(booking.id))}
+                      className="flex-1 md:flex-none px-6 py-2 bg-white border border-red-200 text-red-500 rounded-full text-xs font-bold hover:bg-red-50 transition-all"
+                    >
+                      ยกเลิก
+                    </button>
                   )}
 
                 </div>
@@ -257,17 +258,31 @@ export default function MyBookingPage() {
                 </span>
               </div>
 
-              {selectedBooking.status === 'รอชำระเงิน' && (
-                <button
-                  onClick={() => {
-                    setSelectedBooking(null);
-                    navigate(`/payment/${selectedBooking.id}`);
-                  }}
-                  className="w-full mt-6 bg-primary text-white font-bold py-3 rounded-full hover:bg-primary-dark transition-all text-sm shadow-md"
-                >
-                  ชำระเงิน
-                </button>
-              )}
+              <div className="flex gap-3 w-full mt-6">
+                {selectedBooking.status === 'รอชำระเงิน' && (
+                  <button
+                    onClick={() => {
+                      setSelectedBooking(null);
+                      navigate(`/payment/${selectedBooking.id}`);
+                    }}
+                    className="flex-1 bg-primary text-white font-bold py-3 rounded-full hover:bg-primary-dark transition-all text-sm shadow-md"
+                  >
+                    ชำระเงิน
+                  </button>
+                )}
+
+                {['รอชำระเงิน', 'รอตรวจสอบ', 'สำเร็จ'].includes(selectedBooking.status) && (
+                  <button
+                    onClick={() => {
+                      setSelectedBooking(null);
+                      setCancelModalId(String(selectedBooking.id));
+                    }}
+                    className="flex-1 bg-white border border-red-200 text-red-500 font-bold py-3 rounded-full hover:bg-red-50 transition-all text-sm shadow-md"
+                  >
+                    ยกเลิก
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -276,7 +291,7 @@ export default function MyBookingPage() {
       <ConfirmModal
         isOpen={cancelModalId !== null}
         title="ยืนยันการยกเลิก"
-        message="คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการจองนี้? (รายการจะถูกเปลี่ยนสถานะเป็นยกเลิกแล้ว)"
+        message="หากยกเลิกแล้วจะไม่สามารถย้อนกลับได้"
         confirmText="ยืนยันยกเลิก"
         cancelText="ปิดหน้าต่าง"
         confirmStyle="danger"

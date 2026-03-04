@@ -37,6 +37,13 @@ export class PaymentsService {
       );
     }
 
+    // ตรวจสอบว่า booking ถูกยกเลิกอัตโนมัติจากระบบคืนที่นั่งหรือไม่ (Hard Cutoff)
+    if (booking.status === BookingStatus.CANCELED) {
+      throw new BadRequestException(
+        'เซสชันการชำระเงินหมดอายุแล้ว และที่นั่งได้ถูกคืนให้ส่วนกลางไปแล้ว หากท่านทำการโอนเงินสำเร็จไปแล้ว กรุณาติดต่อแอดมินผ่าน Line หรือ Facebook เพื่อรับเงินคืนหรือรับความช่วยเหลือ'
+      );
+    }
+
     if (booking.status !== BookingStatus.PENDING_PAYMENT) {
       throw new BadRequestException(
         `Booking นี้ไม่ได้อยู่ในสถานะรอชำระเงิน (สถานะปัจจุบัน: ${booking.status})`,
@@ -52,18 +59,15 @@ export class PaymentsService {
       bookingId,
       amountPaid: booking.totalPrice,
       paymentMethod,
-      slipUrl: slipFile.path.replace(/\\/g, '/'), // แปลง backslash เป็น forward slash สำหรับ URL
+      slipUrl: slipFile.path.replace(/\\/g, '/'),
     });
 
     const savedPayment = await this.paymentsRepository.save(newPayment);
 
-    // อัปเดตสถานะ Booking
-    // เปลี่ยนเป็น AWAITING_APPROVAL เพื่อรอ Admin ตรวจสอบสลิปก่อน
+    // อัปเดตสถานะ Booking → AWAITING_APPROVAL
+    // (ที่นั่งถูก hold ไปแล้วตั้งแต่สร้าง booking จึงไม่ต้อง update currentBooked อีก)
     booking.status = BookingStatus.AWAITING_APPROVAL;
     await this.bookingsRepository.save(booking);
-
-    // ✅ อัปเดต currentBooked เมื่อ payment upload (booking status -> AWAITING_APPROVAL)
-    this.toursService.updateScheduleBookedCount(booking.scheduleId, booking.paxCount);
 
     return {
       message: 'การชำระเงินสำเร็จ',

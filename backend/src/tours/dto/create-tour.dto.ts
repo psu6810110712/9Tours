@@ -4,6 +4,7 @@ export class CreateTourDto {
   tourType: 'one_day' | 'package';
   categories: string[];
   price: number;
+  childPrice?: number | null;
   minPeople?: number;
   maxPeople?: number;
   originalPrice?: number | null;
