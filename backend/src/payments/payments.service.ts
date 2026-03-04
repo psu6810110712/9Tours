@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { CreatePaymentDto } from './dto/create-payment.dto';
+import { ToursService } from '../tours/tours.service';
 
 @Injectable()
 export class PaymentsService {
@@ -16,7 +17,8 @@ export class PaymentsService {
     private paymentsRepository: Repository<Payment>,
     @InjectRepository(Booking)
     private bookingsRepository: Repository<Booking>,
-  ) {}
+    private toursService: ToursService, // ✅ เพิ่ม ToursService
+  ) { }
 
   async createPayment(
     createPaymentDto: CreatePaymentDto,
@@ -59,6 +61,9 @@ export class PaymentsService {
     // เปลี่ยนเป็น AWAITING_APPROVAL เพื่อรอ Admin ตรวจสอบสลิปก่อน
     booking.status = BookingStatus.AWAITING_APPROVAL;
     await this.bookingsRepository.save(booking);
+
+    // ✅ อัปเดต currentBooked เมื่อ payment upload (booking status -> AWAITING_APPROVAL)
+    this.toursService.updateScheduleBookedCount(booking.scheduleId, booking.paxCount);
 
     return {
       message: 'การชำระเงินสำเร็จ',

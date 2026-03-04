@@ -435,4 +435,18 @@ export class ToursService {
     persistData();
     return { id, deleted: true };
   }
+
+  // ✅ เพิ่มฟังก์ชันอัปเดตที่นั่ง เพื่อให้ Bookings/Payments Service เรียกใช้ได้
+  // จะได้อัปเดตทั้งในตัวแปร Memory และไฟล์ JSON
+  updateScheduleBookedCount(scheduleId: number, addPax: number) {
+    for (const tour of DEMO_TOURS) {
+      if (!tour.schedules) continue;
+      const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
+      if (schedule) {
+        schedule.currentBooked = (schedule.currentBooked || 0) + addPax;
+        persistData();
+        return;
+      }
+    }
+  }
 }

@@ -8,9 +8,13 @@ import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 
+import { ToursModule } from '../tours/tours.module'; // ✅ Import ToursModule
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Payment, Booking]),
+    ToursModule, // ✅ เพิ่ม ToursModule
+
     MulterModule.register({
       storage: diskStorage({
         destination: './uploads/slips',
@@ -25,4 +29,4 @@ import { v4 as uuidv4 } from 'uuid';
   controllers: [PaymentsController],
   providers: [PaymentsService],
 })
-export class PaymentsModule {}
+export class PaymentsModule { }
