@@ -93,7 +93,14 @@ export default function PaymentPage() {
   useEffect(() => {
     if (!bookingData?.createdAt) return
 
-    const createdTime = new Date(bookingData.createdAt).getTime()
+    // แก้ปัญหา timezone: ถ้า PostgreSQL คืนค่าเวลาโดยไม่มี timezone suffix (Z)
+    // JavaScript จะตีความเป็น local time ซึ่งทำให้เวลาเพี้ยน
+    // เพิ่ม 'Z' เข้าไปเพื่อบังคับให้ตีความเป็น UTC
+    const rawDate = bookingData.createdAt
+    const normalizedDate = rawDate.endsWith('Z') || rawDate.includes('+') || rawDate.includes('T') && rawDate.match(/[+-]\d{2}:\d{2}$/)
+      ? rawDate
+      : rawDate + 'Z'
+    const createdTime = new Date(normalizedDate).getTime()
     // แสดงนับถอยหลัง 15 นาที นับจาก createdAt
     const expiryTime = createdTime + 15 * 60 * 1000
 
@@ -407,7 +414,15 @@ export default function PaymentPage() {
                 ฉันโอนเงินเรียบร้อยแล้ว
               </button>
               <button
-                onClick={() => navigate('/')}
+                onClick={async () => {
+                  // ยกเลิก booking และคืนที่นั่งก่อน navigate ออก
+                  try {
+                    if (bookingId) {
+                      await bookingService.cancelBooking(bookingId)
+                    }
+                  } catch { /* ถ้ายกเลิกไม่ได้ก็ไม่เป็นไร Cron Job จะจัดการให้ */ }
+                  navigate('/')
+                }}
                 className="w-full bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full hover:bg-gray-200 transition-colors text-lg"
               >
                 เริ่มการจองใหม่
