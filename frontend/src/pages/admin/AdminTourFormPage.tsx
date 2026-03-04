@@ -49,6 +49,7 @@ export default function AdminTourFormPage() {
   const [region, setRegion] = useState('')
   const [province, setProvince] = useState('')
   const [price, setPrice] = useState('')
+  const [discountPercent, setDiscountPercent] = useState('')
   const [childPrice, setChildPrice] = useState('')
   const [minPeople, setMinPeople] = useState('')
   const [maxPeople, setMaxPeople] = useState('')
@@ -84,8 +85,23 @@ export default function AdminTourFormPage() {
       setHighlights(tour.highlights)
       setRegion(tour.region)
       setProvince(tour.province)
-      setPrice(String(tour.price))
-      if (tour.childPrice) setChildPrice(String(tour.childPrice))
+      let discount = 0
+      if (tour.originalPrice) {
+        discount = Math.round((1 - tour.price / tour.originalPrice) * 100)
+        setDiscountPercent(String(discount))
+        setPrice(String(tour.originalPrice))
+      } else {
+        setPrice(String(tour.price))
+      }
+
+      if (tour.childPrice) {
+        if (discount > 0) {
+          const origChild = Math.round(tour.childPrice / (1 - discount / 100))
+          setChildPrice(String(origChild))
+        } else {
+          setChildPrice(String(tour.childPrice))
+        }
+      }
       setMinPeople(tour.minPeople ? String(tour.minPeople) : '')
       setMaxPeople(tour.maxPeople ? String(tour.maxPeople) : '')
       setDuration(tour.duration || '')
@@ -232,13 +248,29 @@ export default function AdminTourFormPage() {
     setError('')
     setSaving(true)
 
+    const numPrice = Number(price)
+    const numDiscount = Number(discountPercent)
+    let finalPrice = numPrice
+    let finalOriginalPrice: number | null = null
+    let finalChildPrice: number | null = childPrice ? Number(childPrice) : null
+
+    if (numDiscount > 0 && numPrice > 0) {
+      finalOriginalPrice = numPrice
+      finalPrice = Math.round(numPrice * (1 - numDiscount / 100))
+
+      if (finalChildPrice) {
+        finalChildPrice = Math.round(finalChildPrice * (1 - numDiscount / 100))
+      }
+    }
+
     const payload: CreateTourPayload = {
       name,
       description,
       tourType,
       categories,
-      price: Number(price),
-      childPrice: childPrice ? Number(childPrice) : null,
+      price: finalPrice,
+      originalPrice: finalOriginalPrice,
+      childPrice: finalChildPrice,
       minPeople: minPeople ? Number(minPeople) : undefined,
       maxPeople: maxPeople ? Number(maxPeople) : undefined,
       highlights,
@@ -440,6 +472,24 @@ export default function AdminTourFormPage() {
                       className={inputClass}
                     />
                     <span className="text-sm text-gray-600 whitespace-nowrap">บาท</span>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>ส่วนลด (%)</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      value={discountPercent}
+                      onChange={(e) => {
+                        const val = Number(e.target.value)
+                        if (val >= 0 && val <= 100) setDiscountPercent(e.target.value)
+                      }}
+                      min={0}
+                      max={100}
+                      placeholder="ไม่บังคับ"
+                      className={inputClass}
+                    />
+                    <span className="text-sm text-gray-600 whitespace-nowrap">%</span>
                   </div>
                 </div>
                 <div>

@@ -55,6 +55,7 @@ export interface CreateTourPayload {
   categories: string[]
   price: number
   childPrice?: number | null
+  originalPrice?: number | null
   minPeople?: number
   maxPeople?: number
   highlights: string[]

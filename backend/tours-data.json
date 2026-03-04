@@ -301,8 +301,8 @@
       "สายกิจกรรม",
       "สายธรรมชาติ"
     ],
-    "price": 400,
-    "originalPrice": 1900,
+    "price": 800,
+    "originalPrice": 2000,
     "images": [
       "http://localhost:3000/uploads/tour-1772341946989-783950595.png",
       "http://localhost:3000/uploads/tour-1772341994364-127686848.png",
@@ -351,7 +351,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 10
+        "currentBooked": 0
       },
       {
         "id": 503,
@@ -361,7 +361,7 @@
         "timeSlot": "13:00-17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
-        "currentBooked": 10
+        "currentBooked": 0
       },
       {
         "id": 504,
@@ -371,7 +371,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 6
+        "currentBooked": 0
       },
       {
         "id": 505,
@@ -505,7 +505,7 @@
       }
     ],
     "createdAt": "2026-03-01T05:05:17.106Z",
-    "updatedAt": "2026-03-02T05:34:28.951Z",
+    "updatedAt": "2026-03-04T03:56:58.704Z",
     "childPrice": 200
   }
 ]
