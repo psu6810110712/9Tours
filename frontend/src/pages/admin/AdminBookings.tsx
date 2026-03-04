@@ -226,7 +226,7 @@ export default function AdminBookings() {
                             {selectedBooking.payments && selectedBooking.payments.length > 0 && selectedBooking.payments[0].slipUrl ? (
                                 <div className="border rounded-xl  overflow-hidden bg-gray-100 flex justify-center items-center p-2">
                                     <img
-                                        src={`http://localhost:3000${selectedBooking.payments[0].slipUrl}`}
+                                        src={`http://localhost:3000/${selectedBooking.payments[0].slipUrl}`}
                                         alt="Payment Slip"
                                         className="max-h-[500px] object-contain rounded-lg"
                                     />
