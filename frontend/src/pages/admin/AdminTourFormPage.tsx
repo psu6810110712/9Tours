@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { tourService } from '../../services/tourService'
+import ConfirmModal from '../../components/common/ConfirmModal'
+import { toast } from 'react-hot-toast'
 import type { CreateTourPayload } from '../../types/tour'
+import ImageUploadSection from '../../components/admin/tour-form/ImageUploadSection'
+import ItinerarySection from '../../components/admin/tour-form/ItinerarySection'
+import ScheduleSection from '../../components/admin/tour-form/ScheduleSection'
 
 // ===== ค่าคงที่ที่ใช้ในฟอร์ม =====
 const CATEGORIES = ['สายธรรมชาติ', 'สายคาเฟ่', 'สายกิจกรรม', 'สายมู', 'สายชิล']
 const HIGHLIGHTS = ['ยกเลิกฟรี', 'มีรถรับส่ง', 'อาหารกลางวัน', 'เที่ยวเต็มวัน', 'มีไกด์นำเที่ยว', 'รวมที่พัก', 'รถรับส่งสนามบิน']
 const REGIONS = ['ภาคเหนือ', 'ภาคใต้', 'ภาคกลาง', 'ภาคตะวันออกเฉียงเหนือ', 'ภาคตะวันออก']
 
-interface ScheduleRow {
+export interface ScheduleRow {
   startDate: string
   endDate: string
   timeSlot: string
@@ -17,7 +22,7 @@ interface ScheduleRow {
   enabled: boolean
 }
 
-interface ItineraryItem {
+export interface ItineraryItem {
   day?: number
   time: string
   title: string
@@ -31,6 +36,7 @@ export default function AdminTourFormPage() {
 
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [error, setError] = useState('')
   const [tourCode, setTourCode] = useState('')
 
@@ -123,7 +129,7 @@ export default function AdminTourFormPage() {
     // ตรวจสอบประเภทไฟล์ (รับเฉพาะ jpg/jpeg และ png)
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
     if (!validTypes.includes(file.type)) {
-      alert('กรุณาแนบเฉพาะไฟล์ประเภท .jpg หรือ .png เท่านั้นครับ')
+      toast.error('กรุณาแนบเฉพาะไฟล์ประเภท .jpg หรือ .png เท่านั้นครับ')
       e.target.value = ''
       return
     }
@@ -134,7 +140,7 @@ export default function AdminTourFormPage() {
       setImages((prev) => [...prev, url])
     } catch (error) {
       console.error(error)
-      alert('อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
+      toast.error('อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
     } finally {
       setUploadingImage(false)
       e.target.value = ''
@@ -219,18 +225,6 @@ export default function AdminTourFormPage() {
     setSchedules((prev) => [...prev, ...result])
   }
 
-  // ===== Itinerary Handlers =====
-  const addItineraryItem = () => {
-    setItinerary([...itinerary, { time: '', title: '', description: '' }])
-  }
-
-  const removeItineraryItem = (index: number) => {
-    setItinerary(itinerary.filter((_, i) => i !== index))
-  }
-
-  const updateItineraryItem = (index: number, field: keyof ItineraryItem, value: string) => {
-    setItinerary(itinerary.map((item, i) => (i === index ? { ...item, [field]: value } : item)))
-  }
 
   // ===== Submit Handler =====
   const handleSubmit = async (e: React.FormEvent) => {
@@ -500,356 +494,60 @@ export default function AdminTourFormPage() {
             </div>
 
             {/* ========== ฝั่งขวา: รูปภาพ + กำหนดการ ========== */}
-            <div className="bg-white rounded-2xl border-2 border-yellow-400 p-6 space-y-5">
+            <div className="space-y-6">
 
               {/* ระบบอัปโหลดรูปภาพ */}
-              <div className="mb-2">
-                <span className="text-sm font-bold text-gray-800 block mb-3">รูปภาพทัวร์ (เฉพาะ .jpg, .png)</span>
-
-                {images.length > 0 && (
-                  <div className="grid grid-cols-3 gap-3 mb-3">
-                    {images.map((url, i) => (
-                      <div key={i} className="relative group rounded-xl overflow-hidden h-24 border border-gray-200">
-                        <img src={url} alt={`Tour ${i}`} className="w-full h-full object-cover bg-gray-100" />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(i)}
-                          className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          ลบ
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <label className="border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/80 h-24 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
-                  <span className="text-2xl mb-1 text-gray-400">📷</span>
-                  <span className="text-sm text-gray-500 font-medium">
-                    {uploadingImage ? 'กำลังอัปโหลด...' : 'คลิกเพื่อเลือกไฟล์รูปภาพ'}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/jpeg, image/png, image/jpg"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                    disabled={uploadingImage}
-                  />
-                </label>
-              </div>
+              <ImageUploadSection
+                images={images}
+                uploadingImage={uploadingImage}
+                onImageUpload={handleImageUpload}
+                onRemoveImage={removeImage}
+              />
 
               {/* กำหนดการ (schedules) */}
-              <div>
-                <span className="text-sm font-bold text-gray-800 block mb-3">กำหนดการ</span>
-
-                <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 mb-3 space-y-2">
-                  <p className="text-xs font-bold text-orange-700">เพิ่มหลายวันพร้อมกัน (Bulk Add)</p>
-
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-gray-500">จาก</span>
-                      <input
-                        type="date"
-                        value={bulkFrom}
-                        onChange={(e) => setBulkFrom(e.target.value)}
-                        className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-orange-400"
-                      />
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-gray-500">ถึง</span>
-                      <input
-                        type="date"
-                        value={bulkTo}
-                        onChange={(e) => setBulkTo(e.target.value)}
-                        className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-orange-400"
-                      />
-                    </div>
-
-                    {tourType === 'package' && (
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs text-gray-500">ระยะเวลา</span>
-                        <input
-                          type="number"
-                          min={1}
-                          value={bulkDuration}
-                          onChange={(e) => setBulkDuration(Number(e.target.value))}
-                          className="w-12 bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-center outline-none focus:border-orange-400"
-                        />
-                        <span className="text-xs text-gray-500">วัน</span>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="number"
-                        value={bulkCapacity}
-                        min={1}
-                        onChange={(e) => setBulkCapacity(Number(e.target.value))}
-                        className="w-14 bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-center outline-none focus:border-orange-400"
-                      />
-                      <span className="text-xs text-gray-500">คน/รอบ</span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-1.5 flex-wrap">
-                    {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((label, dayIdx) => (
-                      <button
-                        key={dayIdx}
-                        type="button"
-                        onClick={() => {
-                          const next = new Set(bulkDays)
-                          next.has(dayIdx) ? next.delete(dayIdx) : next.add(dayIdx)
-                          setBulkDays(next)
-                        }}
-                        className={`w-8 h-8 rounded-full text-xs font-semibold transition-colors ${bulkDays.has(dayIdx)
-                          ? 'bg-orange-400 text-white'
-                          : 'bg-white border border-gray-300 text-gray-500'
-                          }`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-
-                  {tourType === 'one_day' && (
-                    <div className="border border-blue-200 bg-blue-50 rounded-lg p-2 space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold text-blue-700">⏱ รอบเวลา (Join Trip)</p>
-                        <button
-                          type="button"
-                          onClick={() => setRoundTemplates([...roundTemplates, { roundName: '', timeSlot: '' }])}
-                          className="text-xs text-blue-500 hover:text-blue-700 font-semibold"
-                        >
-                          + เพิ่มรอบ
-                        </button>
-                      </div>
-                      {roundTemplates.map((rt, ri) => (
-                        <div key={ri} className="flex items-center gap-1.5">
-                          <input
-                            type="text"
-                            value={rt.timeSlot}
-                            onChange={(e) => {
-                              const next = [...roundTemplates]
-                              next[ri] = { ...next[ri], timeSlot: e.target.value }
-                              setRoundTemplates(next)
-                            }}
-                            placeholder="เช่น 08:00-12:00"
-                            className="flex-1 bg-white border border-blue-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-blue-400"
-                          />
-                          <input
-                            type="text"
-                            value={rt.roundName}
-                            onChange={(e) => {
-                              const next = [...roundTemplates]
-                              next[ri] = { ...next[ri], roundName: e.target.value }
-                              setRoundTemplates(next)
-                            }}
-                            placeholder="ชื่อรอบ เช่น รอบเช้า"
-                            className="flex-1 bg-white border border-blue-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-blue-400"
-                          />
-                          {roundTemplates.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => setRoundTemplates(roundTemplates.filter((_, i) => i !== ri))}
-                              className="text-red-400 hover:text-red-600 text-xs"
-                            >✕</button>
-                          )}
-                        </div>
-                      ))}
-                      <p className="text-xs text-blue-400">ถ้าไม่กรอกเวลา = สร้าง 1 รอบต่อวัน (ทัวร์ปกติ)</p>
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleBulkAdd}
-                    disabled={!bulkFrom || !bulkTo}
-                    className="text-xs font-semibold text-white bg-orange-400 hover:bg-orange-500 disabled:opacity-40 px-4 py-1.5 rounded-full transition-colors"
-                  >
-                    สร้างกำหนดการ
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={addSchedule}
-                  className="text-xs font-semibold text-orange-500 border border-orange-300 hover:bg-orange-50 px-3 py-1 rounded-full transition-colors mb-2"
-                >
-                  + เพิ่มทีละรอบ
-                </button>
-
-                <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-                  {schedules.map((s, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm flex-wrap">
-                      <input
-                        type="date"
-                        value={s.startDate}
-                        onChange={(e) => updateSchedule(i, 'startDate', e.target.value)}
-                        className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-yellow-400"
-                      />
-                      {tourType === 'package' && (
-                        <>
-                          <span className="text-gray-400">ถึง</span>
-                          <input
-                            type="date"
-                            value={s.endDate}
-                            onChange={(e) => updateSchedule(i, 'endDate', e.target.value)}
-                            className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-yellow-400"
-                          />
-                        </>
-                      )}
-                      {tourType === 'one_day' && (
-                        <input
-                          type="text"
-                          value={s.timeSlot}
-                          onChange={(e) => updateSchedule(i, 'timeSlot', e.target.value)}
-                          placeholder="เช่น 08:00-12:00"
-                          title="ช่วงเวลา (Join Trip)"
-                          className="w-32 bg-gray-50 border border-blue-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-blue-400"
-                        />
-                      )}
-                      {tourType === 'one_day' && (
-                        <input
-                          type="text"
-                          value={s.roundName}
-                          onChange={(e) => updateSchedule(i, 'roundName', e.target.value)}
-                          placeholder="ชื่อรอบ เช่น รอบเช้า"
-                          title="ชื่อรอบ"
-                          className="w-28 bg-gray-50 border border-blue-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-blue-400"
-                        />
-                      )}
-                      <input
-                        type="number"
-                        value={s.maxCapacity}
-                        onChange={(e) => updateSchedule(i, 'maxCapacity', Number(e.target.value))}
-                        min={1}
-                        className="w-16 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-center outline-none focus:border-yellow-400"
-                      />
-                      <span className="text-xs text-gray-500 whitespace-nowrap">
-                        {tourType === 'one_day' ? 'คน/รอบ' : 'คน/กรุ๊ป'}
-                      </span>
-                      <input
-                        type="checkbox"
-                        checked={s.enabled}
-                        onChange={(e) => updateSchedule(i, 'enabled', e.target.checked)}
-                        className="accent-yellow-500"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeSchedule(i)}
-                        className="text-red-400 hover:text-red-600 text-xs"
-                        title="ลบรอบนี้"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                  {schedules.length === 0 && (
-                    <p className="text-xs text-gray-400 py-2">ยังไม่มีกำหนดการ</p>
-                  )}
-                </div>
-
-                {schedules.filter(s => s.enabled).length > 0 && (
-                  <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs font-bold text-gray-500">สรุปกำหนดการ</p>
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">
-                        รวม {schedules.filter(s => s.enabled).length} รอบ
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-600 space-y-1">
-                      <p>📅 <strong>จำนวนวัน:</strong> {new Set(schedules.filter(s => s.enabled).map(s => s.startDate)).size} วัน</p>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {Array.from(new Set(schedules.filter(s => s.enabled).map(s => s.startDate)))
-                          .sort()
-                          .slice(0, 5)
-                          .map(d => (
-                            <span key={d} className="bg-white border border-gray-200 px-1.5 py-0.5 rounded text-[10px]">
-                              {new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
-                            </span>
-                          ))
-                        }
-                        {new Set(schedules.filter(s => s.enabled).map(s => s.startDate)).size > 5 && (
-                          <span className="text-gray-400 pl-1">...และอื่นๆ</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
+              <div className="bg-white rounded-2xl border-2 border-yellow-400 p-6">
+                <ScheduleSection
+                  schedules={schedules}
+                  tourType={tourType}
+                  bulkFrom={bulkFrom}
+                  bulkTo={bulkTo}
+                  bulkCapacity={bulkCapacity}
+                  bulkDuration={bulkDuration}
+                  bulkDays={bulkDays}
+                  roundTemplates={roundTemplates}
+                  setBulkFrom={setBulkFrom}
+                  setBulkTo={setBulkTo}
+                  setBulkCapacity={setBulkCapacity}
+                  setBulkDuration={setBulkDuration}
+                  setBulkDays={setBulkDays}
+                  setRoundTemplates={setRoundTemplates}
+                  addSchedule={addSchedule}
+                  removeSchedule={removeSchedule}
+                  updateSchedule={updateSchedule}
+                  handleBulkAdd={handleBulkAdd}
+                />
               </div>
+            </div>
+          </div>
 
-              {/* ตารางกิจกรรม (Itinerary) */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-bold text-gray-800">ตารางกิจกรรม (Itinerary)</span>
-                  <button
-                    type="button"
-                    onClick={addItineraryItem}
-                    className="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-full font-semibold transition-colors"
-                  >
-                    + เพิ่มกิจกรรม
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  {itinerary.map((item, i) => (
-                    <div key={i} className="flex gap-2 items-start bg-gray-50 border border-gray-200 rounded-xl p-3">
-                      <div className="flex-1 space-y-2">
-                        <div className="flex gap-2">
-                          <input
-                            type="number"
-                            min="1"
-                            value={item.day || 1}
-                            onChange={(e) => updateItineraryItem(i, 'day', e.target.value)}
-                            placeholder="วันที่"
-                            className="w-16 bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-blue-400 text-center"
-                          />
-                          <input
-                            type="text"
-                            value={item.time}
-                            onChange={(e) => updateItineraryItem(i, 'time', e.target.value)}
-                            placeholder="เวลา (เช่น 08:00)"
-                            className="w-24 bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-blue-400"
-                          />
-                          <input
-                            type="text"
-                            value={item.title}
-                            onChange={(e) => updateItineraryItem(i, 'title', e.target.value)}
-                            placeholder="ชื่อกิจกรรม (เช่น รับที่โรงแรม)"
-                            className="flex-1 bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-blue-400 font-medium"
-                          />
-                        </div>
-                        <input
-                          type="text"
-                          value={item.description}
-                          onChange={(e) => updateItineraryItem(i, 'description', e.target.value)}
-                          placeholder="รายละเอียดเพิ่มเติม (optional)"
-                          className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-blue-400 text-gray-600"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeItineraryItem(i)}
-                        className="text-gray-400 hover:text-red-500 p-1"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                  {itinerary.length === 0 && (
-                    <p className="text-xs text-gray-400 text-center py-4 border-2 border-dashed border-gray-200 rounded-xl">
-                      ยังไม่มีตารางกิจกรรม
-                    </p>
-                  )}
-                </div>
-              </div>
+          {/* ตารางกิจกรรม (Itinerary) - เต็มหน้า */}
+          <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 mb-6 space-y-6">
+            <ItinerarySection
+              itinerary={itinerary}
+              tourType={tourType}
+              setItinerary={setItinerary}
+            />
 
+            <hr className="border-gray-100" />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* คำแนะนำการเดินทาง */}
               <div>
                 <label className={labelClass}>คำแนะนำการเดินทาง</label>
                 <textarea
                   value={transportation}
                   onChange={(e) => setTransportation(e.target.value)}
-                  rows={2}
+                  rows={3}
                   className={inputClass + ' resize-none'}
                 />
               </div>
@@ -861,7 +559,7 @@ export default function AdminTourFormPage() {
                     value={accommodation}
                     onChange={(e) => setAccommodation(e.target.value)}
                     required
-                    rows={2}
+                    rows={3}
                     placeholder="เช่น โรงแรม 3 ดาว ย่านนิมมาน"
                     className={inputClass + ' resize-none'}
                   />
@@ -873,10 +571,11 @@ export default function AdminTourFormPage() {
           {error && (
             <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg mt-4">{error}</p>
           )}
+
           <div className="flex justify-end gap-3 mt-6">
             <button
               type="button"
-              onClick={() => navigate('/admin/tours')}
+              onClick={() => setCancelModalOpen(true)}
               className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold px-6 py-2.5 rounded-xl transition-colors"
             >
               ยกเลิก
@@ -891,6 +590,18 @@ export default function AdminTourFormPage() {
           </div>
         </form>
       </main>
+
+      {/* 🛑 Confirm Cancel Modal 🛑 */}
+      <ConfirmModal
+        isOpen={cancelModalOpen}
+        title="ยกเลิกการแก้ไข?"
+        message="ข้อมูลที่คุณพิมพ์ไว้จะหายไปทั้งหมด ยืนยันที่จะยกเลิกหรือไม่?"
+        confirmText="ยืนยันยกเลิก"
+        cancelText="กลับไปหน้าทัวร์"
+        confirmStyle="danger"
+        onConfirm={() => navigate('/admin/tours')}
+        onCancel={() => setCancelModalOpen(false)}
+      />
     </>
   )
 }

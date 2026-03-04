@@ -1,0 +1,23 @@
+{
+  "name": "9tours-main",
+  "version": "1.0.0",
+  "description": "ระบบจองทัวร์ออนไลน์ที่ช่วยให้ลูกค้าดูทัวร์และจองได้เองพร้อมเห็นที่นั่งคงเหลือแบบ Real-time และแอดมินจัดการทุกอย่างได้ในระบบเดียว",
+  "main": "fix_conflicts.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/psu6810110712/9Tours.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/psu6810110712/9Tours/issues"
+  },
+  "homepage": "https://github.com/psu6810110712/9Tours#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.3.3"
+  }
+}

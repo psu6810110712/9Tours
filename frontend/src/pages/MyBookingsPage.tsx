@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { bookingService } from '../services/bookingService'
+import ConfirmModal from '../components/common/ConfirmModal'
+import { toast } from 'react-hot-toast'
 
 interface MyBookingItem {
   id: number
@@ -18,6 +20,7 @@ export default function MyBookingPage() {
   const [bookings, setBookings] = useState<MyBookingItem[]>([])
   const [selectedBooking, setSelectedBooking] = useState<MyBookingItem | null>(null)
   const [loading, setLoading] = useState(true)
+  const [cancelModalId, setCancelModalId] = useState<string | null>(null)
 
   const navigate = useNavigate()
 
@@ -71,16 +74,16 @@ export default function MyBookingPage() {
 
   // 3. เรียก API เพื่อยกเลิกรายการจอง
   const handleCancelBooking = async (bookingId: string) => {
-    if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการจองนี้? \n(รายการจะถูกเปลี่ยนสถานะเป็นยกเลิกแล้ว)')) {
-      try {
-        await bookingService.cancelBooking(bookingId)
-        alert('ยกเลิกการจองสำเร็จ')
-        loadBookings() // โหลดข้อมูลใหม่เพื่อรีเฟรชหน้าจอ
-      } catch (err: unknown) {
-        const error = err as { response?: { data?: { message?: string } } }
-        console.error("Error canceling booking:", err)
-        alert(error.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก กรุณาลองใหม่อีกครั้ง')
-      }
+    try {
+      await bookingService.cancelBooking(bookingId)
+      toast.success('ยกเลิกการจองสำเร็จ')
+      setCancelModalId(null)
+      loadBookings() // โหลดข้อมูลใหม่เพื่อรีเฟรชหน้าจอ
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } }
+      console.error("Error canceling booking:", err)
+      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก กรุณาลองใหม่อีกครั้ง')
+      setCancelModalId(null)
     }
   }
 
@@ -186,7 +189,7 @@ export default function MyBookingPage() {
                         ชำระเงิน
                       </button>
                       <button
-                        onClick={() => handleCancelBooking(String(booking.id))}
+                        onClick={() => setCancelModalId(String(booking.id))}
                         className="flex-1 md:flex-none px-6 py-2 bg-white border border-red-200 text-red-500 rounded-full text-xs font-bold hover:bg-red-50 transition-all"
                       >
                         ยกเลิก
@@ -269,6 +272,17 @@ export default function MyBookingPage() {
           </div>
         </div>
       )}
+      {/* 🛑 Confirm Cancel Modal 🛑 */}
+      <ConfirmModal
+        isOpen={cancelModalId !== null}
+        title="ยืนยันการยกเลิก"
+        message="คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการจองนี้? (รายการจะถูกเปลี่ยนสถานะเป็นยกเลิกแล้ว)"
+        confirmText="ยืนยันยกเลิก"
+        cancelText="ปิดหน้าต่าง"
+        confirmStyle="danger"
+        onConfirm={() => cancelModalId && handleCancelBooking(cancelModalId)}
+        onCancel={() => setCancelModalId(null)}
+      />
     </div>
   )
 }

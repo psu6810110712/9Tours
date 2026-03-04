@@ -65,6 +65,7 @@ export class AuthController {
 	@Post('logout')
 	async logout(@Res({ passthrough: true }) res: Response) {
 		res.clearCookie('refresh_token', { path: '/' });
+		res.clearCookie('refresh_token', { path: '/auth' }); // 🧹 ลบ Zombie cookie ทิ้ง
 		return { message: 'ออกจากระบบสำเร็จ' };
 	}
 }

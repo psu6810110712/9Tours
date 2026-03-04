@@ -38,7 +38,7 @@ export class BookingsService {
   }
 
   async create(userId: number, createBookingDto: CreateBookingDto) {
-    const { scheduleId, paxCount } = createBookingDto;
+    const { scheduleId, paxCount, adults = 1, children = 0 } = createBookingDto;
 
     // ค้นหา schedule จาก ToursService (ใช้ตัวเดียวกับ frontend)
     const found = this.findScheduleInData(scheduleId);
@@ -59,13 +59,16 @@ export class BookingsService {
     }
 
     // คำนวณ total price
-    const totalPrice = paxCount * tour.price;
+    const childPrice = tour.childPrice ?? tour.price;
+    const totalPrice = (adults * tour.price) + (children * childPrice);
 
     // สร้าง booking ใหม่  (เราเก็บ scheduleId ไว้เฉยๆ เพื่อ reference)
     const booking = this.bookingsRepository.create({
       userId,
       scheduleId,
       paxCount,
+      adults,
+      children,
       totalPrice,
       status: BookingStatus.PENDING_PAYMENT,
     });
@@ -84,8 +87,10 @@ export class BookingsService {
         ...schedule,
         tour: {
           id: tour.id,
+          tourCode: tour.tourCode,
           name: tour.name,
           price: tour.price,
+          childPrice: tour.childPrice,
           images: tour.images,
           accommodation: tour.accommodation || null,
         },
@@ -109,8 +114,10 @@ export class BookingsService {
             ...found.schedule,
             tour: {
               id: found.tour.id,
+              tourCode: found.tour.tourCode,
               name: found.tour.name,
               price: found.tour.price,
+              childPrice: found.tour.childPrice,
             },
           }
           : null,
@@ -135,8 +142,10 @@ export class BookingsService {
             ...found.schedule,
             tour: {
               id: found.tour.id,
+              tourCode: found.tour.tourCode,
               name: found.tour.name,
               price: found.tour.price,
+              childPrice: found.tour.childPrice,
               images: found.tour.images,
               accommodation: found.tour.accommodation || null,
             },
@@ -173,8 +182,10 @@ export class BookingsService {
           ...found.schedule,
           tour: {
             id: found.tour.id,
+            tourCode: found.tour.tourCode,
             name: found.tour.name,
             price: found.tour.price,
+            childPrice: found.tour.childPrice,
             images: found.tour.images,
             accommodation: found.tour.accommodation || null,
           },
@@ -201,8 +212,10 @@ export class BookingsService {
           ...found.schedule,
           tour: {
             id: found.tour.id,
+            tourCode: found.tour.tourCode,
             name: found.tour.name,
             price: found.tour.price,
+            childPrice: found.tour.childPrice,
             images: found.tour.images,
             accommodation: found.tour.accommodation || null,
           },
@@ -247,8 +260,10 @@ export class BookingsService {
           ...found.schedule,
           tour: {
             id: found.tour.id,
+            tourCode: found.tour.tourCode,
             name: found.tour.name,
             price: found.tour.price,
+            childPrice: found.tour.childPrice,
             images: found.tour.images,
             accommodation: found.tour.accommodation || null,
           },
