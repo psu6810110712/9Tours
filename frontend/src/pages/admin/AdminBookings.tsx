@@ -91,7 +91,7 @@ export default function AdminBookings() {
             case 'success':
                 return <span className="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold">ยืนยันแล้ว</span>
             case 'canceled':
-                return <span className="px-2 py-1 rounded bg-gray-100 text-gray-700 text-xs font-semibold">ยกเลิกแล้ว</span>
+                return <span className="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold">ยกเลิกแล้ว</span>
             default:
                 return <span className="px-2 py-1 rounded bg-gray-100 text-gray-700 text-xs font-semibold">{status}</span>
         }
