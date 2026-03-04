@@ -91,34 +91,44 @@ export default function PaymentPage() {
   // 2. ระบบเวลานับถอยหลัง - คำนวณจาก createdAt ของ booking เพื่อให้ตรงกับ Cron Job ฝั่ง Backend
   // แสดง 15 นาทีบนหน้าจอ (แต่ Backend จะตัดที่ 18 นาที = เผื่อเวลาให้อีก 3 นาที)
   useEffect(() => {
-    if (!bookingData?.createdAt) return
-
-    // แก้ปัญหา timezone: ถ้า PostgreSQL คืนค่าเวลาโดยไม่มี timezone suffix (Z)
-    // JavaScript จะตีความเป็น local time ซึ่งทำให้เวลาเพี้ยน
-    // เพิ่ม 'Z' เข้าไปเพื่อบังคับให้ตีความเป็น UTC
+    if (!bookingData?.createdAt || !bookingId) return
+    const PAYMENT_DURATION_MS = 15 * 60 * 1000
+    const storageKey = `payment_expiry_${bookingId}`
     const rawDate = bookingData.createdAt
-    const normalizedDate = rawDate.endsWith('Z') || rawDate.includes('+') || rawDate.includes('T') && rawDate.match(/[+-]\d{2}:\d{2}$/)
-      ? rawDate
-      : rawDate + 'Z'
-    const createdTime = new Date(normalizedDate).getTime()
-    // แสดงนับถอยหลัง 15 นาที นับจาก createdAt
-    const expiryTime = createdTime + 15 * 60 * 1000
+    const now = Date.now()
+    console.log('[Timer] rawDate:', rawDate, '| now:', new Date().toISOString())
+    let createdTime = 0
+    const parsed = new Date(rawDate).getTime()
+    if ((now - parsed) >= 0 && (now - parsed) < PAYMENT_DURATION_MS) {
+      createdTime = parsed
+    } else {
+      const parsedZ = new Date(rawDate + 'Z').getTime()
+      if ((now - parsedZ) >= 0 && (now - parsedZ) < PAYMENT_DURATION_MS) {
+        createdTime = parsedZ
+      }
+    }
+    let expiryTime: number
+    if (createdTime > 0) {
+      expiryTime = createdTime + PAYMENT_DURATION_MS
+      localStorage.setItem(storageKey, expiryTime.toString())
+    } else {
+      const stored = localStorage.getItem(storageKey)
+      expiryTime = stored ? parseInt(stored) : now + PAYMENT_DURATION_MS
+      if (!stored) localStorage.setItem(storageKey, expiryTime.toString())
+    }
+    console.log('[Timer] remaining:', Math.floor((expiryTime - now) / 1000), 'sec')
 
     const updateTimer = () => {
-      const now = Date.now()
-      const remaining = Math.max(0, Math.floor((expiryTime - now) / 1000))
-
+      const remaining = Math.max(0, Math.floor((expiryTime - Date.now()) / 1000))
       setTimeLeft(remaining)
-      if (remaining <= 0) {
-        setIsExpired(true)
-      }
+      if (remaining <= 0) setIsExpired(true)
     }
 
     updateTimer()
     const timerInterval = setInterval(updateTimer, 1000)
-
     return () => clearInterval(timerInterval)
-  }, [bookingData?.createdAt])
+  }, [bookingData?.createdAt, bookingId])
+
 
   const formatTime = (seconds: number | null) => {
     if (seconds === null) return '--:--'
