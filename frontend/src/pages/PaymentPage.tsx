@@ -18,6 +18,7 @@ interface PaymentPageData {
   status: string
   image: string
   isPrivate: boolean
+  createdAt: string
 }
 
 export default function PaymentPage() {
@@ -28,6 +29,7 @@ export default function PaymentPage() {
   // --- State สำหรับ Timer ---
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [isExpired, setIsExpired] = useState(false)
+  const [uploadAnyway, setUploadAnyway] = useState(false)
 
   // --- State สำหรับข้อมูลและการอัปโหลด ---
   const [bookingData, setBookingData] = useState<PaymentPageData | null>(null)
@@ -58,7 +60,8 @@ export default function PaymentPage() {
           childPrice: (data.schedule?.tour as any)?.childPrice || data.schedule?.tour?.price || 0,
           status: data.status,
           image: typeof data.schedule?.tour?.images?.[0] === 'string' ? data.schedule.tour.images[0] : (data.schedule?.tour?.images?.[0] as any)?.url || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
-          isPrivate: !!data.schedule?.tour?.minPeople || location.state?.isPrivate || false
+          isPrivate: !!data.schedule?.tour?.minPeople || location.state?.isPrivate || false,
+          createdAt: data.createdAt || new Date().toISOString()
         })
       } catch (err) {
         console.error("Error fetching booking details:", err)
@@ -75,7 +78,8 @@ export default function PaymentPage() {
           childPrice: 1000,
           status: 'pending_payment',
           image: 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
-          isPrivate: false
+          isPrivate: false,
+          createdAt: new Date().toISOString()
         })
       } finally {
         setLoading(false)
@@ -84,22 +88,18 @@ export default function PaymentPage() {
     fetchBooking()
   }, [bookingId])
 
-  // 2. ระบบเวลานับถอยหลัง (ใช้ LocalStorage)
+  // 2. ระบบเวลานับถอยหลัง - คำนวณจาก createdAt ของ booking เพื่อให้ตรงกับ Cron Job ฝั่ง Backend
+  // แสดง 15 นาทีบนหน้าจอ (แต่ Backend จะตัดที่ 18 นาที = เผื่อเวลาให้อีก 3 นาที)
   useEffect(() => {
-    if (!bookingId) return
+    if (!bookingData?.createdAt) return
 
-    const storageKey = `payment_expiry_${bookingId}`
-    let expiryTime = localStorage.getItem(storageKey)
-
-    if (!expiryTime) {
-      const newExpiry = (Date.now() + 15 * 60 * 1000).toString()
-      localStorage.setItem(storageKey, newExpiry)
-      expiryTime = newExpiry
-    }
+    const createdTime = new Date(bookingData.createdAt).getTime()
+    // แสดงนับถอยหลัง 15 นาที นับจาก createdAt
+    const expiryTime = createdTime + 15 * 60 * 1000
 
     const updateTimer = () => {
       const now = Date.now()
-      const remaining = Math.max(0, Math.floor((parseInt(expiryTime!) - now) / 1000))
+      const remaining = Math.max(0, Math.floor((expiryTime - now) / 1000))
 
       setTimeLeft(remaining)
       if (remaining <= 0) {
@@ -111,7 +111,7 @@ export default function PaymentPage() {
     const timerInterval = setInterval(updateTimer, 1000)
 
     return () => clearInterval(timerInterval)
-  }, [bookingId])
+  }, [bookingData?.createdAt])
 
   const formatTime = (seconds: number | null) => {
     if (seconds === null) return '--:--'
@@ -160,7 +160,6 @@ export default function PaymentPage() {
 
       setIsSubmitting(false)
       setShowSuccessModal(true)
-      localStorage.removeItem(`payment_expiry_${bookingId}`)
     } catch (err: unknown) {
       setIsSubmitting(false)
       const error = err as { response?: { data?: { message?: string } } }
@@ -320,9 +319,9 @@ export default function PaymentPage() {
         <div className="flex flex-col items-center mt-14">
           <button
             onClick={handleConfirmPayment}
-            disabled={isSubmitting || isExpired}
+            disabled={isSubmitting || (isExpired && !uploadAnyway)}
             className={`flex items-center justify-center gap-3 text-white font-bold py-4.5 px-24 rounded-full transition-all text-lg min-w-[340px] shadow-[0_10px_25px_rgba(37,99,235,0.25)] 
-              ${isSubmitting || isExpired
+              ${isSubmitting || (isExpired && !uploadAnyway)
                 ? 'bg-gray-400 cursor-not-allowed shadow-none'
                 : 'bg-primary hover:bg-primary-dark hover:-translate-y-[1.5px] active:translate-y-0'
               }`}
@@ -379,6 +378,41 @@ export default function PaymentPage() {
             >
               การจองของฉัน
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- Timeout Modal --- */}
+      {isExpired && !uploadAnyway && !showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+          <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-md relative z-10 flex flex-col items-center text-center shadow-2xl animate-fade-in-up border border-gray-100">
+
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
+              <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">หมดเวลาชำระเงิน</h2>
+            <p className="text-gray-500 text-[15px] mb-8 leading-relaxed font-medium">
+              เวลาจองที่นั่งของคุณหมดลงแล้ว และที่นั่งได้ถูกคืนกลับเข้าสู่ระบบแล้ว อย่างไรก็ตาม หากคุณทำรายการชำระเงินเรียบร้อยแล้ว กรุณากดปุ่มด้านล่างเพื่ออัปโหลดสลิป
+            </p>
+
+            <div className="flex flex-col gap-3 w-full">
+              <button
+                onClick={() => setUploadAnyway(true)}
+                className="w-full bg-primary text-white font-bold py-3.5 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
+              >
+                ฉันโอนเงินเรียบร้อยแล้ว
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="w-full bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full hover:bg-gray-200 transition-colors text-lg"
+              >
+                เริ่มการจองใหม่
+              </button>
+            </div>
           </div>
         </div>
       )}

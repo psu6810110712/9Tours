@@ -35,6 +35,13 @@ export class PaymentsService {
       );
     }
 
+    // ตรวจสอบว่า booking ถูกยกเลิกอัตโนมัติจากระบบคืนที่นั่งหรือไม่ (Hard Cutoff)
+    if (booking.status === BookingStatus.CANCELED) {
+      throw new BadRequestException(
+        'เซสชันการชำระเงินหมดอายุแล้ว และที่นั่งได้ถูกคืนให้ส่วนกลางไปแล้ว หากท่านทำการโอนเงินสำเร็จไปแล้ว กรุณาติดต่อแอดมินผ่าน Line หรือ Facebook เพื่อรับเงินคืนหรือรับความช่วยเหลือ'
+      );
+    }
+
     if (booking.status !== BookingStatus.PENDING_PAYMENT) {
       throw new BadRequestException(
         `Booking นี้ไม่ได้อยู่ในสถานะรอชำระเงิน (สถานะปัจจุบัน: ${booking.status})`,

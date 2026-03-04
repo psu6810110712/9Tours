@@ -52,18 +52,34 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const [bookedScheduleIds, setBSubmittedScheduleIds] = useState<Set<number>>(new Set())
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // ดึง booking ที่ active ของ user เพื่อเช็คว่าจองรอบนี้ไปแล้วหรือยัง
+  // ตัวแปรกระตุ้นการดึงข้อมูลใหม่เมื่อผู้ใช้กลับมาที่หน้านี้ หรือเปลี่ยน schedule
+  const [fetchKey, setFetchKey] = useState(0)
+
+  // ตรวจจับเมื่อผู้ใช้กลับมาที่แท็บนี้ (เช่น กด back จากหน้า Payment)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        setFetchKey(prev => prev + 1)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    // กระตุ้นทุกครั้งที่ component mount ใหม่
+    setFetchKey(prev => prev + 1)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
+  // ดึง booking ที่ยังรอชำระเงินของ user เพื่อป้องกันการจองซ้อนก่อนจ่ายเงิน
   useEffect(() => {
     if (!user) return
     bookingService.getMyBookings().then(bookings => {
-      const activeIds = new Set<number>(
+      const pendingIds = new Set<number>(
         bookings
-          .filter(b => !['canceled', 'refund_completed'].includes(b.status))
+          .filter(b => b.status === 'pending_payment')
           .map(b => b.scheduleId)
       )
-      setBSubmittedScheduleIds(activeIds)
+      setBSubmittedScheduleIds(pendingIds)
     }).catch(() => { /* ignore */ })
-  }, [user])
+  }, [user, fetchKey])
 
   // ดึงข้อมูล available seats จาก API สำหรับทุก schedule (เพื่อให้ date selector แสดงสถานะล่าสุด)
   useEffect(() => {
@@ -85,7 +101,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
     }
 
     fetchAllSeats()
-  }, [tour?.id, upcomingSchedules])
+  }, [tour?.id, upcomingSchedules, fetchKey])
 
   // ใช้ available seats จาก API ถ้ามี มิฉะนั้นใช้จากข้อมูลเก่า
   const seatsLeft = selectedSchedule
@@ -110,7 +126,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
 
   let buttonText = 'จองเลย'
   if (!upcomingSchedules.length || !selectedSchedule) buttonText = 'ไม่มีรอบเปิดรับ'
-  else if (isAlreadyBooked) buttonText = 'คุณจองรอบนี้แล้ว'
+  else if (isAlreadyBooked) buttonText = 'คุณมีรายการรอชำระเงิน'
   else if (isSoldOut && isPrivate) buttonText = 'รอบนี้ถูกจองแล้ว'
   else if (isSoldOut) buttonText = 'รอบนี้เต็มแล้ว'
   else if (isExceedCapacity) buttonText = 'ที่นั่งไม่เพียงพอ'

@@ -5,7 +5,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, In, Repository } from 'typeorm';
+import { Not, In, Repository, LessThan } from 'typeorm';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { Booking, BookingStatus } from './entities/booking.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
@@ -68,6 +69,45 @@ export class BookingsService {
     private bookingsRepository: Repository<Booking>,
   ) { }
 
+  // ระบบคืนที่นั่งอัตโนมัติ: ทำงานทุก 1 นาที ตรวจสอบ booking ที่ค้างเกิน 18 นาที
+  // (15 นาทีนับถอยหลังบนหน้าจอ + 3 นาทีผ่อนผันให้อัปโหลดสลิป)
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleExpiredBookings() {
+    // กำหนดเวลาตัดรอบ: 18 นาทีที่แล้ว
+    const cutoffTime = new Date(Date.now() - 18 * 60 * 1000);
+
+    // ค้นหาการจองที่ยังรอชำระเงินอยู่ และสร้างมานานกว่า 18 นาที
+    const expiredBookings = await this.bookingsRepository.find({
+      where: {
+        status: BookingStatus.PENDING_PAYMENT,
+        createdAt: LessThan(cutoffTime),
+      },
+    });
+
+    if (expiredBookings.length === 0) return;
+
+    for (const booking of expiredBookings) {
+      // ตรวจสอบซ้ำว่ายังเป็น PENDING_PAYMENT จริงหรือไม่ (ป้องกัน race condition)
+      if (booking.status !== BookingStatus.PENDING_PAYMENT) continue;
+
+      // เปลี่ยนสถานะเป็น CANCELED พร้อมบันทึกเหตุผลการยกเลิก
+      booking.status = BookingStatus.CANCELED;
+      booking.adminNotes = 'ระบบยกเลิกอัตโนมัติเนื่องจากเกินกำหนดชำระเงิน (18 นาที)';
+      await this.bookingsRepository.save(booking);
+
+      // คืนที่นั่งเข้าสู่ระบบ
+      const found = findScheduleInJson(booking.scheduleId);
+      if (found) {
+        const { tour, schedule } = found;
+        const isPrivate = !!tour.minPeople;
+        // Private Tour คืนทั้งหมดตาม maxCapacity, Join Tour คืนตาม paxCount
+        const seatsToRelease = isPrivate ? schedule.maxCapacity : booking.paxCount;
+        updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+        console.log(`[Cron] ยกเลิกการจอง ID ${booking.id} และคืนที่นั่ง ${seatsToRelease} ที่`);
+      }
+    }
+  }
+
   async create(userId: number, createBookingDto: CreateBookingDto) {
     const { scheduleId, adults = 1, children = 0 } = createBookingDto;
 
@@ -84,16 +124,31 @@ export class BookingsService {
     const { tour, schedule } = found;
     const isPrivate = !!tour.minPeople;
 
-    // D4: ป้องกันจอง schedule เดียวกันซ้ำ (active booking ที่ยังไม่ถูก cancel)
-    const existingBooking = await this.bookingsRepository.findOne({
-      where: {
-        userId,
-        scheduleId,
-        status: Not(In([BookingStatus.CANCELED, BookingStatus.REFUND_COMPLETED])),
-      },
-    });
-    if (existingBooking) {
-      throw new BadRequestException('คุณมีการจองรอบนี้อยู่แล้ว ไม่สามารถจองซ้ำได้');
+    // ตรวจสอบการจองซ้ำ: แยกตรรกะ Join Tour กับ Private Tour
+    if (isPrivate) {
+      // Private Tour: บล็อกจองซ้ำถ้ามี booking active อยู่แล้ว (ทุกสถานะยกเว้น canceled/refund)
+      const existingBooking = await this.bookingsRepository.findOne({
+        where: {
+          userId,
+          scheduleId,
+          status: Not(In([BookingStatus.CANCELED, BookingStatus.REFUND_COMPLETED])),
+        },
+      });
+      if (existingBooking) {
+        throw new BadRequestException('คุณมีการจองรอบนี้อยู่แล้ว ไม่สามารถจองซ้ำได้');
+      }
+    } else {
+      // Join Tour: บล็อกเฉพาะเมื่อมี booking ที่ยังรอชำระเงินอยู่ (ต้องจบ booking แรกก่อน)
+      const pendingBooking = await this.bookingsRepository.findOne({
+        where: {
+          userId,
+          scheduleId,
+          status: BookingStatus.PENDING_PAYMENT,
+        },
+      });
+      if (pendingBooking) {
+        throw new BadRequestException('คุณมีรายการรอชำระเงินอยู่ กรุณาชำระเงินหรือยกเลิกก่อนจองใหม่');
+      }
     }
 
     // Hold seat: Private = เต็มทั้งรอบ, Join = ตามจำนวนคน

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ToursModule } from './tours/tours.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
@@ -30,6 +31,9 @@ import { AnalyticsModule } from './analytics/analytics.module';
         synchronize: true,
       }),
     }),
+
+    // เปิดใช้งาน Schedule สำหรับระบบ Cron Jobs (คืนที่นั่งอัตโนมัติ)
+    ScheduleModule.forRoot(),
 
     ToursModule,
     UsersModule,
