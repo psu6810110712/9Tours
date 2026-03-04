@@ -1,3 +1,5 @@
+import type { User } from './user'
+
 export interface Payment {
   id: number
   amountPaid: number
@@ -35,6 +37,7 @@ export interface Booking {
   createdAt: string
   payments: Payment[]
   schedule: Schedule | null
+  user?: User
 }
 
 export interface CreateBookingDto {

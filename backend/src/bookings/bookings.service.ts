@@ -102,7 +102,7 @@ export class BookingsService {
   async findAll() {
     const bookings = await this.bookingsRepository.find({
       order: { createdAt: 'DESC' },
-      relations: ['payments'],
+      relations: ['payments', 'user'],
     });
 
     return bookings.map((booking) => {
@@ -167,6 +167,9 @@ export class BookingsService {
     // ✅ ลดจำนวนที่นั่งลงในเมื่ออัปเดตเป็น AWAITING_APPROVAL
     if (updateBookingStatusDto.status === BookingStatus.AWAITING_APPROVAL && booking.status !== BookingStatus.AWAITING_APPROVAL) {
       this.toursService.updateScheduleBookedCount(booking.scheduleId, booking.paxCount);
+    } else if (booking.status === BookingStatus.AWAITING_APPROVAL &&
+      (updateBookingStatusDto.status === BookingStatus.CANCELED || updateBookingStatusDto.status === BookingStatus.PENDING_PAYMENT)) {
+      this.toursService.updateScheduleBookedCount(booking.scheduleId, -booking.paxCount);
     }
 
     // อัปเดต status
