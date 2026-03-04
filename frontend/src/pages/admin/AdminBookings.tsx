@@ -248,11 +248,11 @@ export default function AdminBookings() {
                             {selectedBooking.status === 'awaiting_approval' && (
                                 <>
                                     <button
-                                        onClick={() => handleUpdateStatus('pending_payment')}
+                                        onClick={() => handleUpdateStatus('canceled')}
                                         disabled={isProcessing}
                                         className="px-5 py-2.5 text-sm font-semibold bg-red-100 text-red-600 hover:bg-red-200 rounded-xl transition-colors disabled:opacity-50"
                                     >
-                                        ไม่อนุมัติสลิป
+                                        ไม่อนุมัติ/ยกเลิก
                                     </button>
                                     <button
                                         onClick={() => handleUpdateStatus('confirmed')}
