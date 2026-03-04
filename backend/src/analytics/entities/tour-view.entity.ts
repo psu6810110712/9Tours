@@ -28,7 +28,7 @@ export class TourView {
     @Column({ name: 'user_id', nullable: true })
     userId: number;
 
-    @CreateDateColumn({ name: 'viewed_at' })
+    @CreateDateColumn({ type: 'timestamptz', name: 'viewed_at' })
     viewedAt: Date;
 
     @Column({ name: 'session_id', nullable: true })

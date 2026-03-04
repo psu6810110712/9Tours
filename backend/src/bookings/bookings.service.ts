@@ -124,6 +124,17 @@ export class BookingsService {
     const { tour, schedule } = found;
     const isPrivate = !!tour.minPeople;
 
+    // ตรวจสอบว่าผู้ใช้มี booking ค้างชำระอยู่หรือไม่ (ป้องกันการจองซ้อนทุกกรณี ไม่ว่าจะทัวร์ไหน)
+    const existingPendingBooking = await this.bookingsRepository.findOne({
+      where: {
+        userId,
+        status: BookingStatus.PENDING_PAYMENT,
+      },
+    });
+    if (existingPendingBooking) {
+      throw new BadRequestException('คุณมีรายการรอชำระเงินอยู่ กรุณาชำระเงินหรือยกเลิกรายการดังกล่าวให้เสร็จสมบูรณ์ก่อนเริ่มการจองใหม่');
+    }
+
     // ตรวจสอบการจองซ้ำ: แยกตรรกะ Join Tour กับ Private Tour
     if (isPrivate) {
       // Private Tour: บล็อกจองซ้ำถ้ามี booking active อยู่แล้ว (ทุกสถานะยกเว้น canceled/refund)
@@ -136,18 +147,6 @@ export class BookingsService {
       });
       if (existingBooking) {
         throw new BadRequestException('คุณมีการจองรอบนี้อยู่แล้ว ไม่สามารถจองซ้ำได้');
-      }
-    } else {
-      // Join Tour: บล็อกเฉพาะเมื่อมี booking ที่ยังรอชำระเงินอยู่ (ต้องจบ booking แรกก่อน)
-      const pendingBooking = await this.bookingsRepository.findOne({
-        where: {
-          userId,
-          scheduleId,
-          status: BookingStatus.PENDING_PAYMENT,
-        },
-      });
-      if (pendingBooking) {
-        throw new BadRequestException('คุณมีรายการรอชำระเงินอยู่ กรุณาชำระเงินหรือยกเลิกก่อนจองใหม่');
       }
     }
 

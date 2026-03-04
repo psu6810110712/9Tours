@@ -49,7 +49,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const [children, setChildren] = useState(0)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [availableSeatsData, setAvailableSeatsData] = useState<{ [key: number]: number | null }>({})
-  const [bookedScheduleIds, setBSubmittedScheduleIds] = useState<Set<number>>(new Set())
+  const [pendingBookingMap, setPendingBookingMap] = useState<Map<number, number>>(new Map()) // scheduleId -> bookingId
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // ตัวแปรกระตุ้นการดึงข้อมูลใหม่เมื่อผู้ใช้กลับมาที่หน้านี้ หรือเปลี่ยน schedule
@@ -68,16 +68,15 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
-  // ดึง booking ที่ยังรอชำระเงินของ user เพื่อป้องกันการจองซ้อนก่อนจ่ายเงิน
+  // ดึง booking ที่ยังรอชำระเงินของ user เพื่อให้กดไปหน้าชำระเงินต่อได้
   useEffect(() => {
     if (!user) return
     bookingService.getMyBookings().then(bookings => {
-      const pendingIds = new Set<number>(
-        bookings
-          .filter(b => b.status === 'pending_payment')
-          .map(b => b.scheduleId)
-      )
-      setBSubmittedScheduleIds(pendingIds)
+      const map = new Map<number, number>()
+      bookings
+        .filter(b => b.status === 'pending_payment')
+        .forEach(b => map.set(b.scheduleId, b.id))
+      setPendingBookingMap(map)
     }).catch(() => { /* ignore */ })
   }, [user, fetchKey])
 
@@ -121,15 +120,16 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   // 2. Logic ล็อคปุ่ม "จองเลย"
   const isSoldOut = selectedSchedule && seatsLeft <= 0
   const isExceedCapacity = !isPrivate && totalGuests > seatsLeft
-  const isAlreadyBooked = selectedSchedule ? bookedScheduleIds.has(selectedSchedule.id) : false
-  const isBookingDisabled = !upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity || isAlreadyBooked
+  const hasAnyPendingBooking = pendingBookingMap.size > 0
+  const anyPendingBookingId = hasAnyPendingBooking ? Array.from(pendingBookingMap.values())[0] : undefined
+  const isBookingDisabled = hasAnyPendingBooking ? false : (!upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity)
 
   let buttonText = 'จองเลย'
-  if (!upcomingSchedules.length || !selectedSchedule) buttonText = 'ไม่มีรอบเปิดรับ'
-  else if (isAlreadyBooked) buttonText = 'คุณมีรายการรอชำระเงิน'
+  if (hasAnyPendingBooking) buttonText = 'มีรายการจองค้างชำระ'
+  else if (!upcomingSchedules.length || !selectedSchedule) buttonText = 'ไม่มีรอบเปิดรับ'
   else if (isSoldOut && isPrivate) buttonText = 'รอบนี้ถูกจองแล้ว'
   else if (isSoldOut) buttonText = 'รอบนี้เต็มแล้ว'
-  else if (isExceedCapacity) buttonText = 'ที่นั่งไม่เพียงพอ'
+  else if (isExceedCapacity) buttonText = 'ที่นั่งไม่พอ'
 
   const handleBookingClick = () => {
     if (!user) {
@@ -137,7 +137,13 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
       return
     }
 
-    // ส่ง id ของ schedule แทนที่จะมีแค่จำนวนคน เพื่อให้ Backend รู้ว่าจองรอบไหน
+    // ถ้ามี booking ค้างรอชำระเงินอยู่ ให้ไปหน้า payment ของ booking นั้นเลย
+    if (hasAnyPendingBooking && anyPendingBookingId) {
+      navigate(`/payment/${anyPendingBookingId}`)
+      return
+    }
+
+    // สร้าง booking ใหม่
     const targetScheduleId = selectedSchedule ? selectedSchedule.id : '-'
     navigate(`/booking/${tour.id}?scheduleId=${targetScheduleId}&adults=${adults}&children=${children}`)
   }

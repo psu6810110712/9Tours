@@ -88,35 +88,60 @@ export default function PaymentPage() {
     fetchBooking()
   }, [bookingId])
 
-  // 2. ระบบเวลานับถอยหลัง - คำนวณจาก createdAt ของ booking เพื่อให้ตรงกับ Cron Job ฝั่ง Backend
-  // แสดง 15 นาทีบนหน้าจอ (แต่ Backend จะตัดที่ 18 นาที = เผื่อเวลาให้อีก 3 นาที)
+  // 2. ระบบเวลานับถอยหลัง — ใช้ server time เท่านั้น (ไม่ใช้ localStorage เพราะทำให้เวลาเพี้ยน)
   useEffect(() => {
-    if (!bookingData?.createdAt || !bookingId) return
+    if (!bookingData || !bookingId) return
+
+    // ถ้า booking ถูกยกเลิกแล้ว (โดย Cron Job หรือ Admin) แสดง expired ทันที
+    if (bookingData.status === 'canceled') {
+      setTimeLeft(0)
+      setIsExpired(true)
+      return
+    }
+
+    // ถ้าไม่มี createdAt ให้เริ่มนับ 15 นาทีจากตอนนี้
+    if (!bookingData.createdAt) {
+      const expiryTime = Date.now() + 15 * 60 * 1000
+      const updateTimer = () => {
+        const remaining = Math.max(0, Math.floor((expiryTime - Date.now()) / 1000))
+        setTimeLeft(remaining)
+        if (remaining <= 0) setIsExpired(true)
+      }
+      updateTimer()
+      const interval = setInterval(updateTimer, 1000)
+      return () => clearInterval(interval)
+    }
+
+    // คำนวณเวลาจาก createdAt ของ server
     const PAYMENT_DURATION_MS = 15 * 60 * 1000
-    const storageKey = `payment_expiry_${bookingId}`
     const rawDate = bookingData.createdAt
     const now = Date.now()
-    console.log('[Timer] rawDate:', rawDate, '| now:', new Date().toISOString())
-    let createdTime = 0
-    const parsed = new Date(rawDate).getTime()
-    if ((now - parsed) >= 0 && (now - parsed) < PAYMENT_DURATION_MS) {
-      createdTime = parsed
+
+    // ลองทั้ง 2 แบบ: ตีความเป็น local time และ UTC
+    const asLocal = new Date(rawDate).getTime()
+    const asUTC = new Date(rawDate.endsWith('Z') ? rawDate : rawDate + 'Z').getTime()
+
+    // เลือกแบบที่ใกล้ now ที่สุด (ไม่เกิน now) = แบบที่ถูกต้อง
+    const diffLocal = now - asLocal
+    const diffUTC = now - asUTC
+    let createdTime: number
+    if (diffLocal >= 0 && (diffUTC < 0 || diffLocal <= diffUTC)) {
+      createdTime = asLocal
+    } else if (diffUTC >= 0) {
+      createdTime = asUTC
     } else {
-      const parsedZ = new Date(rawDate + 'Z').getTime()
-      if ((now - parsedZ) >= 0 && (now - parsedZ) < PAYMENT_DURATION_MS) {
-        createdTime = parsedZ
-      }
+      createdTime = now // fallback: ถ้าไม่สมเหตุทั้งคู่ ให้เริ่มจากตอนนี้
     }
-    let expiryTime: number
-    if (createdTime > 0) {
-      expiryTime = createdTime + PAYMENT_DURATION_MS
-      localStorage.setItem(storageKey, expiryTime.toString())
-    } else {
-      const stored = localStorage.getItem(storageKey)
-      expiryTime = stored ? parseInt(stored) : now + PAYMENT_DURATION_MS
-      if (!stored) localStorage.setItem(storageKey, expiryTime.toString())
+
+    const expiryTime = createdTime + PAYMENT_DURATION_MS
+    console.log('[Timer] createdTime:', new Date(createdTime).toISOString(), '| expiryTime:', new Date(expiryTime).toISOString(), '| remaining:', Math.floor((expiryTime - now) / 1000), 'sec')
+
+    // ถ้าหมดเวลาแล้ว แสดง expired ทันที
+    if (expiryTime <= now) {
+      setTimeLeft(0)
+      setIsExpired(true)
+      return
     }
-    console.log('[Timer] remaining:', Math.floor((expiryTime - now) / 1000), 'sec')
 
     const updateTimer = () => {
       const remaining = Math.max(0, Math.floor((expiryTime - Date.now()) / 1000))
@@ -127,8 +152,7 @@ export default function PaymentPage() {
     updateTimer()
     const timerInterval = setInterval(updateTimer, 1000)
     return () => clearInterval(timerInterval)
-  }, [bookingData?.createdAt, bookingId])
-
+  }, [bookingData, bookingId])
 
   const formatTime = (seconds: number | null) => {
     if (seconds === null) return '--:--'
