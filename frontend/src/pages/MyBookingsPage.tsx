@@ -61,28 +61,45 @@ export default function MyBookingPage() {
       const data = await bookingService.getMyBookings()
 
       // แปลงข้อมูลจาก Backend ให้เข้ากับ UI
-      const formattedBookings = data.map(b => ({
-        id: b.id,
-        tourCode: b.schedule?.tour?.tourCode || `T-${b.scheduleId}`,
-        tourName: b.schedule?.tour?.name || 'Unknown Tour',
-        date: `รอบเดินทางอ้างอิง: ${b.scheduleId}`,
-        startDate: b.schedule?.startDate || '',
-        endDate: b.schedule?.endDate || '',
-        price: b.totalPrice,
-        adultPrice: b.schedule?.tour?.price || 0,
-        childPrice: b.schedule?.tour?.childPrice || 0,
-        status: mapStatusToThai(b.status),
-        adults: b.adults || b.paxCount || 1,
-        children: b.children || 0,
-        image: typeof b.schedule?.tour?.images?.[0] === 'string' ? b.schedule.tour.images[0] : (b.schedule?.tour?.images?.[0] as any)?.url || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
-        accommodation: b.schedule?.tour?.accommodation || '',
-        createdAt: b.createdAt || '',
-        paidAt: b.payments?.[0]?.uploadedAt
-          ? (b.payments[0].uploadedAt.endsWith('Z') || b.payments[0].uploadedAt.includes('+')
-            ? b.payments[0].uploadedAt
-            : `${b.payments[0].uploadedAt.replace(' ', 'T')}Z`)
-          : '',
-      }))
+      const formattedBookings = data.map(b => {
+        let finalPaidAt = '';
+        if (b.payments?.[0]?.uploadedAt) {
+          // ดึง raw date ถ้าระบบไม่ได้ใส่ Z ให้
+          const rawStr = b.payments[0].uploadedAt;
+          const strWithZ = rawStr.endsWith('Z') || rawStr.includes('+') ? rawStr : `${rawStr.replace(' ', 'T')}Z`;
+
+          let pDate = new Date(strWithZ);
+
+          // ตรวจสอบกับ createdAt ว่าล้าหลังผิดมาตราฐาน (7 ชม. time offset bug) หรือไม่
+          if (b.createdAt) {
+            const cDate = new Date(b.createdAt);
+            // เป็นไปไม่ได้ที่เวลาชำระเงินจะ "ก่อน" วันที่จอง ถ้าใช่แปลว่าติดบั๊ก UTC
+            if (pDate.getTime() < cDate.getTime()) {
+              pDate = new Date(pDate.getTime() + 7 * 60 * 60 * 1000);
+            }
+          }
+          finalPaidAt = pDate.toISOString();
+        }
+
+        return {
+          id: b.id,
+          tourCode: b.schedule?.tour?.tourCode || `T-${b.scheduleId}`,
+          tourName: b.schedule?.tour?.name || 'Unknown Tour',
+          date: `รอบเดินทางอ้างอิง: ${b.scheduleId}`,
+          startDate: b.schedule?.startDate || '',
+          endDate: b.schedule?.endDate || '',
+          price: b.totalPrice,
+          adultPrice: b.schedule?.tour?.price || 0,
+          childPrice: b.schedule?.tour?.childPrice || 0,
+          status: mapStatusToThai(b.status),
+          adults: b.adults || b.paxCount || 1,
+          children: b.children || 0,
+          image: typeof b.schedule?.tour?.images?.[0] === 'string' ? b.schedule.tour.images[0] : (b.schedule?.tour?.images?.[0] as any)?.url || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
+          accommodation: b.schedule?.tour?.accommodation || '',
+          createdAt: b.createdAt || '',
+          paidAt: finalPaidAt,
+        }
+      })
 
       setBookings(formattedBookings)
     } catch (err) {
