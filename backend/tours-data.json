@@ -353,7 +353,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 22
+        "currentBooked": 8
       },
       {
         "id": 503,
@@ -363,7 +363,7 @@
         "timeSlot": "13:00-17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
-        "currentBooked": 7
+        "currentBooked": 9
       },
       {
         "id": 504,
