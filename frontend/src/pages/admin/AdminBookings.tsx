@@ -7,6 +7,7 @@ const FILTER_TABS = [
     { label: 'ทั้งหมด', value: 'all' },
     { label: 'รอตรวจสอบสลิป', value: 'awaiting_approval' },
     { label: 'พนักงานยืนยันแล้ว', value: 'confirmed' },
+    { label: 'ยกเลิกแล้ว', value: 'canceled' },
 ] as const
 
 type FilterValue = (typeof FILTER_TABS)[number]['value']
@@ -70,6 +71,7 @@ export default function AdminBookings() {
     const filtered = bookings.filter((b) => {
         if (filter === 'awaiting_approval' && b.status !== 'awaiting_approval') return false
         if (filter === 'confirmed' && !['confirmed', 'success'].includes(b.status)) return false
+        if (filter === 'canceled' && b.status !== 'canceled') return false
 
         if (search.trim()) {
             const term = search.trim().toLowerCase()
@@ -262,6 +264,16 @@ export default function AdminBookings() {
                                         อนุมัติรายการ
                                     </button>
                                 </>
+                            )}
+
+                            {['confirmed', 'success', 'canceled'].includes(selectedBooking.status) && (
+                                <button
+                                    onClick={() => handleUpdateStatus('awaiting_approval')}
+                                    disabled={isProcessing}
+                                    className="px-5 py-2.5 text-sm font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 rounded-xl transition-colors disabled:opacity-50"
+                                >
+                                    เปลี่ยนสถานะกลับเป็น รอตรวจสอบ
+                                </button>
                             )}
                         </div>
                     </div>

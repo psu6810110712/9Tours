@@ -231,6 +231,24 @@ export class BookingsService {
     const previousStatus = booking.status;
     const newStatus = updateBookingStatusDto.status;
 
+    // ✅ ลดจำนวนที่นั่งลงในเมื่ออัปเดตเป็น AWAITING_APPROVAL
+    if (newStatus === BookingStatus.AWAITING_APPROVAL && previousStatus !== BookingStatus.AWAITING_APPROVAL) {
+      const found = this.findScheduleInData(booking.scheduleId);
+      if (found) {
+        const isPrivate = !!found.tour.minPeople;
+        const seatsToHold = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
+        this.toursService.updateScheduleBookedCount(booking.scheduleId, seatsToHold);
+      }
+    } else if (previousStatus === BookingStatus.AWAITING_APPROVAL &&
+      (newStatus === BookingStatus.CANCELED || newStatus === BookingStatus.PENDING_PAYMENT)) {
+      const found = this.findScheduleInData(booking.scheduleId);
+      if (found) {
+        const isPrivate = !!found.tour.minPeople;
+        const seatsToRelease = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
+        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+      }
+    }
+
     if (newStatus === BookingStatus.CANCELED && previousStatus !== BookingStatus.CANCELED) {
       const found = this.findScheduleInData(booking.scheduleId);
       if (found) {
