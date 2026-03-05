@@ -1,23 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { User } from '../users/entities/user.entity';
 import { TourView } from './entities/tour-view.entity';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Tour } from '../tours/entities/tour.entity';
 
-const DATA_FILE = path.join(process.cwd(), 'tours-data.json');
-
-function loadToursData(): any[] {
-    try {
-        if (fs.existsSync(DATA_FILE)) {
-            return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-        }
-    } catch (e) {
-        console.error('❌ DashboardService: cannot read tours-data.json', e);
-    }
-    return [];
+export interface DashboardFilters {
+    startDate?: string; // 'YYYY-MM-DD'
+    endDate?: string;   // 'YYYY-MM-DD'
+    region?: string;    // e.g. 'ภาคเหนือ' or 'all'
+    tourType?: string;  // 'one_day' | 'package' | 'all'
 }
 
 @Injectable()
@@ -29,9 +22,11 @@ export class DashboardService {
         private usersRepo: Repository<User>,
         @InjectRepository(TourView)
         private tourViewsRepo: Repository<TourView>,
+        @InjectRepository(Tour)
+        private toursRepo: Repository<Tour>,
     ) { }
 
-    async getDashboardData() {
+    async getDashboardData(filters: DashboardFilters = {}) {
         const [
             summaryCards,
             topTours,
@@ -41,13 +36,13 @@ export class DashboardService {
             viewsOverTime,
             bookingsOverTime,
         ] = await Promise.all([
-            this.getSummaryCards(),
-            this.getTopTours(),
-            this.getBookingsByStatus(),
-            this.getRegionStats(),
-            this.getProvinceStats(),
-            this.getViewsOverTime(),
-            this.getBookingsOverTime(),
+            this.getSummaryCards(filters),
+            this.getTopTours(filters),
+            this.getBookingsByStatus(filters),
+            this.getRegionStats(filters),
+            this.getProvinceStats(filters),
+            this.getViewsOverTime(filters),
+            this.getBookingsOverTime(filters),
         ]);
 
         const conversionRate = summaryCards.totalViews > 0
@@ -66,26 +61,61 @@ export class DashboardService {
         };
     }
 
-    private async getSummaryCards() {
+    // ──────────── Helper: สร้าง date range จาก startDate / endDate ────────────
+
+    private getDateRange(filters: DashboardFilters): { start: Date; end: Date } | null {
+        if (!filters.startDate && !filters.endDate) return null;
+
+        const start = filters.startDate
+            ? new Date(filters.startDate + 'T00:00:00')
+            : new Date('2000-01-01T00:00:00');
+
+        const end = filters.endDate
+            ? new Date(filters.endDate + 'T23:59:59.999')
+            : new Date();
+
+        return { start, end };
+    }
+
+    // ──────────── Summary Cards ────────────
+
+    private async getSummaryCards(filters: DashboardFilters) {
+        const dateRange = this.getDateRange(filters);
+
         // ยอดขายทั้งหมด
-        const revenueResult = await this.bookingsRepo
+        const revenueQb = this.bookingsRepo
             .createQueryBuilder('b')
             .select('COALESCE(SUM(b.totalPrice), 0)', 'total')
             .where('b.status IN (:...statuses)', {
                 statuses: [BookingStatus.SUCCESS, BookingStatus.AWAITING_APPROVAL],
-            })
-            .getRawOne();
+            });
+        if (dateRange) {
+            revenueQb.andWhere('b.createdAt BETWEEN :start AND :end', dateRange);
+        }
+        const revenueResult = await revenueQb.getRawOne();
 
-        // จำนวน bookings ทั้งหมด
-        const totalBookings = await this.bookingsRepo.count();
+        // จำนวน bookings
+        const bookingsQb = this.bookingsRepo.createQueryBuilder('b');
+        if (dateRange) {
+            bookingsQb.where('b.createdAt BETWEEN :start AND :end', dateRange);
+        }
+        const totalBookings = await bookingsQb.getCount();
 
-        // จำนวน views ทั้งหมด
-        const totalViews = await this.tourViewsRepo.count();
+        // จำนวน views
+        const viewsQb = this.tourViewsRepo.createQueryBuilder('v');
+        if (dateRange) {
+            viewsQb.where('v.viewedAt BETWEEN :start AND :end', dateRange);
+        }
+        const totalViews = await viewsQb.getCount();
 
-        // ลูกค้าใหม่ (จำนวน users ทั้งหมด ลบ admin)
-        const totalCustomers = await this.usersRepo.count({
-            where: { role: 'customer' as any },
-        });
+        // ลูกค้าใหม่
+        const customersQb = this.usersRepo
+            .createQueryBuilder('u')
+            .where("u.role = :role", { role: 'customer' });
+        if (dateRange) {
+            customersQb.andWhere('u.createdAt BETWEEN :start AND :end', dateRange);
+        }
+        const totalCustomers = await customersQb.getCount();
 
         return {
             totalRevenue: Number(revenueResult?.total || 0),
@@ -95,18 +125,26 @@ export class DashboardService {
         };
     }
 
-    private async getTopTours() {
-        const tours = loadToursData();
+    // ──────────── Top Tours ────────────
 
-        // Sort tours by reviewCount (as proxy for popularity), take top 5
-        const sorted = [...tours]
-            .filter((t: any) => t.isActive)
-            .sort((a: any, b: any) => (b.reviewCount || 0) - (a.reviewCount || 0))
-            .slice(0, 5);
+    private async getTopTours(filters: DashboardFilters) {
+        const qb = this.toursRepo
+            .createQueryBuilder('t')
+            .where('t.isActive = :active', { active: true });
 
-        const maxReviews = sorted[0]?.reviewCount || 1;
+        if (filters.region && filters.region !== 'all') {
+            qb.andWhere('t.region = :region', { region: filters.region });
+        }
+        if (filters.tourType && filters.tourType !== 'all') {
+            qb.andWhere('t.tourType = :tourType', { tourType: filters.tourType });
+        }
 
-        return sorted.map((tour: any, index: number) => ({
+        qb.orderBy('t.reviewCount', 'DESC').limit(5);
+
+        const tours = await qb.getMany();
+        const maxReviews = tours[0]?.reviewCount || 1;
+
+        return tours.map((tour, index) => ({
             rank: index + 1,
             id: tour.id,
             name: tour.name,
@@ -114,11 +152,13 @@ export class DashboardService {
             reviewCount: tour.reviewCount || 0,
             rating: tour.rating || 0,
             popularityPercent: Math.round(((tour.reviewCount || 0) / maxReviews) * 100),
-            revenue: (tour.price || 0) * (tour.reviewCount || 0),
+            revenue: (Number(tour.price) || 0) * (tour.reviewCount || 0),
         }));
     }
 
-    private async getBookingsByStatus() {
+    // ──────────── Bookings By Status ────────────
+
+    private async getBookingsByStatus(filters: DashboardFilters) {
         const statuses = [
             BookingStatus.PENDING_PAYMENT,
             BookingStatus.AWAITING_APPROVAL,
@@ -128,79 +168,166 @@ export class DashboardService {
             BookingStatus.REFUND_COMPLETED,
         ];
 
+        const dateRange = this.getDateRange(filters);
         const result: Record<string, number> = {};
+
         for (const status of statuses) {
-            result[status] = await this.bookingsRepo.count({ where: { status } });
+            const qb = this.bookingsRepo
+                .createQueryBuilder('b')
+                .where('b.status = :status', { status });
+            if (dateRange) {
+                qb.andWhere('b.createdAt BETWEEN :start AND :end', dateRange);
+            }
+            result[status] = await qb.getCount();
         }
 
         return result;
     }
 
-    private getRegionStats() {
-        const tours = loadToursData();
-        const regionMap: Record<string, number> = {};
+    // ──────────── Region Stats ────────────
 
-        for (const tour of tours) {
-            if (!tour.isActive) continue;
-            const region = tour.region || 'ไม่ระบุ';
-            regionMap[region] = (regionMap[region] || 0) + (tour.reviewCount || 1);
+    private async getRegionStats(filters: DashboardFilters) {
+        const qb = this.toursRepo
+            .createQueryBuilder('t')
+            .select('t.region', 'name')
+            .addSelect('SUM(t.reviewCount)', 'count')
+            .where('t.isActive = :active', { active: true });
+
+        if (filters.tourType && filters.tourType !== 'all') {
+            qb.andWhere('t.tourType = :tourType', { tourType: filters.tourType });
         }
 
-        const total = Object.values(regionMap).reduce((a, b) => a + b, 0) || 1;
+        qb.groupBy('t.region');
+        const raw: { name: string; count: string }[] = await qb.getRawMany();
 
-        return Object.entries(regionMap)
-            .map(([name, count]) => ({
-                name,
-                count,
-                percent: Number(((count / total) * 100).toFixed(1)),
+        const total = raw.reduce((sum, r) => sum + Number(r.count || 0), 0) || 1;
+
+        return raw
+            .map(r => ({
+                name: r.name || 'ไม่ระบุ',
+                count: Number(r.count || 0),
+                percent: Number(((Number(r.count || 0) / total) * 100).toFixed(1)),
             }))
             .sort((a, b) => b.count - a.count);
     }
 
-    private getProvinceStats() {
-        const tours = loadToursData();
-        const provinceMap: Record<string, number> = {};
+    // ──────────── Province Stats ────────────
 
-        for (const tour of tours) {
-            if (!tour.isActive) continue;
-            const province = tour.province || 'ไม่ระบุ';
-            provinceMap[province] = (provinceMap[province] || 0) + (tour.reviewCount || 1);
+    private async getProvinceStats(filters: DashboardFilters) {
+        const qb = this.toursRepo
+            .createQueryBuilder('t')
+            .select('t.province', 'name')
+            .addSelect('SUM(t.reviewCount)', 'count')
+            .where('t.isActive = :active', { active: true });
+
+        if (filters.region && filters.region !== 'all') {
+            qb.andWhere('t.region = :region', { region: filters.region });
+        }
+        if (filters.tourType && filters.tourType !== 'all') {
+            qb.andWhere('t.tourType = :tourType', { tourType: filters.tourType });
         }
 
-        const total = Object.values(provinceMap).reduce((a, b) => a + b, 0) || 1;
+        qb.groupBy('t.province');
+        const raw: { name: string; count: string }[] = await qb.getRawMany();
 
-        return Object.entries(provinceMap)
-            .map(([name, count]) => ({
-                name,
-                count,
-                percent: Number(((count / total) * 100).toFixed(1)),
+        const total = raw.reduce((sum, r) => sum + Number(r.count || 0), 0) || 1;
+
+        return raw
+            .map(r => ({
+                name: r.name || 'ไม่ระบุ',
+                count: Number(r.count || 0),
+                percent: Number(((Number(r.count || 0) / total) * 100).toFixed(1)),
             }))
             .sort((a, b) => b.count - a.count);
     }
 
-    private async getViewsOverTime() {
-        // Generate mock monthly data for views chart
-        const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.'];
-        const totalViews = await this.tourViewsRepo.count();
-        const baseValue = Math.max(totalViews, 1000);
+    // ──────────── Views Over Time (monthly) ────────────
 
-        return months.map((month, i) => ({
-            month,
-            views: Math.round(baseValue * (0.5 + Math.random() * 0.8) * (1 + i * 0.1)),
-        }));
+    private async getViewsOverTime(_filters: DashboardFilters) {
+        // Query จริงจาก tour_views table — group by เดือน 6 เดือนย้อนหลัง
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+        sixMonthsAgo.setDate(1);
+        sixMonthsAgo.setHours(0, 0, 0, 0);
+
+        const raw: { month: string; views: string }[] = await this.tourViewsRepo
+            .createQueryBuilder('v')
+            .select("TO_CHAR(v.viewedAt, 'YYYY-MM')", 'month')
+            .addSelect('COUNT(*)', 'views')
+            .where('v.viewedAt >= :since', { since: sixMonthsAgo })
+            .groupBy("TO_CHAR(v.viewedAt, 'YYYY-MM')")
+            .orderBy('month', 'ASC')
+            .getRawMany();
+
+        // สร้าง label เดือนไทยสั้น
+        const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+            'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+        // สร้าง map ของผลลัพธ์
+        const viewsMap: Record<string, number> = {};
+        for (const r of raw) {
+            viewsMap[r.month] = Number(r.views || 0);
+        }
+
+        // สร้าง 6 เดือนเต็ม
+        const result: { month: string; views: number }[] = [];
+        const now = new Date();
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            result.push({
+                month: thaiMonths[d.getMonth()],
+                views: viewsMap[key] || 0,
+            });
+        }
+
+        return result;
     }
 
-    private async getBookingsOverTime() {
-        // Generate daily data for current month bookings chart
+    // ──────────── Bookings Over Time (daily, this month vs last month) ────────────
+
+    private async getBookingsOverTime(_filters: DashboardFilters) {
+        const now = new Date();
+
+        // เดือนนี้
+        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+        // เดือนที่แล้ว
+        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+        const [thisMonthRaw, lastMonthRaw] = await Promise.all([
+            this.bookingsRepo
+                .createQueryBuilder('b')
+                .select('EXTRACT(DAY FROM b.createdAt)::int', 'day')
+                .addSelect('COUNT(*)', 'count')
+                .where('b.createdAt BETWEEN :start AND :end', { start: thisMonthStart, end: thisMonthEnd })
+                .groupBy('EXTRACT(DAY FROM b.createdAt)')
+                .getRawMany<{ day: number; count: string }>(),
+            this.bookingsRepo
+                .createQueryBuilder('b')
+                .select('EXTRACT(DAY FROM b.createdAt)::int', 'day')
+                .addSelect('COUNT(*)', 'count')
+                .where('b.createdAt BETWEEN :start AND :end', { start: lastMonthStart, end: lastMonthEnd })
+                .groupBy('EXTRACT(DAY FROM b.createdAt)')
+                .getRawMany<{ day: number; count: string }>(),
+        ]);
+
+        const thisMonthMap: Record<number, number> = {};
+        const lastMonthMap: Record<number, number> = {};
+        for (const r of thisMonthRaw) thisMonthMap[r.day] = Number(r.count || 0);
+        for (const r of lastMonthRaw) lastMonthMap[r.day] = Number(r.count || 0);
+
+        // จำนวนวันในเดือนนี้
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
         const days: { day: number; thisMonth: number; lastMonth: number }[] = [];
-        const totalBookings = await this.bookingsRepo.count();
-        const avg = Math.max(Math.round(totalBookings / 30), 5);
-
-        for (let d = 1; d <= 30; d++) {
+        for (let d = 1; d <= daysInMonth; d++) {
             days.push({
                 day: d,
-                thisMonth: Math.round(avg * (0.6 + Math.random() * 0.8)),
-                lastMonth: Math.round(avg * (0.4 + Math.random() * 0.6)),
+                thisMonth: thisMonthMap[d] || 0,
+                lastMonth: lastMonthMap[d] || 0,
             });
         }
 
