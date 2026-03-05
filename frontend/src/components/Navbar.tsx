@@ -112,6 +112,16 @@ export default function Navbar() {
                 >
                   จัดการทัวร์
                 </Link>
+                <Link
+                  to="/admin/bookings"
+                  className={
+                    pathname.startsWith('/admin/bookings')
+                      ? 'text-[var(--color-primary)] font-semibold border-b-2 border-[var(--color-primary)] pb-0.5'
+                      : 'text-gray-500 hover:text-gray-900 transition-colors border-b-2 border-transparent pb-0.5'
+                  }
+                >
+                  ตรวจสอบสลิป
+                </Link>
               </>
             )}
           </div>

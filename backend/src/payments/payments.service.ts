@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { CreatePaymentDto } from './dto/create-payment.dto';
+import { ToursService } from '../tours/tours.service';
 
 @Injectable()
 export class PaymentsService {
@@ -16,7 +17,8 @@ export class PaymentsService {
     private paymentsRepository: Repository<Payment>,
     @InjectRepository(Booking)
     private bookingsRepository: Repository<Booking>,
-  ) {}
+    private toursService: ToursService, // ✅ เพิ่ม ToursService
+  ) { }
 
   async createPayment(
     createPaymentDto: CreatePaymentDto,
@@ -35,6 +37,13 @@ export class PaymentsService {
       );
     }
 
+    // ตรวจสอบว่า booking ถูกยกเลิกอัตโนมัติจากระบบคืนที่นั่งหรือไม่ (Hard Cutoff)
+    if (booking.status === BookingStatus.CANCELED) {
+      throw new BadRequestException(
+        'เซสชันการชำระเงินหมดอายุแล้ว และที่นั่งได้ถูกคืนให้ส่วนกลางไปแล้ว หากท่านทำการโอนเงินสำเร็จไปแล้ว กรุณาติดต่อแอดมินผ่าน Line หรือ Facebook เพื่อรับเงินคืนหรือรับความช่วยเหลือ'
+      );
+    }
+
     if (booking.status !== BookingStatus.PENDING_PAYMENT) {
       throw new BadRequestException(
         `Booking นี้ไม่ได้อยู่ในสถานะรอชำระเงิน (สถานะปัจจุบัน: ${booking.status})`,
@@ -50,13 +59,13 @@ export class PaymentsService {
       bookingId,
       amountPaid: booking.totalPrice,
       paymentMethod,
-      slipUrl: slipFile.path.replace(/\\/g, '/'), // แปลง backslash เป็น forward slash สำหรับ URL
+      slipUrl: slipFile.path.replace(/\\/g, '/'),
     });
 
     const savedPayment = await this.paymentsRepository.save(newPayment);
 
-    // อัปเดตสถานะ Booking
-    // เปลี่ยนเป็น AWAITING_APPROVAL เพื่อรอ Admin ตรวจสอบสลิปก่อน
+    // อัปเดตสถานะ Booking → AWAITING_APPROVAL
+    // (ที่นั่งถูก hold ไปแล้วตั้งแต่สร้าง booking จึงไม่ต้อง update currentBooked อีก)
     booking.status = BookingStatus.AWAITING_APPROVAL;
     await this.bookingsRepository.save(booking);
 

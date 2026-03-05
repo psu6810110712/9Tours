@@ -40,11 +40,11 @@
         "timeSlot": "09:00-17:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 20,
-        "currentBooked": 8
+        "currentBooked": 0
       }
     ],
-    "createdAt": "2026-03-01T05:05:17.105Z",
-    "updatedAt": "2026-03-01T05:05:17.105Z"
+    "createdAt": "2026-03-02T08:46:26.747Z",
+    "updatedAt": "2026-03-02T08:46:26.747Z"
   },
   {
     "id": 2,
@@ -56,7 +56,7 @@
       "สายธรรมชาติ",
       "สายชิล"
     ],
-    "price": 1800,
+    "price": 1500,
     "originalPrice": 2100,
     "images": [
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
@@ -80,18 +80,19 @@
     "isActive": true,
     "schedules": [
       {
-        "id": 201,
+        "id": 200,
         "tourId": 2,
         "startDate": "2026-02-22",
         "endDate": "2026-02-22",
         "timeSlot": "08:00-16:00",
         "roundName": "รอบปกติ",
         "maxCapacity": 25,
-        "currentBooked": 11
+        "currentBooked": 0
       }
     ],
-    "createdAt": "2026-03-01T05:05:17.105Z",
-    "updatedAt": "2026-03-01T05:05:17.105Z"
+    "createdAt": "2026-03-02T08:46:26.747Z",
+    "updatedAt": "2026-03-02T14:10:21.311Z",
+    "childPrice": null
   },
   {
     "id": 3,
@@ -103,44 +104,25 @@
       "สายธรรมชาติ",
       "สายชิล"
     ],
-    "price": 3900,
+    "price": 9900,
     "originalPrice": 7500,
     "images": [
-      "http://localhost:3000/uploads/tour-1772344317892-951047197.png",
-      "http://localhost:3000/uploads/tour-1772344320311-277579752.png",
-      "http://localhost:3000/uploads/tour-1772344329079-484288789.png",
-      "http://localhost:3000/uploads/tour-1772344331863-21477368.png",
-      "http://localhost:3000/uploads/tour-1772344334862-481150391.png"
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
+      "https://images.unsplash.com/photo-1528181304800-259b08848526?w=800",
+      "https://images.unsplash.com/photo-1512100356356-de1b84283e18?w=800",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800"
     ],
     "highlights": [
       "รวมที่พัก",
       "รถรับส่งสนามบิน"
     ],
-    "itinerary": [
-      {
-        "day": 1,
-        "time": "09:00-10:30",
-        "title": "เดินทางถึงเชียงใหม่และเติมพลังมื้อแรก",
-        "description": "รับรถเช่าหรือเดินทางเข้าตัวเมือง แวะทาน \"ข้าวซอยแม่สาย\" หรือ \"กาดมณี\" สัมผัสรสชาติอาหารเหนือต้นตำรับ"
-      },
-      {
-        "day": 1,
-        "time": "11:00-13:00",
-        "title": "เสพงานดีไซน์ที่ One Nimman (ย่านนิมมานเหมินท์)",
-        "description": "เดินชมโครงการที่มีสถาปัตยกรรมแบบก่ออิฐสีส้ม สไตล์ยุโรปผสมล้านนา มีจังหวะของโครงสร้างที่สวยงาม (Rhythm & Pattern) เหมาะกับการถ่ายภาพแนวสตรีทและสถาปัตยกรรม"
-      },
-      {
-        "time": "13:30-15:30",
-        "title": "พักผ่อนที่ คาเฟ่ Pluto (ย่านแม่โจ้)",
-        "description": "คาเฟ่ที่มีการออกแบบในธีมดาวเคราะห์ลึกลับ เน้นโทนสีเทาดำ การเล่นกับแสงธรรมชาติและเงา (Light & Shadow) เหมาะมากสำหรับการถ่ายภาพแนว Minimal หรือ Liminal Space ที่ดูแปลกตา",
-        "day": 1
-      }
-    ],
+    "itinerary": [],
     "transportation": "รถตู้ส่วนตัว",
     "duration": "3 วัน 2 คืน",
     "region": "ภาคเหนือ",
     "province": "เชียงใหม่",
-    "accommodation": "โรงแรม 3 ดาว ย่านนิมมาน",
+    "accommodation": "โรงแรม 3 ดาว",
     "rating": 4.7,
     "reviewCount": 48,
     "isActive": true,
@@ -148,8 +130,8 @@
       {
         "id": 300,
         "tourId": 3,
-        "startDate": "2026-03-07",
-        "endDate": "2026-03-09",
+        "startDate": "2026-05-02",
+        "endDate": "2026-05-04",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -158,8 +140,8 @@
       {
         "id": 301,
         "tourId": 3,
-        "startDate": "2026-03-08",
-        "endDate": "2026-03-10",
+        "startDate": "2026-05-03",
+        "endDate": "2026-05-05",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -168,8 +150,8 @@
       {
         "id": 302,
         "tourId": 3,
-        "startDate": "2026-03-14",
-        "endDate": "2026-03-16",
+        "startDate": "2026-05-09",
+        "endDate": "2026-05-11",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -178,8 +160,8 @@
       {
         "id": 303,
         "tourId": 3,
-        "startDate": "2026-03-15",
-        "endDate": "2026-03-17",
+        "startDate": "2026-05-10",
+        "endDate": "2026-05-12",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -188,8 +170,8 @@
       {
         "id": 304,
         "tourId": 3,
-        "startDate": "2026-03-21",
-        "endDate": "2026-03-23",
+        "startDate": "2026-05-16",
+        "endDate": "2026-05-18",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -198,8 +180,8 @@
       {
         "id": 305,
         "tourId": 3,
-        "startDate": "2026-03-22",
-        "endDate": "2026-03-24",
+        "startDate": "2026-05-17",
+        "endDate": "2026-05-19",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -208,8 +190,8 @@
       {
         "id": 306,
         "tourId": 3,
-        "startDate": "2026-03-28",
-        "endDate": "2026-03-30",
+        "startDate": "2026-05-23",
+        "endDate": "2026-05-25",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
@@ -218,18 +200,38 @@
       {
         "id": 307,
         "tourId": 3,
-        "startDate": "2026-03-29",
-        "endDate": "2026-03-31",
+        "startDate": "2026-05-24",
+        "endDate": "2026-05-26",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
+        "id": 308,
+        "tourId": 3,
+        "startDate": "2026-05-30",
+        "endDate": "2026-06-01",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
+        "id": 309,
+        "tourId": 3,
+        "startDate": "2026-05-31",
+        "endDate": "2026-06-02",
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
         "currentBooked": 0
       }
     ],
-    "createdAt": "2026-03-01T05:05:17.105Z",
-    "updatedAt": "2026-03-02T06:59:31.629Z",
+    "createdAt": "2026-03-02T08:46:26.747Z",
+    "updatedAt": "2026-03-02T13:57:42.823Z",
     "childPrice": null,
-    "minPeople": 4,
+    "minPeople": 1,
     "maxPeople": 6
   },
   {
@@ -242,7 +244,7 @@
       "สายกิจกรรม",
       "สายธรรมชาติ"
     ],
-    "price": 1200,
+    "price": 2300,
     "originalPrice": null,
     "images": [
       "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800",
@@ -266,7 +268,7 @@
     "isActive": true,
     "schedules": [
       {
-        "id": 400,
+        "id": 401,
         "tourId": 4,
         "startDate": "2026-02-23",
         "endDate": "2026-02-23",
@@ -276,7 +278,7 @@
         "currentBooked": 0
       },
       {
-        "id": 401,
+        "id": 402,
         "tourId": 4,
         "startDate": "2026-02-25",
         "endDate": "2026-02-25",
@@ -286,32 +288,32 @@
         "currentBooked": 0
       }
     ],
-    "createdAt": "2026-03-01T05:05:17.105Z",
-    "updatedAt": "2026-03-02T07:48:03.846Z",
-    "childPrice": null
+    "createdAt": "2026-03-02T08:46:26.747Z",
+    "updatedAt": "2026-03-02T08:46:26.747Z"
   },
   {
     "id": 5,
     "tourCode": "ATV2026005",
     "name": "ขับ ATV ตะลุยป่า ภูเก็ต (Join Trip)",
-    "description": "ตลอดเส้นทางคุณจะได้สัมผัสความสวยงามที่ลงตัวระหว่างวิวท้องทะเลอันกว้างไกลและทิวเขาที่สลับซับซ้อน ให้คุณได้สูดอากาศบริสุทธิ์พร้อมความตื่นเต้นท้าทายในทุกโค้ง ไม่ว่าคุณจะเป็นมือใหม่หรือนักขับมือโปรก็สนุกได้อย่างมั่นใจ เพราะเรามีทีมครูฝึกผู้เชี่ยวชาญคอยดูแลอย่างใกล้ชิด ตั้งแต่การสอนใช้งานเบื้องต้นไปจนถึงการนำทางตลอดทริป เพื่อความปลอดภัยและประสบการณ์ที่ดีที่สุดของคุณ",
+    "description": "ผจญภัยขับ ATV เส้นทางธรรมชาติ วิวทะเลและภูเขา พร้อมครูฝึกดูแลอย่างใกล้ชิด",
     "tourType": "one_day",
     "categories": [
       "สายลุย",
       "สายกิจกรรม",
       "สายธรรมชาติ"
     ],
-    "price": 400,
-    "originalPrice": 1900,
+    "price": 800,
+    "originalPrice": 2000,
     "images": [
-      "http://localhost:3000/uploads/tour-1772341946989-783950595.png",
-      "http://localhost:3000/uploads/tour-1772341994364-127686848.png",
-      "http://localhost:3000/uploads/tour-1772341998559-229064272.png"
+      "http://localhost:3000/uploads/tour-1772441641729-800707782.png"
     ],
     "highlights": [
       "ขับ ATV 1 ชั่วโมง",
       "รวมอุปกรณ์ความปลอดภัย",
-      "ครูฝึกมืออาชีพ"
+      "ครูฝึกมืออาชีพ",
+      "ยกเลิกฟรี",
+      "มีรถรับส่ง",
+      "มีไกด์นำเที่ยว"
     ],
     "itinerary": [],
     "transportation": "รถรับส่งในโซน",
@@ -351,7 +353,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 10
+        "currentBooked": 8
       },
       {
         "id": 503,
@@ -361,7 +363,7 @@
         "timeSlot": "13:00-17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
-        "currentBooked": 10
+        "currentBooked": 7
       },
       {
         "id": 504,
@@ -371,7 +373,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 6
+        "currentBooked": 0
       },
       {
         "id": 505,
@@ -504,8 +506,8 @@
         "currentBooked": 0
       }
     ],
-    "createdAt": "2026-03-01T05:05:17.106Z",
-    "updatedAt": "2026-03-02T05:34:28.951Z",
+    "createdAt": "2026-03-02T08:46:26.747Z",
+    "updatedAt": "2026-03-04T05:14:35.239Z",
     "childPrice": 200
   }
 ]

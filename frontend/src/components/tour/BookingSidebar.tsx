@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { Tour, TourSchedule } from '../../types/tour'
 import { useAuth } from '../../context/AuthContext'
 import { tourService } from '../../services/tourService'
+import { bookingService } from '../../services/bookingService'
 import LoginModal from '../LoginModal'
 
 interface BookingSidebarProps {
@@ -48,35 +49,62 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const [children, setChildren] = useState(0)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [availableSeatsData, setAvailableSeatsData] = useState<{ [key: number]: number | null }>({})
+  const [pendingBookingMap, setPendingBookingMap] = useState<Map<number, number>>(new Map()) // scheduleId -> bookingId
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // ดึงข้อมูล available seats จาก API เมื่อ schedule เปลี่ยน
-  useEffect(() => {
-    if (!selectedSchedule || !tour?.id) return
+  // ตัวแปรกระตุ้นการดึงข้อมูลใหม่เมื่อผู้ใช้กลับมาที่หน้านี้ หรือเปลี่ยน schedule
+  const [fetchKey, setFetchKey] = useState(0)
 
-    const fetchAvailableSeats = async () => {
-      try {
-        const data = await tourService.getAvailableSeats(tour.id, selectedSchedule.id)
-        setAvailableSeatsData(prev => ({
-          ...prev,
-          [selectedSchedule.id]: data.availableSeats
-        }))
-      } catch (err) {
-        console.error('Error fetching available seats:', err)
-        // ใช้ข้อมูลเก่าจาก state ของ tour ถ้า API error
-        setAvailableSeatsData(prev => ({
-          ...prev,
-          [selectedSchedule.id]: selectedSchedule.maxCapacity - selectedSchedule.currentBooked
-        }))
+  // ตรวจจับเมื่อผู้ใช้กลับมาที่แท็บนี้ (เช่น กด back จากหน้า Payment)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        setFetchKey(prev => prev + 1)
       }
     }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    // กระตุ้นทุกครั้งที่ component mount ใหม่
+    setFetchKey(prev => prev + 1)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
 
-    fetchAvailableSeats()
-  }, [selectedSchedule?.id, tour?.id])
+  // ดึง booking ที่ยังรอชำระเงินของ user เพื่อให้กดไปหน้าชำระเงินต่อได้
+  useEffect(() => {
+    if (!user) return
+    bookingService.getMyBookings().then(bookings => {
+      const map = new Map<number, number>()
+      bookings
+        .filter(b => b.status === 'pending_payment')
+        .forEach(b => map.set(b.scheduleId, b.id))
+      setPendingBookingMap(map)
+    }).catch(() => { /* ignore */ })
+  }, [user, fetchKey])
+
+  // ดึงข้อมูล available seats จาก API สำหรับทุก schedule (เพื่อให้ date selector แสดงสถานะล่าสุด)
+  useEffect(() => {
+    if (!tour?.id || upcomingSchedules.length === 0) return
+
+    const fetchAllSeats = async () => {
+      const results: { [key: number]: number | null } = {}
+      await Promise.all(
+        upcomingSchedules.map(async (s: TourSchedule) => {
+          try {
+            const data = await tourService.getAvailableSeats(tour.id, s.id)
+            results[s.id] = Math.max(0, data.availableSeats)
+          } catch {
+            results[s.id] = Math.max(0, s.maxCapacity - s.currentBooked)
+          }
+        })
+      )
+      setAvailableSeatsData(results)
+    }
+
+    fetchAllSeats()
+  }, [tour?.id, upcomingSchedules, fetchKey])
 
   // ใช้ available seats จาก API ถ้ามี มิฉะนั้นใช้จากข้อมูลเก่า
   const seatsLeft = selectedSchedule
-    ? (availableSeatsData[selectedSchedule.id] ?? (selectedSchedule.maxCapacity - selectedSchedule.currentBooked))
+    ? Math.max(0, availableSeatsData[selectedSchedule.id] ?? (selectedSchedule.maxCapacity - selectedSchedule.currentBooked))
     : 0
   const totalGuests = adults + children
   const isPrivate = !!tour?.minPeople
@@ -90,14 +118,18 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
     : (totalGuests >= seatsLeft) // กรณี Join Trip เช็คจาก seatsLeft
 
   // 2. Logic ล็อคปุ่ม "จองเลย"
-  const isSoldOut = !isPrivate && selectedSchedule && seatsLeft <= 0
+  const isSoldOut = selectedSchedule && seatsLeft <= 0
   const isExceedCapacity = !isPrivate && totalGuests > seatsLeft
-  const isBookingDisabled = !upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity
+  const hasAnyPendingBooking = pendingBookingMap.size > 0
+  const anyPendingBookingId = hasAnyPendingBooking ? Array.from(pendingBookingMap.values())[0] : undefined
+  const isBookingDisabled = hasAnyPendingBooking ? false : (!upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity)
 
   let buttonText = 'จองเลย'
-  if (!upcomingSchedules.length || !selectedSchedule) buttonText = 'ไม่มีรอบเปิดรับ'
+  if (hasAnyPendingBooking) buttonText = 'มีรายการจองค้างชำระ'
+  else if (!upcomingSchedules.length || !selectedSchedule) buttonText = 'ไม่มีรอบเปิดรับ'
+  else if (isSoldOut && isPrivate) buttonText = 'รอบนี้ถูกจองแล้ว'
   else if (isSoldOut) buttonText = 'รอบนี้เต็มแล้ว'
-  else if (isExceedCapacity) buttonText = 'ที่นั่งไม่เพียงพอ'
+  else if (isExceedCapacity) buttonText = 'ที่นั่งไม่พอ'
 
   const handleBookingClick = () => {
     if (!user) {
@@ -105,7 +137,13 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
       return
     }
 
-    // ส่ง id ของ schedule แทนที่จะมีแค่จำนวนคน เพื่อให้ Backend รู้ว่าจองรอบไหน
+    // ถ้ามี booking ค้างรอชำระเงินอยู่ ให้ไปหน้า payment ของ booking นั้นเลย
+    if (hasAnyPendingBooking && anyPendingBookingId) {
+      navigate(`/payment/${anyPendingBookingId}`)
+      return
+    }
+
+    // สร้าง booking ใหม่
     const targetScheduleId = selectedSchedule ? selectedSchedule.id : '-'
     navigate(`/booking/${tour.id}?scheduleId=${targetScheduleId}&adults=${adults}&children=${children}`)
   }
@@ -124,6 +162,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
           selectedSchedule={selectedSchedule}
           setSelectedSchedule={setSelectedSchedule}
           scrollRef={scrollRef}
+          availableSeatsData={availableSeatsData}
         />
 
         <BookingGuestSelector
