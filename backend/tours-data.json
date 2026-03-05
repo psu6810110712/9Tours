@@ -145,7 +145,7 @@
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
-        "currentBooked": 6
+        "currentBooked": 0
       },
       {
         "id": 302,
