@@ -6,9 +6,10 @@ import { TourView } from './entities/tour-view.entity';
 import { DashboardStatsDaily } from './entities/dashboard-stats-daily.entity';
 import { Booking } from '../bookings/entities/booking.entity';
 import { User } from '../users/entities/user.entity';
+import { Tour } from '../tours/entities/tour.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([TourView, DashboardStatsDaily, Booking, User])],
+    imports: [TypeOrmModule.forFeature([TourView, DashboardStatsDaily, Booking, User, Tour])],
     providers: [DashboardService],
     controllers: [DashboardController],
 })
