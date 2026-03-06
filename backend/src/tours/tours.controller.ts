@@ -44,7 +44,7 @@ export class ToursController {
   }
 
   @Get()
-  findAll(@Query() query: any) {
+  async findAll(@Query() query: any) {
     return this.toursService.findAll(query);
   }
 
@@ -61,17 +61,17 @@ export class ToursController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.toursService.findOne(+id);
   }
 
   @Get(':tourId/schedule/:scheduleId/available-seats')
-  getAvailableSeats(
+  async getAvailableSeats(
     @Param('tourId') tourId: string,
     @Param('scheduleId') scheduleId: string,
   ) {
     try {
-      return this.toursService.getAvailableSeats(+tourId, +scheduleId);
+      return await this.toursService.getAvailableSeats(+tourId, +scheduleId);
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
         throw new NotFoundException(error.message);
@@ -83,14 +83,14 @@ export class ToursController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTourDto: UpdateTourDto) {
+  async update(@Param('id') id: string, @Body() updateTourDto: UpdateTourDto) {
     return this.toursService.update(+id, updateTourDto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.toursService.remove(+id);
   }
 }

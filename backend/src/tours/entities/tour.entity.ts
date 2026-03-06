@@ -44,6 +44,13 @@ export class Tour {
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   childPrice: number | null;
 
+  // สำหรับทริปส่วนตัว: จำนวนคนขั้นต่ำ/สูงสุดต่อรอบ
+  @Column({ type: 'int', nullable: true })
+  minPeople: number | null;
+
+  @Column({ type: 'int', nullable: true })
+  maxPeople: number | null;
+
   // ราคาเดิมก่อนลด - ถ้า null แสดงว่าไม่มีส่วนลด
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   originalPrice: number | null;
