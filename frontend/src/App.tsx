@@ -20,11 +20,11 @@ function App() {
       <Toaster
         position="top-center"
         toastOptions={{
-          duration: 3000,
+          duration: 6000,
           style: {
             borderRadius: '12px',
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            fontSize: '14px',
+            fontSize: '16px',
             padding: '12px 16px',
             fontWeight: 500
           },

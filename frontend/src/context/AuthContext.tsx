@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const bookings = await bookingService.getMyBookings()
       const pending = bookings.filter(b => b.status === 'pending_payment')
       if (pending.length > 0) {
-        toast(`คุณมีรายการจองที่ยังไม่ได้ชำระเงิน ${pending.length} รายการ กรุณาดำเนินการชำระเงินให้เสร็จสิ้น`, {
+        toast(`คุณมีรายการจองที่ยังไม่ได้ชำระเงิน`, {
           duration: 6000,
           icon: '⚠️',
         })
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
   }
 
-  // ✅ เปิดแอปครั้งแรก → เรียก /auth/refresh เพื่อ restore session
+  // เปิดแอปครั้งแรก → เรียก /auth/refresh เพื่อ restore session
   // cookie (refresh_token) จะถูกส่งไปอัตโนมัติ
   useEffect(() => {
     authService.refresh()
@@ -48,12 +48,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTimeout(() => checkPendingBookings(), 500)
       })
       .catch(() => {
-        // ✅ ไม่มี cookie = ยังไม่ได้ login → ไม่ต้องทำอะไร
+        // ไม่มี cookie = ยังไม่ได้ login → ไม่ต้องทำอะไร
       })
       .finally(() => setIsLoading(false))
   }, [])
 
-  // ✅ login — ส่ง rememberMe ไป backend เพื่อตั้งค่า cookie
+  // login — ส่ง rememberMe ไป backend เพื่อตั้งค่า cookie
   const login = async (email: string, password: string, remember: boolean = false) => {
     const data = await authService.login({ email, password, rememberMe: remember })
     setToken(data.access_token)
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.user
   }
 
-  // ✅ logout — เรียก backend ลบ cookie + เคลียร์ state ใน memory
+  // logout — เรียก backend ลบ cookie + เคลียร์ state ใน memory
   const logout = () => {
     authService.logout().catch(() => { })
     setToken(null)
@@ -91,6 +91,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// ⚠️ แยก export ออกมาหรือทำ default export ไม่ให้ Vite HMR แจ้งเตือน
+// Fast Refresh requires a file to only export React components or hook 
 export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth ต้องใช้ภายใน AuthProvider')
