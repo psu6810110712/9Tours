@@ -32,7 +32,7 @@ export class Booking {
     @Column({ name: 'user_id', nullable: true })
     userId: number;
 
-    // scheduleId เก็บเป็นตัวเลขอ้างอิง — ข้อมูล schedule จริงอ่านจาก tours-data.json
+    // scheduleId เก็บเป็นตัวเลขอ้างอิง — ข้อมูล schedule จริงอ่านจากตาราง tour_schedules
     @Column({ name: 'schedule_id', nullable: true })
     scheduleId: number;
 

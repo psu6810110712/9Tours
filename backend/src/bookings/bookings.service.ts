@@ -10,8 +10,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { Booking, BookingStatus } from './entities/booking.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
-
-
 import { ToursService } from '../tours/tours.service';
 
 @Injectable()
@@ -22,17 +20,11 @@ export class BookingsService {
     private toursService: ToursService, // ✅ เพิ่ม ToursService
   ) { }
 
-  // ดึงข้อมูลทัวร์จาก ToursService
-  private findScheduleInData(scheduleId: number): { tour: any; schedule: any } | null {
-    const tours = this.toursService.findAll({ admin: 'true' });
-    for (const tour of tours) {
-      if (!tour.schedules) continue;
-      const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
-      if (schedule) {
-        return { tour, schedule };
-      }
-    }
-    return null;
+  // อ่านข้อมูล schedule/tour จากฐานข้อมูลโดยตรง เพื่อเลิกพึ่งไฟล์ mock runtime
+  private async findScheduleInData(scheduleId: number): Promise<{ tour: any; schedule: any } | null> {
+    const found = await this.toursService.getScheduleWithTour(scheduleId);
+    if (!found) return null;
+    return { tour: found.tour, schedule: found.schedule };
   }
 
   // ระบบคืนที่นั่งอัตโนมัติ: ทำงานทุก 1 นาที ตรวจสอบ booking ที่ค้างเกิน 18 นาที
@@ -56,12 +48,12 @@ export class BookingsService {
       booking.adminNotes = 'ระบบยกเลิกอัตโนมัติเนื่องจากเกินกำหนดชำระเงิน (18 นาที)';
       await this.bookingsRepository.save(booking);
 
-      const found = this.findScheduleInData(booking.scheduleId);
+      const found = await this.findScheduleInData(booking.scheduleId);
       if (found) {
         const { tour, schedule } = found;
         const isPrivate = !!tour.minPeople;
         const seatsToRelease = isPrivate ? schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+        await this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
         console.log(`[Cron] ยกเลิกการจอง ID ${booking.id} และคืนที่นั่ง ${seatsToRelease} ที่`);
       }
     }
@@ -72,7 +64,7 @@ export class BookingsService {
 
     const paxCount = adults + children;
 
-    const found = this.findScheduleInData(scheduleId);
+    const found = await this.findScheduleInData(scheduleId);
 
     if (!found) {
       throw new NotFoundException('ไม่พบ Tour Schedule นี้');
@@ -142,7 +134,7 @@ export class BookingsService {
     const savedBooking = await this.bookingsRepository.save(booking);
 
     // Hold seat ทันที
-    this.toursService.updateScheduleBookedCount(scheduleId, seatsToHold);
+    await this.toursService.updateScheduleBookedCount(scheduleId, seatsToHold);
 
     // คืนข้อมูล booking พร้อมข้อมูลทัวร์
     return {
@@ -169,24 +161,24 @@ export class BookingsService {
       relations: ['payments', 'user'],
     });
 
-    return bookings.map((booking) => {
-      const found = this.findScheduleInData(booking.scheduleId);
+    return Promise.all(bookings.map(async (booking) => {
+      const found = await this.findScheduleInData(booking.scheduleId);
       return {
         ...booking,
         schedule: found
           ? {
-            ...found.schedule,
-            tour: {
-              id: found.tour.id,
-              tourCode: found.tour.tourCode,
-              name: found.tour.name,
-              price: found.tour.price,
-              childPrice: found.tour.childPrice,
-            },
-          }
+              ...found.schedule,
+              tour: {
+                id: found.tour.id,
+                tourCode: found.tour.tourCode,
+                name: found.tour.name,
+                price: found.tour.price,
+                childPrice: found.tour.childPrice,
+              },
+            }
           : null,
       };
-    });
+    }));
   }
 
   async getMyBookings(userId: number) {
@@ -196,27 +188,26 @@ export class BookingsService {
       relations: ['payments'],
     });
 
-    // เติมข้อมูล schedule + tour จาก JSON
-    return bookings.map((booking) => {
-      const found = this.findScheduleInData(booking.scheduleId);
+    return Promise.all(bookings.map(async (booking) => {
+      const found = await this.findScheduleInData(booking.scheduleId);
       return {
         ...booking,
         schedule: found
           ? {
-            ...found.schedule,
-            tour: {
-              id: found.tour.id,
-              tourCode: found.tour.tourCode,
-              name: found.tour.name,
-              price: found.tour.price,
-              childPrice: found.tour.childPrice,
-              images: found.tour.images,
-              accommodation: found.tour.accommodation || null,
-            },
-          }
+              ...found.schedule,
+              tour: {
+                id: found.tour.id,
+                tourCode: found.tour.tourCode,
+                name: found.tour.name,
+                price: found.tour.price,
+                childPrice: found.tour.childPrice,
+                images: found.tour.images,
+                accommodation: found.tour.accommodation || null,
+              },
+            }
           : null,
       };
-    });
+    }));
   }
 
   async updateStatus(bookingId: number, updateBookingStatusDto: UpdateBookingStatusDto, userId: number) {
@@ -233,35 +224,35 @@ export class BookingsService {
 
     // ✅ ลดจำนวนที่นั่งลงในเมื่ออัปเดตเป็น AWAITING_APPROVAL
     if (newStatus === BookingStatus.AWAITING_APPROVAL && previousStatus !== BookingStatus.AWAITING_APPROVAL) {
-      const found = this.findScheduleInData(booking.scheduleId);
+      const found = await this.findScheduleInData(booking.scheduleId);
       if (found) {
         const isPrivate = !!found.tour.minPeople;
         const seatsToHold = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, seatsToHold);
+        await this.toursService.updateScheduleBookedCount(booking.scheduleId, seatsToHold);
       }
     } else if (previousStatus === BookingStatus.AWAITING_APPROVAL &&
       (newStatus === BookingStatus.CANCELED || newStatus === BookingStatus.PENDING_PAYMENT)) {
-      const found = this.findScheduleInData(booking.scheduleId);
+      const found = await this.findScheduleInData(booking.scheduleId);
       if (found) {
         const isPrivate = !!found.tour.minPeople;
         const seatsToRelease = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+        await this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
       }
     }
 
     if (newStatus === BookingStatus.CANCELED && previousStatus !== BookingStatus.CANCELED) {
-      const found = this.findScheduleInData(booking.scheduleId);
+      const found = await this.findScheduleInData(booking.scheduleId);
       if (found) {
         const isPrivate = !!found.tour.minPeople;
         const seatsToRelease = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+        await this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
       }
     }
 
     booking.status = newStatus;
     const updated = await this.bookingsRepository.save(booking);
 
-    const found = this.findScheduleInData(updated.scheduleId);
+    const found = await this.findScheduleInData(updated.scheduleId);
     return {
       ...updated,
       schedule: found
@@ -297,7 +288,7 @@ export class BookingsService {
       throw new UnauthorizedException('คุณไม่มีสิทธิ์เข้าถึง Booking นี้');
     }
 
-    const found = this.findScheduleInData(booking.scheduleId);
+    const found = await this.findScheduleInData(booking.scheduleId);
     return {
       ...booking,
       schedule: found
@@ -342,14 +333,14 @@ export class BookingsService {
     const updated = await this.bookingsRepository.save(booking);
 
     // คืน seat กลับทุกกรณี (เพราะ hold ตั้งแต่สร้าง booking)
-    const foundForCancel = this.findScheduleInData(booking.scheduleId);
+    const foundForCancel = await this.findScheduleInData(booking.scheduleId);
     if (foundForCancel) {
       const isPrivate = !!foundForCancel.tour.minPeople;
       const seatsToRelease = isPrivate ? foundForCancel.schedule.maxCapacity : booking.paxCount;
-      this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+      await this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
     }
 
-    const found = this.findScheduleInData(updated.scheduleId);
+    const found = await this.findScheduleInData(updated.scheduleId);
     return {
       ...updated,
       schedule: found
