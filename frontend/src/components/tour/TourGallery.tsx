@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 
 interface TourGalleryProps {
   images: string[]
@@ -8,6 +9,8 @@ interface TourGalleryProps {
 export default function TourGallery({ images, name }: TourGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
+  useBodyScrollLock(isPopupOpen)
+
   const activeImage = images[activeIndex] || images[0]
 
   const showPrev = () => {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { bookingService } from '../services/bookingService'
 import ConfirmModal from '../components/common/ConfirmModal'
+import Modal from '../components/common/Modal'
 import { toast } from 'react-hot-toast'
 
 interface MyBookingItem {
@@ -276,184 +277,185 @@ export default function MyBookingPage() {
       </main>
 
       {/* 🌟 Modal / Pop-up รายละเอียดการจอง 🌟 */}
-      {selectedBooking && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl relative animate-[fadeInUp_0.3s_ease-out]">
-
-            {/* Status Header */}
-            <div className={`py-4 px-6 flex items-center justify-between text-white ${getModalHeaderColor(selectedBooking.status)}`}>
-              <span className="font-bold text-lg tracking-wide">{getModalHeaderText(selectedBooking.status)}</span>
-              <button
-                onClick={() => setSelectedBooking(null)}
-                className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white font-bold transition-all text-sm"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="px-7 py-6">
-
-              {/* Booking Metadata */}
-              <div className="bg-gray-50 rounded-xl px-5 py-4 mb-6">
-                <h4 className="text-sm font-bold text-gray-800 mb-3">ข้อมูลการจอง</h4>
-                <div className="space-y-2.5 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">เลขที่จอง</span>
-                    <span className="font-bold text-gray-800">#{selectedBooking.id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">วันที่จอง</span>
-                    <span className="font-semibold text-gray-700">
-                      {selectedBooking.createdAt
-                        ? new Date(selectedBooking.createdAt).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })
-                        : '-'}
-                    </span>
-                  </div>
-                  {selectedBooking.paidAt && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">ชำระเงินเมื่อ</span>
-                      <span className="font-semibold text-gray-700">
-                        {new Date(selectedBooking.paidAt).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })}
-                      </span>
-                    </div>
-                  )}
-                </div>
+      <Modal isOpen={selectedBooking !== null} onClose={() => setSelectedBooking(null)} width="max-w-xl">
+        <div className="flex flex-col">
+          {selectedBooking && (
+            <>
+              {/* Status Header */}
+              <div className={`py-4 px-6 -mx-8 -mt-8 mb-6 flex items-center justify-between text-white rounded-t-[2rem] ${getModalHeaderColor(selectedBooking.status)}`}>
+                <span className="font-bold text-lg tracking-wide">{getModalHeaderText(selectedBooking.status)}</span>
+                <button
+                  onClick={() => setSelectedBooking(null)}
+                  className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white font-bold transition-all text-sm"
+                >
+                  ✕
+                </button>
               </div>
 
-              {/* Tour Info */}
-              <h3 className="text-base font-bold text-gray-800 mb-4">สรุปข้อมูลของท่าน</h3>
-
-              <div className="border border-gray-200 rounded-xl p-5 mb-6">
-                <div className="flex gap-4">
-                  {/* Labels */}
-                  <div className="flex-1 space-y-3 text-sm leading-relaxed min-w-0">
-                    <div className="flex gap-2">
-                      <span className="font-bold text-gray-800 w-28 shrink-0">รหัสทัวร์</span>
-                      <span className="font-medium text-gray-700">{selectedBooking.tourCode}</span>
+              {/* Body */}
+              <div>
+                {/* Booking Metadata */}
+                <div className="bg-gray-50 rounded-xl px-5 py-4 mb-6">
+                  <h4 className="text-sm font-bold text-gray-800 mb-3">ข้อมูลการจอง</h4>
+                  <div className="space-y-2.5 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">เลขที่จอง</span>
+                      <span className="font-bold text-gray-800">#{selectedBooking.id}</span>
                     </div>
-                    <div className="flex gap-2">
-                      <span className="font-bold text-gray-800 w-28 shrink-0">ชื่อทัวร์</span>
-                      <span className="font-medium text-gray-700">{selectedBooking.tourName}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="font-bold text-gray-800 w-28 shrink-0">วันที่เดินทาง</span>
-                      <span className="font-medium text-gray-700">
-                        {selectedBooking.startDate && selectedBooking.endDate
-                          ? `${new Date(selectedBooking.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })} - ${new Date(selectedBooking.endDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                          : selectedBooking.date}
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">วันที่จอง</span>
+                      <span className="font-semibold text-gray-700">
+                        {selectedBooking.createdAt
+                          ? new Date(selectedBooking.createdAt).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })
+                          : '-'}
                       </span>
                     </div>
-                    <div className="flex gap-2">
-                      <span className="font-bold text-gray-800 w-28 shrink-0">จำนวนผู้เดินทาง</span>
-                      <span className="font-medium text-gray-700">ผู้ใหญ่ {selectedBooking.adults}, เด็ก {selectedBooking.children}</span>
-                    </div>
-                    {selectedBooking.accommodation && (
-                      <div className="flex gap-2">
-                        <span className="font-bold text-gray-800 w-28 shrink-0">ที่พัก</span>
-                        <span className="font-medium text-gray-700">{selectedBooking.accommodation}</span>
+                    {selectedBooking.paidAt && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">ชำระเงินเมื่อ</span>
+                        <span className="font-semibold text-gray-700">
+                          {new Date(selectedBooking.paidAt).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })}
+                        </span>
                       </div>
                     )}
                   </div>
-                  {/* Image */}
-                  <img
-                    src={selectedBooking.image}
-                    alt="tour"
-                    className={`w-36 h-28 object-cover rounded-xl shrink-0 shadow border border-gray-100 ${selectedBooking.status === 'ยกเลิกแล้ว' ? 'grayscale' : ''}`}
-                  />
                 </div>
-              </div>
 
-              {/* Price Breakdown — hide when paid or under review */}
-              {!['สำเร็จ', 'รอตรวจสอบ'].includes(selectedBooking.status) && (
-                <>
-                  <div className="border-t border-gray-200 pt-5 mb-5">
-                    <h4 className="font-bold text-sm text-gray-800 mb-3">รายละเอียดราคา</h4>
-                    <div className="text-sm space-y-3">
-                      {selectedBooking.adults > 0 && (
-                        <div className="flex items-center">
-                          <span className="w-16 shrink-0 font-medium text-gray-600">ผู้ใหญ่</span>
-                          <span className="flex-1 text-center text-gray-400 font-medium">
-                            {selectedBooking.adultPrice > 0
-                              ? `${selectedBooking.adultPrice.toLocaleString()} × ${selectedBooking.adults}`
-                              : `(${selectedBooking.adults} ท่าน)`}
-                          </span>
-                          <span className="font-bold text-gray-800 w-28 text-right">
-                            {selectedBooking.adultPrice > 0
-                              ? `${(selectedBooking.adults * selectedBooking.adultPrice).toLocaleString()} บาท`
-                              : '-'}
-                          </span>
-                        </div>
-                      )}
-                      {selectedBooking.children > 0 && (
-                        <div className="flex items-center">
-                          <span className="w-16 shrink-0 font-medium text-gray-600">เด็ก</span>
-                          <span className="flex-1 text-center text-gray-400 font-medium">
-                            {selectedBooking.childPrice > 0
-                              ? `${selectedBooking.childPrice.toLocaleString()} × ${selectedBooking.children}`
-                              : `(${selectedBooking.children} ท่าน)`}
-                          </span>
-                          <span className="font-bold text-gray-800 w-28 text-right">
-                            {selectedBooking.childPrice > 0
-                              ? `${(selectedBooking.children * selectedBooking.childPrice).toLocaleString()} บาท`
-                              : '-'}
-                          </span>
+                {/* Tour Info */}
+                <h3 className="text-base font-bold text-gray-800 mb-4">สรุปข้อมูลของท่าน</h3>
+
+                <div className="border border-gray-200 rounded-xl p-5 mb-6">
+                  <div className="flex gap-4">
+                    {/* Labels */}
+                    <div className="flex-1 space-y-3 text-sm leading-relaxed min-w-0">
+                      <div className="flex gap-2">
+                        <span className="font-bold text-gray-800 w-28 shrink-0">รหัสทัวร์</span>
+                        <span className="font-medium text-gray-700">{selectedBooking.tourCode}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="font-bold text-gray-800 w-28 shrink-0">ชื่อทัวร์</span>
+                        <span className="font-medium text-gray-700">{selectedBooking.tourName}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="font-bold text-gray-800 w-28 shrink-0">วันที่เดินทาง</span>
+                        <span className="font-medium text-gray-700">
+                          {selectedBooking.startDate && selectedBooking.endDate
+                            ? `${new Date(selectedBooking.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })} - ${new Date(selectedBooking.endDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                            : selectedBooking.date}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="font-bold text-gray-800 w-28 shrink-0">จำนวนผู้เดินทาง</span>
+                        <span className="font-medium text-gray-700">ผู้ใหญ่ {selectedBooking.adults}, เด็ก {selectedBooking.children}</span>
+                      </div>
+                      {selectedBooking.accommodation && (
+                        <div className="flex gap-2">
+                          <span className="font-bold text-gray-800 w-28 shrink-0">ที่พัก</span>
+                          <span className="font-medium text-gray-700">{selectedBooking.accommodation}</span>
                         </div>
                       )}
                     </div>
+                    {/* Image */}
+                    <img
+                      src={selectedBooking.image}
+                      alt="tour"
+                      className={`w-36 h-28 object-cover rounded-xl shrink-0 shadow border border-gray-100 ${selectedBooking.status === 'ยกเลิกแล้ว' ? 'grayscale' : ''}`}
+                    />
                   </div>
+                </div>
 
-                  {/* Total */}
-                  <div className="flex justify-between items-end border-t border-gray-200 pt-5">
-                    <span className="font-bold text-gray-800 text-base">ยอดที่ต้องชำระ</span>
-                    <div className="text-right">
-                      <span className={`text-4xl font-black ${selectedBooking.status === 'ยกเลิกแล้ว' ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
-                        {Math.round(selectedBooking.price).toLocaleString()}
-                      </span>
-                      <span className="text-base font-bold text-gray-800 ml-2">บาท</span>
+                {/* Price Breakdown — hide when paid or under review */}
+                {!['สำเร็จ', 'รอตรวจสอบ'].includes(selectedBooking.status) && (
+                  <>
+                    <div className="border-t border-gray-200 pt-5 mb-5">
+                      <h4 className="font-bold text-sm text-gray-800 mb-3">รายละเอียดราคา</h4>
+                      <div className="text-sm space-y-3">
+                        {selectedBooking.adults > 0 && (
+                          <div className="flex items-center">
+                            <span className="w-16 shrink-0 font-medium text-gray-600">ผู้ใหญ่</span>
+                            <span className="flex-1 text-center text-gray-400 font-medium">
+                              {selectedBooking.adultPrice > 0
+                                ? `${selectedBooking.adultPrice.toLocaleString()} × ${selectedBooking.adults}`
+                                : `(${selectedBooking.adults} ท่าน)`}
+                            </span>
+                            <span className="font-bold text-gray-800 w-28 text-right">
+                              {selectedBooking.adultPrice > 0
+                                ? `${(selectedBooking.adults * selectedBooking.adultPrice).toLocaleString()} บาท`
+                                : '-'}
+                            </span>
+                          </div>
+                        )}
+                        {selectedBooking.children > 0 && (
+                          <div className="flex items-center">
+                            <span className="w-16 shrink-0 font-medium text-gray-600">เด็ก</span>
+                            <span className="flex-1 text-center text-gray-400 font-medium">
+                              {selectedBooking.childPrice > 0
+                                ? `${selectedBooking.childPrice.toLocaleString()} × ${selectedBooking.children}`
+                                : `(${selectedBooking.children} ท่าน)`}
+                            </span>
+                            <span className="font-bold text-gray-800 w-28 text-right">
+                              {selectedBooking.childPrice > 0
+                                ? `${(selectedBooking.children * selectedBooking.childPrice).toLocaleString()} บาท`
+                                : '-'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col gap-3 w-full mt-7">
-                <div className="flex gap-3">
-                  {selectedBooking.status === 'รอชำระเงิน' && (
-                    <button
-                      onClick={() => {
-                        setSelectedBooking(null);
-                        navigate(`/payment/${selectedBooking.id}`);
-                      }}
-                      className="flex-1 bg-primary text-white font-bold py-3.5 rounded-full hover:bg-primary-dark transition-all text-base shadow-lg hover:shadow-xl"
-                    >
-                      ชำระเงิน
-                    </button>
-                  )}
+                    {/* Total */}
+                    <div className="flex justify-between items-end border-t border-gray-200 pt-5">
+                      <span className="font-bold text-gray-800 text-base">ยอดที่ต้องชำระ</span>
+                      <div className="text-right">
+                        <span className={`text-4xl font-black ${selectedBooking.status === 'ยกเลิกแล้ว' ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+                          {Math.round(selectedBooking.price).toLocaleString()}
+                        </span>
+                        <span className="text-base font-bold text-gray-800 ml-2">บาท</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* CTA Buttons */}
+                <div className="flex flex-col gap-3 w-full mt-7">
+                  <div className="flex gap-3">
+                    {selectedBooking.status === 'รอชำระเงิน' && (
+                      <button
+                        onClick={() => {
+                          setSelectedBooking(null);
+                          navigate(`/payment/${selectedBooking.id}`);
+                        }}
+                        className="flex-1 bg-primary text-white font-bold py-3.5 rounded-full hover:bg-primary-dark transition-all text-base shadow-lg hover:shadow-xl"
+                      >
+                        ชำระเงิน
+                      </button>
+                    )}
+
+                    {['รอชำระเงิน', 'รอตรวจสอบ', 'สำเร็จ'].includes(selectedBooking.status) && (
+                      <button
+                        onClick={() => {
+                          setSelectedBooking(null);
+                          setCancelModalId(String(selectedBooking.id));
+                        }}
+                        className="flex-1 bg-white border-2 border-red-200 text-red-500 font-bold py-3.5 rounded-full hover:bg-red-50 transition-all text-base shadow-lg hover:shadow-xl"
+                      >
+                        ยกเลิกการจอง
+                      </button>
+                    )}
+                  </div>
 
                   {['รอชำระเงิน', 'รอตรวจสอบ', 'สำเร็จ'].includes(selectedBooking.status) && (
-                    <button
-                      onClick={() => {
-                        setSelectedBooking(null);
-                        setCancelModalId(String(selectedBooking.id));
-                      }}
-                      className="flex-1 bg-white border-2 border-red-200 text-red-500 font-bold py-3.5 rounded-full hover:bg-red-50 transition-all text-base shadow-lg hover:shadow-xl"
-                    >
-                      ยกเลิกการจอง
-                    </button>
+                    <p className="text-xs text-gray-400 text-center">
+                      สามารถยกเลิกได้ก่อนวันเดินทางอย่างน้อย 7 วัน
+                    </p>
                   )}
                 </div>
-
-                {['รอชำระเงิน', 'รอตรวจสอบ', 'สำเร็จ'].includes(selectedBooking.status) && (
-                  <p className="text-xs text-gray-400 text-center">
-                    สามารถยกเลิกได้ก่อนวันเดินทางอย่างน้อย 7 วัน
-                  </p>
-                )}
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
-      )}
+      </Modal>
+
       {/* 🛑 Confirm Cancel Modal 🛑 */}
       <ConfirmModal
         isOpen={cancelModalId !== null}

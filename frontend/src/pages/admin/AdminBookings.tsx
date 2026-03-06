@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { adminService } from '../../services/adminService'
 import { toast } from 'react-hot-toast'
 import type { Booking } from '../../types/booking'
+import Modal from '../../components/common/Modal'
 
 const FILTER_TABS = [
     { label: 'ทั้งหมด', value: 'all' },
@@ -201,84 +202,83 @@ export default function AdminBookings() {
             </main>
 
             {/* 🛑 Check Slip Modal 🛑 */}
-            {isModalOpen && selectedBooking && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-                    <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                            <h2 className="text-xl font-bold text-gray-900">ตรวจสอบสลิปโอนเงิน (จอง #{selectedBooking.id})</h2>
-                            <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
-                        </div>
+            <Modal isOpen={isModalOpen} onClose={handleCloseModal} width="max-w-lg">
+                <div className="flex flex-col max-h-[90vh]">
+                    <div className="pb-4 border-b border-gray-100 flex justify-between items-center">
+                        <h2 className="text-xl font-bold text-gray-900">ตรวจสอบสลิปโอนเงิน (จอง #{selectedBooking?.id})</h2>
+                        <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+                    </div>
 
-                        <div className="p-6 overflow-y-auto">
-                            <div className="bg-gray-50 rounded-xl p-4 mb-4 flex justify-between text-sm">
-                                <div>
-                                    <p className="text-gray-500">ยอดที่ต้องชำระ:</p>
-                                    <p className="text-lg font-bold text-gray-900">฿{Number(selectedBooking.totalPrice).toLocaleString()}</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-gray-500">วันเวลาที่อัปโหลดสลิป:</p>
-                                    <p className="font-medium text-gray-800">
-                                        {selectedBooking.payments && selectedBooking.payments[0]
-                                            ? new Date(selectedBooking.payments[0].uploadedAt).toLocaleString('th-TH')
-                                            : '-'}
-                                    </p>
-                                </div>
+                    <div className="py-6 overflow-y-auto">
+                        <div className="bg-gray-50 rounded-xl p-4 mb-4 flex justify-between text-sm">
+                            <div>
+                                <p className="text-gray-500">ยอดที่ต้องชำระ:</p>
+                                <p className="text-lg font-bold text-gray-900">฿{Number(selectedBooking?.totalPrice).toLocaleString()}</p>
                             </div>
-
-                            {selectedBooking.payments && selectedBooking.payments.length > 0 && selectedBooking.payments[0].slipUrl ? (
-                                <div className="border rounded-xl  overflow-hidden bg-gray-100 flex justify-center items-center p-2">
-                                    <img
-                                        src={`http://localhost:3000/${selectedBooking.payments[0].slipUrl}`}
-                                        alt="Payment Slip"
-                                        className="max-h-[500px] object-contain rounded-lg"
-                                    />
-                                </div>
-                            ) : (
-                                <p className="text-center text-gray-500 py-10">ไม่พบรูปภาพสลิป</p>
-                            )}
+                            <div className="text-right">
+                                <p className="text-gray-500">วันเวลาที่อัปโหลดสลิป:</p>
+                                <p className="font-medium text-gray-800">
+                                    {selectedBooking?.payments && selectedBooking.payments[0]
+                                        ? new Date(selectedBooking.payments[0].uploadedAt).toLocaleString('th-TH')
+                                        : '-'}
+                                </p>
+                            </div>
                         </div>
 
-                        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
-                            <button
-                                onClick={handleCloseModal}
-                                disabled={isProcessing}
-                                className="px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
-                            >
-                                ปิด
-                            </button>
+                        {selectedBooking?.payments && selectedBooking.payments.length > 0 && selectedBooking.payments[0].slipUrl ? (
+                            <div className="border rounded-xl  overflow-hidden bg-gray-100 flex justify-center items-center p-2">
+                                <img
+                                    src={`http://localhost:3000/${selectedBooking.payments[0].slipUrl}`}
+                                    alt="Payment Slip"
+                                    className="max-h-[500px] object-contain rounded-lg"
+                                />
+                            </div>
+                        ) : (
+                            <p className="text-center text-gray-500 py-10">ไม่พบรูปภาพสลิป</p>
+                        )}
+                    </div>
 
-                            {selectedBooking.status === 'awaiting_approval' && (
-                                <>
-                                    <button
-                                        onClick={() => handleUpdateStatus('canceled')}
-                                        disabled={isProcessing}
-                                        className="px-5 py-2.5 text-sm font-semibold bg-red-100 text-red-600 hover:bg-red-200 rounded-xl transition-colors disabled:opacity-50"
-                                    >
-                                        ไม่อนุมัติ/ยกเลิก
-                                    </button>
-                                    <button
-                                        onClick={() => handleUpdateStatus('confirmed')}
-                                        disabled={isProcessing}
-                                        className="px-5 py-2.5 text-sm font-semibold bg-green-500 text-white hover:bg-green-600 rounded-xl transition-colors disabled:opacity-50"
-                                    >
-                                        อนุมัติรายการ
-                                    </button>
-                                </>
-                            )}
+                    <div className="pt-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 -mx-8 -mb-8 px-8 py-4 rounded-b-[2rem]">
+                        <button
+                            onClick={handleCloseModal}
+                            disabled={isProcessing}
+                            className="px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
+                        >
+                            ปิด
+                        </button>
 
-                            {['confirmed', 'success', 'canceled'].includes(selectedBooking.status) && (
+                        {selectedBooking?.status === 'awaiting_approval' && (
+                            <>
                                 <button
-                                    onClick={() => handleUpdateStatus('awaiting_approval')}
+                                    onClick={() => handleUpdateStatus('canceled')}
                                     disabled={isProcessing}
-                                    className="px-5 py-2.5 text-sm font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 rounded-xl transition-colors disabled:opacity-50"
+                                    className="px-5 py-2.5 text-sm font-semibold bg-red-100 text-red-600 hover:bg-red-200 rounded-xl transition-colors disabled:opacity-50"
                                 >
-                                    เปลี่ยนสถานะกลับเป็น รอตรวจสอบ
+                                    ไม่อนุมัติ/ยกเลิก
                                 </button>
-                            )}
-                        </div>
+                                <button
+                                    onClick={() => handleUpdateStatus('confirmed')}
+                                    disabled={isProcessing}
+                                    className="px-5 py-2.5 text-sm font-semibold bg-green-500 text-white hover:bg-green-600 rounded-xl transition-colors disabled:opacity-50"
+                                >
+                                    อนุมัติรายการ
+                                </button>
+                            </>
+                        )}
+
+                        {selectedBooking && ['confirmed', 'success', 'canceled'].includes(selectedBooking.status) && (
+                            <button
+                                onClick={() => handleUpdateStatus('awaiting_approval')}
+                                disabled={isProcessing}
+                                className="px-5 py-2.5 text-sm font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 rounded-xl transition-colors disabled:opacity-50"
+                            >
+                                เปลี่ยนสถานะกลับเป็น รอตรวจสอบ
+                            </button>
+                        )}
                     </div>
                 </div>
-            )}
+            </Modal>
+
         </>
     )
 }

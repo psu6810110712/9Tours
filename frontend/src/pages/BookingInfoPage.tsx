@@ -7,6 +7,7 @@ import type { Tour } from '../types/tour'
 import { useAuth } from '../context/AuthContext'
 import ProgressBar from '../components/common/ProgressBar'
 import BookingSummaryCard from '../components/booking/BookingSummaryCard'
+import Modal from '../components/common/Modal'
 
 export default function BookingInfoPage() {
   const { tourId } = useParams<{ tourId: string }>()
@@ -70,7 +71,7 @@ export default function BookingInfoPage() {
   const [tour, setTour] = useState<Tour | null>(null)
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errorModal, setErrorModal] = useState({ isOpen: false, message: '' })
+  const [showErrorModal, setShowErrorModal] = useState(false) // Refactored from errorModal
 
   useEffect(() => {
     if (tourId) {
@@ -119,7 +120,7 @@ export default function BookingInfoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (scheduleId === '-') {
-      setErrorModal({ isOpen: true, message: 'กรุณาระบุรอบเดินทางที่ต้องการ' })
+      setShowErrorModal(true) // Refactored
       return;
     }
     try {
@@ -144,9 +145,9 @@ export default function BookingInfoPage() {
       })
     } catch (err: unknown) {
       console.error("Error creating booking:", err)
-      const error = err as { response?: { data?: { message?: string } } }
-      const errorMsg = error.response?.data?.message || 'ไม่สามารถทำการจองได้ กรุณาลองใหม่อีกครั้ง'
-      setErrorModal({ isOpen: true, message: errorMsg })
+      // const error = err as { response?: { data?: { message?: string } } }
+      // const errorMsg = error.response?.data?.message || 'ไม่สามารถทำการจองได้ กรุณาลองใหม่อีกครั้ง'
+      setShowErrorModal(true) // Refactored
     } finally {
       setIsSubmitting(false)
     }
@@ -306,33 +307,26 @@ export default function BookingInfoPage() {
         </form>
       </main>
 
-      {/* --- Error Modal ย้ายมาวางตรงนี้ (ถูกหลัก React 100%) --- */}
-      {
-        errorModal.isOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setErrorModal({ isOpen: false, message: '' })}></div>
-            <div className="bg-white rounded-[2rem] p-8 w-full max-w-sm relative z-10 flex flex-col items-center text-center shadow-2xl animate-fade-in-up border border-gray-100">
-              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
-                <div className="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)]">
-                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-              </div>
-              <h2 className="text-xl font-bold text-gray-800 mb-2">ไม่สามารถทำรายการได้</h2>
-              <p className="text-gray-500 text-[15px] mb-8 leading-relaxed font-medium">
-                {errorModal.message}
-              </p>
-              <button
-                onClick={() => setErrorModal({ isOpen: false, message: '' })}
-                className="w-full bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full hover:bg-gray-200 transition-colors text-base"
-              >
-                ตกลง
-              </button>
-            </div>
+      {/* 🛑 Error Modal 🛑 */}
+      <Modal isOpen={showErrorModal} onClose={() => setShowErrorModal(false)} width="max-w-md">
+        <div className="flex flex-col items-center text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
           </div>
-        )
-      }
-    </div >
+          <h3 className="text-xl font-bold text-gray-900 mb-2">เกิดข้อผิดพลาด</h3>
+          <p className="text-gray-500 mb-6">
+            สิทธิ์การจองของคุณไม่ถูกต้อง หรือทัวร์นี้ไม่สามารถจองได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+          </p>
+          <button
+            onClick={() => setShowErrorModal(false)}
+            className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary-dark transition-colors"
+          >
+            เข้าใจแล้ว
+          </button>
+        </div>
+      </Modal>
+    </div>
   )
 }

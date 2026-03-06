@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 interface ModalProps {
     isOpen: boolean;
@@ -8,19 +9,10 @@ interface ModalProps {
 }
 
 export default function Modal({ isOpen, onClose, children, width = 'max-w-md' }: ModalProps) {
-    useEffect(() => {
-        // Prevent scrolling when modal is open
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isOpen]);
+    useBodyScrollLock(isOpen);
 
     if (!isOpen) return null;
+
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

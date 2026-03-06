@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { bookingService } from '../services/bookingService'
 import ProgressBar from '../components/common/ProgressBar'
 import BookingSummaryCard from '../components/booking/BookingSummaryCard'
+import Modal from '../components/common/Modal'
 import { toast } from 'react-hot-toast'
 
 interface PaymentPageData {
@@ -395,76 +396,70 @@ export default function PaymentPage() {
       </main>
 
       {/* --- Success Modal --- */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => { }}></div>
-          <div className="bg-white rounded-[2.5rem] p-10 w-full max-w-sm relative z-10 flex flex-col items-center text-center shadow-2xl animate-fade-in-up border border-gray-100">
-
-            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-8">
-              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.4)]">
-                <svg className="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
+      <Modal isOpen={showSuccessModal} onClose={() => { }} width="max-w-sm">
+        <div className="flex flex-col items-center text-center">
+          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-8">
+            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.4)]">
+              <svg className="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
+          </div>
 
-            <h2 className="text-3xl font-bold text-gray-800 mb-3">การชำระเงินเสร็จสิ้น</h2>
-            <p className="text-gray-500 text-[15px] mb-10 leading-relaxed font-medium">
-              คุณสามารถตรวจสอบสถานะการจองได้<br />โดยกดไปที่การจองของฉัน
-            </p>
+          <h2 className="text-3xl font-bold text-gray-800 mb-3">การชำระเงินเสร็จสิ้น</h2>
+          <p className="text-gray-500 text-[15px] mb-10 leading-relaxed font-medium">
+            คุณสามารถตรวจสอบสถานะการจองได้<br />โดยกดไปที่การจองของฉัน
+          </p>
 
+          <button
+            onClick={() => navigate('/my-bookings')}
+            className="w-full bg-primary text-white font-bold py-4 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
+          >
+            การจองของฉัน
+          </button>
+        </div>
+      </Modal>
+
+
+      {/* --- Timeout Modal --- */}
+      <Modal isOpen={isExpired && !uploadAnyway && !showSuccessModal} onClose={() => { }} width="max-w-md">
+        <div className="flex flex-col items-center text-center">
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
+            <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">หมดเวลาชำระเงิน</h2>
+          <p className="text-gray-500 text-[15px] mb-8 leading-relaxed font-medium">
+            เวลาจองที่นั่งของคุณหมดลงแล้ว และที่นั่งได้ถูกคืนกลับเข้าสู่ระบบแล้ว อย่างไรก็ตาม หากคุณทำรายการชำระเงินเรียบร้อยแล้ว กรุณากดปุ่มด้านล่างเพื่ออัปโหลดสลิป
+          </p>
+
+          <div className="flex flex-col gap-3 w-full">
             <button
-              onClick={() => navigate('/my-bookings')}
-              className="w-full bg-primary text-white font-bold py-4 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
+              onClick={() => setUploadAnyway(true)}
+              className="w-full bg-primary text-white font-bold py-3.5 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
             >
-              การจองของฉัน
+              ฉันโอนเงินเรียบร้อยแล้ว
+            </button>
+            <button
+              onClick={async () => {
+                // ยกเลิก booking และคืนที่นั่งก่อน navigate ออก
+                try {
+                  if (bookingId) {
+                    await bookingService.cancelBooking(bookingId)
+                  }
+                } catch { /* ถ้ายกเลิกไม่ได้ก็ไม่เป็นไร Cron Job จะจัดการให้ */ }
+                navigate('/')
+              }}
+              className="w-full bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full hover:bg-gray-200 transition-colors text-lg"
+            >
+              เริ่มการจองใหม่
             </button>
           </div>
         </div>
-      )}
+      </Modal>
 
-      {/* --- Timeout Modal --- */}
-      {isExpired && !uploadAnyway && !showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-          <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-md relative z-10 flex flex-col items-center text-center shadow-2xl animate-fade-in-up border border-gray-100">
-
-            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
-              <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-
-            <h2 className="text-2xl font-bold text-gray-800 mb-3">หมดเวลาชำระเงิน</h2>
-            <p className="text-gray-500 text-[15px] mb-8 leading-relaxed font-medium">
-              เวลาจองที่นั่งของคุณหมดลงแล้ว และที่นั่งได้ถูกคืนกลับเข้าสู่ระบบแล้ว อย่างไรก็ตาม หากคุณทำรายการชำระเงินเรียบร้อยแล้ว กรุณากดปุ่มด้านล่างเพื่ออัปโหลดสลิป
-            </p>
-
-            <div className="flex flex-col gap-3 w-full">
-              <button
-                onClick={() => setUploadAnyway(true)}
-                className="w-full bg-primary text-white font-bold py-3.5 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
-              >
-                ฉันโอนเงินเรียบร้อยแล้ว
-              </button>
-              <button
-                onClick={async () => {
-                  // ยกเลิก booking และคืนที่นั่งก่อน navigate ออก
-                  try {
-                    if (bookingId) {
-                      await bookingService.cancelBooking(bookingId)
-                    }
-                  } catch { /* ถ้ายกเลิกไม่ได้ก็ไม่เป็นไร Cron Job จะจัดการให้ */ }
-                  navigate('/')
-                }}
-                className="w-full bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full hover:bg-gray-200 transition-colors text-lg"
-              >
-                เริ่มการจองใหม่
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   )
