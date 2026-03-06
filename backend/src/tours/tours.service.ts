@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Repository } from 'typeorm';
+import { BehaviorEvent } from '../analytics/entities/behavior-event.entity';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
 import { TourType } from './entities/tour.entity';
@@ -296,6 +299,11 @@ function reloadTours() {
 
 @Injectable()
 export class ToursService {
+  constructor(
+    @InjectRepository(BehaviorEvent)
+    private readonly behaviorEventsRepo: Repository<BehaviorEvent>,
+  ) {}
+
   private nextId = Math.max(...DEMO_TOURS.map(t => t.id), 99) + 1;
   private codeSeq = DEMO_TOURS.length + 1;
 
@@ -453,6 +461,91 @@ export class ToursService {
     tour.isActive = false;
     persistData();
     return { id, deleted: true };
+  }
+
+  // แนะนำทัวร์แบบ Personalized โดยใช้พฤติกรรมผู้ใช้ + fallback เพื่อให้หน้าแรกมีข้อมูลเสมอ
+  async getRecommendationsForUser(userId: string, limit = 8) {
+    const safeLimit = Math.max(1, Math.min(Number(limit) || 8, 12));
+    const activeTours = this.findAll();
+    const activeMap = new Map<number, any>(activeTours.map((tour: any) => [tour.id, tour]));
+    const resultTours: any[] = [];
+    const usedTourIds = new Set<number>();
+
+    const addIfActive = (tourId: number) => {
+      if (usedTourIds.has(tourId)) return;
+      const tour = activeMap.get(tourId);
+      if (!tour) return;
+      usedTourIds.add(tourId);
+      resultTours.push(tour);
+    };
+
+    // 1) Personalized score จากพฤติกรรมผู้ใช้ใน 90 วันล่าสุด
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    const personalized = await this.behaviorEventsRepo
+      .createQueryBuilder('be')
+      .select('be.tourId', 'tourId')
+      .addSelect(`
+        SUM(
+          CASE
+            WHEN be.eventType = 'cta_click' THEN 5
+            WHEN be.eventType = 'dwell_time' THEN LEAST(COALESCE(be.dwellMs, 0) / 15000.0, 4)
+            WHEN be.eventType = 'page_view' THEN 1
+            ELSE 0
+          END
+        )
+      `, 'score')
+      .addSelect('MAX(be.occurredAt)', 'last_seen_at')
+      .where('be.userId = :userId', { userId })
+      .andWhere('be.tourId IS NOT NULL')
+      .andWhere('be.occurredAt >= :since', { since: ninetyDaysAgo })
+      .groupBy('be.tourId')
+      .orderBy('score', 'DESC')
+      .addOrderBy('last_seen_at', 'DESC')
+      .limit(safeLimit)
+      .getRawMany<{ tourId: string }>();
+
+    personalized.forEach((row) => addIfActive(Number(row.tourId)));
+
+    // 2) Fallback เป็นทัวร์ที่กำลังนิยมโดยรวมใน 30 วันล่าสุด
+    if (resultTours.length < safeLimit) {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const trending = await this.behaviorEventsRepo
+        .createQueryBuilder('be')
+        .select('be.tourId', 'tourId')
+        .addSelect(`
+          SUM(
+            CASE
+              WHEN be.eventType = 'cta_click' THEN 3
+              WHEN be.eventType = 'dwell_time' THEN LEAST(COALESCE(be.dwellMs, 0) / 30000.0, 2)
+              WHEN be.eventType = 'page_view' THEN 1
+              ELSE 0
+            END
+          )
+        `, 'score')
+        .where('be.tourId IS NOT NULL')
+        .andWhere('be.occurredAt >= :since', { since: thirtyDaysAgo })
+        .groupBy('be.tourId')
+        .orderBy('score', 'DESC')
+        .limit(safeLimit * 2)
+        .getRawMany<{ tourId: string }>();
+
+      trending.forEach((row) => addIfActive(Number(row.tourId)));
+    }
+
+    // 3) Fallback สุดท้าย: เรียงตามความนิยมคงที่จากข้อมูลรีวิว
+    if (resultTours.length < safeLimit) {
+      const staticPopular = [...activeTours].sort((a: any, b: any) => {
+        if ((b.reviewCount || 0) !== (a.reviewCount || 0)) {
+          return (b.reviewCount || 0) - (a.reviewCount || 0);
+        }
+        return (b.rating || 0) - (a.rating || 0);
+      });
+      staticPopular.forEach((tour: any) => addIfActive(tour.id));
+    }
+
+    return resultTours.slice(0, safeLimit);
   }
 
   // ✅ เพิ่มฟังก์ชันอัปเดตที่นั่ง เพื่อให้ Bookings/Payments Service เรียกใช้ได้

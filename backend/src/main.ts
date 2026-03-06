@@ -11,13 +11,20 @@ async function bootstrap() {
   // เปิดใช้ cookie-parser เพื่อให้อ่าน cookie จาก request ได้
   app.use(cookieParser());
 
+  const configuredOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+    : ['http://localhost:5173', 'http://127.0.0.1:5173'];
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: configuredOrigins,
     credentials: true,
   });
 
   // เปิดใช้งาน ValidationPipe ทั่วทั้งแอป
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }));
 
   //โค้ดสำหรับเปิดใช้งานโฟลเดอร์ uploads
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
