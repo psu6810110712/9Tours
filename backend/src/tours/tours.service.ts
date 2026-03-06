@@ -495,13 +495,13 @@ export class ToursService {
           END
         )
       `, 'score')
-      .addSelect('MAX(be.occurredAt)', 'lastSeenAt')
+      .addSelect('MAX(be.occurredAt)', 'last_seen_at')
       .where('be.userId = :userId', { userId })
       .andWhere('be.tourId IS NOT NULL')
       .andWhere('be.occurredAt >= :since', { since: ninetyDaysAgo })
       .groupBy('be.tourId')
       .orderBy('score', 'DESC')
-      .addOrderBy('lastSeenAt', 'DESC')
+      .addOrderBy('last_seen_at', 'DESC')
       .limit(safeLimit)
       .getRawMany<{ tourId: string }>();
 
