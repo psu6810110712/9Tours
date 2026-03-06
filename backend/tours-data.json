@@ -1,540 +1,343 @@
 [
   {
     "id": 1,
-    "tourCode": "15012026001",
+    "tourCode": "PHK-OLD-001",
     "name": "เที่ยวภูเก็ต เมืองเก่า ถ่ายรูปคาเฟ่ทั้งวัน",
-    "description": "เดินเล่นย่านเมืองเก่าภูเก็ต คาเฟ่สวย ๆ และแลนด์มาร์กยอดฮิตในวันเดียว",
+    "description": "สัมผัสเสน่ห์เมืองเก่าภูเก็ต เดินชมสถาปัตยกรรมแบบชิโนโปรตุกีส แวะคาเฟ่ฮิปๆ และถ่ายรูปมุมไอคอนิกในย่านเมืองเก่า เช็คอินแลนด์มาร์กยอดฮิตในวันเดียว พร้อมไกด์ท้องถิ่นพาชิมของอร่อย",
     "tourType": "one_day",
     "categories": [
       "สายคาเฟ่",
-      "สายชิล"
+      "สายชิล",
+      "ประวัติศาสตร์"
     ],
     "price": 2900,
     "originalPrice": 3200,
     "images": [
-      "https://images.unsplash.com/photo-1541417904950-b855846fe074?w=800",
-      "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800",
-      "https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=800",
-      "https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=800",
-      "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=800"
+      "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=800&q=80"
     ],
     "highlights": [
-      "บริการรถรับส่ง",
-      "รวมอาหารกลางวัน"
+      "เดินย่านเมืองเก่าชิโนโปรตุกีส",
+      "ฟรี! อาหารกลางวันพื้นเมือง",
+      "รถรับส่งแบบส่วนตัว"
     ],
-    "itinerary": [],
-    "transportation": "รถตู้ปรับอากาศ",
+    "itinerary": [
+      {
+        "time": "09:00",
+        "title": "Pick up",
+        "description": "รับจากโรงแรมในภูเก็ต"
+      },
+      {
+        "time": "10:30",
+        "title": "Old Town Walk",
+        "description": "เดินชมความสวยงามของตึกเก่า"
+      },
+      {
+        "time": "12:00",
+        "title": "Lunch",
+        "description": "ทานอาหารจีน-ฮกเกี้ยนในร้านระดับมิชลิน"
+      },
+      {
+        "time": "14:00",
+        "title": "Cafe Hopping",
+        "description": "จิบกาแฟในคาเฟ่ที่รีโนเวทจากตึกเก่า"
+      },
+      {
+        "time": "17:00",
+        "title": "Return",
+        "description": "ส่งกลับที่พักโดยสวัสดิภาพ"
+      }
+    ],
+    "transportation": "รถตู้พรีเมียม",
     "duration": "8 ชั่วโมง",
     "region": "ภาคใต้",
     "province": "ภูเก็ต",
     "accommodation": null,
-    "rating": 4.3,
-    "reviewCount": 19,
+    "rating": 4.8,
+    "reviewCount": 156,
     "isActive": true,
     "schedules": [
       {
         "id": 101,
-        "tourId": 1,
-        "startDate": "2026-02-21",
-        "endDate": "2026-02-21",
+        "startDate": "2026-03-10",
+        "endDate": "2026-03-10",
         "timeSlot": "09:00-17:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 20,
+        "roundName": "รอบปกติ",
+        "maxCapacity": 12,
         "currentBooked": 0
       }
-    ],
-    "createdAt": "2026-03-02T08:46:26.747Z",
-    "updatedAt": "2026-03-02T08:46:26.747Z"
+    ]
   },
   {
     "id": 2,
-    "tourCode": "15012026002",
+    "tourCode": "SRN-CLK-002",
     "name": "ทัวร์เขื่อนเชี่ยวหลาน ล่องเรือ ชมหมอกตอนเช้า",
-    "description": "ล่องเรือชมวิวเขื่อนเชี่ยวหลาน น้ำสีเขียวมรกต พร้อมกิจกรรมพายเรือคายัค",
+    "description": "ผจญภัยในกุ้ยหลินเมืองไทย ล่องเรือหางยาวชมเขาสามเกลอ กระโดดน้ำใสสีเขียวมรกต พายคายัคเงียบๆ ท่ามกลางธรรมชาติที่สมบูรณ์ที่สุดของสุราษฎร์ธานี",
     "tourType": "one_day",
     "categories": [
       "สายธรรมชาติ",
+      "สายกิจกรรม",
       "สายชิล"
     ],
     "price": 1500,
     "originalPrice": 2100,
     "images": [
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
-      "https://images.unsplash.com/photo-1504699894957-93f02c251aaa?w=800",
-      "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800",
-      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800",
-      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800"
+      "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80"
     ],
     "highlights": [
-      "ล่องเรือชมวิว",
-      "พายเรือคายัค"
+      "ล่องเรือชมเขาสามเกลอ",
+      "กิจกรรมพายคายัคฟรี",
+      "อาหารเที่ยงบนแพร้านอาหาร"
     ],
-    "itinerary": [],
-    "transportation": "เรือหางยาว + รถตู้",
+    "itinerary": [
+      {
+        "time": "08:30",
+        "title": "Pier Arrival",
+        "description": "ถึงท่าเรือเทศบาลเขื่อนเชี่ยวหลาน"
+      },
+      {
+        "time": "09:30",
+        "title": "Boat Trip",
+        "description": "ล่องเรือชมวิวกุ้ยหลินเมืองไทย"
+      },
+      {
+        "time": "11:30",
+        "title": "Floating Restaurant",
+        "description": "พักผ่อนที่แพและรับประทานอาหาร"
+      },
+      {
+        "time": "13:30",
+        "title": "Kayaking",
+        "description": "พายเรือเล่นน้ำหน้าแพ"
+      },
+      {
+        "time": "16:00",
+        "title": "Back to Shore",
+        "description": "เดินทางกลับท่าเรือ"
+      }
+    ],
+    "transportation": "เรือหางยาวท้องถิ่น",
     "duration": "8 ชั่วโมง",
     "region": "ภาคใต้",
     "province": "สุราษฎร์ธานี",
     "accommodation": null,
     "rating": 4.9,
-    "reviewCount": 95,
+    "reviewCount": 240,
     "isActive": true,
     "schedules": [
       {
-        "id": 200,
-        "tourId": 2,
-        "startDate": "2026-02-22",
-        "endDate": "2026-02-22",
+        "id": 201,
+        "startDate": "2026-03-15",
+        "endDate": "2026-03-15",
         "timeSlot": "08:00-16:00",
-        "roundName": "รอบปกติ",
-        "maxCapacity": 25,
+        "roundName": "วันเดียวเที่ยวคุ้ม",
+        "maxCapacity": 20,
         "currentBooked": 0
       }
-    ],
-    "createdAt": "2026-03-02T08:46:26.747Z",
-    "updatedAt": "2026-03-02T14:10:21.311Z",
-    "childPrice": null
+    ]
   },
   {
     "id": 3,
-    "tourCode": "20012026003",
-    "name": "แพ็คเกจเชียงใหม่ 3 วัน 2 คืน ชมดอยอินทนนท์",
-    "description": "เที่ยวเชียงใหม่ครบทั้งดอยวัดคาเฟ่ ที่พักสบายย่านนิมมาน",
+    "tourCode": "CMX-DIN-003",
+    "name": "แพ็คเกจเชียงใหม่ 3 วัน 2 คืน ชมยอดดอยอินทนนท์",
+    "description": "สัมผัสอากาศหนาวที่ยอดดอยที่สูงที่สุดในไทย ชมพระมหาธาตุนภเมทนีดล-นภพลภูมิสิริ เดินเส้นทางศึกษาธรรมชาติกิ่วแม่ปาน และพักผ่อนในเมืองเชียงใหม่ย่านนิมมาน",
     "tourType": "package",
     "categories": [
       "สายธรรมชาติ",
-      "สายชิล"
+      "ครอบครัว",
+      "อากาศเย็น"
     ],
     "price": 9900,
-    "originalPrice": 7500,
+    "childPrice": 7500,
     "images": [
-      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
-      "https://images.unsplash.com/photo-1528181304800-259b08848526?w=800",
-      "https://images.unsplash.com/photo-1512100356356-de1b84283e18?w=800",
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
-      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800"
+      "https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1512100356356-de1b84283e18?auto=format&fit=crop&w=800&q=80"
     ],
     "highlights": [
-      "รวมที่พัก",
-      "รถรับส่งสนามบิน"
+      "พักโรงแรมย่านนิมมาน 2 คืน",
+      "ทัวร์กิ่วแม่ปานแบบ Private",
+      "รถรับส่งสนามบินฟรี"
     ],
-    "itinerary": [],
-    "transportation": "รถตู้ส่วนตัว",
+    "itinerary": [
+      {
+        "time": "Day 1",
+        "title": "Welcome to CM",
+        "description": "รับจากสนามบินและเช็คอินโรงแรม"
+      },
+      {
+        "time": "Day 2",
+        "title": "Doi Inthanon",
+        "description": "ทัวร์ยอดดอยอินทนนท์ทั้งวัน"
+      },
+      {
+        "time": "Day 3",
+        "title": "City Tour & Exit",
+        "description": "ไหว้พระวัดดอยสุเทพ และส่งสนามบิน"
+      }
+    ],
+    "transportation": "รถ SUV พรีเมียม",
     "duration": "3 วัน 2 คืน",
     "region": "ภาคเหนือ",
     "province": "เชียงใหม่",
-    "accommodation": "โรงแรม 3 ดาว",
+    "accommodation": "โรงแรมนิมมานดีไซน์ (4 ดาว)",
     "rating": 4.7,
-    "reviewCount": 48,
+    "reviewCount": 89,
     "isActive": true,
+    "minPeople": 2,
+    "maxPeople": 6,
     "schedules": [
       {
-        "id": 300,
-        "tourId": 3,
-        "startDate": "2026-05-02",
-        "endDate": "2026-05-04",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 6
-      },
-      {
         "id": 301,
-        "tourId": 3,
-        "startDate": "2026-05-03",
-        "endDate": "2026-05-05",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 6
-      },
-      {
-        "id": 302,
-        "tourId": 3,
-        "startDate": "2026-05-09",
-        "endDate": "2026-05-11",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 303,
-        "tourId": 3,
-        "startDate": "2026-05-10",
-        "endDate": "2026-05-12",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 304,
-        "tourId": 3,
-        "startDate": "2026-05-16",
-        "endDate": "2026-05-18",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 305,
-        "tourId": 3,
-        "startDate": "2026-05-17",
-        "endDate": "2026-05-19",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 306,
-        "tourId": 3,
-        "startDate": "2026-05-23",
-        "endDate": "2026-05-25",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 307,
-        "tourId": 3,
-        "startDate": "2026-05-24",
-        "endDate": "2026-05-26",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 308,
-        "tourId": 3,
-        "startDate": "2026-05-30",
-        "endDate": "2026-06-01",
-        "timeSlot": "",
-        "roundName": "Private Group",
-        "maxCapacity": 6,
-        "currentBooked": 0
-      },
-      {
-        "id": 309,
-        "tourId": 3,
-        "startDate": "2026-05-31",
-        "endDate": "2026-06-02",
-        "timeSlot": "",
+        "startDate": "2026-03-20",
+        "endDate": "2026-03-22",
+        "timeSlot": null,
         "roundName": "Private Group",
         "maxCapacity": 6,
         "currentBooked": 0
       }
-    ],
-    "createdAt": "2026-03-02T08:46:26.747Z",
-    "updatedAt": "2026-03-02T13:57:42.823Z",
-    "childPrice": null,
-    "minPeople": 1,
-    "maxPeople": 6
+    ]
   },
   {
     "id": 4,
-    "tourCode": "25012026004",
-    "name": "เกาะพีพี ดำน้ำดูปะการัง เต็มวัน",
-    "description": "นั่งสปีดโบ๊ทไปเกาะพีพี ดำน้ำ 2 จุด พร้อมอาหารกลางวันบุฟเฟ่ต์",
+    "tourCode": "PHK-PPI-004",
+    "name": "เกาะพีพี อ่าวมาหยา ดำน้ำตื้นด้วยเรือสปีดโบ๊ท",
+    "description": "ล่องเรือสปีดโบ๊ทพรีเมียมไปยังหมู่เกาะพีพีระดับโลก ชมอ่าวมาหยาที่มีชื่อเสียง ดำน้ำดูฝูงปลาที่อ่าวโละซามะ และพักผ่อนบนทรายขาวละเอียดที่อ่าวปิเละ",
     "tourType": "one_day",
     "categories": [
+      "สายทะเล",
       "สายกิจกรรม",
-      "สายธรรมชาติ"
+      "Luxury"
     ],
-    "price": 2300,
-    "originalPrice": null,
+    "price": 2500,
+    "originalPrice": 2900,
     "images": [
-      "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800",
-      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
-      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800",
-      "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800",
-      "https://images.unsplash.com/photo-1518990034670-3eb04d6ea23b?w=800"
+      "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1518990034670-3eb04d6ea23b?auto=format&fit=crop&w=800&q=80"
     ],
     "highlights": [
-      "ดำน้ำดูปะการัง",
-      "รวมอุปกรณ์ดำน้ำ"
+      "เข้าชมอ่าวมาหยา",
+      "บุฟเฟ่ต์ริมหาดบนเกาะพีพีดอน",
+      "อุปกรณ์ดำน้ำครบชุด"
     ],
-    "itinerary": [],
-    "transportation": "สปีดโบ๊ท",
-    "duration": "8 ชั่วโมง",
+    "itinerary": [
+      {
+        "time": "08:00",
+        "title": "Check-in",
+        "description": "เช็คอินที่ท่าเรือส่วนตัว"
+      },
+      {
+        "time": "09:30",
+        "title": "Maya Bay",
+        "description": "ถ่ายรูปที่อ่าวมาหยา"
+      },
+      {
+        "time": "12:00",
+        "title": "Buffet Lunch",
+        "description": "ทานอาหารกลางวันบนเกาะ"
+      },
+      {
+        "time": "14:00",
+        "title": "Snorkeling",
+        "description": "ดำน้ำที่เกาะไม้ไผ่"
+      },
+      {
+        "time": "16:30",
+        "title": "Return",
+        "description": "กลับถึงท่าเรือ"
+      }
+    ],
+    "transportation": "Speedboat พรีเมียม",
+    "duration": "9 ชั่วโมง",
     "region": "ภาคใต้",
     "province": "ภูเก็ต",
     "accommodation": null,
-    "rating": 4.5,
-    "reviewCount": 65,
+    "rating": 4.6,
+    "reviewCount": 311,
     "isActive": true,
     "schedules": [
       {
         "id": 401,
-        "tourId": 4,
-        "startDate": "2026-02-23",
-        "endDate": "2026-02-23",
-        "timeSlot": "10:00-18:00",
-        "roundName": "รอบทะเลสวย",
-        "maxCapacity": 18,
-        "currentBooked": 0
-      },
-      {
-        "id": 402,
-        "tourId": 4,
-        "startDate": "2026-02-25",
-        "endDate": "2026-02-25",
-        "timeSlot": "10:00-18:00",
-        "roundName": "รอบพิเศษ",
-        "maxCapacity": 18,
+        "startDate": "2026-03-12",
+        "endDate": "2026-03-12",
+        "timeSlot": "08:30-17:30",
+        "roundName": "รอบเช้าพิเศษ",
+        "maxCapacity": 30,
         "currentBooked": 0
       }
-    ],
-    "createdAt": "2026-03-02T08:46:26.747Z",
-    "updatedAt": "2026-03-02T08:46:26.747Z"
+    ]
   },
   {
     "id": 5,
-    "tourCode": "ATV2026005",
-    "name": "ขับ ATV ตะลุยป่า ภูเก็ต (Join Trip)",
-    "description": "ผจญภัยขับ ATV เส้นทางธรรมชาติ วิวทะเลและภูเขา พร้อมครูฝึกดูแลอย่างใกล้ชิด",
+    "tourCode": "PHK-ATV-005",
+    "name": "ขับ ATV ตะลุยป่า ภูเก็ต ผจญภัยท่ามกลางธรรมชาติ",
+    "description": "กิจกรรมผจญภัยยอดนิยมในภูเก็ต ขับรถ ATV ตะลุยเส้นทางวิบาก ทั้งในป่าและลุยโคลน ชมวิวมุมสูงของเกาะภูเก็ตที่ Big Buddha เหมาะสำหรับทุกระดับประสบการณ์",
     "tourType": "one_day",
     "categories": [
       "สายลุย",
       "สายกิจกรรม",
-      "สายธรรมชาติ"
+      "Adventure"
     ],
-    "price": 720,
-    "originalPrice": 800,
+    "price": 1200,
+    "originalPrice": 1500,
     "images": [
-      "http://localhost:3000/uploads/tour-1772441641729-800707782.png"
+      "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80"
     ],
     "highlights": [
-      "ขับ ATV 1 ชั่วโมง",
-      "รวมอุปกรณ์ความปลอดภัย",
-      "ครูฝึกมืออาชีพ",
-      "ยกเลิกฟรี",
-      "มีรถรับส่ง",
-      "มีไกด์นำเที่ยว"
+      "ขับระยะยาว 1.5 ชม.",
+      "ไกด์สอนขับเบื้องต้น",
+      "รวมประกันอุบัติเหตุ"
     ],
-    "itinerary": [],
-    "transportation": "รถรับส่งในโซน",
-    "duration": "4 ชั่วโมง",
+    "itinerary": [
+      {
+        "time": "09:00",
+        "title": "Briefing",
+        "description": "ฟังอธิบายความปลอดภัย"
+      },
+      {
+        "time": "09:30",
+        "title": "Off-road",
+        "description": "เริ่มขับตะลุยป่า"
+      },
+      {
+        "time": "11:00",
+        "title": "Big Buddha View",
+        "description": "พักถ่ายรูปจุดชมวิว"
+      },
+      {
+        "time": "12:00",
+        "title": "Finish",
+        "description": "จบทริปและพักดื่มน้ำ"
+      }
+    ],
+    "transportation": "รถรับส่งโรงแรม",
+    "duration": "3 ชั่วโมง",
     "region": "ภาคใต้",
     "province": "ภูเก็ต",
     "accommodation": null,
-    "rating": 4.8,
-    "reviewCount": 42,
+    "rating": 4.9,
+    "reviewCount": 185,
     "isActive": true,
     "schedules": [
       {
-        "id": 500,
-        "tourId": 5,
-        "startDate": "2026-03-01",
-        "endDate": "2026-03-01",
-        "timeSlot": "08:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
         "id": 501,
-        "tourId": 5,
-        "startDate": "2026-03-01",
-        "endDate": "2026-03-01",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
+        "startDate": "2026-03-08",
+        "endDate": "2026-03-08",
+        "timeSlot": "09:00-12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 12,
         "currentBooked": 0
       },
       {
         "id": 502,
-        "tourId": 5,
-        "startDate": "2026-03-07",
-        "endDate": "2026-03-07",
-        "timeSlot": "08:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 7
-      },
-      {
-        "id": 503,
-        "tourId": 5,
-        "startDate": "2026-03-07",
-        "endDate": "2026-03-07",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": -4
-      },
-      {
-        "id": 504,
-        "tourId": 5,
         "startDate": "2026-03-08",
         "endDate": "2026-03-08",
-        "timeSlot": "08:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 505,
-        "tourId": 5,
-        "startDate": "2026-03-08",
-        "endDate": "2026-03-08",
-        "timeSlot": "13:00-17:00",
+        "timeSlot": "13:30-16:30",
         "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 506,
-        "tourId": 5,
-        "startDate": "2026-03-14",
-        "endDate": "2026-03-14",
-        "timeSlot": "08:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 507,
-        "tourId": 5,
-        "startDate": "2026-03-14",
-        "endDate": "2026-03-14",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 508,
-        "tourId": 5,
-        "startDate": "2026-03-15",
-        "endDate": "2026-03-15",
-        "timeSlot": "08:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 509,
-        "tourId": 5,
-        "startDate": "2026-03-15",
-        "endDate": "2026-03-15",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 510,
-        "tourId": 5,
-        "startDate": "2026-03-21",
-        "endDate": "2026-03-21",
-        "timeSlot": "08:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 511,
-        "tourId": 5,
-        "startDate": "2026-03-21",
-        "endDate": "2026-03-21",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 512,
-        "tourId": 5,
-        "startDate": "2026-03-22",
-        "endDate": "2026-03-22",
-        "timeSlot": "08:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 513,
-        "tourId": 5,
-        "startDate": "2026-03-22",
-        "endDate": "2026-03-22",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 514,
-        "tourId": 5,
-        "startDate": "2026-03-28",
-        "endDate": "2026-03-28",
-        "timeSlot": "08:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 515,
-        "tourId": 5,
-        "startDate": "2026-03-28",
-        "endDate": "2026-03-28",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 516,
-        "tourId": 5,
-        "startDate": "2026-03-29",
-        "endDate": "2026-03-29",
-        "timeSlot": "08:00-12:00",
-        "roundName": "รอบเช้า",
-        "maxCapacity": 10,
-        "currentBooked": 0
-      },
-      {
-        "id": 517,
-        "tourId": 5,
-        "startDate": "2026-03-29",
-        "endDate": "2026-03-29",
-        "timeSlot": "13:00-17:00",
-        "roundName": "รอบบ่าย",
-        "maxCapacity": 10,
+        "maxCapacity": 12,
         "currentBooked": 0
       }
-    ],
-    "createdAt": "2026-03-02T08:46:26.747Z",
-    "updatedAt": "2026-03-05T12:39:54.608Z",
-    "childPrice": 450
-  },
-  {
-    "id": 100,
-    "tourCode": "05032026006",
-    "name": "ergf",
-    "description": "efefefe",
-    "tourType": "one_day",
-    "categories": [],
-    "price": 123,
-    "childPrice": null,
-    "minPeople": null,
-    "maxPeople": null,
-    "originalPrice": null,
-    "images": [],
-    "highlights": [],
-    "itinerary": [],
-    "transportation": "",
-    "duration": "4",
-    "region": "ภาคเหนือ",
-    "province": "fef",
-    "accommodation": null,
-    "rating": 0,
-    "reviewCount": 0,
-    "isActive": true,
-    "schedules": [],
-    "createdAt": "2026-03-05T14:22:09.426Z",
-    "updatedAt": "2026-03-05T14:22:09.426Z"
+    ]
   }
 ]

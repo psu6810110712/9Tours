@@ -13,22 +13,33 @@ export class ToursSeederService implements OnModuleInit {
     private tourRepository: Repository<Tour>,
     @InjectRepository(TourSchedule)
     private scheduleRepository: Repository<TourSchedule>,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     try {
       const isProduction = process.env.NODE_ENV === 'production';
-      const shouldSeedOnStartup = process.env.SEED_TOURS_ON_STARTUP !== 'false';
+      const shouldSeedOnStartup = process.env.SEED_TOURS_ON_STARTUP?.trim() !== 'false';
       if (isProduction || !shouldSeedOnStartup) {
         console.log('⏭️ Skip tours seeding (production or disabled by SEED_TOURS_ON_STARTUP=false)');
         return;
       }
 
+      // Persistent Strategy: Seed only if the database is empty
+      const forceSync = process.env.SEED_FORCE_SYNC?.trim() === 'true';
       const existingTours = await this.tourRepository.count();
-      if (existingTours > 0) {
-        console.log(`✅ Tours already seeded (${existingTours} tours), skipping...`);
+
+      if (existingTours > 0 && !forceSync) {
+        console.log(`✅ Tours already seeded (${existingTours} tours), skipping seeding to preserve manual changes.`);
         return;
       }
+
+      if (forceSync) {
+        console.log('🔄 FORCE_SYNC=true: Clearing existing tours and related data before re-seeding...');
+        await this.tourRepository.query('TRUNCATE TABLE tours CASCADE');
+      }
+
+      console.log('🌱 Seeding tours from tours-data.json...');
+
 
       const dataFile = path.join(process.cwd(), 'tours-data.json');
       if (fs.existsSync(dataFile)) {
