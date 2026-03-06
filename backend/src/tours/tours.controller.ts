@@ -6,6 +6,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
@@ -60,9 +61,11 @@ export class ToursController {
     return this.toursService.getRecommendationsForUser(userId || '', safeLimit);
   }
 
+  @UseGuards(OptionalJwtAuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.toursService.findOne(+id);
+  async findOne(@Param('id') id: string, @Req() req: { user?: { role?: string } }) {
+    const includeInactive = req.user?.role === UserRole.ADMIN;
+    return this.toursService.findOne(+id, includeInactive);
   }
 
   @Get(':tourId/schedule/:scheduleId/available-seats')

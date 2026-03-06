@@ -135,9 +135,9 @@ export class ToursService {
     return tours.map((tour) => this.normalizeTour(tour));
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, includeInactive = false) {
     const tour = await this.toursRepo.findOne({
-      where: { id, isActive: true },
+      where: includeInactive ? { id } : { id, isActive: true },
       relations: ['schedules'],
     });
     return tour ? this.normalizeTour(tour) : null;

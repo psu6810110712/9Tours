@@ -14,17 +14,22 @@ export default function TourDetailPage() {
   const [tour, setTour] = useState<Tour | null>(null)
   const [related, setRelated] = useState<Tour[]>([])
   const navigate = useNavigate()
-  const { isAdmin } = useAuth()
+  const { isAdmin, isLoading } = useAuth()
 
   useEffect(() => {
-    if (!id) return
+    // รอให้ AuthContext restore session เสร็จก่อน
+    // เพื่อให้หน้า detail แนบ access token ได้ครบ โดยเฉพาะตอนเปิด URL ตรงหรือ refresh หน้า
+    if (!id || isLoading) return
+
     tourService.getOne(Number(id)).then((t) => {
       setTour(t)
       tourService.getAll({ province: t.province }).then((list) => {
         setRelated(list.filter((x) => x.id !== t.id).slice(0, 4))
       })
-    }).catch(() => navigate('/tours'))
-  }, [id])
+    }).catch(() => {
+      navigate('/tours')
+    })
+  }, [id, isAdmin, isLoading, navigate])
 
   if (!tour) {
     return (

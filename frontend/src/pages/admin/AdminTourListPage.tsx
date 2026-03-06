@@ -46,10 +46,15 @@ export default function AdminTourListPage() {
 
   // สลับสถานะเปิด/ปิดทัวร์ แล้วอัปเดต state ทันทีโดยไม่ต้อง reload
   const handleToggleActive = async (tour: Tour) => {
-    await tourService.update(tour.id, { isActive: !tour.isActive })
-    setTours((prev) =>
-      prev.map((t) => (t.id === tour.id ? { ...t, isActive: !t.isActive } : t))
-    )
+    const nextIsActive = !tour.isActive
+    try {
+      await tourService.update(tour.id, { isActive: nextIsActive })
+      setTours((prev) =>
+        prev.map((t) => (t.id === tour.id ? { ...t, isActive: nextIsActive } : t))
+      )
+    } catch (error) {
+      throw error
+    }
   }
 
   // กรองทัวร์ตาม tab + คำค้นหา

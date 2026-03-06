@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsIn,
   IsInt,
   IsNumber,
@@ -115,6 +116,10 @@ export class CreateTourDto {
   @IsOptional()
   @IsString()
   accommodation?: string | null;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 
   // nested DTO ช่วยให้ whitelist + validation ตรวจโครงสร้างได้ครบทุกระดับ
   @IsOptional()
