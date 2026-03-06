@@ -63,70 +63,96 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
         {name}
       </h1>
 
-      {/* popup gallery — ใช้ของง่ายๆอ่านง่าย ไม่ซับซ้อน */}
+      {/* popup gallery — ปรับปรุง UI ใหม่ ย้ายปุ่มออกข้างนอกภาพ */}
       {isPopupOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4 md:p-8"
           onClick={() => setIsPopupOpen(false)}
         >
+          {/* Close button - Top Right of screen area */}
+          <button
+            type="button"
+            onClick={() => setIsPopupOpen(false)}
+            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white text-3xl flex items-center justify-center transition-colors z-50"
+            title="ปิด"
+          >
+            ×
+          </button>
+
           <div
-            className="w-full max-w-5xl"
+            className="w-full max-w-6xl relative flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative rounded-xl overflow-hidden">
+            {/* Prev Button - Left Side Outside */}
+            {images.length > 1 && (
+              <button
+                type="button"
+                onClick={showPrev}
+                className="hidden md:flex absolute -left-16 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white text-2xl items-center justify-center transition-colors"
+              >
+                ‹
+              </button>
+            )}
+
+            <div className="relative w-full overflow-hidden rounded-2xl shadow-2xl">
               <img
                 src={activeImage}
                 alt={name}
-                className="w-full max-h-[78vh] object-cover rounded-xl"
+                className="w-full max-h-[80vh] object-contain mx-auto"
               />
 
+              {/* Mobile Navigation - Still inside for better reach */}
               {images.length > 1 && (
-                <>
+                <div className="md:hidden">
                   <button
                     type="button"
                     onClick={showPrev}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-800 text-lg"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 text-white text-xl flex items-center justify-center"
                   >
                     ‹
                   </button>
                   <button
                     type="button"
                     onClick={showNext}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-800 text-lg"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 text-white text-xl flex items-center justify-center"
                   >
                     ›
                   </button>
-                </>
+                </div>
               )}
-
-              <button
-                type="button"
-                onClick={() => setIsPopupOpen(false)}
-                className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 hover:bg-black/70 text-white text-lg"
-              >
-                ×
-              </button>
             </div>
 
+            {/* Next Button - Right Side Outside */}
             {images.length > 1 && (
-              <div className="mt-3 flex gap-2 overflow-x-auto justify-center">
-                {images.map((img, i) => (
-                  <button key={i} onClick={() => setActiveIndex(i)}>
-                    <img
-                      src={img}
-                      alt=""
-                      className={`w-20 h-14 object-cover rounded-md ${activeIndex === i
-                        ? 'ring-2 ring-white'
-                        : 'opacity-70 hover:opacity-100'
-                        }`}
-                    />
-                  </button>
-                ))}
-              </div>
+              <button
+                type="button"
+                onClick={showNext}
+                className="hidden md:flex absolute -right-16 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white text-2xl items-center justify-center transition-colors"
+              >
+                ›
+              </button>
             )}
           </div>
+
+          {images.length > 1 && (
+            <div className="mt-3 flex gap-2 overflow-x-auto justify-center">
+              {images.map((img, i) => (
+                <button key={i} onClick={() => setActiveIndex(i)}>
+                  <img
+                    src={img}
+                    alt=""
+                    className={`w-20 h-14 object-cover rounded-md ${activeIndex === i
+                      ? 'ring-2 ring-white'
+                      : 'opacity-70 hover:opacity-100'
+                      }`}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   )
 }
