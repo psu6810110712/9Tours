@@ -28,7 +28,10 @@ import { AnalyticsModule } from './analytics/analytics.module';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true,
+        // production ปิด auto-sync เพื่อบังคับใช้ migration เท่านั้น
+        synchronize: configService.get<string>('NODE_ENV') === 'production'
+          ? false
+          : configService.get<string>('DB_SYNC') !== 'false',
       }),
     }),
 

@@ -17,47 +17,83 @@ export class ToursSeederService implements OnModuleInit {
 
   async onModuleInit() {
     try {
-      // Check if schedules already exist
-      const existingSchedules = await this.scheduleRepository.count();
-      if (existingSchedules > 0) {
-        console.log(`✅ Tour schedules already seeded (${existingSchedules} schedules), skipping...`);
+      const isProduction = process.env.NODE_ENV === 'production';
+      const shouldSeedOnStartup = process.env.SEED_TOURS_ON_STARTUP !== 'false';
+      if (isProduction || !shouldSeedOnStartup) {
+        console.log('⏭️ Skip tours seeding (production or disabled by SEED_TOURS_ON_STARTUP=false)');
+        return;
+      }
+
+      const existingTours = await this.tourRepository.count();
+      if (existingTours > 0) {
+        console.log(`✅ Tours already seeded (${existingTours} tours), skipping...`);
         return;
       }
 
       const dataFile = path.join(process.cwd(), 'tours-data.json');
       if (fs.existsSync(dataFile)) {
-        const toursData = JSON.parse(fs.readFileSync(dataFile, 'utf-8'));
+        const toursData = JSON.parse(fs.readFileSync(dataFile, 'utf-8')) as any[];
 
-        for (const tourData of toursData) {
-          // Find existing tour in database
-          const existingTour = await this.tourRepository.findOne({
-            where: { tourCode: tourData.tourCode },
-          });
+        // ใช้ transaction เพื่อให้ import สำเร็จทั้งชุดหรือ rollback ทั้งชุด
+        await this.tourRepository.manager.transaction(async (manager) => {
+          const tourRepo = manager.getRepository(Tour);
+          const scheduleRepo = manager.getRepository(TourSchedule);
 
-          if (existingTour && tourData.schedules && Array.isArray(tourData.schedules)) {
-            // Save schedules for existing tour
-            for (const scheduleData of tourData.schedules) {
-              const existingSchedule = await this.scheduleRepository.findOne({
-                where: { id: scheduleData.id },
-              });
-              if (!existingSchedule) {
-                await this.scheduleRepository.save({
+          for (const tourData of toursData) {
+            const savedTour = await tourRepo.save(tourRepo.create({
+              tourCode: tourData.tourCode,
+              name: tourData.name,
+              description: tourData.description,
+              tourType: tourData.tourType,
+              categories: tourData.categories || [],
+              price: Number(tourData.price || 0),
+              childPrice: tourData.childPrice !== undefined && tourData.childPrice !== null
+                ? Number(tourData.childPrice)
+                : null,
+              minPeople: tourData.minPeople !== undefined && tourData.minPeople !== null
+                ? Number(tourData.minPeople)
+                : null,
+              maxPeople: tourData.maxPeople !== undefined && tourData.maxPeople !== null
+                ? Number(tourData.maxPeople)
+                : null,
+              originalPrice: tourData.originalPrice !== undefined && tourData.originalPrice !== null
+                ? Number(tourData.originalPrice)
+                : null,
+              images: tourData.images || [],
+              highlights: tourData.highlights || [],
+              itinerary: tourData.itinerary || [],
+              transportation: tourData.transportation || '',
+              duration: tourData.duration || '',
+              region: tourData.region || '',
+              province: tourData.province || '',
+              accommodation: tourData.accommodation || null,
+              rating: Number(tourData.rating || 0),
+              reviewCount: Number(tourData.reviewCount || 0),
+              isActive: tourData.isActive !== false,
+            }));
+
+            if (Array.isArray(tourData.schedules)) {
+              for (const scheduleData of tourData.schedules) {
+                await scheduleRepo.save(scheduleRepo.create({
                   id: scheduleData.id,
-                  tourId: existingTour.id,
+                  tourId: savedTour.id,
                   startDate: scheduleData.startDate,
                   endDate: scheduleData.endDate,
-                  timeSlot: scheduleData.timeSlot,
-                  roundName: scheduleData.roundName,
-                  maxCapacity: scheduleData.maxCapacity,
-                  currentBooked: scheduleData.currentBooked || 0,
-                });
+                  timeSlot: scheduleData.timeSlot || null,
+                  roundName: scheduleData.roundName || null,
+                  maxCapacity: Number(scheduleData.maxCapacity || 0),
+                  currentBooked: Number(scheduleData.currentBooked || 0),
+                }));
               }
             }
           }
-        }
+        });
 
+        const totalTours = await this.tourRepository.count();
         const totalSchedules = await this.scheduleRepository.count();
-        console.log(`✅ Seeded ${totalSchedules} tour schedules from tours-data.json`);
+        console.log(`✅ Seeded ${totalTours} tours and ${totalSchedules} schedules from tours-data.json`);
+      } else {
+        console.warn('⚠️ tours-data.json not found, skip tours seed');
       }
     } catch (error) {
       console.error('❌ Error seeding tours:', error);
