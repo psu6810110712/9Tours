@@ -37,7 +37,9 @@ export default function MyBookingPage() {
     switch (status) {
       case 'pending_payment': return 'รอชำระเงิน'
       case 'awaiting_approval': return 'รอตรวจสอบ'
-      case 'success': return 'สำเร็จ'
+      case 'success':
+      case 'confirmed':
+        return 'สำเร็จ'
       case 'canceled': return 'ยกเลิกแล้ว'
       case 'refund_pending': return 'รอคืนเงิน'
       case 'refund_completed': return 'คืนเงินสำเร็จ'
