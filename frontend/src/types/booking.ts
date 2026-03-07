@@ -1,3 +1,5 @@
+import type { User } from './user'
+
 export interface Payment {
   id: number
   amountPaid: number
@@ -12,6 +14,8 @@ export interface Tour {
   price: number
   tourCode?: string
   childPrice?: number
+  minPeople?: number
+  maxPeople?: number
   images: string[]
   accommodation?: string
 }
@@ -35,6 +39,7 @@ export interface Booking {
   createdAt: string
   payments: Payment[]
   schedule: Schedule | null
+  user?: User
 }
 
 export interface CreateBookingDto {

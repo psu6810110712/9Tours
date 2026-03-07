@@ -62,7 +62,7 @@ export class Booking {
     @OneToMany(() => Payment, (payment) => payment.booking)
     payments: Payment[];
 
-    @CreateDateColumn({ name: 'created_at' })
+    @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
     createdAt: Date;
 }
 

@@ -17,6 +17,8 @@ interface PaymentPageData {
   childPrice: number
   status: string
   image: string
+  isPrivate: boolean
+  createdAt: string
 }
 
 export default function PaymentPage() {
@@ -27,6 +29,7 @@ export default function PaymentPage() {
   // --- State สำหรับ Timer ---
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [isExpired, setIsExpired] = useState(false)
+  const [uploadAnyway, setUploadAnyway] = useState(false)
 
   // --- State สำหรับข้อมูลและการอัปโหลด ---
   const [bookingData, setBookingData] = useState<PaymentPageData | null>(null)
@@ -56,7 +59,9 @@ export default function PaymentPage() {
           adultPrice: data.schedule?.tour?.price || 0,
           childPrice: (data.schedule?.tour as any)?.childPrice || data.schedule?.tour?.price || 0,
           status: data.status,
-          image: typeof data.schedule?.tour?.images?.[0] === 'string' ? data.schedule.tour.images[0] : (data.schedule?.tour?.images?.[0] as any)?.url || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+          image: typeof data.schedule?.tour?.images?.[0] === 'string' ? data.schedule.tour.images[0] : (data.schedule?.tour?.images?.[0] as any)?.url || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
+          isPrivate: !!data.schedule?.tour?.minPeople || location.state?.isPrivate || false,
+          createdAt: data.createdAt || new Date().toISOString()
         })
       } catch (err) {
         console.error("Error fetching booking details:", err)
@@ -72,7 +77,9 @@ export default function PaymentPage() {
           adultPrice: 1500,
           childPrice: 1000,
           status: 'pending_payment',
-          image: 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
+          image: 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
+          isPrivate: false,
+          createdAt: new Date().toISOString()
         })
       } finally {
         setLoading(false)
@@ -81,34 +88,71 @@ export default function PaymentPage() {
     fetchBooking()
   }, [bookingId])
 
-  // 2. ระบบเวลานับถอยหลัง (ใช้ LocalStorage)
+  // 2. ระบบเวลานับถอยหลัง — ใช้ server time เท่านั้น (ไม่ใช้ localStorage เพราะทำให้เวลาเพี้ยน)
   useEffect(() => {
-    if (!bookingId) return
+    if (!bookingData || !bookingId) return
 
-    const storageKey = `payment_expiry_${bookingId}`
-    let expiryTime = localStorage.getItem(storageKey)
+    // ถ้า booking ถูกยกเลิกแล้ว (โดย Cron Job หรือ Admin) แสดง expired ทันที
+    if (bookingData.status === 'canceled') {
+      setTimeLeft(0)
+      setIsExpired(true)
+      return
+    }
 
-    if (!expiryTime) {
-      const newExpiry = (Date.now() + 15 * 60 * 1000).toString()
-      localStorage.setItem(storageKey, newExpiry)
-      expiryTime = newExpiry
+    // ถ้าไม่มี createdAt ให้เริ่มนับ 15 นาทีจากตอนนี้
+    if (!bookingData.createdAt) {
+      const expiryTime = Date.now() + 15 * 60 * 1000
+      const updateTimer = () => {
+        const remaining = Math.max(0, Math.floor((expiryTime - Date.now()) / 1000))
+        setTimeLeft(remaining)
+        if (remaining <= 0) setIsExpired(true)
+      }
+      updateTimer()
+      const interval = setInterval(updateTimer, 1000)
+      return () => clearInterval(interval)
+    }
+
+    // คำนวณเวลาจาก createdAt ของ server
+    const PAYMENT_DURATION_MS = 15 * 60 * 1000
+    const rawDate = bookingData.createdAt
+    const now = Date.now()
+
+    // ลองทั้ง 2 แบบ: ตีความเป็น local time และ UTC
+    const asLocal = new Date(rawDate).getTime()
+    const asUTC = new Date(rawDate.endsWith('Z') ? rawDate : rawDate + 'Z').getTime()
+
+    // เลือกแบบที่ใกล้ now ที่สุด (ไม่เกิน now) = แบบที่ถูกต้อง
+    const diffLocal = now - asLocal
+    const diffUTC = now - asUTC
+    let createdTime: number
+    if (diffLocal >= 0 && (diffUTC < 0 || diffLocal <= diffUTC)) {
+      createdTime = asLocal
+    } else if (diffUTC >= 0) {
+      createdTime = asUTC
+    } else {
+      createdTime = now // fallback: ถ้าไม่สมเหตุทั้งคู่ ให้เริ่มจากตอนนี้
+    }
+
+    const expiryTime = createdTime + PAYMENT_DURATION_MS
+    console.log('[Timer] createdTime:', new Date(createdTime).toISOString(), '| expiryTime:', new Date(expiryTime).toISOString(), '| remaining:', Math.floor((expiryTime - now) / 1000), 'sec')
+
+    // ถ้าหมดเวลาแล้ว แสดง expired ทันที
+    if (expiryTime <= now) {
+      setTimeLeft(0)
+      setIsExpired(true)
+      return
     }
 
     const updateTimer = () => {
-      const now = Date.now()
-      const remaining = Math.max(0, Math.floor((parseInt(expiryTime!) - now) / 1000))
-
+      const remaining = Math.max(0, Math.floor((expiryTime - Date.now()) / 1000))
       setTimeLeft(remaining)
-      if (remaining <= 0) {
-        setIsExpired(true)
-      }
+      if (remaining <= 0) setIsExpired(true)
     }
 
     updateTimer()
     const timerInterval = setInterval(updateTimer, 1000)
-
     return () => clearInterval(timerInterval)
-  }, [bookingId])
+  }, [bookingData, bookingId])
 
   const formatTime = (seconds: number | null) => {
     if (seconds === null) return '--:--'
@@ -157,7 +201,6 @@ export default function PaymentPage() {
 
       setIsSubmitting(false)
       setShowSuccessModal(true)
-      localStorage.removeItem(`payment_expiry_${bookingId}`)
     } catch (err: unknown) {
       setIsSubmitting(false)
       const error = err as { response?: { data?: { message?: string } } }
@@ -240,6 +283,7 @@ export default function PaymentPage() {
               childPrice={bookingData.childPrice}
               image={bookingData.image}
               totalPrice={bookingData.price}
+              isPrivate={bookingData.isPrivate}
             />
           </div>
 
@@ -316,9 +360,9 @@ export default function PaymentPage() {
         <div className="flex flex-col items-center mt-14">
           <button
             onClick={handleConfirmPayment}
-            disabled={isSubmitting || isExpired}
+            disabled={isSubmitting || (isExpired && !uploadAnyway)}
             className={`flex items-center justify-center gap-3 text-white font-bold py-4.5 px-24 rounded-full transition-all text-lg min-w-[340px] shadow-[0_10px_25px_rgba(37,99,235,0.25)] 
-              ${isSubmitting || isExpired
+              ${isSubmitting || (isExpired && !uploadAnyway)
                 ? 'bg-gray-400 cursor-not-allowed shadow-none'
                 : 'bg-primary hover:bg-primary-dark hover:-translate-y-[1.5px] active:translate-y-0'
               }`}
@@ -375,6 +419,49 @@ export default function PaymentPage() {
             >
               การจองของฉัน
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- Timeout Modal --- */}
+      {isExpired && !uploadAnyway && !showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+          <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-md relative z-10 flex flex-col items-center text-center shadow-2xl animate-fade-in-up border border-gray-100">
+
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
+              <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">หมดเวลาชำระเงิน</h2>
+            <p className="text-gray-500 text-[15px] mb-8 leading-relaxed font-medium">
+              เวลาจองที่นั่งของคุณหมดลงแล้ว และที่นั่งได้ถูกคืนกลับเข้าสู่ระบบแล้ว อย่างไรก็ตาม หากคุณทำรายการชำระเงินเรียบร้อยแล้ว กรุณากดปุ่มด้านล่างเพื่ออัปโหลดสลิป
+            </p>
+
+            <div className="flex flex-col gap-3 w-full">
+              <button
+                onClick={() => setUploadAnyway(true)}
+                className="w-full bg-primary text-white font-bold py-3.5 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
+              >
+                ฉันโอนเงินเรียบร้อยแล้ว
+              </button>
+              <button
+                onClick={async () => {
+                  // ยกเลิก booking และคืนที่นั่งก่อน navigate ออก
+                  try {
+                    if (bookingId) {
+                      await bookingService.cancelBooking(bookingId)
+                    }
+                  } catch { /* ถ้ายกเลิกไม่ได้ก็ไม่เป็นไร Cron Job จะจัดการให้ */ }
+                  navigate('/')
+                }}
+                className="w-full bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full hover:bg-gray-200 transition-colors text-lg"
+              >
+                เริ่มการจองใหม่
+              </button>
+            </div>
           </div>
         </div>
       )}
