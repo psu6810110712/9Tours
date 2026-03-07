@@ -36,14 +36,13 @@ interface FilterSidebarProps {
   onRegionChange: (v: string) => void
   onProvinceChange: (v: string) => void
   onTourTypeChange: (v: string) => void
-  onSearchChange: (v: string) => void
   onMonthChange: (v: string) => void
   onClear: () => void
 }
 
 export default function FilterSidebar({
   region, province, tourType, search, month,
-  onRegionChange, onProvinceChange, onTourTypeChange, onSearchChange, onMonthChange, onClear,
+  onRegionChange, onProvinceChange, onTourTypeChange, onMonthChange, onClear,
 }: FilterSidebarProps) {
   const hasFilter = region || province || tourType || search || month
   const provinceOptions = region

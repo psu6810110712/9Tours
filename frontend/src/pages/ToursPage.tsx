@@ -90,7 +90,7 @@ export default function ToursPage() {
         <FilterSidebar
           region={region} province={province} tourType={tourType} search={search} month={month}
           onRegionChange={setRegion} onProvinceChange={setProvince}
-          onTourTypeChange={setTourType} onSearchChange={setSearch} onMonthChange={setMonth}
+          onTourTypeChange={setTourType} onMonthChange={setMonth}
           onClear={() => { setRegion(''); setProvince(''); setTourType(''); setSearch(''); setMonth('') }}
         />
 
