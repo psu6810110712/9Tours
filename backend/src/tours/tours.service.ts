@@ -367,8 +367,9 @@ export class ToursService {
     tourType?: string;
     search?: string;
     admin?: string;
+    month?: string;
   }) {
-    const { region, province, tourType, search, admin } = filters || {};
+    const { region, province, tourType, search, admin, month } = filters || {};
 
     reloadTours(); // อ่านข้อมูลล่าสุดจากไฟล์ทุกครั้ง
 
@@ -393,6 +394,14 @@ export class ToursService {
           t.description.toLowerCase().includes(term) ||
           t.province.includes(search),
       );
+    }
+
+    if (month) {
+      result = result.filter((t) => {
+        if (!t.schedules || t.schedules.length === 0) return false;
+        // month is expected to be "YYYY-MM" format
+        return t.schedules.some((s: any) => s.startDate && s.startDate.startsWith(month));
+      });
     }
 
     return result;

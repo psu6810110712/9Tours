@@ -7,6 +7,7 @@ export interface TourFilters {
   tourType?: string
   search?: string
   admin?: string
+  month?: string
 }
 
 export interface AvailableSeatsResponse {
