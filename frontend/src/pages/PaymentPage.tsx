@@ -28,8 +28,9 @@ export default function PaymentPage() {
   const location = useLocation()
 
   // --- State สำหรับ Timer ---
-  const [timeLeft, setTimeLeft] = useState<number | null>(null)
-  const [isExpired, setIsExpired] = useState(false)
+  const [primaryTimeLeft, setPrimaryTimeLeft] = useState<number | null>(null)
+  const [graceTimeLeft, setGraceTimeLeft] = useState<number | null>(null)
+  const [paymentPhase, setPaymentPhase] = useState<'primary' | 'grace' | 'expired'>('primary')
   const [uploadAnyway, setUploadAnyway] = useState(false)
 
   // --- State สำหรับข้อมูลและการอัปโหลด ---
@@ -89,65 +90,56 @@ export default function PaymentPage() {
     fetchBooking()
   }, [bookingId])
 
-  // 2. ระบบเวลานับถอยหลัง — ใช้ server time เท่านั้น (ไม่ใช้ localStorage เพราะทำให้เวลาเพี้ยน)
+  // 2. Payment page timing: 15-minute primary window, 18-minute hard cutoff
   useEffect(() => {
     if (!bookingData || !bookingId) return
 
-    // ถ้า booking ถูกยกเลิกแล้ว (โดย Cron Job หรือ Admin) แสดง expired ทันที
     if (bookingData.status === 'canceled') {
-      setTimeLeft(0)
-      setIsExpired(true)
+      setPrimaryTimeLeft(0)
+      setGraceTimeLeft(0)
+      setPaymentPhase('expired')
       return
     }
 
-    // ถ้าไม่มี createdAt ให้เริ่มนับ 15 นาทีจากตอนนี้
-    if (!bookingData.createdAt) {
-      const expiryTime = Date.now() + 15 * 60 * 1000
-      const updateTimer = () => {
-        const remaining = Math.max(0, Math.floor((expiryTime - Date.now()) / 1000))
-        setTimeLeft(remaining)
-        if (remaining <= 0) setIsExpired(true)
-      }
-      updateTimer()
-      const interval = setInterval(updateTimer, 1000)
-      return () => clearInterval(interval)
-    }
-
-    // คำนวณเวลาจาก createdAt ของ server
-    const PAYMENT_DURATION_MS = 15 * 60 * 1000
+    const PRIMARY_WINDOW_MS = 15 * 60 * 1000
+    const HARD_CUTOFF_MS = 18 * 60 * 1000
     const rawDate = bookingData.createdAt
-    const now = Date.now()
 
-    // ลองทั้ง 2 แบบ: ตีความเป็น local time และ UTC
-    const asLocal = new Date(rawDate).getTime()
-    const asUTC = new Date(rawDate.endsWith('Z') ? rawDate : rawDate + 'Z').getTime()
+    const resolveCreatedTime = () => {
+      if (!rawDate) return Date.now()
 
-    // เลือกแบบที่ใกล้ now ที่สุด (ไม่เกิน now) = แบบที่ถูกต้อง
-    const diffLocal = now - asLocal
-    const diffUTC = now - asUTC
-    let createdTime: number
-    if (diffLocal >= 0 && (diffUTC < 0 || diffLocal <= diffUTC)) {
-      createdTime = asLocal
-    } else if (diffUTC >= 0) {
-      createdTime = asUTC
-    } else {
-      createdTime = now // fallback: ถ้าไม่สมเหตุทั้งคู่ ให้เริ่มจากตอนนี้
+      const now = Date.now()
+      const asLocal = new Date(rawDate).getTime()
+      const asUTC = new Date(rawDate.endsWith('Z') ? rawDate : rawDate + 'Z').getTime()
+      const diffLocal = now - asLocal
+      const diffUTC = now - asUTC
+
+      if (diffLocal >= 0 && (diffUTC < 0 || diffLocal <= diffUTC)) {
+        return asLocal
+      }
+      if (diffUTC >= 0) {
+        return asUTC
+      }
+      return now
     }
 
-    const expiryTime = createdTime + PAYMENT_DURATION_MS
-    console.log('[Timer] createdTime:', new Date(createdTime).toISOString(), '| expiryTime:', new Date(expiryTime).toISOString(), '| remaining:', Math.floor((expiryTime - now) / 1000), 'sec')
-
-    // ถ้าหมดเวลาแล้ว แสดง expired ทันที
-    if (expiryTime <= now) {
-      setTimeLeft(0)
-      setIsExpired(true)
-      return
-    }
+    const createdTime = resolveCreatedTime()
 
     const updateTimer = () => {
-      const remaining = Math.max(0, Math.floor((expiryTime - Date.now()) / 1000))
-      setTimeLeft(remaining)
-      if (remaining <= 0) setIsExpired(true)
+      const now = Date.now()
+      const primaryRemaining = Math.max(0, Math.floor((createdTime + PRIMARY_WINDOW_MS - now) / 1000))
+      const graceRemaining = Math.max(0, Math.floor((createdTime + HARD_CUTOFF_MS - now) / 1000))
+
+      setPrimaryTimeLeft(primaryRemaining)
+      setGraceTimeLeft(graceRemaining)
+
+      if (graceRemaining <= 0) {
+        setPaymentPhase('expired')
+      } else if (primaryRemaining <= 0) {
+        setPaymentPhase('grace')
+      } else {
+        setPaymentPhase('primary')
+      }
     }
 
     updateTimer()
@@ -155,12 +147,22 @@ export default function PaymentPage() {
     return () => clearInterval(timerInterval)
   }, [bookingData, bookingId])
 
+  useEffect(() => {
+    if (paymentPhase !== 'grace') {
+      setUploadAnyway(false)
+    }
+  }, [paymentPhase])
+
   const formatTime = (seconds: number | null) => {
     if (seconds === null) return '--:--'
     const m = Math.floor(seconds / 60)
     const s = seconds % 60
     return `${m}:${s < 10 ? '0' : ''}${s}`
   }
+
+  const isGracePeriod = paymentPhase === 'grace'
+  const isExpired = paymentPhase === 'expired'
+  const isUploadLocked = isSubmitting || isExpired || (isGracePeriod && !uploadAnyway)
 
   // 3. ฟังก์ชันจัดการไฟล์อัปโหลด (Preview)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -230,13 +232,15 @@ export default function PaymentPage() {
   return (
     <div className="bg-[#F8FAFC] relative">
       {/* แถบแจ้งเตือนเวลา (Full width) */}
-      <div className={`${isExpired ? 'bg-red-500 text-white' : 'bg-red-50 text-red-500'} py-3 text-center text-base font-bold flex items-center justify-center gap-2 shadow-sm transition-colors`}>
+      <div className={`${isExpired ? 'bg-red-500 text-white' : isGracePeriod ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-500'} py-3 text-center text-base font-bold flex items-center justify-center gap-2 shadow-sm transition-colors`}>
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         {isExpired
-          ? 'หมดเวลาชำระเงิน กรุณาทำรายการจองใหม่อีกครั้ง'
-          : `กรุณาชำระเงินภายใน ${formatTime(timeLeft)} นาที`
+          ? 'หมดเวลาส่งสลิปแล้ว กรุณาทำรายการจองใหม่อีกครั้ง'
+          : isGracePeriod
+            ? `เลยเวลา 15 นาทีแรกแล้ว แต่ยังอัปโหลดสลิปได้ภายใน ${formatTime(graceTimeLeft)}`
+            : `กรุณาชำระเงินภายใน ${formatTime(primaryTimeLeft)} นาที`
         }
       </div>
 
@@ -361,9 +365,9 @@ export default function PaymentPage() {
         <div className="flex flex-col items-center mt-14">
           <button
             onClick={handleConfirmPayment}
-            disabled={isSubmitting || (isExpired && !uploadAnyway)}
+            disabled={isUploadLocked}
             className={`flex items-center justify-center gap-3 text-white font-bold py-4.5 px-24 rounded-full transition-all text-lg min-w-[340px] shadow-[0_10px_25px_rgba(37,99,235,0.25)] 
-              ${isSubmitting || (isExpired && !uploadAnyway)
+              ${isUploadLocked
                 ? 'bg-gray-400 cursor-not-allowed shadow-none'
                 : 'bg-primary hover:bg-primary-dark hover:-translate-y-[1.5px] active:translate-y-0'
               }`}
@@ -422,26 +426,32 @@ export default function PaymentPage() {
 
 
       {/* --- Timeout Modal --- */}
-      <Modal isOpen={isExpired && !uploadAnyway && !showSuccessModal} onClose={() => { }} width="max-w-md">
+      <Modal isOpen={((isGracePeriod && !uploadAnyway) || isExpired) && !showSuccessModal} onClose={() => { }} width="max-w-md">
         <div className="flex flex-col items-center text-center">
-          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
-            <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${isGracePeriod ? 'bg-amber-50' : 'bg-red-50'}`}>
+            <svg className={`w-10 h-10 ${isGracePeriod ? 'text-amber-500' : 'text-red-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">หมดเวลาชำระเงิน</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">
+            {isGracePeriod ? 'หมดเวลาชำระเงินช่วงหลักแล้ว' : 'หมดเวลาส่งสลิปแล้ว'}
+          </h2>
           <p className="text-gray-500 text-[15px] mb-8 leading-relaxed font-medium">
-            เวลาจองที่นั่งของคุณหมดลงแล้ว และที่นั่งได้ถูกคืนกลับเข้าสู่ระบบแล้ว อย่างไรก็ตาม หากคุณทำรายการชำระเงินเรียบร้อยแล้ว กรุณากดปุ่มด้านล่างเพื่ออัปโหลดสลิป
+            {isGracePeriod
+              ? `คุณเลยช่วงดำเนินการ 15 นาทีแรกแล้ว แต่ระบบยังเปิดช่วงผ่อนผันให้อัปโหลดสลิปได้อีก ${formatTime(graceTimeLeft)} หากคุณโอนเงินเรียบร้อยแล้ว กรุณากดปุ่มด้านล่างเพื่อแนบสลิป`
+              : 'เลยช่วงผ่อนผัน 18 นาทีแล้ว ระบบไม่สามารถรับสลิปสำหรับรายการนี้ได้ กรุณาทำรายการจองใหม่อีกครั้ง'}
           </p>
 
           <div className="flex flex-col gap-3 w-full">
-            <button
-              onClick={() => setUploadAnyway(true)}
-              className="w-full bg-primary text-white font-bold py-3.5 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
-            >
-              ฉันโอนเงินเรียบร้อยแล้ว
-            </button>
+            {isGracePeriod && (
+              <button
+                onClick={() => setUploadAnyway(true)}
+                className="w-full bg-primary text-white font-bold py-3.5 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
+              >
+                ฉันโอนเงินเรียบร้อยแล้ว
+              </button>
+            )}
             <button
               onClick={async () => {
                 // ยกเลิก booking และคืนที่นั่งก่อน navigate ออก
