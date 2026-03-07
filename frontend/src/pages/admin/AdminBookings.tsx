@@ -17,6 +17,7 @@ export default function AdminBookings() {
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState<FilterValue>('awaiting_approval')
     const [search, setSearch] = useState('')
+    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null)
 
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -83,6 +84,40 @@ export default function AdminBookings() {
         return true
     })
 
+    // Sorting Logic
+    const sortedBookings = [...filtered].sort((a, b) => {
+        if (!sortConfig) return 0;
+        const { key, direction } = sortConfig;
+
+        let aValue: any = a[key as keyof Booking];
+        let bValue: any = b[key as keyof Booking];
+
+        if (key === 'user.name') {
+            aValue = a.user?.name || '';
+            bValue = b.user?.name || '';
+        } else if (key === 'tourCode') {
+            aValue = a.schedule?.tour?.tourCode || '';
+            bValue = b.schedule?.tour?.tourCode || '';
+        }
+
+        if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const handleSort = (key: string) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const getSortIcon = (key: string) => {
+        if (!sortConfig || sortConfig.key !== key) return '↕️';
+        return sortConfig.direction === 'asc' ? '⬆️' : '⬇️';
+    };
+
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'pending_payment':
@@ -144,18 +179,18 @@ export default function AdminBookings() {
                         <table className="w-full text-sm">
                             <thead className="bg-yellow-50 text-gray-700 border-b border-gray-200">
                                 <tr>
-                                    <th className="text-left px-5 py-3 font-semibold">รหัสจอง</th>
-                                    <th className="text-left px-5 py-3 font-semibold">วันที่จอง</th>
-                                    <th className="text-left px-5 py-3 font-semibold">ลูกค้า</th>
-                                    <th className="text-left px-5 py-3 font-semibold">ทัวร์</th>
-                                    <th className="text-left px-5 py-3 font-semibold">ยอดชำระ</th>
+                                    <th className="text-left px-5 py-3 font-semibold cursor-pointer hover:bg-yellow-100 transition-colors" onClick={() => handleSort('id')}>รหัสจอง {getSortIcon('id')}</th>
+                                    <th className="text-left px-5 py-3 font-semibold cursor-pointer hover:bg-yellow-100 transition-colors" onClick={() => handleSort('createdAt')}>วันที่จอง {getSortIcon('createdAt')}</th>
+                                    <th className="text-left px-5 py-3 font-semibold cursor-pointer hover:bg-yellow-100 transition-colors" onClick={() => handleSort('user.name')}>ลูกค้า {getSortIcon('user.name')}</th>
+                                    <th className="text-left px-5 py-3 font-semibold cursor-pointer hover:bg-yellow-100 transition-colors" onClick={() => handleSort('tourCode')}>ทัวร์ {getSortIcon('tourCode')}</th>
+                                    <th className="text-left px-5 py-3 font-semibold cursor-pointer hover:bg-yellow-100 transition-colors" onClick={() => handleSort('totalPrice')}>ยอดชำระ {getSortIcon('totalPrice')}</th>
                                     <th className="text-left px-5 py-3 font-semibold">สถานะ</th>
                                     <th className="px-5 py-3 font-semibold text-right">ดำเนินการ</th>
                                 </tr>
                             </thead>
 
                             <tbody>
-                                {filtered.map((booking) => {
+                                {sortedBookings.map((booking) => {
                                     const hasSlip = booking.payments && booking.payments.length > 0 && booking.payments[0].slipUrl
                                     return (
                                         <tr
@@ -183,7 +218,7 @@ export default function AdminBookings() {
                                                 {hasSlip ? (
                                                     <button
                                                         onClick={() => handleOpenModal(booking)}
-                                                        className="bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                                                        className="bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 px-4 py-2 rounded-lg text-sm font-bold transition-transform hover:scale-105 active:scale-95 shadow-sm"
                                                     >
                                                         ดูสลิปโอนเงิน
                                                     </button>
@@ -219,7 +254,7 @@ export default function AdminBookings() {
                                     <p className="text-gray-500">วันเวลาที่อัปโหลดสลิป:</p>
                                     <p className="font-medium text-gray-800">
                                         {selectedBooking.payments && selectedBooking.payments[0]
-                                            ? new Date(selectedBooking.payments[0].uploadedAt).toLocaleString('th-TH')
+                                            ? new Date(selectedBooking.payments[0].uploadedAt.endsWith('Z') ? selectedBooking.payments[0].uploadedAt : selectedBooking.payments[0].uploadedAt + 'Z').toLocaleString('th-TH')
                                             : '-'}
                                     </p>
                                 </div>
@@ -235,6 +270,13 @@ export default function AdminBookings() {
                                 </div>
                             ) : (
                                 <p className="text-center text-gray-500 py-10">ไม่พบรูปภาพสลิป</p>
+                            )}
+
+                            {selectedBooking.specialRequest && (
+                                <div className="mt-4 p-4 bg-orange-50 border border-orange-100 rounded-xl">
+                                    <p className="text-sm font-bold text-orange-800 mb-1">คำขอเพิ่มเติมจากลูกค้า:</p>
+                                    <p className="text-gray-700 text-sm whitespace-pre-wrap">{selectedBooking.specialRequest}</p>
+                                </div>
                             )}
                         </div>
 

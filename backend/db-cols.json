@@ -1,0 +1,12 @@
+[
+  "id",
+  "schedule_id",
+  "pax_count",
+  "total_price",
+  "status",
+  "admin_notes",
+  "user_id",
+  "adults",
+  "children",
+  "created_at"
+]
