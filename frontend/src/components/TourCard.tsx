@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { Tour } from '../types/tour'
+import { trackEvent } from '../services/trackingService'
 
 interface TourCardProps {
   tour: Tour
@@ -13,7 +14,20 @@ export default function TourCard({ tour }: TourCardProps) {
   const coverImage = tour.images[0] || 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=400'
 
   return (
-    <Link to={`/tours/${tour.id}`} className="group block bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+    <Link
+      to={`/tours/${tour.id}`}
+      className="group block bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+      onClick={() => {
+        trackEvent({
+          eventType: 'cta_click',
+          pagePath: window.location.pathname + window.location.search,
+          tourId: tour.id,
+          elementId: 'tour_card_click',
+          // ใส่บริบทที่จำเป็นต่อ recommender โดยไม่เก็บข้อมูลส่วนบุคคล
+          metadata: { province: tour.province, tourType: tour.tourType },
+        })
+      }}
+    >
       {/* รูปภาพ */}
       <div className="relative h-44 overflow-hidden">
         <img

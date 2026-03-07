@@ -11,10 +11,11 @@ export class AuthController {
 
 	// Helper: ตั้ง refresh_token เป็น HttpOnly cookie
 	private setRefreshCookie(res: Response, token: string, remember: boolean) {
+		const isProduction = process.env.NODE_ENV === 'production';
 		res.cookie('refresh_token', token, {
 			httpOnly: true,        // JS อ่านไม่ได้ → ป้องกัน XSS
-			secure: false,         // dev ใช้ HTTP, production เปลี่ยนเป็น true
-			sameSite: 'lax',
+			secure: isProduction,  // production ต้องใช้ HTTPS
+			sameSite: isProduction ? 'none' : 'lax',
 			path: '/',            // ส่ง cookie ไปยังทุก request
 			...(remember && { maxAge: 30 * 24 * 60 * 60 * 1000 }), // 30 วัน หรือ session
 		});

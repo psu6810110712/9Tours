@@ -333,8 +333,8 @@ export class BookingsService {
       throw new UnauthorizedException('คุณไม่มีสิทธิ์ยกเลิก Booking นี้');
     }
 
-    // อนุญาตยกเลิกได้ทั้ง PENDING_PAYMENT, AWAITING_APPROVAL, SUCCESS
-    const cancellableStatuses = [BookingStatus.PENDING_PAYMENT, BookingStatus.AWAITING_APPROVAL, BookingStatus.SUCCESS];
+    // อนุญาตยกเลิกได้ทั้ง PENDING_PAYMENT, AWAITING_APPROVAL, CONFIRMED, SUCCESS
+    const cancellableStatuses = [BookingStatus.PENDING_PAYMENT, BookingStatus.AWAITING_APPROVAL, BookingStatus.CONFIRMED, BookingStatus.SUCCESS];
     if (!cancellableStatuses.includes(booking.status)) {
       throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงิน รอตรวจสอบ หรือสำเร็จเท่านั้น');
     }

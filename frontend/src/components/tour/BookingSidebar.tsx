@@ -4,6 +4,7 @@ import type { Tour, TourSchedule } from '../../types/tour'
 import { useAuth } from '../../context/AuthContext'
 import { tourService } from '../../services/tourService'
 import { bookingService } from '../../services/bookingService'
+import { trackEvent } from '../../services/trackingService'
 import LoginModal from '../LoginModal'
 
 interface BookingSidebarProps {
@@ -132,6 +133,20 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   else if (isExceedCapacity) buttonText = 'ที่นั่งไม่พอ'
 
   const handleBookingClick = () => {
+    trackEvent({
+      eventType: 'cta_click',
+      pagePath: window.location.pathname + window.location.search,
+      tourId: tour.id,
+      elementId: 'booking_sidebar_primary_button',
+      // เก็บเฉพาะพฤติกรรมที่จำเป็น เพื่อให้ทีมปรับปรุง conversion ได้ต่อเนื่อง
+      metadata: {
+        selectedScheduleId: selectedSchedule?.id ?? null,
+        adults,
+        children,
+        hasPendingBooking: hasAnyPendingBooking,
+      },
+    })
+
     if (!user) {
       setShowLoginModal(true)
       return
