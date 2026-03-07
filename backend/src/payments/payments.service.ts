@@ -44,6 +44,12 @@ export class PaymentsService {
       );
     }
 
+    const createdAtMs = new Date(booking.createdAt).getTime();
+    const paymentWindowMs = 15 * 60 * 1000;
+    if (Number.isFinite(createdAtMs) && Date.now() - createdAtMs > paymentWindowMs) {
+      throw new BadRequestException('Payment session expired. Please create a new booking.');
+    }
+
     if (booking.status !== BookingStatus.PENDING_PAYMENT) {
       throw new BadRequestException(
         `Booking นี้ไม่ได้อยู่ในสถานะรอชำระเงิน (สถานะปัจจุบัน: ${booking.status})`,
