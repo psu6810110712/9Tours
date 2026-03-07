@@ -186,7 +186,7 @@ export default function MyBookingPage() {
               <p className="font-bold">กำลังโหลด...</p>
             </div>
           ) : filteredBookings.length > 0 ? filteredBookings.map((booking, index) => (
-            <div key={index} className={`bg-white p-5 rounded-2xl shadow-sm border flex flex-col md:flex-row gap-5 hover:shadow-md transition-all ${booking.status === 'ยกเลิกแล้ว' ? 'border-red-100 opacity-60' : 'border-gray-100'}`}>
+            <div data-testid="my-booking-card" key={index} className={`bg-white p-5 rounded-2xl shadow-sm border flex flex-col md:flex-row gap-5 hover:shadow-md transition-all ${booking.status === 'ยกเลิกแล้ว' ? 'border-red-100 opacity-60' : 'border-gray-100'}`}>
 
               {/* Tour Image */}
               <div className="w-full md:w-44 h-32 shrink-0">

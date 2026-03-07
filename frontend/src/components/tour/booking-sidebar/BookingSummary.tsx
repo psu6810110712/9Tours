@@ -63,6 +63,7 @@ export default function BookingSummary({
             </div>
 
             <button
+                data-testid="start-booking"
                 onClick={onBookingClick}
                 disabled={isBookingDisabled}
                 className={`w-full font-semibold py-3 rounded-xl transition-all text-base 
@@ -76,3 +77,4 @@ export default function BookingSummary({
         </>
     );
 }
+

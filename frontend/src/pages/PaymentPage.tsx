@@ -332,6 +332,7 @@ export default function PaymentPage() {
               )}
 
               <input
+                data-testid="payment-slip-input"
                 type="file"
                 ref={fileInputRef}
                 className="hidden"
@@ -364,6 +365,7 @@ export default function PaymentPage() {
         {/* ปุ่มยืนยัน */}
         <div className="flex flex-col items-center mt-14">
           <button
+            data-testid="confirm-payment"
             onClick={handleConfirmPayment}
             disabled={isUploadLocked}
             className={`flex items-center justify-center gap-3 text-white font-bold py-4.5 px-24 rounded-full transition-all text-lg min-w-[340px] shadow-[0_10px_25px_rgba(37,99,235,0.25)] 
@@ -416,6 +418,7 @@ export default function PaymentPage() {
           </p>
 
           <button
+            data-testid="payment-success-cta"
             onClick={() => navigate('/my-bookings')}
             className="w-full bg-primary text-white font-bold py-4 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
           >
@@ -474,3 +477,4 @@ export default function PaymentPage() {
     </div>
   )
 }
+

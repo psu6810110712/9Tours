@@ -296,6 +296,7 @@ export default function BookingInfoPage() {
 
             <div className="flex justify-center mt-6">
               <button
+                data-testid="checkout-submit"
                 type="submit"
                 disabled={isSubmitting}
                 className={`w-full text-white font-bold py-4 rounded-2xl transition-all text-lg shadow-[0_8px_20px_rgba(37,99,235,0.25)] ${isSubmitting ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-primary hover:bg-primary-dark hover:-translate-y-1 active:translate-y-0'}`}
