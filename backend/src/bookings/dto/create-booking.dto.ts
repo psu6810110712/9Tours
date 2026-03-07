@@ -1,4 +1,4 @@
-import { IsNumber, Min } from 'class-validator';
+import { IsNumber, Min, IsString, IsOptional } from 'class-validator';
 
 export class CreateBookingDto {
   @IsNumber()
@@ -15,4 +15,8 @@ export class CreateBookingDto {
   @IsNumber()
   @Min(0)
   children?: number;
+
+  @IsString()
+  @IsOptional()
+  specialRequest?: string;
 }
