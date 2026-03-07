@@ -373,8 +373,11 @@ export class ToursService {
     return result;
   }
 
-  findOne(id: number) {
-    return DEMO_TOURS.find((t) => t.id === id) || null;
+  findOne(id: number, includeInactive: boolean = false) {
+    const tour = DEMO_TOURS.find((t) => t.id === id);
+    if (!tour) return null;
+    if (!includeInactive && !tour.isActive) return null;
+    return tour;
   }
 
   getAvailableSeats(tourId: number, scheduleId: number) {
