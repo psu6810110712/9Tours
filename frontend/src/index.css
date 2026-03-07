@@ -28,6 +28,7 @@
     font-family: 'IBM Plex Sans Thai', sans-serif;
     color: var(--color-text);
     background-color: var(--color-bg);
+    overflow-y: scroll;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-weight: medium;
