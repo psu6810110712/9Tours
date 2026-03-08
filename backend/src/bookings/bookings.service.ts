@@ -232,30 +232,31 @@ export class BookingsService {
     const previousStatus = booking.status;
     const newStatus = updateBookingStatusDto.status;
 
-    // ✅ ลดจำนวนที่นั่งลงในเมื่ออัปเดตเป็น AWAITING_APPROVAL
-    if (newStatus === BookingStatus.AWAITING_APPROVAL && previousStatus !== BookingStatus.AWAITING_APPROVAL) {
+    const activeStatuses = [
+      BookingStatus.PENDING_PAYMENT,
+      BookingStatus.AWAITING_APPROVAL,
+      BookingStatus.CONFIRMED,
+      BookingStatus.SUCCESS,
+    ];
+
+    const wasActive = activeStatuses.includes(previousStatus);
+    const isNowActive = activeStatuses.includes(newStatus);
+
+    if (wasActive && !isNowActive) {
+      // Transitioning to CANCELED or REFUND (Release seats)
+      const found = this.findScheduleInData(booking.scheduleId);
+      if (found) {
+        const isPrivate = !!found.tour.minPeople;
+        const seatsToRelease = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
+        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+      }
+    } else if (!wasActive && isNowActive) {
+      // Transitioning from CANCELED to Active (Hold seats again)
       const found = this.findScheduleInData(booking.scheduleId);
       if (found) {
         const isPrivate = !!found.tour.minPeople;
         const seatsToHold = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
         this.toursService.updateScheduleBookedCount(booking.scheduleId, seatsToHold);
-      }
-    } else if (previousStatus === BookingStatus.AWAITING_APPROVAL &&
-      (newStatus === BookingStatus.CANCELED || newStatus === BookingStatus.PENDING_PAYMENT)) {
-      const found = this.findScheduleInData(booking.scheduleId);
-      if (found) {
-        const isPrivate = !!found.tour.minPeople;
-        const seatsToRelease = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
-      }
-    }
-
-    if (newStatus === BookingStatus.CANCELED && previousStatus !== BookingStatus.CANCELED) {
-      const found = this.findScheduleInData(booking.scheduleId);
-      if (found) {
-        const isPrivate = !!found.tour.minPeople;
-        const seatsToRelease = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
       }
     }
 
