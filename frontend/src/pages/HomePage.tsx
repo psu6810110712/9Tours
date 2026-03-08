@@ -4,6 +4,7 @@ import TourCard from '../components/TourCard'
 import { tourService } from '../services/tourService'
 import type { Tour } from '../types/tour'
 import SearchBar from '../components/common/SearchBar'
+import { useAuth } from '../context/AuthContext'
 
 // multi-select category tags — รวมเป็น filter ตอนกดค้นหา
 const CATEGORIES = ['สายธรรมชาติ', 'สายคาเฟ่', 'สายกิจกรรม', 'สายมู', 'สายชิล']
@@ -19,8 +20,11 @@ const PLACES = [
 type Place = typeof PLACES[0]
 
 export default function HomePage() {
+  const { user } = useAuth()
   const [tours, setTours] = useState<Tour[]>([])
   const [toursLoading, setToursLoading] = useState(true)
+  const [recommendedTours, setRecommendedTours] = useState<Tour[]>([])
+  const [recommendationLoading, setRecommendationLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [tourType, setTourType] = useState<'' | 'one_day' | 'package'>('')
   const [guests, setGuests] = useState(2)
@@ -38,6 +42,23 @@ export default function HomePage() {
       .catch(console.error)
       .finally(() => setToursLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (!user) {
+      setRecommendedTours([])
+      setRecommendationLoading(false)
+      return
+    }
+
+    setRecommendationLoading(true)
+    tourService.getRecommendations(8)
+      .then((items) => setRecommendedTours(items))
+      .catch(() => {
+        // fallback ให้หน้าแรกไม่ว่าง กรณี endpoint มีปัญหา
+        setRecommendedTours(tours.slice(0, 8))
+      })
+      .finally(() => setRecommendationLoading(false))
+  }, [user, tours])
 
   const toggleCategory = (cat: string) => {
     setSelectedCats((prev) => {
@@ -186,6 +207,32 @@ export default function HomePage() {
             </button>
           </div>
         </section>
+
+        {/* --- ทัวร์แนะนำส่วนบุคคล (เฉพาะผู้ใช้ที่ล็อกอิน) --- */}
+        {user && (
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-800">ทริปที่คุณอาจชอบ</h2>
+              <Link to="/tours" className="text-sm text-gray-400 hover:text-[var(--color-primary)] transition-colors">
+                ดูทั้งหมด →
+              </Link>
+            </div>
+
+            {recommendationLoading ? (
+              <div className="text-center py-8 text-gray-400">กำลังจัดอันดับทัวร์ที่เหมาะกับคุณ...</div>
+            ) : recommendedTours.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">ยังไม่มีข้อมูลเพียงพอสำหรับคำแนะนำส่วนตัว</div>
+            ) : (
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+                {recommendedTours.map((tour) => (
+                  <div key={tour.id} className="flex-shrink-0 w-64">
+                    <TourCard tour={tour} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* --- ทัวร์ตาม province ที่เลือก / ทั้งหมด --- */}
         <section>

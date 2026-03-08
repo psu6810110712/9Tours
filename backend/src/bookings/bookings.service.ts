@@ -68,7 +68,7 @@ export class BookingsService {
   }
 
   async create(userId: number, createBookingDto: CreateBookingDto) {
-    const { scheduleId, adults = 1, children = 0 } = createBookingDto;
+    const { scheduleId, adults = 1, children = 0, specialRequest } = createBookingDto;
 
     const paxCount = adults + children;
 
@@ -136,6 +136,7 @@ export class BookingsService {
       adults,
       children,
       totalPrice,
+      specialRequest,
       status: BookingStatus.PENDING_PAYMENT,
     });
 
@@ -231,6 +232,24 @@ export class BookingsService {
     const previousStatus = booking.status;
     const newStatus = updateBookingStatusDto.status;
 
+    // ✅ ลดจำนวนที่นั่งลงในเมื่ออัปเดตเป็น AWAITING_APPROVAL
+    if (newStatus === BookingStatus.AWAITING_APPROVAL && previousStatus !== BookingStatus.AWAITING_APPROVAL) {
+      const found = this.findScheduleInData(booking.scheduleId);
+      if (found) {
+        const isPrivate = !!found.tour.minPeople;
+        const seatsToHold = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
+        this.toursService.updateScheduleBookedCount(booking.scheduleId, seatsToHold);
+      }
+    } else if (previousStatus === BookingStatus.AWAITING_APPROVAL &&
+      (newStatus === BookingStatus.CANCELED || newStatus === BookingStatus.PENDING_PAYMENT)) {
+      const found = this.findScheduleInData(booking.scheduleId);
+      if (found) {
+        const isPrivate = !!found.tour.minPeople;
+        const seatsToRelease = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
+        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+      }
+    }
+
     if (newStatus === BookingStatus.CANCELED && previousStatus !== BookingStatus.CANCELED) {
       const found = this.findScheduleInData(booking.scheduleId);
       if (found) {
@@ -314,8 +333,8 @@ export class BookingsService {
       throw new UnauthorizedException('คุณไม่มีสิทธิ์ยกเลิก Booking นี้');
     }
 
-    // อนุญาตยกเลิกได้ทั้ง PENDING_PAYMENT, AWAITING_APPROVAL, SUCCESS
-    const cancellableStatuses = [BookingStatus.PENDING_PAYMENT, BookingStatus.AWAITING_APPROVAL, BookingStatus.SUCCESS];
+    // อนุญาตยกเลิกได้ทั้ง PENDING_PAYMENT, AWAITING_APPROVAL, CONFIRMED, SUCCESS
+    const cancellableStatuses = [BookingStatus.PENDING_PAYMENT, BookingStatus.AWAITING_APPROVAL, BookingStatus.CONFIRMED, BookingStatus.SUCCESS];
     if (!cancellableStatuses.includes(booking.status)) {
       throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงิน รอตรวจสอบ หรือสำเร็จเท่านั้น');
     }

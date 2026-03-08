@@ -7,6 +7,7 @@ export interface TourFilters {
   tourType?: string
   search?: string
   admin?: string
+  month?: string
 }
 
 export interface AvailableSeatsResponse {
@@ -21,6 +22,9 @@ export interface AvailableSeatsResponse {
 export const tourService = {
   getAll: (filters?: TourFilters) =>
     api.get<Tour[]>('/tours', { params: filters }).then((r) => r.data),
+
+  getRecommendations: (limit = 8) =>
+    api.get<Tour[]>('/tours/recommendations', { params: { limit } }).then((r) => r.data),
 
   getOne: (id: number) =>
     api.get<Tour>(`/tours/${id}`).then((r) => r.data),

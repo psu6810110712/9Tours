@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, BadRequestException, NotFoundException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, BadRequestException, NotFoundException, UseGuards, Req } from '@nestjs/common';
 import { ToursService } from './tours.service';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
@@ -46,6 +46,18 @@ export class ToursController {
   @Get()
   findAll(@Query() query: any) {
     return this.toursService.findAll(query);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('recommendations')
+  getRecommendations(
+    @Req() req: { user?: { id?: string } },
+    @Query('limit') limit?: string,
+  ) {
+    const userId = req.user?.id;
+    const parsedLimit = Number(limit);
+    const safeLimit = Number.isFinite(parsedLimit) ? parsedLimit : 8;
+    return this.toursService.getRecommendationsForUser(userId || '', safeLimit);
   }
 
   @Get(':id')
