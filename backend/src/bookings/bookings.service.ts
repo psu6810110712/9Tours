@@ -68,7 +68,7 @@ export class BookingsService {
   }
 
   async create(userId: number, createBookingDto: CreateBookingDto) {
-    const { scheduleId, adults = 1, children = 0 } = createBookingDto;
+    const { scheduleId, adults = 1, children = 0, specialRequest } = createBookingDto;
 
     const paxCount = adults + children;
 
@@ -136,6 +136,7 @@ export class BookingsService {
       adults,
       children,
       totalPrice,
+      specialRequest,
       status: BookingStatus.PENDING_PAYMENT,
     });
 

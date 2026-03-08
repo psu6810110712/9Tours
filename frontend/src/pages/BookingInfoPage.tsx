@@ -128,7 +128,8 @@ export default function BookingInfoPage() {
         scheduleId: Number(scheduleId),
         paxCount: adults + children,
         adults: adults,
-        children: children
+        children: children,
+        specialRequest: formData.specialRequest || undefined,
       }
       const response = await bookingService.createBooking(payload);
       // แนบข้อมูลทัวร์ติดตัวไปหน้า Payment ด้วย เพื่อป้องกัน Backend ไม่ส่งกลับมา

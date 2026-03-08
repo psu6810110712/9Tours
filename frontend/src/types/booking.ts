@@ -40,6 +40,7 @@ export interface Booking {
   payments: Payment[]
   schedule: Schedule | null
   user?: User
+  specialRequest?: string
 }
 
 export interface CreateBookingDto {
@@ -47,4 +48,5 @@ export interface CreateBookingDto {
   paxCount: number
   adults?: number
   children?: number
+  specialRequest?: string
 }
