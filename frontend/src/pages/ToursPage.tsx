@@ -22,6 +22,7 @@ export default function ToursPage() {
   const [province, setProvince] = useState(searchParams.get('province') || '')
   const [tourType, setTourType] = useState(searchParams.get('tourType') || '')
   const [search, setSearch] = useState(searchParams.get('search') || '')
+  const [month, setMonth] = useState(searchParams.get('month') || '')
 
   useEffect(() => {
     setLoading(true)
@@ -31,6 +32,7 @@ export default function ToursPage() {
         province: province || undefined,
         tourType: tourType || undefined,
         search: search || undefined,
+        month: month || undefined,
       })
       .then(setTours)
       .catch((err) => {
@@ -38,7 +40,7 @@ export default function ToursPage() {
         setTours([])
       })
       .finally(() => setLoading(false))
-  }, [region, province, tourType, search])
+  }, [region, province, tourType, search, month])
 
   // sync filter กับ URL
   useEffect(() => {
@@ -47,8 +49,9 @@ export default function ToursPage() {
     if (province) params.province = province
     if (tourType) params.tourType = tourType
     if (search) params.search = search
+    if (month) params.month = month
     setSearchParams(params, { replace: true })
-  }, [region, province, tourType, search])
+  }, [region, province, tourType, search, month])
 
   const sortedTours = [...tours].sort((a, b) => {
     if (sortBy === 'price_asc') return Number(a.price) - Number(b.price)
@@ -85,10 +88,10 @@ export default function ToursPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
         <FilterSidebar
-          region={region} province={province} tourType={tourType} search={search}
+          region={region} province={province} tourType={tourType} search={search} month={month}
           onRegionChange={setRegion} onProvinceChange={setProvince}
-          onTourTypeChange={setTourType} onSearchChange={setSearch}
-          onClear={() => { setRegion(''); setProvince(''); setTourType(''); setSearch('') }}
+          onTourTypeChange={setTourType} onMonthChange={setMonth}
+          onClear={() => { setRegion(''); setProvince(''); setTourType(''); setSearch(''); setMonth('') }}
         />
 
         <main className="flex-1 min-w-0">
