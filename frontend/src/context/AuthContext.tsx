@@ -1,7 +1,9 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { User } from '../types/user'
 import { authService } from '../services/authService'
+import { bookingService } from '../services/bookingService'
 import { setAccessToken } from '../services/api'
+import { toast } from 'react-hot-toast'
 
 interface AuthContextType {
   user: User | null
@@ -20,14 +22,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  // ตรวจสอบว่ามี booking ค้างชำระเงินหรือไม่ แล้วแจ้งลูกค้า
+  const checkPendingBookings = async () => {
+    try {
+      const bookings = await bookingService.getMyBookings()
+      const pending = bookings.filter(b => b.status === 'pending_payment')
+      if (pending.length > 0) {
+        toast(`คุณมีรายการจองที่ยังไม่ได้ชำระเงิน ${pending.length} รายการ กรุณาดำเนินการชำระเงินให้เสร็จสิ้น`, {
+          duration: 6000,
+          icon: '⚠️',
+        })
+      }
+    } catch { /* ignore */ }
+  }
+
   // ✅ เปิดแอปครั้งแรก → เรียก /auth/refresh เพื่อ restore session
   // cookie (refresh_token) จะถูกส่งไปอัตโนมัติ
   useEffect(() => {
     authService.refresh()
       .then((data) => {
         setToken(data.access_token)
-        setAccessToken(data.access_token) // sync กับ api.ts interceptor
+        setAccessToken(data.access_token)
         setUser(data.user)
+        // ตรวจสอบ booking ค้างหลัง restore session สำเร็จ
+        setTimeout(() => checkPendingBookings(), 500)
       })
       .catch(() => {
         // ✅ ไม่มี cookie = ยังไม่ได้ login → ไม่ต้องทำอะไร
@@ -41,6 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(data.access_token)
     setAccessToken(data.access_token)
     setUser(data.user)
+    // ตรวจสอบ booking ค้างหลัง login สำเร็จ
+    setTimeout(() => checkPendingBookings(), 500)
     return data.user
   }
 

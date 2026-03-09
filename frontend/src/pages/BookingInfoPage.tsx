@@ -128,7 +128,8 @@ export default function BookingInfoPage() {
         scheduleId: Number(scheduleId),
         paxCount: adults + children,
         adults: adults,
-        children: children
+        children: children,
+        specialRequest: formData.specialRequest || undefined,
       }
       const response = await bookingService.createBooking(payload);
       // แนบข้อมูลทัวร์ติดตัวไปหน้า Payment ด้วย เพื่อป้องกัน Backend ไม่ส่งกลับมา
@@ -138,7 +139,8 @@ export default function BookingInfoPage() {
           tourName: tour?.name || 'Loading...',
           image: tourImage,
           adults,
-          children
+          children,
+          isPrivate: !!tour?.minPeople
         }
       })
     } catch (err: unknown) {
@@ -289,6 +291,7 @@ export default function BookingInfoPage() {
               image={tourImage}
               accommodation={tour?.accommodation || undefined}
               totalPrice={totalPrice}
+              isPrivate={!!tour?.minPeople}
             />
 
             <div className="flex justify-center mt-6">

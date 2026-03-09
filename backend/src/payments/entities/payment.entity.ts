@@ -29,6 +29,6 @@ export class Payment {
     @Column({ name: 'payment_method', nullable: true })
     paymentMethod: string;
 
-    @CreateDateColumn({ name: 'uploaded_at' })
+    @CreateDateColumn({ type: 'timestamptz', name: 'uploaded_at' })
     uploadedAt: Date;
 }

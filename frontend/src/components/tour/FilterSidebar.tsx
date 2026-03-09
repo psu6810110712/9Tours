@@ -8,23 +8,43 @@ const PROVINCES_BY_REGION: Record<string, string[]> = {
   'ภาคตะวันออกเฉียงเหนือ': ['ขอนแก่น', 'นครราชสีมา', 'อุดรธานี'],
 }
 
+const getMonthOptions = () => {
+  const options = []
+  const today = new Date()
+  let year = today.getFullYear()
+  let m = today.getMonth()
+
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(year, m + i, 1)
+    const yyyy = d.getFullYear()
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const thMonth = d.toLocaleDateString('th-TH', { month: 'long' })
+    const thYear = yyyy + 543
+    options.push({ value: `${yyyy}-${mm}`, label: `${thMonth} ${thYear}` })
+  }
+  return options
+}
+
+const MONTH_OPTIONS = getMonthOptions()
+
 interface FilterSidebarProps {
   region: string
   province: string
   tourType: string
   search: string
+  month: string
   onRegionChange: (v: string) => void
   onProvinceChange: (v: string) => void
   onTourTypeChange: (v: string) => void
-  onSearchChange: (v: string) => void
+  onMonthChange: (v: string) => void
   onClear: () => void
 }
 
 export default function FilterSidebar({
-  region, province, tourType, search,
-  onRegionChange, onProvinceChange, onTourTypeChange, onClear,
+  region, province, tourType, search, month,
+  onRegionChange, onProvinceChange, onTourTypeChange, onMonthChange, onClear,
 }: FilterSidebarProps) {
-  const hasFilter = region || province || tourType || search
+  const hasFilter = region || province || tourType || search || month
   const provinceOptions = region
     ? (PROVINCES_BY_REGION[region] ?? [])
     : Object.values(PROVINCES_BY_REGION).flat()
@@ -62,6 +82,19 @@ export default function FilterSidebar({
               </button>
             ))}
           </div>
+        </div>
+
+        {/* เดือนเดินทาง */}
+        <div className="mb-4">
+          <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">เดือนที่เดินทาง</label>
+          <select
+            value={month}
+            onChange={(e) => onMonthChange(e.target.value)}
+            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none"
+          >
+            <option value="">ทุกเดือน</option>
+            {MONTH_OPTIONS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+          </select>
         </div>
 
         {/* ภาค */}

@@ -88,6 +88,10 @@ DB_USERNAME=init
 DB_PASSWORD=your_password
 DB_DATABASE=9tours_db
 PORT=3000
+JWT_SECRET=replace-with-strong-secret
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+TRACKING_ENABLED=true
+TRACKING_HASH_SALT=replace-with-random-salt
 ```
 
 ### 3. Start Database
@@ -107,6 +111,20 @@ npm run start:dev
 cd frontend
 npm install
 npm run dev
+```
+
+### 6. Tracking Consent (PDPA-ready)
+
+ระบบเก็บพฤติกรรมผู้ใช้ถูกออกแบบให้ **opt-in** ตาม PDPA:
+
+- จะบันทึก event เฉพาะเมื่อผู้ใช้ให้ consent เท่านั้น
+- ไม่มีการเก็บ raw IP (เก็บแบบ hash ฝั่ง backend)
+- มีการตัดข้อมูล metadata ที่เข้าข่ายข้อมูลส่วนบุคคลออกโดยอัตโนมัติ
+
+ตัวอย่างเปิด consent ระหว่างทดสอบใน browser console:
+
+```js
+localStorage.setItem('pdpa_analytics_consent', 'granted')
 ```
 
 ---

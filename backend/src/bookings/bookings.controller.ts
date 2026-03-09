@@ -43,8 +43,9 @@ export class BookingsController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.bookingsService.findOne(+id);
+  async findOne(@Param('id') id: string, @Req() req: any) {
+    const isAdmin = req.user.role === 'admin';
+    return this.bookingsService.findOne(+id, req.user.id, isAdmin);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

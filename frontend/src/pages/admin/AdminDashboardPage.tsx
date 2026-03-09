@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { dashboardService } from '../../services/dashboardService'
+import type { DashboardFilters } from '../../services/dashboardService'
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area, Legend,
@@ -36,18 +37,31 @@ export default function AdminDashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null)
     const [loading, setLoading] = useState(true)
 
-    // Filter states
-    const [filterTime, setFilterTime] = useState('this_month')
+    // Filter states — ใช้ปฏิทิน (วันเริ่มต้น / วันสิ้นสุด)
+    const [filterStartDate, setFilterStartDate] = useState(() => {
+        const d = new Date(); d.setDate(1)
+        return d.toISOString().slice(0, 10) // วันแรกของเดือนนี้
+    })
+    const [filterEndDate, setFilterEndDate] = useState(() => new Date().toISOString().slice(0, 10))
     const [filterRegion, setFilterRegion] = useState('all')
     const [filterTourType, setFilterTourType] = useState('all')
     const [searchCode, setSearchCode] = useState('')
 
-    useEffect(() => {
-        dashboardService.getData()
+    const fetchData = useCallback((filters: DashboardFilters = {}) => {
+        setLoading(true)
+        dashboardService.getData(filters)
             .then(setData)
             .catch(console.error)
             .finally(() => setLoading(false))
     }, [])
+
+    useEffect(() => {
+        fetchData({ startDate: filterStartDate, endDate: filterEndDate, region: filterRegion, tourType: filterTourType })
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleApplyFilters = () => {
+        fetchData({ startDate: filterStartDate, endDate: filterEndDate, region: filterRegion, tourType: filterTourType })
+    }
 
     if (loading) {
         return (
@@ -95,21 +109,24 @@ export default function AdminDashboardPage() {
 
             {/* ========== FILTER BAR ========== */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-3 mb-5 flex flex-wrap items-center gap-3">
-                {/* ช่วงเวลา */}
+                {/* ช่วงเวลา — ปฏิทิน */}
                 <div className="flex items-center gap-1.5 text-sm">
-                    <label className="text-gray-500 font-medium whitespace-nowrap">ช่วงเวลา :</label>
-                    <select
-                        value={filterTime}
-                        onChange={e => setFilterTime(e.target.value)}
+                    <label className="text-gray-500 font-medium whitespace-nowrap">ตั้งแต่ :</label>
+                    <input
+                        type="date"
+                        value={filterStartDate}
+                        onChange={e => setFilterStartDate(e.target.value)}
                         className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)]"
-                    >
-                        <option value="today">วันนี้</option>
-                        <option value="this_week">สัปดาห์นี้</option>
-                        <option value="this_month">เดือนนี้</option>
-                        <option value="last_month">เดือนที่แล้ว</option>
-                        <option value="this_year">ปีนี้</option>
-                        <option value="all">ทั้งหมด</option>
-                    </select>
+                    />
+                </div>
+                <div className="flex items-center gap-1.5 text-sm">
+                    <label className="text-gray-500 font-medium whitespace-nowrap">ถึง :</label>
+                    <input
+                        type="date"
+                        value={filterEndDate}
+                        onChange={e => setFilterEndDate(e.target.value)}
+                        className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)]"
+                    />
                 </div>
 
                 {/* ภูมิภาค */}
@@ -146,9 +163,11 @@ export default function AdminDashboardPage() {
 
                 {/* ตกลง */}
                 <button
-                    className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white text-sm font-semibold px-5 py-1.5 rounded-lg transition-colors"
+                    onClick={handleApplyFilters}
+                    disabled={loading}
+                    className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white text-sm font-semibold px-5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
                 >
-                    ตกลง
+                    {loading ? 'กำลังโหลด...' : 'ตกลง'}
                 </button>
 
                 {/* ค้นหาด้วยรหัสทัวร์ */}

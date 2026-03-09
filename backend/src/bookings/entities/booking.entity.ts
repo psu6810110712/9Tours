@@ -59,10 +59,13 @@ export class Booking {
     @Column({ name: 'admin_notes', type: 'text', nullable: true })
     adminNotes: string;
 
+    @Column({ name: 'special_request', type: 'text', nullable: true })
+    specialRequest: string;
+
     @OneToMany(() => Payment, (payment) => payment.booking)
     payments: Payment[];
 
-    @CreateDateColumn({ name: 'created_at' })
+    @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
     createdAt: Date;
 }
 

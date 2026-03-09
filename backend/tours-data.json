@@ -173,7 +173,7 @@
         "timeSlot": "",
         "roundName": "Private Group",
         "maxCapacity": 6,
-        "currentBooked": 0
+        "currentBooked": -6
       },
       {
         "id": 303,
@@ -331,7 +331,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": 0
+        "currentBooked": -4
       },
       {
         "id": 501,
@@ -507,5 +507,55 @@
     "createdAt": "2026-03-01T05:05:17.106Z",
     "updatedAt": "2026-03-04T03:56:58.704Z",
     "childPrice": 200
+  },
+  {
+    "id": 100,
+    "tourCode": "05032026006",
+    "name": "1",
+    "description": "1\n",
+    "tourType": "one_day",
+    "categories": [],
+    "price": 1000,
+    "originalPrice": null,
+    "images": [],
+    "highlights": [],
+    "itinerary": [],
+    "transportation": "",
+    "duration": "1",
+    "region": "ภาคใต้",
+    "province": "1",
+    "accommodation": null,
+    "rating": 0,
+    "reviewCount": 0,
+    "isActive": false,
+    "schedules": [],
+    "createdAt": "2026-03-05T13:13:49.988Z",
+    "updatedAt": "2026-03-05T13:17:41.614Z"
+  },
+  {
+    "id": 101,
+    "tourCode": "05032026007",
+    "name": "1",
+    "description": "1",
+    "tourType": "package",
+    "categories": [],
+    "price": 1,
+    "originalPrice": null,
+    "images": [],
+    "highlights": [],
+    "itinerary": [],
+    "transportation": "",
+    "duration": "1",
+    "region": "ภาคใต้",
+    "province": "1",
+    "accommodation": "1\n",
+    "rating": 0,
+    "reviewCount": 0,
+    "isActive": false,
+    "schedules": [],
+    "createdAt": "2026-03-05T13:14:16.449Z",
+    "updatedAt": "2026-03-05T13:14:37.601Z",
+    "childPrice": null,
+    "minPeople": 1
   }
 ]

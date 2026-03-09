@@ -6,10 +6,16 @@ import { TourView } from './entities/tour-view.entity';
 import { DashboardStatsDaily } from './entities/dashboard-stats-daily.entity';
 import { Booking } from '../bookings/entities/booking.entity';
 import { User } from '../users/entities/user.entity';
+import { Tour } from '../tours/entities/tour.entity';
+import { DashboardSeederService } from './dashboard.seeder';
+import { BehaviorEvent } from './entities/behavior-event.entity';
+import { EventsController } from './events.controller';
+import { EventsService } from './events.service';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([TourView, DashboardStatsDaily, Booking, User])],
-    providers: [DashboardService],
-    controllers: [DashboardController],
+    imports: [TypeOrmModule.forFeature([TourView, DashboardStatsDaily, Booking, User, Tour, BehaviorEvent])],
+    providers: [DashboardService, DashboardSeederService, EventsService, OptionalJwtAuthGuard],
+    controllers: [DashboardController, EventsController],
 })
 export class AnalyticsModule { }
