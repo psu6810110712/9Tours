@@ -8,12 +8,14 @@ import { AuthModule } from './auth/auth.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { validateEnv } from './config/env.validation';
 
 @Module({
   imports: [
     // 1. ตั้งค่าให้ NestJS อ่านไฟล์ .env
     ConfigModule.forRoot({
       isGlobal: true,
+      validate: validateEnv,
     }),
 
     // 2. ตั้งค่าการเชื่อมต่อ Database โดยดึงค่าจาก ConfigService

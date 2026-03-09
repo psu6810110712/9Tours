@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+
+interface CreateUserOptions {
+  hashPassword?: boolean;
+}
 
 @Injectable()
 export class UsersService {
@@ -12,25 +16,20 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) { }
 
-  // 1. ฟังก์ชันค้นหาด้วย Email (ที่เราทำไว้ก่อนหน้า)
   async findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { email } });
+    return this.usersRepository.findOne({ where: { email: this.normalizeEmail(email) } });
   }
 
-  // 2. ฟังก์ชัน Create
-  async create(userData: Partial<User>): Promise<User> {
-    const newUser = this.usersRepository.create(userData);
+  async create(userData: Partial<User>, options?: CreateUserOptions): Promise<User> {
+    const preparedUserData = await this.prepareUserData(userData, options);
+    const newUser = this.usersRepository.create(preparedUserData);
     return this.usersRepository.save(newUser);
   }
 
-  // 👇 เพิ่มฟังก์ชันด้านล่างนี้เข้าไปให้ครบ 👇
-
-  // 3. ค้นหาทั้งหมด
   async findAll(): Promise<User[]> {
     return this.usersRepository.find();
   }
 
-  // 4. ค้นหาคนเดียวด้วย ID (UUID)
   async findOne(id: string): Promise<User> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
@@ -39,17 +38,35 @@ export class UsersService {
     return user;
   }
 
-  // 5. อัปเดตข้อมูล
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id); // เช็คก่อนว่ามีคนนี้อยู่จริงไหม
-    // เอาข้อมูลใหม่ (updateUserDto) ไปทับข้อมูลเดิม (user)
-    this.usersRepository.merge(user, updateUserDto);
+    const user = await this.findOne(id);
+    const preparedUpdate = await this.prepareUserData(updateUserDto, {
+      hashPassword: !!updateUserDto.password,
+    });
+    this.usersRepository.merge(user, preparedUpdate);
     return this.usersRepository.save(user);
   }
 
-  // 6. ลบข้อมูล
   async remove(id: string): Promise<void> {
-    const user = await this.findOne(id); // เช็คก่อนว่ามีคนนี้อยู่จริงไหม
+    const user = await this.findOne(id);
     await this.usersRepository.remove(user);
+  }
+
+  private normalizeEmail(email?: string | null) {
+    return email?.trim().toLowerCase() ?? '';
+  }
+
+  private async prepareUserData(userData: Partial<User>, options?: CreateUserOptions): Promise<Partial<User>> {
+    const preparedUserData: Partial<User> = { ...userData };
+
+    if (preparedUserData.email) {
+      preparedUserData.email = this.normalizeEmail(preparedUserData.email);
+    }
+
+    if (options?.hashPassword && preparedUserData.password) {
+      preparedUserData.password = await bcrypt.hash(preparedUserData.password, 10);
+    }
+
+    return preparedUserData;
   }
 }

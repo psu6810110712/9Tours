@@ -15,7 +15,7 @@ export class UsersController {
   @Roles(UserRole.ADMIN)
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+    return this.usersService.create(createUserDto, { hashPassword: true });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

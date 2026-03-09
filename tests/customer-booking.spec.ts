@@ -73,6 +73,10 @@ test.describe('Customer booking flow', () => {
     await expect(page).toHaveURL(/\/payment\/\d+$/)
     await expect(page.getByAltText('PromptPay QR Code')).toBeVisible()
 
+    await page.reload()
+    await expect(page).toHaveURL(/\/payment\/\d+$/)
+    await expect(page.getByAltText('PromptPay QR Code')).toBeVisible()
+
     const fileChooserPromise = page.waitForEvent('filechooser')
     await page.getByText('คลิกเพื่ออัปโหลดสลิป').click()
     const fileChooser = await fileChooserPromise

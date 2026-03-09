@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { Booking } from '../../bookings/entities/booking.entity';
 import { TourView } from '../../analytics/entities/tour-view.entity';
+import { RefreshSession } from '../../auth/entities/refresh-session.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -39,4 +40,7 @@ export class User {
 
   @OneToMany(() => TourView, (tourView) => tourView.user, { nullable: true })
   tourViews: TourView[];
+
+  @OneToMany(() => RefreshSession, (refreshSession) => refreshSession.user)
+  refreshSessions: RefreshSession[];
 }

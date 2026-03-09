@@ -91,6 +91,10 @@ export default function HomePage() {
     ? `ที่เที่ยวยอดนิยมห้ามพลาดใน${selectedPlace.name}`
     : 'ที่เที่ยวยอดนิยมห้ามพลาด'
 
+  const emptyStateMessage = selectedPlace.province
+    ? `ยังไม่มีทัวร์ใน${selectedPlace.name}`
+    : 'ยังไม่มีทัวร์แนะนำในขณะนี้'
+
   return (
     <>
       {/* ===== Hero — rounded card ไม่เต็มจอ ===== */}
@@ -250,7 +254,7 @@ export default function HomePage() {
           {toursLoading ? (
             <div className="text-center py-12 text-gray-400">กำลังโหลด...</div>
           ) : displayedTours.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">ยังไม่มีทัวร์ใน{selectedPlace.name}</div>
+            <div className="text-center py-12 text-gray-400">{emptyStateMessage}</div>
           ) : (
             <div className="relative">
               {/* horizontal scroll — แสดงทัวร์ตาม province */}

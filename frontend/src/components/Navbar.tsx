@@ -37,14 +37,14 @@ export default function Navbar() {
     const handleAuthExpired = () => {
       if (pathname === '/') {
         // อยู่หน้า home อยู่แล้ว โชว์ Modal ได้เลย (ไม่เกิดการ Unmount Navbar)
-        logout() // ล้าง context และ storage ทุกอย่าง
+        void logout() // ล้าง context และ storage ทุกอย่าง
         setModalError('เซสชันของคุณหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง')
         setModal('login')
       } else {
         // ย้ายคำสั่ง navigate ขึ้นมาก่อน logout เพื่อป้องกัน Race condition กับ ProtectedRoute
         // ทำให้ Router เปลี่ยนหน้าเป็น '/' ทันทีใน Batch ถัดไป ป้องกันการเตะซ้ำจาก ProtectedRoute
         navigate('/', { replace: true, state: { requireLogin: true, authExpired: true } })
-        logout()
+        void logout()
       }
     }
 
@@ -62,7 +62,7 @@ export default function Navbar() {
   }
 
   const handleLogout = () => {
-    logout()
+    void logout()
     setMenuOpen(false)
     navigate('/')
   }

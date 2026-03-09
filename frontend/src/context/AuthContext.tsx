@@ -11,7 +11,7 @@ interface AuthContextType {
   isLoading: boolean
   login: (email: string, password: string, remember?: boolean) => Promise<User>
   register: (name: string, email: string, phone: string, password: string) => Promise<User>
-  logout: () => void
+  logout: () => Promise<void>
   isAdmin: boolean
 }
 
@@ -22,7 +22,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // ตรวจสอบว่ามี booking ค้างชำระเงินหรือไม่ แล้วแจ้งลูกค้า
+  const applySession = (nextToken: string, nextUser: User) => {
+    setToken(nextToken)
+    setAccessToken(nextToken)
+    setUser(nextUser)
+  }
+
+  const clearSession = () => {
+    setToken(null)
+    setAccessToken(null)
+    setUser(null)
+  }
+
   const checkPendingBookings = async () => {
     try {
       const bookings = await bookingService.getMyBookings()
@@ -33,51 +44,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           icon: '⚠️',
         })
       }
-    } catch { /* ignore */ }
+    } catch {
+      // Ignore pending-booking checks when the session is not available.
+    }
   }
 
-  // ✅ เปิดแอปครั้งแรก → เรียก /auth/refresh เพื่อ restore session
-  // cookie (refresh_token) จะถูกส่งไปอัตโนมัติ
   useEffect(() => {
     authService.refresh()
       .then((data) => {
-        setToken(data.access_token)
-        setAccessToken(data.access_token)
-        setUser(data.user)
-        // ตรวจสอบ booking ค้างหลัง restore session สำเร็จ
-        setTimeout(() => checkPendingBookings(), 500)
+        applySession(data.access_token, data.user)
+        setTimeout(() => void checkPendingBookings(), 500)
       })
       .catch(() => {
-        // ✅ ไม่มี cookie = ยังไม่ได้ login → ไม่ต้องทำอะไร
+        clearSession()
       })
       .finally(() => setIsLoading(false))
   }, [])
 
-  // ✅ login — ส่ง rememberMe ไป backend เพื่อตั้งค่า cookie
   const login = async (email: string, password: string, remember: boolean = false) => {
     const data = await authService.login({ email, password, rememberMe: remember })
-    setToken(data.access_token)
-    setAccessToken(data.access_token)
-    setUser(data.user)
-    // ตรวจสอบ booking ค้างหลัง login สำเร็จ
-    setTimeout(() => checkPendingBookings(), 500)
+    applySession(data.access_token, data.user)
+    setTimeout(() => void checkPendingBookings(), 500)
     return data.user
   }
 
   const register = async (name: string, email: string, phone: string, password: string) => {
     const data = await authService.register({ name, email, phone, password })
-    setToken(data.access_token)
-    setAccessToken(data.access_token)
-    setUser(data.user)
+    applySession(data.access_token, data.user)
     return data.user
   }
 
-  // ✅ logout — เรียก backend ลบ cookie + เคลียร์ state ใน memory
-  const logout = () => {
-    authService.logout().catch(() => { })
-    setToken(null)
-    setAccessToken(null)
-    setUser(null)
+  const logout = async () => {
+    clearSession()
+    try {
+      await authService.logout()
+    } catch {
+      // Ignore network errors during logout; the client session is already cleared.
+    }
   }
 
   return (
