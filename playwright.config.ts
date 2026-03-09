@@ -11,13 +11,13 @@ export default defineConfig({
     {
       command: 'npm --prefix backend run start:dev',
       url: 'http://127.0.0.1:3000/',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 120_000,
     },
     {
       command: 'npm --prefix frontend run dev -- --host 127.0.0.1',
       url: 'http://127.0.0.1:5173',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 120_000,
     },
   ],
