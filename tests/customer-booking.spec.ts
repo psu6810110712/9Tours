@@ -1,8 +1,8 @@
 import path from 'node:path'
 import { test, expect, type Page } from '@playwright/test'
 
-const FRONTEND_URL = process.env.PLAYWRIGHT_FRONTEND_URL ?? 'http://localhost:5173'
-const API_URL = process.env.PLAYWRIGHT_API_URL ?? 'http://localhost:3000'
+const FRONTEND_URL = process.env.PLAYWRIGHT_FRONTEND_URL ?? 'http://127.0.0.1:5173'
+const API_URL = process.env.PLAYWRIGHT_API_URL ?? 'http://127.0.0.1:3000'
 const slipPath = path.join(process.cwd(), 'frontend', 'public', 'logo.png')
 
 interface TourSchedule {
@@ -93,3 +93,4 @@ test.describe('Customer booking flow', () => {
 
   })
 })
+
