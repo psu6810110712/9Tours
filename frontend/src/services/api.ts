@@ -1,10 +1,11 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios'
+import { API_BASE_URL } from './apiBaseUrl'
 
 let accessToken: string | null = null
 export const setAccessToken = (token: string | null) => { accessToken = token }
 export const getAccessToken = () => accessToken
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const baseURL = API_BASE_URL
 
 interface AuthResponse {
   access_token: string
