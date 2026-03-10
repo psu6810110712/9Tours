@@ -1,4 +1,5 @@
-import axios, { type InternalAxiosRequestConfig } from 'axios'
+﻿import axios, { type InternalAxiosRequestConfig } from 'axios'
+import type { User } from '../types/user'
 import { API_BASE_URL } from './apiBaseUrl'
 
 let accessToken: string | null = null
@@ -7,12 +8,17 @@ export const getAccessToken = () => accessToken
 
 const baseURL = API_BASE_URL
 
-interface AuthResponse {
+export interface SessionRefreshResponse {
   access_token: string
+  user: User
 }
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean
+}
+
+interface RefreshRequestOptions {
+  emitAuthExpired?: boolean
 }
 
 const api = axios.create({
@@ -20,18 +26,31 @@ const api = axios.create({
   withCredentials: true,
 })
 
-let refreshPromise: Promise<string> | null = null
+let refreshPromise: Promise<SessionRefreshResponse> | null = null
+let shouldEmitAuthExpiredOnRefreshFailure = false
 
-const refreshAccessToken = async () => {
+export const requestSessionRefresh = async (options: RefreshRequestOptions = {}) => {
+  if (options.emitAuthExpired) {
+    shouldEmitAuthExpiredOnRefreshFailure = true
+  }
+
   if (!refreshPromise) {
     refreshPromise = axios
-      .post<AuthResponse>(`${baseURL}/auth/refresh`, undefined, { withCredentials: true })
+      .post<SessionRefreshResponse>(`${baseURL}/auth/refresh`, undefined, { withCredentials: true })
       .then((response) => {
         setAccessToken(response.data.access_token)
-        return response.data.access_token
+        return response.data
+      })
+      .catch((error) => {
+        setAccessToken(null)
+        if (shouldEmitAuthExpiredOnRefreshFailure) {
+          window.dispatchEvent(new CustomEvent('auth:expired'))
+        }
+        throw error
       })
       .finally(() => {
         refreshPromise = null
+        shouldEmitAuthExpiredOnRefreshFailure = false
       })
   }
 
@@ -62,21 +81,15 @@ api.interceptors.response.use(
     )
 
     if (isAuthLifecycleRequest || originalConfig._retry) {
-      if (url.includes('/auth/refresh')) {
-        setAccessToken(null)
-        window.dispatchEvent(new CustomEvent('auth:expired'))
-      }
       return Promise.reject(error)
     }
 
     try {
       originalConfig._retry = true
-      const newAccessToken = await refreshAccessToken()
-      originalConfig.headers.Authorization = `Bearer ${newAccessToken}`
+      const refreshData = await requestSessionRefresh({ emitAuthExpired: true })
+      originalConfig.headers.Authorization = `Bearer ${refreshData.access_token}`
       return api(originalConfig)
     } catch (refreshError) {
-      setAccessToken(null)
-      window.dispatchEvent(new CustomEvent('auth:expired'))
       return Promise.reject(refreshError)
     }
   }

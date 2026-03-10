@@ -1,4 +1,4 @@
-﻿import api from './api'
+﻿import api, { requestSessionRefresh, type SessionRefreshResponse } from './api'
 import { API_BASE_URL } from './apiBaseUrl'
 import type { User } from '../types/user'
 
@@ -20,6 +20,10 @@ interface AuthResponse {
   user: User
 }
 
+interface RefreshOptions {
+  silent?: boolean
+}
+
 export const authService = {
   login: (data: LoginDto) =>
     api.post<AuthResponse>('/auth/login', data).then((r) => r.data),
@@ -30,8 +34,8 @@ export const authService = {
   getMe: () =>
     api.get<User>('/auth/me').then((r) => r.data),
 
-  refresh: () =>
-    api.post<AuthResponse>('/auth/refresh').then((r) => r.data),
+  refresh: (options: RefreshOptions = {}) =>
+    requestSessionRefresh({ emitAuthExpired: !options.silent }) as Promise<SessionRefreshResponse>,
 
   logout: () =>
     api.post('/auth/logout').then((r) => r.data),

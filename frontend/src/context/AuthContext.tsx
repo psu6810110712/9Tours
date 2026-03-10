@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { User } from '../types/user'
 import { authService } from '../services/authService'
 import { bookingService } from '../services/bookingService'
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    authService.refresh()
+    authService.refresh({ silent: true })
       .then((data) => {
         applySession(data.access_token, data.user)
         setTimeout(() => void checkPendingBookings(), 500)
@@ -124,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const completeGoogleLogin = async () => {
-    const data = await authService.refresh()
+    const data = await authService.refresh({ silent: true })
     applySession(data.access_token, data.user)
     setTimeout(() => void checkPendingBookings(), 500)
     return data.user
