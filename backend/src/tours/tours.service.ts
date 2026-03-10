@@ -392,7 +392,8 @@ export class ToursService {
         (t) =>
           t.name.toLowerCase().includes(term) ||
           t.description.toLowerCase().includes(term) ||
-          t.province.includes(search),
+          t.province.toLowerCase().includes(term) ||
+          (t.categories && t.categories.some((c: string) => c.toLowerCase().includes(term))),
       );
     }
 
