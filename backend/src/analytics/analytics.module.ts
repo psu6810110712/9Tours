@@ -11,10 +11,14 @@ import { DashboardSeederService } from './dashboard.seeder';
 import { BehaviorEvent } from './entities/behavior-event.entity';
 import { EventsController } from './events.controller';
 import { EventsService } from './events.service';
+import { ToursModule } from '../tours/tours.module';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([TourView, DashboardStatsDaily, Booking, User, Tour, BehaviorEvent])],
+    imports: [
+        TypeOrmModule.forFeature([TourView, DashboardStatsDaily, Booking, User, Tour, BehaviorEvent]),
+        ToursModule,
+    ],
     providers: [DashboardService, DashboardSeederService, EventsService, OptionalJwtAuthGuard],
     controllers: [DashboardController, EventsController],
 })
