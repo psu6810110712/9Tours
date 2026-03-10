@@ -19,6 +19,10 @@ export class DashboardController {
         @Query('tourType') tourType?: string,
     ) {
         const filters: DashboardFilters = { startDate, endDate, region, tourType };
-        return this.dashboardService.getDashboardData(filters);
+        try {
+            return await this.dashboardService.getDashboardData(filters);
+        } catch (e) {
+            return { error: e.message, stack: e.stack };
+        }
     }
 }

@@ -5,12 +5,18 @@ import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { User } from '../users/entities/user.entity';
 import { TourView } from './entities/tour-view.entity';
 import { Tour } from '../tours/entities/tour.entity';
+import { ToursService } from '../tours/tours.service';
 
 export interface DashboardFilters {
     startDate?: string; // 'YYYY-MM-DD'
     endDate?: string;   // 'YYYY-MM-DD'
     region?: string;    // e.g. 'ภาคเหนือ' or 'all'
     tourType?: string;  // 'one_day' | 'package' | 'all'
+}
+
+interface TrendData {
+    value: number;
+    percentChange: number;
 }
 
 @Injectable()
@@ -24,6 +30,7 @@ export class DashboardService {
         private tourViewsRepo: Repository<TourView>,
         @InjectRepository(Tour)
         private toursRepo: Repository<Tour>,
+        private toursService: ToursService,
     ) { }
 
     async getDashboardData(filters: DashboardFilters = {}) {
@@ -35,6 +42,7 @@ export class DashboardService {
             provinceStats,
             viewsOverTime,
             bookingsOverTime,
+            recentBookings,
         ] = await Promise.all([
             this.getSummaryCards(filters),
             this.getTopTours(filters),
@@ -43,15 +51,17 @@ export class DashboardService {
             this.getProvinceStats(filters),
             this.getViewsOverTime(filters),
             this.getBookingsOverTime(filters),
+            this.getRecentBookings(filters),
         ]);
 
-        const conversionRate = summaryCards.totalViews > 0
-            ? ((summaryCards.totalBookings / summaryCards.totalViews) * 100).toFixed(1)
+        const conversionRate = summaryCards.totalViews.value > 0
+            ? ((summaryCards.totalBookings.value / summaryCards.totalViews.value) * 100).toFixed(1)
             : '0';
 
         return {
             summaryCards,
             topTours,
+            recentBookings,
             bookingsByStatus,
             regionStats,
             provinceStats,
@@ -81,47 +91,76 @@ export class DashboardService {
 
     private async getSummaryCards(filters: DashboardFilters) {
         const dateRange = this.getDateRange(filters);
+        
+        let previousRange: { start: Date; end: Date } | null = null;
+        if (dateRange) {
+            const diffTime = Math.abs(dateRange.end.getTime() - dateRange.start.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            previousRange = {
+                start: new Date(dateRange.start.getTime() - (diffDays * 24 * 60 * 60 * 1000)),
+                end: new Date(dateRange.start.getTime() - 1)
+            };
+        }
 
-        // ยอดขายทั้งหมด
-        const revenueQb = this.bookingsRepo
+        // --- Current Period ---
+        const currentRevenueQb = this.bookingsRepo
             .createQueryBuilder('b')
             .select('COALESCE(SUM(b.totalPrice), 0)', 'total')
-            .where('b.status IN (:...statuses)', {
-                statuses: [BookingStatus.SUCCESS, BookingStatus.AWAITING_APPROVAL],
-            });
-        if (dateRange) {
-            revenueQb.andWhere('b.createdAt BETWEEN :start AND :end', dateRange);
-        }
-        const revenueResult = await revenueQb.getRawOne();
+            .where('b.status IN (:...statuses)', { statuses: [BookingStatus.SUCCESS, BookingStatus.AWAITING_APPROVAL] });
+        if (dateRange) currentRevenueQb.andWhere('b.createdAt BETWEEN :start AND :end', dateRange);
 
-        // จำนวน bookings
-        const bookingsQb = this.bookingsRepo.createQueryBuilder('b');
-        if (dateRange) {
-            bookingsQb.where('b.createdAt BETWEEN :start AND :end', dateRange);
-        }
-        const totalBookings = await bookingsQb.getCount();
+        const currentBookingsQb = this.bookingsRepo.createQueryBuilder('b');
+        if (dateRange) currentBookingsQb.where('b.createdAt BETWEEN :start AND :end', dateRange);
 
-        // จำนวน views
-        const viewsQb = this.tourViewsRepo.createQueryBuilder('v');
-        if (dateRange) {
-            viewsQb.where('v.viewedAt BETWEEN :start AND :end', dateRange);
-        }
-        const totalViews = await viewsQb.getCount();
+        const currentViewsQb = this.tourViewsRepo.createQueryBuilder('v');
+        if (dateRange) currentViewsQb.where('v.viewedAt BETWEEN :start AND :end', dateRange);
 
-        // ลูกค้าใหม่
-        const customersQb = this.usersRepo
+        const currentCustomersQb = this.usersRepo
             .createQueryBuilder('u')
             .where("u.role = :role", { role: 'customer' });
-        if (dateRange) {
-            customersQb.andWhere('u.createdAt BETWEEN :start AND :end', dateRange);
-        }
-        const totalCustomers = await customersQb.getCount();
+        if (dateRange) currentCustomersQb.andWhere('u.createdAt BETWEEN :start AND :end', dateRange);
+
+        // --- Previous Period (for trend comparison) ---
+        const previousRevenueQb = this.bookingsRepo
+            .createQueryBuilder('b')
+            .select('COALESCE(SUM(b.totalPrice), 0)', 'total')
+            .where('b.status IN (:...statuses)', { statuses: [BookingStatus.SUCCESS, BookingStatus.AWAITING_APPROVAL] });
+        if (previousRange) previousRevenueQb.andWhere('b.createdAt BETWEEN :start AND :end', previousRange);
+
+        const previousBookingsQb = this.bookingsRepo.createQueryBuilder('b');
+        if (previousRange) previousBookingsQb.where('b.createdAt BETWEEN :start AND :end', previousRange);
+
+        const previousViewsQb = this.tourViewsRepo.createQueryBuilder('v');
+        if (previousRange) previousViewsQb.where('v.viewedAt BETWEEN :start AND :end', previousRange);
+
+        const previousCustomersQb = this.usersRepo
+            .createQueryBuilder('u')
+            .where("u.role = :role", { role: 'customer' });
+        if (previousRange) previousCustomersQb.andWhere('u.createdAt BETWEEN :start AND :end', previousRange);
+
+        // --- Execute All Queries in Parallel ---
+        const [
+            currentRevenueRes, currentBookings, currentViews, currentCustomers,
+            previousRevenueRes, previousBookings, previousViews, previousCustomers
+        ] = await Promise.all([
+            currentRevenueQb.getRawOne(), currentBookingsQb.getCount(), currentViewsQb.getCount(), currentCustomersQb.getCount(),
+            previousRevenueQb.getRawOne(), previousBookingsQb.getCount(), previousViewsQb.getCount(), previousCustomersQb.getCount()
+        ]);
+
+        const currentRevenue = Number(currentRevenueRes?.total || 0);
+        const previousRevenue = Number(previousRevenueRes?.total || 0);
+
+        // --- Calculate Percentage Changes ---
+        const calcPercent = (current: number, previous: number) => {
+            if (previous === 0) return current > 0 ? 100 : 0;
+            return Number((((current - previous) / previous) * 100).toFixed(1));
+        };
 
         return {
-            totalRevenue: Number(revenueResult?.total || 0),
-            totalBookings,
-            totalViews,
-            totalCustomers,
+            totalRevenue: { value: currentRevenue, percentChange: calcPercent(currentRevenue, previousRevenue) },
+            totalBookings: { value: currentBookings, percentChange: calcPercent(currentBookings, previousBookings) },
+            totalViews: { value: currentViews, percentChange: calcPercent(currentViews, previousViews) },
+            totalCustomers: { value: currentCustomers, percentChange: calcPercent(currentCustomers, previousCustomers) },
         };
     }
 
@@ -153,7 +192,41 @@ export class DashboardService {
             rating: tour.rating || 0,
             popularityPercent: Math.round(((tour.reviewCount || 0) / maxReviews) * 100),
             revenue: (Number(tour.price) || 0) * (tour.reviewCount || 0),
+            imageUrl: tour.images && tour.images.length > 0 ? tour.images[0] : null,
         }));
+    }
+
+    // ──────────── Recent Bookings ────────────
+    private async getRecentBookings(_filters: DashboardFilters) {
+        const qb = this.bookingsRepo
+            .createQueryBuilder('b')
+            .leftJoinAndSelect('b.user', 'user')
+            .orderBy('b.createdAt', 'DESC')
+            .limit(6);
+
+        const bookings = await qb.getMany();
+        
+        return bookings.map(b => {
+            let tourName = `Tour (Schedule ${b.scheduleId})`;
+            // Attempt to get from toursService (which reads from tours-data.json or DB)
+            const toursData = this.toursService.findAll({ admin: 'true' });
+            for (const tour of toursData) {
+                if (tour.schedules?.some((s: any) => s.id === b.scheduleId)) {
+                    tourName = tour.name;
+                    break;
+                }
+            }
+
+            return {
+                id: b.id,
+                bookingCode: `BK-${b.id.toString().padStart(5, '0')}`,
+                tourName,
+                customerName: b.user?.name || (b.user?.email || 'Guest'),
+                totalPrice: Number(b.totalPrice),
+                status: b.status,
+                createdAt: b.createdAt,
+            };
+        });
     }
 
     // ──────────── Bookings By Status ────────────
