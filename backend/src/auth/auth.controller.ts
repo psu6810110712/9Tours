@@ -49,7 +49,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { refresh_token, rememberMe, ...result } = await this.authService.login(
-      loginDto.email,
+      loginDto.identifier,
       loginDto.password,
       loginDto.rememberMe ?? false,
       this.extractSessionContext(req),
@@ -84,8 +84,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getMe(@Req() req: Request & { user: unknown }) {
-    return req.user;
+  async getMe(@Req() req: Request & { user: { id: string } }) {
+    return this.authService.getAuthenticatedUser(req.user.id);
   }
 
   @HttpCode(HttpStatus.OK)

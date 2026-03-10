@@ -1,20 +1,10 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+﻿import { Transform } from 'class-transformer';
+import { IsNotEmpty, MinLength } from 'class-validator';
+import { CustomerProfileDto } from '../../users/dto/customer-profile.dto';
 
-export class RegisterDto {
-  @IsString()
-  @IsNotEmpty({ message: 'กรุณาระบุชื่อ-นามสกุล' })
-  name: string;
-
-  @IsEmail({}, { message: 'รูปแบบอีเมลไม่ถูกต้อง' })
-  @IsNotEmpty({ message: 'กรุณาระบุอีเมล' })
-  email: string;
-
-  @IsString()
-  @MinLength(6, { message: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร' })
+export class RegisterDto extends CustomerProfileDto {
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @MinLength(8, { message: 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร' })
   @IsNotEmpty({ message: 'กรุณาระบุรหัสผ่าน' })
   password: string;
-
-  @IsString()
-  @IsOptional()
-  phone?: string;
 }

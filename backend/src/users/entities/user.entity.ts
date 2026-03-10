@@ -2,6 +2,7 @@
 import { Booking } from '../../bookings/entities/booking.entity';
 import { TourView } from '../../analytics/entities/tour-view.entity';
 import { RefreshSession } from '../../auth/entities/refresh-session.entity';
+import type { CustomerPrefix } from '../customer-profile.utils';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -17,6 +18,9 @@ export enum AuthProvider {
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ type: 'varchar', length: 16, nullable: true })
+  prefix: CustomerPrefix | null;
 
   @Column()
   name: string;

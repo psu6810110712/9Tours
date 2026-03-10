@@ -10,6 +10,7 @@ import { UsersService } from '../users/users.service';
 import { AuthProvider, User, UserRole } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { RefreshSession } from './entities/refresh-session.entity';
+import { normalizeEmail } from '../users/customer-profile.utils';
 
 export interface SessionRequestContext {
   ipAddress?: string | null;
@@ -39,8 +40,9 @@ export class AuthService {
     }
 
     const user = await this.usersService.create({
+      prefix: createUserDto.prefix,
       email: createUserDto.email,
-      name: createUserDto.name.trim(),
+      name: createUserDto.name,
       password: createUserDto.password,
       role: UserRole.CUSTOMER,
       phone: createUserDto.phone,
@@ -52,19 +54,19 @@ export class AuthService {
   }
 
   async login(
-    email: string,
+    identifier: string,
     password: string,
     rememberMe: boolean = false,
     context?: SessionRequestContext,
   ) {
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.findUserForLoginIdentifier(identifier);
     if (!user || !user.password) {
-      throw new UnauthorizedException('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+      throw new UnauthorizedException('อีเมลหรือหมายเลขโทรศัพท์หรือรหัสผ่านไม่ถูกต้อง');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+      throw new UnauthorizedException('อีเมลหรือหมายเลขโทรศัพท์หรือรหัสผ่านไม่ถูกต้อง');
     }
 
     return this.issueTokensForUser(user, { ...context, rememberMe });
@@ -80,10 +82,15 @@ export class AuthService {
       throw new UnauthorizedException('GOOGLE_OAUTH_FAILED');
     }
 
-    let user = await this.usersService.findByEmail(email);
+    let user = await this.usersService.findByProviderUserId(profile.providerUserId);
+
+    if (!user) {
+      user = await this.usersService.findByEmail(email);
+    }
 
     if (!user) {
       user = await this.usersService.create({
+        prefix: null,
         email,
         name: profile.name?.trim() || email,
         password: null,
@@ -110,6 +117,11 @@ export class AuthService {
     }
 
     return this.issueTokensForUser(user, { ...context, rememberMe: false });
+  }
+
+  async getAuthenticatedUser(userId: string) {
+    const user = await this.usersService.findOne(userId);
+    return this.usersService.toPublicUser(user);
   }
 
   async refreshToken(refreshToken: string, context?: SessionRequestContext) {
@@ -165,7 +177,7 @@ export class AuthService {
         access_token: this.createAccessToken(currentSession.user),
         refresh_token: replacementRawToken,
         rememberMe: currentSession.isPersistent,
-        user: this.serializeUser(currentSession.user),
+        user: this.usersService.toPublicUser(currentSession.user),
       };
     });
   }
@@ -197,7 +209,7 @@ export class AuthService {
       access_token: this.createAccessToken(user),
       refresh_token: rawToken,
       rememberMe: session.isPersistent,
-      user: this.serializeUser(user),
+      user: this.usersService.toPublicUser(user),
     };
   }
 
@@ -247,16 +259,20 @@ export class AuthService {
       .execute();
   }
 
+  private async findUserForLoginIdentifier(identifier: string) {
+    if (identifier.includes('@')) {
+      return this.usersService.findByEmail(normalizeEmail(identifier));
+    }
+
+    return this.usersService.findByPhone(identifier);
+  }
+
   private generateRefreshToken() {
     return randomBytes(48).toString('base64url');
   }
 
   private hashToken(token: string) {
     return createHash('sha256').update(token).digest('hex');
-  }
-
-  private serializeUser(user: User) {
-    return { id: user.id, email: user.email, name: user.name, role: user.role, phone: user.phone };
   }
 
   private get accessTokenTtl() {
