@@ -24,10 +24,10 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   phone: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   password: string | null;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.CUSTOMER })
@@ -36,7 +36,7 @@ export class User {
   @Column({ type: 'enum', enum: AuthProvider, default: AuthProvider.LOCAL })
   authProvider: AuthProvider;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   providerUserId: string | null;
 
   @CreateDateColumn({ type: 'timestamptz' })

@@ -18,6 +18,31 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
+const AUTH_SESSION_HINT_KEY = 'auth_session_active'
+
+function setSessionHint(active: boolean) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  if (active) {
+    window.localStorage.setItem(AUTH_SESSION_HINT_KEY, 'true')
+    return
+  }
+
+  window.localStorage.removeItem(AUTH_SESSION_HINT_KEY)
+}
+
+function shouldAttemptSessionRestore() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  return (
+    window.location.pathname === '/auth/google/callback'
+    || window.localStorage.getItem(AUTH_SESSION_HINT_KEY) === 'true'
+  )
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -28,12 +53,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(nextToken)
     setAccessToken(nextToken)
     setUser(nextUser)
+    setSessionHint(true)
   }
 
   const clearSession = () => {
     setToken(null)
     setAccessToken(null)
     setUser(null)
+    setSessionHint(false)
   }
 
   const checkPendingBookings = async () => {
@@ -52,6 +79,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    if (!shouldAttemptSessionRestore()) {
+      setIsLoading(false)
+      return
+    }
+
     authService.refresh()
       .then((data) => {
         applySession(data.access_token, data.user)
@@ -61,6 +93,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearSession()
       })
       .finally(() => setIsLoading(false))
+  }, [])
+
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      clearSession()
+    }
+
+    window.addEventListener('auth:expired', handleAuthExpired)
+    return () => {
+      window.removeEventListener('auth:expired', handleAuthExpired)
+    }
   }, [])
 
   const login = async (email: string, password: string, remember: boolean = false) => {
