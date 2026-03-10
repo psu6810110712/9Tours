@@ -1,17 +1,20 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+﻿import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { User } from '../types/user'
 import { authService } from '../services/authService'
 import { bookingService } from '../services/bookingService'
 import { setAccessToken } from '../services/api'
 import { toast } from 'react-hot-toast'
+import type { CustomerPrefix } from '../utils/profileValidation'
 
 interface AuthContextType {
   user: User | null
   token: string | null
   isLoading: boolean
-  login: (email: string, password: string, remember?: boolean) => Promise<User>
-  register: (name: string, email: string, phone: string, password: string) => Promise<User>
-  loginWithGoogle: () => void
+  login: (identifier: string, password: string, remember?: boolean) => Promise<User>
+  register: (prefix: CustomerPrefix, name: string, email: string, phone: string, password: string) => Promise<User>
+  updateOwnProfile: (prefix: CustomerPrefix, name: string, email: string, phone: string) => Promise<User>
+  refreshCurrentUser: () => Promise<User>
+  loginWithGoogle: (returnTo?: string) => void
   completeGoogleLogin: () => Promise<User>
   logout: () => Promise<void>
   isAdmin: boolean
@@ -49,10 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  const applyUser = (nextUser: User) => {
+    setUser(nextUser)
+  }
+
   const applySession = (nextToken: string, nextUser: User) => {
     setToken(nextToken)
     setAccessToken(nextToken)
-    setUser(nextUser)
+    applyUser(nextUser)
     setSessionHint(true)
   }
 
@@ -68,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const bookings = await bookingService.getMyBookings()
       const pending = bookings.filter(b => b.status === 'pending_payment')
       if (pending.length > 0) {
-        toast(`คุณมีรายการจองที่ยังไม่ได้ชำระเงิน กรุณาดำเนินการชำระเงินให้เสร็จสิ้น`, {
+        toast('คุณมีรายการจองที่ยังไม่ได้ชำระเงิน กรุณาดำเนินการชำระเงินให้เสร็จสิ้น', {
           duration: 6000,
           icon: '⚠️',
         })
@@ -106,21 +113,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const login = async (email: string, password: string, remember: boolean = false) => {
-    const data = await authService.login({ email, password, rememberMe: remember })
+  const refreshCurrentUser = async () => {
+    const currentUser = await authService.getMe()
+    applyUser(currentUser)
+    return currentUser
+  }
+
+  const login = async (identifier: string, password: string, remember: boolean = false) => {
+    const data = await authService.login({ identifier, password, rememberMe: remember })
     applySession(data.access_token, data.user)
     setTimeout(() => void checkPendingBookings(), 500)
     return data.user
   }
 
-  const register = async (name: string, email: string, phone: string, password: string) => {
-    const data = await authService.register({ name, email, phone, password })
+  const register = async (prefix: CustomerPrefix, name: string, email: string, phone: string, password: string) => {
+    const data = await authService.register({ prefix, name, email, phone, password })
     applySession(data.access_token, data.user)
     return data.user
   }
 
-  const loginWithGoogle = () => {
-    authService.loginWithGoogle()
+  const updateOwnProfile = async (prefix: CustomerPrefix, name: string, email: string, phone: string) => {
+    const nextUser = await authService.updateOwnProfile({ prefix, name, email, phone })
+    applyUser(nextUser)
+    return nextUser
+  }
+
+  const loginWithGoogle = (returnTo?: string) => {
+    authService.loginWithGoogle(returnTo)
   }
 
   const completeGoogleLogin = async () => {
@@ -142,7 +161,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user, token, isLoading,
-      login, register, loginWithGoogle, completeGoogleLogin, logout,
+      login, register, updateOwnProfile, refreshCurrentUser,
+      loginWithGoogle, completeGoogleLogin, logout,
       isAdmin: user?.role === 'admin',
     }}>
       {children}

@@ -1,6 +1,7 @@
 ﻿import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { clearOAuthReturnTo, consumeOAuthReturnTo } from '../services/authService'
 
 const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   customer_only: 'บัญชีนี้ต้องเข้าสู่ระบบด้วยอีเมลและรหัสผ่านเท่านั้น',
@@ -33,6 +34,7 @@ export default function GoogleAuthCallbackPage() {
     const status = params.get('status')
 
     if (status !== 'success') {
+      clearOAuthReturnTo()
       navigate('/', {
         replace: true,
         state: {
@@ -44,10 +46,20 @@ export default function GoogleAuthCallbackPage() {
     }
 
     void completeGoogleLogin()
-      .then(() => {
-        navigate('/', { replace: true })
+      .then((user) => {
+        const returnTo = consumeOAuthReturnTo()
+        if (user.role === 'customer' && !user.profileCompleted) {
+          navigate('/auth/complete-profile', {
+            replace: true,
+            state: { returnTo },
+          })
+          return
+        }
+
+        navigate(returnTo || '/', { replace: true })
       })
       .catch(() => {
+        clearOAuthReturnTo()
         navigate('/', {
           replace: true,
           state: {
@@ -59,9 +71,9 @@ export default function GoogleAuthCallbackPage() {
   }, [completeGoogleLogin, location.search, navigate])
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
-      <div className="w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-sm p-8 text-center">
-        <div className="w-10 h-10 mx-auto rounded-full border-4 border-gray-200 border-t-[var(--color-primary)] animate-spin" />
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-6">
+      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-[var(--color-primary)]" />
         <h1 className="mt-6 text-xl font-semibold text-gray-900">กำลังเข้าสู่ระบบด้วย Google</h1>
         <p className="mt-2 text-sm text-gray-500">กรุณารอสักครู่ ระบบกำลังยืนยันตัวตนและสร้างเซสชันให้คุณ</p>
       </div>
