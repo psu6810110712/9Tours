@@ -60,28 +60,71 @@ export default function ScheduleSection({
 
                 <div className="flex items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-1">
-                        <span className="text-xs text-gray-500">{tourType === 'package' ? 'จาก' : 'วันที่'}</span>
+                        <span className="text-xs text-gray-500">จาก</span>
                         <input
                             type="date"
                             value={bulkFrom}
                             onChange={(e) => {
-                                setBulkFrom(e.target.value)
-                                if (tourType === 'one_day') setBulkTo(e.target.value)
+                                const newFrom = e.target.value;
+                                setBulkFrom(newFrom);
+
+                                if (newFrom && bulkTo) {
+                                    const nextDays = new Set<number>();
+                                    const start = new Date(newFrom);
+                                    const end = new Date(bulkTo);
+                                    if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
+                                        let current = new Date(start);
+                                        while (current <= end) {
+                                            nextDays.add(current.getDay());
+                                            current.setDate(current.getDate() + 1);
+                                        }
+                                        setBulkDays(nextDays);
+                                    }
+                                } else if (newFrom) {
+                                    const start = new Date(newFrom);
+                                    if (!isNaN(start.getTime())) {
+                                        const nextDays = new Set<number>();
+                                        nextDays.add(start.getDay());
+                                        setBulkDays(nextDays);
+                                    }
+                                }
                             }}
                             className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-orange-400"
                         />
                     </div>
-                    {tourType === 'package' && (
-                        <div className="flex items-center gap-1">
-                            <span className="text-xs text-gray-500">ถึง</span>
-                            <input
-                                type="date"
-                                value={bulkTo}
-                                onChange={(e) => setBulkTo(e.target.value)}
-                                className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-orange-400"
-                            />
-                        </div>
-                    )}
+                    <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-500">ถึง</span>
+                        <input
+                            type="date"
+                            value={bulkTo}
+                            onChange={(e) => {
+                                const newTo = e.target.value;
+                                setBulkTo(newTo);
+
+                                if (bulkFrom && newTo) {
+                                    const nextDays = new Set<number>();
+                                    const start = new Date(bulkFrom);
+                                    const end = new Date(newTo);
+                                    if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
+                                        let current = new Date(start);
+                                        while (current <= end) {
+                                            nextDays.add(current.getDay());
+                                            current.setDate(current.getDate() + 1);
+                                        }
+                                        setBulkDays(nextDays);
+                                    }
+                                } else if (newTo) {
+                                    const end = new Date(newTo);
+                                    if (!isNaN(end.getTime())) {
+                                        const nextDays = new Set<number>();
+                                        nextDays.add(end.getDay());
+                                        setBulkDays(nextDays);
+                                    }
+                                }
+                            }}
+                            className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-orange-400"
+                        />
+                    </div>
 
                     {tourType === 'package' && (
                         <div className="flex items-center gap-1">
@@ -109,27 +152,25 @@ export default function ScheduleSection({
                     </div>
                 </div>
 
-                {tourType === 'package' && (
-                    <div className="flex gap-1.5 flex-wrap">
-                        {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((label, dayIdx) => (
-                            <button
-                                key={dayIdx}
-                                type="button"
-                                onClick={() => {
-                                    const next = new Set(bulkDays);
-                                    next.has(dayIdx) ? next.delete(dayIdx) : next.add(dayIdx);
-                                    setBulkDays(next);
-                                }}
-                                className={`w-8 h-8 rounded-full text-xs font-semibold transition-colors ${bulkDays.has(dayIdx)
-                                    ? 'bg-orange-400 text-white'
-                                    : 'bg-white border border-gray-300 text-gray-500'
-                                    }`}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
-                )}
+                <div className="flex gap-1.5 flex-wrap">
+                    {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((label, dayIdx) => (
+                        <button
+                            key={dayIdx}
+                            type="button"
+                            onClick={() => {
+                                const next = new Set(bulkDays);
+                                next.has(dayIdx) ? next.delete(dayIdx) : next.add(dayIdx);
+                                setBulkDays(next);
+                            }}
+                            className={`w-8 h-8 rounded-full text-xs font-semibold transition-colors ${bulkDays.has(dayIdx)
+                                ? 'bg-orange-400 text-white'
+                                : 'bg-white border border-gray-300 text-gray-500'
+                                }`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
 
                 {tourType === 'one_day' && (
                     <div className="border border-blue-200 bg-blue-50 rounded-lg p-2 space-y-1.5">

@@ -212,13 +212,22 @@ export default function AdminTourFormPage() {
     }
 
     while (cur <= end) {
-      if (tourType === 'one_day' || bulkDays.has(cur.getDay())) {
-        const startDateStr = cur.toISOString().slice(0, 10)
+      if (bulkDays.has(cur.getDay())) {
+        // Use local date instead of UTC to avoid timezone shift issues
+        const year = cur.getFullYear()
+        const month = String(cur.getMonth() + 1).padStart(2, '0')
+        const day = String(cur.getDate()).padStart(2, '0')
+        const startDateStr = `${year}-${month}-${day}`
+
         const endDateObj = new Date(cur)
         if (tourType === 'package' && bulkDuration > 1) {
           endDateObj.setDate(endDateObj.getDate() + (bulkDuration - 1))
         }
-        const endDateStr = endDateObj.toISOString().slice(0, 10)
+
+        const endYear = endDateObj.getFullYear()
+        const endMonth = String(endDateObj.getMonth() + 1).padStart(2, '0')
+        const endDay = String(endDateObj.getDate()).padStart(2, '0')
+        const endDateStr = `${endYear}-${endMonth}-${endDay}`
 
         for (const round of rounds) {
           const alreadyExists = schedules.some(
