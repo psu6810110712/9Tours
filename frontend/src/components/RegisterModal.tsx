@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import Modal from './common/Modal'
 
@@ -15,18 +15,15 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
   const [agree, setAgree] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { register } = useAuth()
+  const { register, loginWithGoogle } = useAuth()
 
-  // ฟังก์ชันลบคำนำหน้า
   const sanitizeName = (fullName: string) => {
-    // Regex เพื่อค้นหาคำนำหน้าทั้งไทยและอังกฤษที่อาจมีจุด (.) และช่องว่างตามหลัง
-    const prefixRegex = /^(นาย|นาง|นางสาว|เด็กชาย|เด็กหญิง|ด\.ช\.|ด\.ญ\.|Mr\.|Mrs\.|Ms\.|Miss)\s*/i;
-    return fullName.replace(prefixRegex, '').trim();
+    const prefixRegex = /^(นาย|นาง|นางสาว|เด็กชาย|เด็กหญิง|ด\.ช\.|ด\.ญ\.|Mr\.|Mrs\.|Ms\.|Miss)\s*/i
+    return fullName.replace(prefixRegex, '').trim()
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // ตรวจสอบว่ากดยอมรับข้อตกลงก่อนส่งฟอร์ม
     if (!agree) {
       setError('กรุณายอมรับข้อตกลงก่อน')
       return
@@ -34,10 +31,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
     setError('')
     setLoading(true)
     try {
-      // 1. นำชื่อมาทำความสะอาด (ตัดคำนำหน้าออก)
-      const cleanName = sanitizeName(name);
-
-      // 2. ส่ง cleanName ให้ Backend แทน name ดิบ
+      const cleanName = sanitizeName(name)
       await register(cleanName, email, phone, password)
       onClose()
     } catch {
@@ -47,9 +41,13 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
     }
   }
 
+  const handleGoogleSignIn = () => {
+    setError('')
+    loginWithGoogle()
+  }
+
   return (
     <Modal isOpen={true} onClose={onClose} width="max-w-sm">
-      {/* ปุ่มปิด — วางด้านบนขวาของ modal */}
       <button
         onClick={onClose}
         className="absolute top-4 right-4 w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:border-gray-400 transition-colors"
@@ -57,10 +55,26 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
         ✕
       </button>
 
-      {/* โลโก้และหัวข้อ */}
       <div className="flex flex-col items-center mb-4">
         <img src="/logo.png" alt="9Tours" className="h-20 w-auto mb-3" />
         <h2 className="text-2xl font-bold text-gray-800">สมัครสมาชิก</h2>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        className="w-full border border-gray-300 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-3 rounded-full transition-colors"
+      >
+        สมัครด้วย Google
+      </button>
+
+      <div className="relative my-4">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-200" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-gray-400">หรือ</span>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -129,7 +143,6 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
           </span>
         </label>
 
-        {/* แสดงข้อความผิดพลาดเมื่อสมัครไม่สำเร็จ */}
         {error && (
           <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
         )}
@@ -149,6 +162,6 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
           เข้าสู่ระบบที่นี่
         </button>
       </p>
-    </Modal >
+    </Modal>
   )
 }

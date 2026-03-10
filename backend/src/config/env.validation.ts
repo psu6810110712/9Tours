@@ -2,6 +2,7 @@ const DEFAULT_ACCESS_TOKEN_TTL = '15m';
 const DEFAULT_REFRESH_TOKEN_TTL_DAYS = 7;
 const DEFAULT_REMEMBER_ME_REFRESH_TTL_DAYS = 30;
 const DEFAULT_AUTH_COOKIE_NAME = 'refresh_token';
+const DEFAULT_FRONTEND_URL = 'http://localhost:5173';
 
 function readString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
@@ -24,9 +25,24 @@ export function validateEnv(config: Record<string, unknown>) {
   const nodeEnv = readString(config.NODE_ENV) ?? 'development';
   const jwtSecret = readString(config.JWT_SECRET);
   const corsOrigins = readString(config.CORS_ORIGINS);
+  const googleClientId = readString(config.GOOGLE_CLIENT_ID);
+  const googleClientSecret = readString(config.GOOGLE_CLIENT_SECRET);
+  const googleCallbackUrl = readString(config.GOOGLE_CALLBACK_URL);
+  const frontendUrl = readString(config.FRONTEND_URL) ?? DEFAULT_FRONTEND_URL;
+  const configuredGoogleValues = [
+    googleClientId,
+    googleClientSecret,
+    googleCallbackUrl,
+  ].filter(Boolean).length;
 
   if (!jwtSecret) {
     throw new Error('JWT_SECRET environment variable is not defined');
+  }
+
+  if (configuredGoogleValues > 0 && configuredGoogleValues < 3) {
+    throw new Error(
+      'GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_CALLBACK_URL must all be defined together',
+    );
   }
 
   if (nodeEnv === 'production' && !corsOrigins) {
@@ -51,5 +67,9 @@ export function validateEnv(config: Record<string, unknown>) {
     ),
     AUTH_COOKIE_NAME: readString(config.AUTH_COOKIE_NAME) ?? DEFAULT_AUTH_COOKIE_NAME,
     AUTH_COOKIE_DOMAIN: readString(config.AUTH_COOKIE_DOMAIN),
+    GOOGLE_CLIENT_ID: googleClientId,
+    GOOGLE_CLIENT_SECRET: googleClientSecret,
+    GOOGLE_CALLBACK_URL: googleCallbackUrl,
+    FRONTEND_URL: frontendUrl,
   };
 }

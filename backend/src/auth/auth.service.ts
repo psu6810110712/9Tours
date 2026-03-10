@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+﻿import { Injectable, BadRequestException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,13 +7,19 @@ import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes, randomUUID } from 'crypto';
 import type { StringValue } from 'ms';
 import { UsersService } from '../users/users.service';
-import { User, UserRole } from '../users/entities/user.entity';
+import { AuthProvider, User, UserRole } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { RefreshSession } from './entities/refresh-session.entity';
 
 export interface SessionRequestContext {
   ipAddress?: string | null;
   userAgent?: string | null;
+}
+
+export interface GoogleOAuthProfile {
+  email: string | null;
+  name: string | null;
+  providerUserId: string;
 }
 
 @Injectable()
@@ -38,6 +44,8 @@ export class AuthService {
       password: createUserDto.password,
       role: UserRole.CUSTOMER,
       phone: createUserDto.phone,
+      authProvider: AuthProvider.LOCAL,
+      providerUserId: null,
     }, { hashPassword: true });
 
     return this.issueTokensForUser(user, { ...context, rememberMe: false });
@@ -60,6 +68,48 @@ export class AuthService {
     }
 
     return this.issueTokensForUser(user, { ...context, rememberMe });
+  }
+
+  async loginWithGoogle(profile: GoogleOAuthProfile, context?: SessionRequestContext) {
+    const email = profile.email?.trim().toLowerCase() ?? null;
+    if (!email) {
+      throw new BadRequestException('GOOGLE_OAUTH_EMAIL_REQUIRED');
+    }
+
+    if (!profile.providerUserId) {
+      throw new UnauthorizedException('GOOGLE_OAUTH_FAILED');
+    }
+
+    let user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      user = await this.usersService.create({
+        email,
+        name: profile.name?.trim() || email,
+        password: null,
+        role: UserRole.CUSTOMER,
+        phone: null,
+        authProvider: AuthProvider.GOOGLE,
+        providerUserId: profile.providerUserId,
+      });
+      return this.issueTokensForUser(user, { ...context, rememberMe: false });
+    }
+
+    if (user.role !== UserRole.CUSTOMER) {
+      throw new ForbiddenException('GOOGLE_OAUTH_CUSTOMER_ONLY');
+    }
+
+    if (user.providerUserId && user.providerUserId !== profile.providerUserId) {
+      throw new UnauthorizedException('GOOGLE_OAUTH_FAILED');
+    }
+
+    if (user.authProvider !== AuthProvider.GOOGLE || user.providerUserId !== profile.providerUserId) {
+      user.authProvider = AuthProvider.GOOGLE;
+      user.providerUserId = profile.providerUserId;
+      user = await this.usersService.save(user);
+    }
+
+    return this.issueTokensForUser(user, { ...context, rememberMe: false });
   }
 
   async refreshToken(refreshToken: string, context?: SessionRequestContext) {

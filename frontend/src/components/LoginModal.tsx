@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import Modal from './common/Modal'
 
@@ -14,7 +14,7 @@ export default function LoginModal({ onClose, onSwitchToRegister, initialError =
   const [remember, setRemember] = useState(false)
   const [error, setError] = useState(initialError)
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const { login, loginWithGoogle } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,7 +22,6 @@ export default function LoginModal({ onClose, onSwitchToRegister, initialError =
     setLoading(true)
     try {
       await login(email, password, remember)
-
       onClose()
     } catch {
       setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
@@ -31,9 +30,13 @@ export default function LoginModal({ onClose, onSwitchToRegister, initialError =
     }
   }
 
+  const handleGoogleSignIn = () => {
+    setError('')
+    loginWithGoogle()
+  }
+
   return (
     <Modal isOpen={true} onClose={onClose} width="max-w-sm">
-      {/* ปุ่มปิด — วางด้านบนขวาของ modal */}
       <button
         onClick={onClose}
         className="absolute top-4 right-4 w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:border-gray-400 transition-colors"
@@ -41,10 +44,26 @@ export default function LoginModal({ onClose, onSwitchToRegister, initialError =
         ✕
       </button>
 
-      {/* โลโก้และหัวข้อ */}
       <div className="flex flex-col items-center mb-6">
         <img src="/logo.png" alt="9Tours" className="h-20 w-auto mb-3" />
         <h2 className="text-2xl font-bold text-gray-800">ยินดีต้อนรับ!</h2>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        className="w-full border border-gray-300 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-3 rounded-full transition-colors"
+      >
+        เข้าสู่ระบบด้วย Google
+      </button>
+
+      <div className="relative my-4">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-200" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-gray-400">หรือ</span>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -84,7 +103,6 @@ export default function LoginModal({ onClose, onSwitchToRegister, initialError =
           <span className="text-sm text-gray-600">จดจำฉัน</span>
         </label>
 
-        {/* แสดงข้อความผิดพลาดเมื่อ login ไม่สำเร็จ */}
         {error && (
           <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
         )}
@@ -104,6 +122,6 @@ export default function LoginModal({ onClose, onSwitchToRegister, initialError =
           สมัครเลย
         </button>
       </p>
-    </Modal >
+    </Modal>
   )
 }

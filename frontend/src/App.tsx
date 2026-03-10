@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+﻿import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import Layout from './components/Layout'
@@ -13,6 +13,7 @@ import AdminBookings from './pages/admin/AdminBookings'
 import ProtectedRoute from './components/ProtectedRoute'
 import BookingInfoPage from './pages/BookingInfoPage'
 import PaymentPage from './pages/PaymentPage'
+import GoogleAuthCallbackPage from './pages/GoogleAuthCallbackPage'
 
 function App() {
   return (
@@ -32,6 +33,8 @@ function App() {
       />
       <BrowserRouter>
         <Routes>
+          <Route path="/auth/google/callback" element={<GoogleAuthCallbackPage />} />
+
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/tours" element={<ToursPage />} />

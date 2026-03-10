@@ -1,8 +1,9 @@
-import {
+﻿import {
   Body,
   Controller,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Post,
   Req,
@@ -12,10 +13,12 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { CookieOptions, Request, Response } from 'express';
-import { AuthService } from './auth.service';
+import { AuthService, type GoogleOAuthProfile } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { GoogleOAuthCallbackGuard } from './guards/google-oauth-callback.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -53,6 +56,30 @@ export class AuthController {
     );
     this.setRefreshCookie(res, refresh_token, rememberMe);
     return result;
+  }
+
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuth() {
+    return undefined;
+  }
+
+  @Get('google/callback')
+  @UseGuards(GoogleOAuthCallbackGuard)
+  async googleCallback(
+    @Req() req: Request & { user: GoogleOAuthProfile },
+    @Res() res: Response,
+  ) {
+    try {
+      const { refresh_token, rememberMe } = await this.authService.loginWithGoogle(
+        req.user,
+        this.extractSessionContext(req),
+      );
+      this.setRefreshCookie(res, refresh_token, rememberMe);
+      return res.redirect(this.buildFrontendCallbackUrl('success'));
+    } catch (error) {
+      return res.redirect(this.buildFrontendCallbackUrl('error', this.mapGoogleOAuthError(error)));
+    }
   }
 
   @UseGuards(JwtAuthGuard)
@@ -121,7 +148,32 @@ export class AuthController {
     return { ipAddress, userAgent };
   }
 
+  private buildFrontendCallbackUrl(status: 'success' | 'error', error?: string) {
+    const url = new URL('/auth/google/callback', this.frontendUrl);
+    url.searchParams.set('status', status);
+    if (error) {
+      url.searchParams.set('error', error);
+    }
+    return url.toString();
+  }
+
+  private mapGoogleOAuthError(error: unknown) {
+    if (error instanceof HttpException) {
+      if (error.message === 'GOOGLE_OAUTH_CUSTOMER_ONLY') {
+        return 'customer_only';
+      }
+      if (error.message === 'GOOGLE_OAUTH_EMAIL_REQUIRED') {
+        return 'email_required';
+      }
+    }
+    return 'oauth_failed';
+  }
+
   private get cookieName() {
     return this.configService.get<string>('AUTH_COOKIE_NAME') ?? 'refresh_token';
+  }
+
+  private get frontendUrl() {
+    return this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
   }
 }

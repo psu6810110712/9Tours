@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import LoginModal from './LoginModal'
@@ -20,11 +20,12 @@ export default function Navbar() {
 
   const [modalError, setModalError] = useState('')
 
-  // จัดการ Redirect จาก ProtectedRoute หรือ state ข้ามหน้า
   useEffect(() => {
-    const state = location.state as { requireLogin?: boolean; authExpired?: boolean } | null
+    const state = location.state as { requireLogin?: boolean; authExpired?: boolean; oauthError?: string } | null
     if (state?.requireLogin) {
-      if (state.authExpired) {
+      if (state.oauthError) {
+        setModalError(state.oauthError)
+      } else if (state.authExpired) {
         setModalError('เซสชันของคุณหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง')
       }
       setModal('login')
@@ -32,17 +33,13 @@ export default function Navbar() {
     }
   }, [location, navigate, pathname])
 
-  // จัดการ Token หมดอายุจาก api.ts interceptor
   useEffect(() => {
     const handleAuthExpired = () => {
       if (pathname === '/') {
-        // อยู่หน้า home อยู่แล้ว โชว์ Modal ได้เลย (ไม่เกิดการ Unmount Navbar)
-        void logout() // ล้าง context และ storage ทุกอย่าง
+        void logout()
         setModalError('เซสชันของคุณหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง')
         setModal('login')
       } else {
-        // ย้ายคำสั่ง navigate ขึ้นมาก่อน logout เพื่อป้องกัน Race condition กับ ProtectedRoute
-        // ทำให้ Router เปลี่ยนหน้าเป็น '/' ทันทีใน Batch ถัดไป ป้องกันการเตะซ้ำจาก ProtectedRoute
         navigate('/', { replace: true, state: { requireLogin: true, authExpired: true } })
         void logout()
       }
@@ -74,16 +71,12 @@ export default function Navbar() {
 
   return (
     <>
-      {/* border-b แทน shadow ดูสะอาดและ professional กว่า */}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-8 h-[68px] flex items-center justify-between gap-8">
-
-          {/* โลโก้ */}
           <Link to="/" className="flex-shrink-0">
             <img src="/logo.png" alt="9Tours" className="h-16 w-auto" />
           </Link>
 
-          {/* เมนูกลาง — breathing room มากขึ้น */}
           <div className="hidden md:flex items-center gap-8 text-[15px]">
             {NAV_LINKS.map(({ label, path }) => (
               <Link key={path} to={path} className={navLinkClass(path)}>
@@ -126,7 +119,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* ด้านขวา */}
           <div className="flex items-center gap-4 ml-auto">
             {user ? (
               <>
@@ -140,7 +132,6 @@ export default function Navbar() {
                   การจองของฉัน
                 </Link>
 
-                {/* Avatar dropdown */}
                 <div className="relative">
                   <button
                     onClick={() => setMenuOpen(!menuOpen)}
@@ -169,9 +160,11 @@ export default function Navbar() {
                 </div>
               </>
             ) : (
-              /* ปุ่มใหญ่ขึ้น rounded-xl และ font-semibold ดูหนักแน่นขึ้น */
               <button
-                onClick={() => setModal('login')}
+                onClick={() => {
+                  setModalError('')
+                  setModal('login')
+                }}
                 className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
               >
                 เข้าสู่ระบบ
@@ -195,7 +188,13 @@ export default function Navbar() {
         />
       )}
       {modal === 'register' && (
-        <RegisterModal onClose={() => setModal(null)} onSwitchToLogin={() => setModal('login')} />
+        <RegisterModal
+          onClose={() => setModal(null)}
+          onSwitchToLogin={() => {
+            setModal('login')
+            setModalError('')
+          }}
+        />
       )}
     </>
   )

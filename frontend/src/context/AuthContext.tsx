@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+﻿import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { User } from '../types/user'
 import { authService } from '../services/authService'
 import { bookingService } from '../services/bookingService'
@@ -11,6 +11,8 @@ interface AuthContextType {
   isLoading: boolean
   login: (email: string, password: string, remember?: boolean) => Promise<User>
   register: (name: string, email: string, phone: string, password: string) => Promise<User>
+  loginWithGoogle: () => void
+  completeGoogleLogin: () => Promise<User>
   logout: () => Promise<void>
   isAdmin: boolean
 }
@@ -74,6 +76,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.user
   }
 
+  const loginWithGoogle = () => {
+    authService.loginWithGoogle()
+  }
+
+  const completeGoogleLogin = async () => {
+    const data = await authService.refresh()
+    applySession(data.access_token, data.user)
+    setTimeout(() => void checkPendingBookings(), 500)
+    return data.user
+  }
+
   const logout = async () => {
     clearSession()
     try {
@@ -86,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user, token, isLoading,
-      login, register, logout,
+      login, register, loginWithGoogle, completeGoogleLogin, logout,
       isAdmin: user?.role === 'admin',
     }}>
       {children}

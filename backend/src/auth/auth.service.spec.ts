@@ -1,4 +1,4 @@
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+﻿import { BadRequestException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { RefreshSession } from './entities/refresh-session.entity';
-import { User, UserRole } from '../users/entities/user.entity';
+import { AuthProvider, User, UserRole } from '../users/entities/user.entity';
 
 type RefreshSessionRecord = RefreshSession & { user?: User };
 
@@ -26,6 +26,8 @@ describe('AuthService', () => {
     phone: '0812345678',
     password: await bcrypt.hash('password123', 10),
     role: UserRole.CUSTOMER,
+    authProvider: AuthProvider.LOCAL,
+    providerUserId: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     bookings: [],
@@ -41,6 +43,7 @@ describe('AuthService', () => {
     usersService = {
       findByEmail: jest.fn(),
       create: jest.fn(),
+      save: jest.fn(),
       findAll: jest.fn(),
       findOne: jest.fn(),
       update: jest.fn(),
@@ -166,6 +169,8 @@ describe('AuthService', () => {
     expect(usersService.create).toHaveBeenCalledWith(expect.objectContaining({
       email: 'PUBLIC@EXAMPLE.COM',
       role: UserRole.CUSTOMER,
+      authProvider: AuthProvider.LOCAL,
+      providerUserId: null,
     }), { hashPassword: true });
     expect(result.user.role).toBe(UserRole.CUSTOMER);
     expect(result.refresh_token).toEqual(expect.any(String));
@@ -180,7 +185,78 @@ describe('AuthService', () => {
       name: 'Duplicate User',
       email: 'test@example.com',
       password: 'password123',
-    })).rejects.toBeInstanceOf(BadRequestException);
+    } as any)).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('creates a customer account for a new Google user', async () => {
+    const createdUser = await createUser({
+      email: 'google@example.com',
+      password: null,
+      phone: null,
+      authProvider: AuthProvider.GOOGLE,
+      providerUserId: 'google-user-1',
+    });
+    knownUsers[createdUser.id] = createdUser;
+    usersService.findByEmail.mockResolvedValue(null);
+    usersService.create.mockResolvedValue(createdUser);
+
+    const result = await authService.loginWithGoogle({
+      email: 'google@example.com',
+      name: 'Google User',
+      providerUserId: 'google-user-1',
+    });
+
+    expect(usersService.create).toHaveBeenCalledWith(expect.objectContaining({
+      email: 'google@example.com',
+      role: UserRole.CUSTOMER,
+      authProvider: AuthProvider.GOOGLE,
+      providerUserId: 'google-user-1',
+      password: null,
+      phone: null,
+    }));
+    expect(result.user.email).toBe('google@example.com');
+  });
+
+  it('auto-links Google to an existing customer with the same email', async () => {
+    const existingUser = await createUser({
+      email: 'customer@example.com',
+      authProvider: AuthProvider.LOCAL,
+      providerUserId: null,
+    });
+    knownUsers[existingUser.id] = existingUser;
+    usersService.findByEmail.mockResolvedValue(existingUser);
+    usersService.save.mockImplementation(async (user) => {
+      knownUsers[user.id] = user;
+      return user;
+    });
+
+    const result = await authService.loginWithGoogle({
+      email: 'customer@example.com',
+      name: 'Customer User',
+      providerUserId: 'google-user-2',
+    });
+
+    expect(usersService.save).toHaveBeenCalledWith(expect.objectContaining({
+      id: existingUser.id,
+      authProvider: AuthProvider.GOOGLE,
+      providerUserId: 'google-user-2',
+    }));
+    expect(result.user.id).toBe(existingUser.id);
+  });
+
+  it('blocks Google login for admin accounts with the same email', async () => {
+    const adminUser = await createUser({
+      email: 'admin@example.com',
+      role: UserRole.ADMIN,
+    });
+    knownUsers[adminUser.id] = adminUser;
+    usersService.findByEmail.mockResolvedValue(adminUser);
+
+    await expect(authService.loginWithGoogle({
+      email: 'admin@example.com',
+      name: 'Admin User',
+      providerUserId: 'google-admin',
+    })).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('rotates refresh sessions and rejects reuse of old refresh tokens', async () => {
