@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, type FormEvent } from 'react'
+﻿import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import BookingSummaryCard from '../components/booking/BookingSummaryCard'
 import ProgressBar from '../components/common/ProgressBar'
@@ -16,13 +16,11 @@ import {
   type CustomerPrefix,
 } from '../utils/profileValidation'
 
-interface ContactFormState {
+interface ContactDetails {
   prefix: CustomerPrefix
   name: string
   phone: string
   email: string
-  specialRequest: string
-  useAccountInfo: 'yes' | 'no'
 }
 
 interface ContactFormErrors {
@@ -55,14 +53,16 @@ export default function BookingInfoPage() {
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<ContactFormErrors>({})
-  const [formData, setFormData] = useState<ContactFormState>({
+  const [contactMode, setContactMode] = useState<'yes' | 'no'>('yes')
+  const accountContact = useMemo<ContactDetails>(() => ({
     prefix: user?.prefix ?? 'นาย',
     name: user?.name ?? '',
     phone: user?.phone ?? '',
     email: user?.email ?? '',
-    specialRequest: '',
-    useAccountInfo: 'yes',
-  })
+  }), [user?.email, user?.name, user?.phone, user?.prefix])
+  const [manualContactDraft, setManualContactDraft] = useState<ContactDetails>(accountContact)
+  const [hasManualDraft, setHasManualDraft] = useState(false)
+  const [specialRequest, setSpecialRequest] = useState('')
 
   useEffect(() => {
     if (!tourId) {
@@ -82,18 +82,12 @@ export default function BookingInfoPage() {
   }, [tourId, navigate])
 
   useEffect(() => {
-    if (formData.useAccountInfo !== 'yes' || !user) {
+    if (hasManualDraft) {
       return
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      prefix: user.prefix ?? prev.prefix,
-      name: user.name ?? '',
-      email: user.email ?? '',
-      phone: user.phone ?? '',
-    }))
-  }, [formData.useAccountInfo, user])
+    setManualContactDraft(accountContact)
+  }, [accountContact, hasManualDraft])
 
   if (loading) {
     return (
@@ -109,6 +103,8 @@ export default function BookingInfoPage() {
   const totalChildPrice = children * childPrice
   const totalPrice = totalAdultPrice + totalChildPrice
   const selectedSchedule = tour?.schedules?.find((schedule) => schedule.id === Number(scheduleId))
+  const resolvedContact = contactMode === 'yes' ? accountContact : manualContactDraft
+  const isAccountMode = contactMode === 'yes'
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) {
@@ -133,9 +129,15 @@ export default function BookingInfoPage() {
       : (tour.images[0] as { url?: string }).url ?? ''
     : 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300'
 
-  const handleFieldChange = <TField extends keyof ContactFormState>(field: TField, value: ContactFormState[TField]) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+  const handleManualFieldChange = <TField extends keyof ContactDetails>(field: TField, value: ContactDetails[TField]) => {
+    setManualContactDraft((prev) => ({ ...prev, [field]: value }))
+    setHasManualDraft(true)
     setErrors((prev) => ({ ...prev, [field]: undefined, form: undefined }))
+  }
+
+  const handleModeChange = (mode: 'yes' | 'no') => {
+    setContactMode(mode)
+    setErrors({})
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -147,10 +149,10 @@ export default function BookingInfoPage() {
     }
 
     const validationErrors = validateCustomerProfile({
-      prefix: formData.prefix,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
+      prefix: resolvedContact.prefix,
+      name: resolvedContact.name,
+      email: resolvedContact.email,
+      phone: resolvedContact.phone,
     })
 
     if (Object.values(validationErrors).some(Boolean)) {
@@ -167,11 +169,11 @@ export default function BookingInfoPage() {
         paxCount: adults + children,
         adults,
         children,
-        specialRequest: formData.specialRequest.trim() || undefined,
-        contactPrefix: formData.prefix,
-        contactName: sanitizeCustomerName(formData.name),
-        contactEmail: normalizeEmail(formData.email),
-        contactPhone: normalizeThaiPhoneInput(formData.phone) ?? formData.phone,
+        specialRequest: specialRequest.trim() || undefined,
+        contactPrefix: resolvedContact.prefix,
+        contactName: sanitizeCustomerName(resolvedContact.name),
+        contactEmail: normalizeEmail(resolvedContact.email),
+        contactPhone: normalizeThaiPhoneInput(resolvedContact.phone) ?? resolvedContact.phone,
       }
 
       const response = await bookingService.createBooking(payload)
@@ -241,9 +243,11 @@ export default function BookingInfoPage() {
                       คำนำหน้า<span className="text-red-500">*</span>
                     </label>
                     <select
-                      className={inputClass(errors.prefix)}
-                      value={formData.prefix}
-                      onChange={(event) => handleFieldChange('prefix', event.target.value as CustomerPrefix)}
+                      data-testid="contact-prefix"
+                      className={`${inputClass(errors.prefix)} ${isAccountMode ? 'cursor-not-allowed bg-gray-100 text-gray-500' : ''}`}
+                      value={resolvedContact.prefix}
+                      onChange={(event) => handleManualFieldChange('prefix', event.target.value as CustomerPrefix)}
+                      disabled={isAccountMode}
                     >
                       {PREFIX_OPTIONS.map((option) => (
                         <option key={option} value={option}>
@@ -259,11 +263,13 @@ export default function BookingInfoPage() {
                       ชื่อ-นามสกุล<span className="text-red-500">*</span>
                     </label>
                     <input
+                      data-testid="contact-name"
                       required
-                      className={inputClass(errors.name)}
-                      value={formData.name}
-                      onChange={(event) => handleFieldChange('name', event.target.value)}
+                      className={`${inputClass(errors.name)} ${isAccountMode ? 'cursor-not-allowed bg-gray-100 text-gray-500' : ''}`}
+                      value={resolvedContact.name}
+                      onChange={(event) => handleManualFieldChange('name', event.target.value)}
                       placeholder="farn patcharapon"
+                      readOnly={isAccountMode}
                     />
                     <p className="mt-2 text-sm text-gray-400">ตามที่ปรากฏอยู่บนบัตรประชาชน โดยไม่ต้องมีคำนำหน้าหรืออักษรพิเศษ</p>
                     {errors.name && <p className="mt-2 text-sm text-red-500">{errors.name}</p>}
@@ -276,12 +282,14 @@ export default function BookingInfoPage() {
                       หมายเลขโทรศัพท์<span className="text-red-500">*</span>
                     </label>
                     <input
+                      data-testid="contact-phone"
                       required
                       type="tel"
-                      className={inputClass(errors.phone)}
-                      value={formData.phone}
-                      onChange={(event) => handleFieldChange('phone', event.target.value)}
+                      className={`${inputClass(errors.phone)} ${isAccountMode ? 'cursor-not-allowed bg-gray-100 text-gray-500' : ''}`}
+                      value={resolvedContact.phone}
+                      onChange={(event) => handleManualFieldChange('phone', event.target.value)}
                       placeholder="0812345678 หรือ +66812345678"
+                      readOnly={isAccountMode}
                     />
                     <p className="mt-2 text-sm text-gray-400">ระบบจะบันทึกเป็นรูปแบบ 0XXXXXXXXX</p>
                     {errors.phone && <p className="mt-2 text-sm text-red-500">{errors.phone}</p>}
@@ -291,12 +299,14 @@ export default function BookingInfoPage() {
                       อีเมล<span className="text-red-500">*</span>
                     </label>
                     <input
+                      data-testid="contact-email"
                       required
                       type="email"
-                      className={inputClass(errors.email)}
-                      value={formData.email}
-                      onChange={(event) => handleFieldChange('email', event.target.value)}
+                      className={`${inputClass(errors.email)} ${isAccountMode ? 'cursor-not-allowed bg-gray-100 text-gray-500' : ''}`}
+                      value={resolvedContact.email}
+                      onChange={(event) => handleManualFieldChange('email', event.target.value)}
                       placeholder="name@example.com"
+                      readOnly={isAccountMode}
                     />
                     <p className="mt-2 text-sm text-gray-400">ใช้สำหรับส่งรายละเอียดการจองและใบยืนยัน</p>
                     {errors.email && <p className="mt-2 text-sm text-red-500">{errors.email}</p>}
@@ -306,39 +316,46 @@ export default function BookingInfoPage() {
 
               <div className="mt-8 flex flex-col gap-4 px-2 sm:flex-row sm:gap-8">
                 <label className="group flex cursor-pointer items-center gap-3">
-                  <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${formData.useAccountInfo === 'yes' ? 'border-primary' : 'border-gray-400 group-hover:border-blue-400'}`}>
-                    {formData.useAccountInfo === 'yes' && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
+                  <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${contactMode === 'yes' ? 'border-primary' : 'border-gray-400 group-hover:border-blue-400'}`}>
+                    {contactMode === 'yes' && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
                   </div>
                   <input
+                    data-testid="use-account-info"
                     type="radio"
                     className="hidden"
                     name="useAccount"
                     value="yes"
-                    checked={formData.useAccountInfo === 'yes'}
-                    onChange={() => handleFieldChange('useAccountInfo', 'yes')}
+                    checked={contactMode === 'yes'}
+                    onChange={() => handleModeChange('yes')}
                   />
-                  <span className={`text-base font-bold transition-colors ${formData.useAccountInfo === 'yes' ? 'text-primary' : 'text-gray-600 group-hover:text-gray-800'}`}>
+                  <span className={`text-base font-bold transition-colors ${contactMode === 'yes' ? 'text-primary' : 'text-gray-600 group-hover:text-gray-800'}`}>
                     ใช้ข้อมูลเดียวกับบัญชีของฉัน
                   </span>
                 </label>
 
                 <label className="group flex cursor-pointer items-center gap-3">
-                  <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${formData.useAccountInfo === 'no' ? 'border-primary' : 'border-gray-400 group-hover:border-blue-400'}`}>
-                    {formData.useAccountInfo === 'no' && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
+                  <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${contactMode === 'no' ? 'border-primary' : 'border-gray-400 group-hover:border-blue-400'}`}>
+                    {contactMode === 'no' && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
                   </div>
                   <input
+                    data-testid="use-manual-info"
                     type="radio"
                     className="hidden"
                     name="useAccount"
                     value="no"
-                    checked={formData.useAccountInfo === 'no'}
-                    onChange={() => handleFieldChange('useAccountInfo', 'no')}
+                    checked={contactMode === 'no'}
+                    onChange={() => handleModeChange('no')}
                   />
-                  <span className={`text-base font-bold transition-colors ${formData.useAccountInfo === 'no' ? 'text-primary' : 'text-gray-600 group-hover:text-gray-800'}`}>
+                  <span className={`text-base font-bold transition-colors ${contactMode === 'no' ? 'text-primary' : 'text-gray-600 group-hover:text-gray-800'}`}>
                     กรอกข้อมูลเองทั้งหมด
                   </span>
                 </label>
               </div>
+              <p className="mt-4 px-2 text-sm text-gray-500">
+                {isAccountMode
+                  ? 'กำลังใช้ข้อมูลจากบัญชีของคุณ หากต้องการแก้ไขเฉพาะรายการนี้ให้เลือกกรอกข้อมูลเองทั้งหมด'
+                  : 'คุณสามารถแก้ไขข้อมูลติดต่อสำหรับการจองนี้ได้ ระบบจะจำค่าที่คุณกรอกไว้ระหว่างการสลับโหมด'}
+              </p>
             </div>
 
             <div className="relative mt-10 rounded-2xl border border-gray-200 p-6 md:p-8">
@@ -346,11 +363,12 @@ export default function BookingInfoPage() {
                 คำขอเพิ่มเติม (หากมี)
               </span>
               <textarea
+                data-testid="special-request"
                 rows={4}
                 className="mt-2 w-full resize-none rounded-xl border border-gray-300 p-4 text-base outline-none transition-all placeholder:text-gray-300 focus:ring-2 focus:ring-primary"
                 placeholder="คำขอพิเศษ"
-                value={formData.specialRequest}
-                onChange={(event) => handleFieldChange('specialRequest', event.target.value)}
+                value={specialRequest}
+                onChange={(event) => setSpecialRequest(event.target.value)}
               />
               <p className="mt-3 text-sm text-gray-400">สามารถระบุข้อมูลเพิ่มเติมที่ต้องการให้ทีมงานรับทราบได้</p>
             </div>

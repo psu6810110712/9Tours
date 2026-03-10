@@ -96,11 +96,39 @@ test.describe('Customer booking flow', () => {
 
     await expect(page).toHaveURL(new RegExp(`/booking/${selectedTour.id}\\?`))
 
-    await page.getByText('กรอกข้อมูลเองทั้งหมด').click()
-    await page.locator('select').first().selectOption(customContact.prefix)
-    await page.locator('input[placeholder="farn patcharapon"]').fill(customContact.name)
-    await page.locator('input[placeholder="0812345678 หรือ +66812345678"]').fill(customContact.phone)
-    await page.locator('input[placeholder="name@example.com"]').fill(customContact.email)
+    const nameInput = page.getByTestId('contact-name')
+    const emailInput = page.getByTestId('contact-email')
+    const phoneInput = page.getByTestId('contact-phone')
+    const specialRequest = page.getByTestId('special-request')
+
+    await expect(nameInput).toHaveValue('Playwright Customer')
+    await expect(emailInput).toHaveValue(customer.email)
+    await expect(phoneInput).toHaveValue(customer.phone)
+
+    await page.getByTestId('use-manual-info').check({ force: true })
+    await expect(nameInput).toHaveValue('Playwright Customer')
+
+    await page.getByTestId('contact-prefix').selectOption(customContact.prefix)
+    await nameInput.fill(customContact.name)
+    await phoneInput.fill(customContact.phone)
+    await emailInput.fill(customContact.email)
+    await specialRequest.fill('Need vegetarian meal')
+
+    await expect(nameInput).toHaveValue(customContact.name)
+    await expect(emailInput).toHaveValue(customContact.email)
+    await expect(phoneInput).toHaveValue(customContact.phone)
+
+    await page.getByTestId('use-account-info').check({ force: true })
+    await expect(nameInput).toHaveValue('Playwright Customer')
+    await expect(emailInput).toHaveValue(customer.email)
+    await expect(phoneInput).toHaveValue(customer.phone)
+    await expect(specialRequest).toHaveValue('Need vegetarian meal')
+
+    await page.getByTestId('use-manual-info').check({ force: true })
+    await expect(nameInput).toHaveValue(customContact.name)
+    await expect(emailInput).toHaveValue(customContact.email)
+    await expect(phoneInput).toHaveValue(customContact.phone)
+    await expect(specialRequest).toHaveValue('Need vegetarian meal')
 
     const checkoutButton = page.getByRole('button', { name: 'ชำระเงิน' })
     await expect(checkoutButton).toBeEnabled()
