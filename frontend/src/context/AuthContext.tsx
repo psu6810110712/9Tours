@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const bookings = await bookingService.getMyBookings()
       const pending = bookings.filter(b => b.status === 'pending_payment')
       if (pending.length > 0) {
-        toast(`คุณมีรายการจองที่ยังไม่ได้ชำระเงิน ${pending.length} รายการ กรุณาดำเนินการชำระเงินให้เสร็จสิ้น`, {
+        toast(`คุณมีรายการจองที่ยังไม่ได้ชำระเงิน กรุณาดำเนินการชำระเงินให้เสร็จสิ้น`, {
           duration: 6000,
           icon: '⚠️',
         })
