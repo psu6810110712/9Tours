@@ -245,8 +245,8 @@ export class ToursService {
 
       tour.schedules = incomingSchedules.map((schedule: ScheduleRecord) => {
         const incomingId = schedule?.id != null ? Number(schedule.id) : undefined;
-        const matchedExisting = (incomingId != null ? existingById.get(incomingId) : undefined)
-          || existingBySignature.get(normalizeScheduleSignature(schedule));
+        const matchedExisting = ((incomingId != null ? existingById.get(incomingId) : undefined)
+          || existingBySignature.get(normalizeScheduleSignature(schedule))) as ScheduleRecord | undefined;
 
         return {
           id: matchedExisting?.id ?? incomingId ?? nextScheduleId++,
@@ -372,3 +372,5 @@ export class ToursService {
     }
   }
 }
+
+

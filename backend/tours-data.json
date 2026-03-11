@@ -527,10 +527,10 @@
     "accommodation": null,
     "rating": 0,
     "reviewCount": 0,
-    "isActive": true,
+    "isActive": false,
     "schedules": [],
     "createdAt": "2026-03-05T13:13:49.988Z",
-    "updatedAt": "2026-03-11T01:40:15.838Z",
+    "updatedAt": "2026-03-11T02:08:54.007Z",
     "childPrice": null
   },
   {
@@ -555,7 +555,7 @@
     "isActive": false,
     "schedules": [],
     "createdAt": "2026-03-05T13:14:16.449Z",
-    "updatedAt": "2026-03-05T13:14:37.601Z",
+    "updatedAt": "2026-03-11T02:08:19.396Z",
     "childPrice": null,
     "minPeople": 1
   }

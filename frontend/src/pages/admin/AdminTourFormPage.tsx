@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
+import { isAxiosError } from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import ConfirmModal from '../../components/common/ConfirmModal'
@@ -10,14 +11,16 @@ import type { CreateTourPayload } from '../../types/tour'
 
 const CATEGORIES = ['สายธรรมชาติ', 'สายคาเฟ่', 'สายกิจกรรม', 'สายมู', 'สายชิล']
 const HIGHLIGHTS = ['ยกเลิกฟรี', 'มีรถรับส่ง', 'อาหารกลางวัน', 'เที่ยวเต็มวัน', 'มีไกด์นำเที่ยว', 'รวมที่พัก', 'รถรับส่งสนามบิน']
-const REGIONS = ['ภาคเหนือ', 'ภาคใต้', 'ภาคกลาง', 'ภาคตะวันออกเฉียงเหนือ', 'ภาคตะวันออก']
+const REGIONS = ['ภาคเหนือ', 'ภาคใต้', 'ภาคกลาง', 'ภาคตะวันออกเฉียงเหนือ', 'ภาคตะวันออก', 'ภาคตะวันตก']
 
 export interface ScheduleRow {
+  id?: number
   startDate: string
   endDate: string
   timeSlot: string
   roundName: string
   maxCapacity: number
+  currentBooked?: number
   enabled: boolean
 }
 
@@ -26,6 +29,24 @@ export interface ItineraryItem {
   time: string
   title: string
   description: string
+}
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (isAxiosError(error)) {
+    const message = error.response?.data?.message
+    if (Array.isArray(message)) {
+      return message.join(' ')
+    }
+    if (typeof message === 'string' && message.trim()) {
+      return message
+    }
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
+  }
+
+  return fallback
 }
 
 export default function AdminTourFormPage() {
@@ -68,52 +89,67 @@ export default function AdminTourFormPage() {
   useEffect(() => {
     if (!isEditing) return
 
-    tourService.getOne(Number(id)).then((tour) => {
-      if (!tour) return
-      setTourCode(tour.tourCode || '')
-      setTourType(tour.tourType)
-      setName(tour.name)
-      setDescription(tour.description)
-      setCategories(tour.categories)
-      setHighlights(tour.highlights)
-      setRegion(tour.region)
-      setProvince(tour.province)
-      let discount = 0
-      if (tour.originalPrice) {
-        discount = Math.round((1 - tour.price / tour.originalPrice) * 100)
-        setDiscountPercent(String(discount))
-        setPrice(String(tour.originalPrice))
-      } else {
-        setPrice(String(tour.price))
-      }
+    setLoading(true)
+    setError('')
 
-      if (tour.childPrice) {
-        if (discount > 0) {
-          const originalChild = Math.round(tour.childPrice / (1 - discount / 100))
-          setChildPrice(String(originalChild))
-        } else {
-          setChildPrice(String(tour.childPrice))
+    tourService.getOne(Number(id))
+      .then((tour) => {
+        if (!tour) {
+          setError('ไม่พบทัวร์ที่ต้องการแก้ไข')
+          return
         }
-      }
-      setMinPeople(tour.minPeople ? String(tour.minPeople) : '')
-      setMaxPeople(tour.maxPeople ? String(tour.maxPeople) : '')
-      setDuration(tour.duration || '')
-      setImages(tour.images || [])
-      setTransportation(tour.transportation || '')
-      setAccommodation(tour.accommodation || '')
-      setItinerary(tour.itinerary || [])
-      setSchedules(
-        tour.schedules.map((schedule) => ({
-          startDate: schedule.startDate,
-          endDate: schedule.endDate,
-          timeSlot: schedule.timeSlot || '',
-          roundName: schedule.roundName || '',
-          maxCapacity: schedule.maxCapacity,
-          enabled: true,
-        })),
-      )
-      setLoading(false)
-    })
+
+        setTourCode(tour.tourCode || '')
+        setTourType(tour.tourType)
+        setName(tour.name)
+        setDescription(tour.description)
+        setCategories(tour.categories)
+        setHighlights(tour.highlights)
+        setRegion(tour.region)
+        setProvince(tour.province)
+
+        let discount = 0
+        if (tour.originalPrice) {
+          discount = Math.round((1 - tour.price / tour.originalPrice) * 100)
+          setDiscountPercent(String(discount))
+          setPrice(String(tour.originalPrice))
+        } else {
+          setPrice(String(tour.price))
+        }
+
+        if (tour.childPrice) {
+          if (discount > 0) {
+            const originalChild = Math.round(tour.childPrice / (1 - discount / 100))
+            setChildPrice(String(originalChild))
+          } else {
+            setChildPrice(String(tour.childPrice))
+          }
+        }
+
+        setMinPeople(tour.minPeople ? String(tour.minPeople) : '')
+        setMaxPeople(tour.maxPeople ? String(tour.maxPeople) : '')
+        setDuration(tour.duration || '')
+        setImages(tour.images || [])
+        setTransportation(tour.transportation || '')
+        setAccommodation(tour.accommodation || '')
+        setItinerary(tour.itinerary || [])
+        setSchedules(
+          tour.schedules.map((schedule) => ({
+            id: schedule.id,
+            startDate: schedule.startDate,
+            endDate: schedule.endDate,
+            timeSlot: schedule.timeSlot || '',
+            roundName: schedule.roundName || '',
+            maxCapacity: schedule.maxCapacity,
+            currentBooked: schedule.currentBooked,
+            enabled: true,
+          })),
+        )
+      })
+      .catch((loadError) => {
+        setError(getApiErrorMessage(loadError, 'ไม่สามารถโหลดข้อมูลทัวร์ได้'))
+      })
+      .finally(() => setLoading(false))
   }, [id, isEditing])
 
   const toggleChip = (list: string[], setList: (value: string[]) => void, value: string) => {
@@ -135,8 +171,8 @@ export default function AdminTourFormPage() {
       setUploadingImage(true)
       const url = await tourService.uploadImage(file)
       setImages((prev) => [...prev, url])
-    } catch (error) {
-      console.error(error)
+    } catch (uploadError) {
+      console.error(uploadError)
       toast.error('อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
     } finally {
       setUploadingImage(false)
@@ -267,11 +303,13 @@ export default function AdminTourFormPage() {
       schedules: schedules
         .filter((schedule) => schedule.enabled && schedule.startDate && schedule.endDate)
         .map((schedule) => ({
+          id: schedule.id,
           startDate: schedule.startDate,
           endDate: schedule.endDate,
           timeSlot: schedule.timeSlot || null,
           roundName: schedule.roundName || null,
           maxCapacity: Number(schedule.maxCapacity),
+          currentBooked: schedule.currentBooked,
         })),
     }
 
@@ -282,8 +320,8 @@ export default function AdminTourFormPage() {
         await tourService.create(payload)
       }
       navigate('/admin/tours')
-    } catch {
-      setError('บันทึกไม่สำเร็จ กรุณาลองใหม่')
+    } catch (saveError) {
+      setError(getApiErrorMessage(saveError, 'บันทึกไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setSaving(false)
     }
@@ -509,4 +547,3 @@ export default function AdminTourFormPage() {
     </>
   )
 }
-

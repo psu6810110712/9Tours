@@ -1,4 +1,5 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
+import { isAxiosError } from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import ConfirmModal from '../../components/common/ConfirmModal'
@@ -14,19 +15,41 @@ const FILTER_TABS = [
 
 type FilterValue = (typeof FILTER_TABS)[number]['value']
 
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (isAxiosError(error)) {
+    const message = error.response?.data?.message
+    if (Array.isArray(message)) {
+      return message.join(' ')
+    }
+    if (typeof message === 'string' && message.trim()) {
+      return message
+    }
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
+  }
+
+  return fallback
+}
+
 export default function AdminTourListPage() {
   const [tours, setTours] = useState<Tour[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [filter, setFilter] = useState<FilterValue>('all')
   const [search, setSearch] = useState('')
   const [deleteModalTour, setDeleteModalTour] = useState<Tour | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
-    tourService.getAll({ admin: 'true' }).then((data) => {
-      setTours(data)
-      setLoading(false)
-    })
+    setLoading(true)
+    setError('')
+
+    tourService.getAll({ admin: 'true' })
+      .then((data) => setTours(data))
+      .catch((loadError) => setError(getApiErrorMessage(loadError, 'ไม่สามารถโหลดรายการทัวร์ได้')))
+      .finally(() => setLoading(false))
   }, [])
 
   const handleDelete = async (tour: Tour) => {
@@ -35,16 +58,20 @@ export default function AdminTourListPage() {
       setTours((prev) => prev.filter((item) => item.id !== tour.id))
       toast.success('ลบทัวร์สำเร็จ')
       setDeleteModalTour(null)
-    } catch (error) {
-      console.error(error)
-      toast.error('ไม่สามารถลบทัวร์ได้ กรุณาลองใหม่อีกครั้ง')
+    } catch (deleteError) {
+      toast.error(getApiErrorMessage(deleteError, 'ไม่สามารถลบทัวร์ได้ กรุณาลองใหม่อีกครั้ง'))
       setDeleteModalTour(null)
     }
   }
 
   const handleToggleActive = async (tour: Tour) => {
-    await tourService.update(tour.id, { isActive: !tour.isActive })
-    setTours((prev) => prev.map((item) => (item.id === tour.id ? { ...item, isActive: !item.isActive } : item)))
+    try {
+      const updatedTour = await tourService.update(tour.id, { isActive: !tour.isActive })
+      setTours((prev) => prev.map((item) => (item.id === tour.id ? { ...item, isActive: updatedTour.isActive } : item)))
+      toast.success(updatedTour.isActive ? 'เปิดใช้งานทัวร์แล้ว' : 'ปิดใช้งานทัวร์แล้ว')
+    } catch (toggleError) {
+      toast.error(getApiErrorMessage(toggleError, 'ไม่สามารถอัปเดตสถานะทัวร์ได้'))
+    }
   }
 
   const filteredTours = useMemo(() => {
@@ -76,6 +103,12 @@ export default function AdminTourListPage() {
             + เพิ่มทัวร์
           </button>
         </div>
+
+        {error && (
+          <div className="mb-5 rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         <div className="mb-5 flex flex-col gap-3 xl:flex-row xl:items-center">
           <div className="scrollbar-hide flex gap-3 overflow-x-auto">
