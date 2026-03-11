@@ -1,16 +1,62 @@
-import axios from 'axios'
+﻿import axios, { type InternalAxiosRequestConfig } from 'axios'
+import type { User } from '../types/user'
+import { API_BASE_URL } from './apiBaseUrl'
 
-// เก็บ access_token ไว้ใน memory เท่านั้น (ไม่เก็บ storage ใดๆ → ป้องกัน XSS)
 let accessToken: string | null = null
 export const setAccessToken = (token: string | null) => { accessToken = token }
 export const getAccessToken = () => accessToken
 
+const baseURL = API_BASE_URL
+
+export interface SessionRefreshResponse {
+  access_token: string
+  user: User
+}
+
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean
+}
+
+interface RefreshRequestOptions {
+  emitAuthExpired?: boolean
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
-  withCredentials: true, // ส่ง cookie ไปกับทุก request
+  baseURL,
+  withCredentials: true,
 })
 
-// ขาไป: แนบ access_token จาก memory
+let refreshPromise: Promise<SessionRefreshResponse> | null = null
+let shouldEmitAuthExpiredOnRefreshFailure = false
+
+export const requestSessionRefresh = async (options: RefreshRequestOptions = {}) => {
+  if (options.emitAuthExpired) {
+    shouldEmitAuthExpiredOnRefreshFailure = true
+  }
+
+  if (!refreshPromise) {
+    refreshPromise = axios
+      .post<SessionRefreshResponse>(`${baseURL}/auth/refresh`, undefined, { withCredentials: true })
+      .then((response) => {
+        setAccessToken(response.data.access_token)
+        return response.data
+      })
+      .catch((error) => {
+        setAccessToken(null)
+        if (shouldEmitAuthExpiredOnRefreshFailure) {
+          window.dispatchEvent(new CustomEvent('auth:expired'))
+        }
+        throw error
+      })
+      .finally(() => {
+        refreshPromise = null
+        shouldEmitAuthExpiredOnRefreshFailure = false
+      })
+  }
+
+  return refreshPromise
+}
+
 api.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`
@@ -18,19 +64,34 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// ขากลับ: เพิ่มตัวดักจับ 401 Unauthorized (Token หมดอายุ / ไม่มีสิทธิ์)
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // ข้าม /auth/refresh เพราะ 401 จาก refresh แปลว่า "ยังไม่ได้ login" ไม่ใช่ "session หมดอายุ"
-      const url = error.config?.url || ''
-      const isRefreshRequest = url.includes('/auth/refresh')
-      if (!isRefreshRequest) {
-        window.dispatchEvent(new CustomEvent('auth:expired'))
-      }
+  async (error) => {
+    const originalConfig = error.config as RetryableRequestConfig | undefined
+    if (error.response?.status !== 401 || !originalConfig) {
+      return Promise.reject(error)
     }
-    return Promise.reject(error)
+
+    const url = originalConfig.url || ''
+    const isAuthLifecycleRequest = (
+      url.includes('/auth/login')
+      || url.includes('/auth/register')
+      || url.includes('/auth/refresh')
+      || url.includes('/auth/logout')
+    )
+
+    if (isAuthLifecycleRequest || originalConfig._retry) {
+      return Promise.reject(error)
+    }
+
+    try {
+      originalConfig._retry = true
+      const refreshData = await requestSessionRefresh({ emitAuthExpired: true })
+      originalConfig.headers.Authorization = `Bearer ${refreshData.access_token}`
+      return api(originalConfig)
+    } catch (refreshError) {
+      return Promise.reject(refreshError)
+    }
   }
 )
 

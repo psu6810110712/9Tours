@@ -1,26 +1,34 @@
-import { Navigate, useLocation } from 'react-router-dom'
+﻿import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 interface ProtectedRouteProps {
     children: React.ReactNode
     requiredRole?: 'admin' | 'customer'
+    allowIncompleteProfile?: boolean
 }
 
-export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, requiredRole, allowIncompleteProfile = false }: ProtectedRouteProps) {
     const { user, isLoading } = useAuth()
     const location = useLocation()
 
-    // แสดงการโหลดเมื่อตรวจสอบ auth
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-screen">Loading...</div>
     }
 
-    // ไม่ได้ login → redirect ไปหน้า Home + เปิด LoginModal พร้อมพ่วง State เดิมไปด้วย (เผื่อมี error state ที่ส่งมาจาก Navbar ก่อนโดนเตะ)
     if (!user) {
         return <Navigate to="/" state={{ ...location.state, requireLogin: true }} replace />
     }
 
-    // ผู้ใช้ login แต่ไม่มีสิทธิ์เข้าถึง → แสดง "ไม่มีสิทธิ์เข้าถึง"
+    if (!allowIncompleteProfile && user.role === 'customer' && !user.profileCompleted) {
+        return (
+            <Navigate
+                to="/auth/complete-profile"
+                state={{ returnTo: `${location.pathname}${location.search}${location.hash}` }}
+                replace
+            />
+        )
+    }
+
     if (requiredRole && user.role !== requiredRole) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen">
@@ -30,6 +38,5 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
         )
     }
 
-    // ผู้ใช้ login และมีสิทธิ์เข้าถึง → render children
     return <>{children}</>
 }
