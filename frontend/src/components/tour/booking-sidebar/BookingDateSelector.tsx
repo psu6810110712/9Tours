@@ -66,10 +66,10 @@ export default function BookingDateSelector({
   }
 
   return (
-    <div className="mb-5 border-b border-gray-100 pb-5">
-      <div className="mb-2 flex items-start justify-between gap-3">
+    <div className="mb-5 border-b border-gray-200 pb-5">
+      <div className="mb-0 flex items-start justify-between gap-3">
         <div>
-          <label className="block text-lg font-semibold text-gray-700">เลือกวันที่เดินทาง</label>
+          <label className="block text-lg font-bold text-gray-700">เลือกวันที่เดินทาง</label>
         </div>
         <div className="flex items-center gap-2">
           {(canScrollLeft || canScrollRight) && (
@@ -82,7 +82,7 @@ export default function BookingDateSelector({
             <select
               value={selectedMonth}
               onChange={(event) => setSelectedMonth(event.target.value)}
-              className="ui-focus-ring rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-700 outline-none focus:border-[var(--color-primary)] focus:bg-white"
+              className="ui-focus-ring rounded-xl border border-gray-200 bg-gray-50 px-3 py-10 text-xs font-bold text-gray-700 outline-none focus:border-[var(--color-primary)] focus:bg-white"
             >
               <option value="all">ทุกช่วงเวลา</option>
               {availableMonths.map((month) => (
@@ -158,7 +158,7 @@ export default function BookingDateSelector({
                     <span className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-80">{weekday}</span>
                     <span className="mt-1 block text-xl font-bold leading-none">{day}</span>
                     <span className="mt-1 block text-[11px] font-medium opacity-80">{month}</span>
-                    <span className={`mt-1.5 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${isFullyBooked ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
+                    <span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[14px] font-semibold ${isFullyBooked ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
                       {isFullyBooked ? 'เต็ม' : 'ว่าง'}
                     </span>
                   </button>
@@ -185,7 +185,7 @@ export default function BookingDateSelector({
 
                 return (
                   <div className="space-y-2.5">
-                    <label className="block text-sm font-semibold text-gray-700">
+                    <label className="block text-lg font-bold text-gray-600">
                       {hasMultipleRounds ? 'เลือกรอบเวลา (Join Trip)' : 'รายละเอียดรอบ / จำนวนที่นั่งว่าง (Join Trip)'}
                     </label>
                     <div className="grid gap-2">
@@ -237,16 +237,16 @@ export default function BookingDateSelector({
 
           {selectedSchedule && (tour.tourType === 'package' || !!tour.minPeople) && (
             <div className="mt-4 rounded-[1.5rem] border border-blue-200 bg-blue-50 px-4 py-4">
-              <label className="mb-2 block text-lg font-semibold text-blue-800">วันที่ท่านเลือกคือ</label>
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+              <label className="mb-2 block text-md font-semibold text-blue-800">วันที่ท่านเลือกคือ</label>
+              <div className="flex items-center gap-4">
+                <div className="flex h-5 w-5 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <rect x="3" y="4" width="18" height="18" rx="2" />
                     <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-[16px] font-medium text-blue-900">
+                  <p className="text-[14px] font-semibold text-blue-900">
                     {(() => {
                       const start = parseDate(selectedSchedule.startDate)
                       let dateText = ''

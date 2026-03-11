@@ -402,7 +402,7 @@
         "timeSlot": "13:00-17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
-        "currentBooked": 5
+        "currentBooked": 0
       },
       {
         "id": 508,
@@ -594,7 +594,7 @@
     "accommodation": null,
     "rating": 0,
     "reviewCount": 0,
-    "isActive": true,
+    "isActive": false,
     "schedules": [
       {
         "id": 10201,
@@ -628,7 +628,7 @@
       }
     ],
     "createdAt": "2026-03-11T03:42:10.746Z",
-    "updatedAt": "2026-03-11T03:42:43.007Z"
+    "updatedAt": "2026-03-11T09:25:55.865Z"
   },
   {
     "id": 103,
@@ -658,7 +658,7 @@
     "accommodation": "โรงแรม",
     "rating": 0,
     "reviewCount": 0,
-    "isActive": true,
+    "isActive": false,
     "schedules": [
       {
         "id": 10301,
@@ -762,6 +762,6 @@
       }
     ],
     "createdAt": "2026-03-11T03:58:18.293Z",
-    "updatedAt": "2026-03-11T05:29:47.700Z"
+    "updatedAt": "2026-03-11T09:25:56.997Z"
   }
 ]

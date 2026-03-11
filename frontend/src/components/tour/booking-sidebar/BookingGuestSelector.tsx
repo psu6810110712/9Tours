@@ -32,7 +32,7 @@ export default function BookingGuestSelector({
             </svg>
           </div>
           <div>
-            <p className="text-[16px] font-medium text-amber-900">ทัวร์นี้เหมาะสำหรับ {tour.minPeople}–{tour.maxPeople || tour.minPeople} ท่าน</p>
+            <p className="text-[16px] font-medium text-amber-600">ทัวร์นี้เหมาะสำหรับ {tour.minPeople}–{tour.maxPeople || tour.minPeople} ท่าน</p>
           </div>
         </div>
       </div>
@@ -42,8 +42,8 @@ export default function BookingGuestSelector({
   return (
     <div className="mb-5">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <label className="text-sm font-semibold text-gray-700">จำนวนผู้เดินทาง</label>
-        {!hasSelectedSchedule && <span className="text-xs text-amber-600">เลือกวันที่ก่อนเพื่อปลดล็อกจำนวนคน</span>}
+        <label className="text-lg font-bold text-gray-600">จำนวนผู้เดินทาง</label>
+        {!hasSelectedSchedule && <span className="text-md text-amber-600">เลือกวันที่ก่อนเพื่อเลือกจำนวนคน</span>}
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -52,12 +52,12 @@ export default function BookingGuestSelector({
           { label: 'เด็ก', value: children, min: 0, setValue: setChildren },
         ].map(({ label, value, min, setValue }) => (
           <div key={label} className="rounded-[1.25rem] border border-gray-100 bg-gray-50 px-4 py-3">
-            <label className="mb-3 block text-sm font-medium text-gray-500">{label}</label>
+            <label className="mb-3 block text-md font-semibold text-gray-500">{label}</label>
             <div className="flex items-center rounded-2xl border border-gray-200 bg-white">
               <button
                 type="button"
                 onClick={() => setValue(Math.max(min, value - 1))}
-                className="ui-focus-ring flex h-11 w-11 items-center justify-center text-lg font-semibold text-gray-500 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="ui-focus-ring flex h-11 w-11 items-center justify-center text-lg font-semibold text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={value <= min}
               >
                 −

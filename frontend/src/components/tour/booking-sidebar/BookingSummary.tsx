@@ -35,7 +35,7 @@ export default function BookingSummary({
                   ผู้ใหญ่ <span className="text-[13px] font-medium text-gray-400">(฿{Number(tour.price).toLocaleString()} x {adults})</span>
                 </span>
                 <span className="whitespace-nowrap font-semibold text-gray-800">
-                  ฿{(Number(tour.price || 1500) * adults).toLocaleString()}
+                  {((Number(tour.price || 1500) * adults).toLocaleString())} บาท
                 </span>
               </div>
             )}
@@ -45,7 +45,7 @@ export default function BookingSummary({
                   เด็ก <span className="text-[13px] font-medium text-gray-400">(฿{Number(tour.childPrice || 1000).toLocaleString()} x {children})</span>
                 </span>
                 <span className="whitespace-nowrap font-semibold text-gray-800">
-                  ฿{(Number(tour.childPrice || 1000) * children).toLocaleString()}
+                  {((Number(tour.childPrice || 1000) * children).toLocaleString())} บาท
                 </span>
               </div>
             )}
@@ -55,7 +55,7 @@ export default function BookingSummary({
 
       <div className="flex items-end justify-between gap-3 pt-4">
         <span className="text-base font-bold text-gray-900">รวมทั้งหมด</span>
-        <span className="text-[1.75rem] font-bold leading-none text-accent">฿{totalPrice.toLocaleString()}</span>
+        <span className="text-[1.75rem] font-bold leading-none text-accent">{totalPrice.toLocaleString()} บาท</span>
       </div>
 
       <button
