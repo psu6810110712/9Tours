@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { BehaviorEvent } from '../analytics/entities/behavior-event.entity';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
+import { parseToursData } from './tours-data.util';
 import { TourType } from './entities/tour.entity';
 
 const DATA_FILE = path.join(process.cwd(), 'tours-data.json');
@@ -20,7 +21,7 @@ function loadToursFromDisk() {
   try {
     if (fs.existsSync(DATA_FILE)) {
       const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-      return JSON.parse(raw);
+      return parseToursData<TourRecord>(raw);
     }
   } catch (error) {
     console.error('loadToursFromDisk error:', error);
@@ -380,6 +381,3 @@ export class ToursService {
     }
   }
 }
-
-
-
