@@ -1,4 +1,4 @@
-import {
+﻿import {
     Entity,
     PrimaryGeneratedColumn,
     Column,
@@ -29,10 +29,9 @@ export class Booking {
     @JoinColumn({ name: 'user_id' })
     user: User;
 
-    @Column({ name: 'user_id', nullable: true })
-    userId: number;
+    @Column({ name: 'user_id', type: 'uuid', nullable: true })
+    userId: string;
 
-    // scheduleId เก็บเป็นตัวเลขอ้างอิง — ข้อมูล schedule จริงอ่านจาก tours-data.json
     @Column({ name: 'schedule_id', nullable: true })
     scheduleId: number;
 
@@ -47,6 +46,18 @@ export class Booking {
 
     @Column({ name: 'total_price', type: 'decimal', precision: 10, scale: 2, nullable: true })
     totalPrice: number;
+
+    @Column({ name: 'contact_prefix', type: 'varchar', length: 16, nullable: true })
+    contactPrefix: string | null;
+
+    @Column({ name: 'contact_name', type: 'varchar', length: 160, nullable: true })
+    contactName: string | null;
+
+    @Column({ name: 'contact_email', type: 'varchar', length: 160, nullable: true })
+    contactEmail: string | null;
+
+    @Column({ name: 'contact_phone', type: 'varchar', length: 32, nullable: true })
+    contactPhone: string | null;
 
     @Column({
         type: 'enum',
@@ -68,4 +79,3 @@ export class Booking {
     @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
     createdAt: Date;
 }
-
