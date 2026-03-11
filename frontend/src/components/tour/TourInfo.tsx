@@ -57,27 +57,27 @@ export default function TourInfo({ tour }: TourInfoProps) {
           ))}
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">คะแนนรีวิว</p>
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-xl text-yellow-400">★</span>
-              <span className="text-2xl font-bold text-gray-900">{tour.rating.toFixed(1)}</span>
-              <span className="text-sm text-gray-500">({tour.reviewCount} รีวิว)</span>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 px-5 py-4">
+            <p className="text-base font-semibold text-gray-500">คะแนนรีวิว</p>
+            <div className="mt-3 flex items-center gap-3">
+              <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-xl text-amber-500">
+                ★
+              </span>
+              <div className="flex min-w-0 items-baseline gap-2">
+                <span className="text-[2rem] font-bold leading-none text-gray-900">{tour.rating.toFixed(1)}</span>
+                <span className="text-sm font-medium text-gray-500">({tour.reviewCount} รีวิว)</span>
+              </div>
             </div>
           </div>
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">ระยะเวลา</p>
-            <div className="mt-2 flex items-center gap-2 text-gray-800">
-              <ClockIcon />
-              <span className="text-base font-semibold">{tour.duration}</span>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">ราคาเริ่มต้น</p>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-accent">฿{Number(tour.price).toLocaleString()}</span>
-              <span className="text-sm text-gray-400">/ ท่าน</span>
+
+          <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 px-5 py-4">
+            <p className="text-base font-semibold text-gray-500">ระยะเวลา</p>
+            <div className="mt-3 flex items-center gap-3">
+              <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
+                <ClockIcon />
+              </span>
+              <span className="text-[1.65rem] font-bold leading-none text-gray-900">{tour.duration}</span>
             </div>
           </div>
         </div>
