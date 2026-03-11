@@ -1,4 +1,4 @@
-﻿import type { Tour } from '../../../types/tour'
+import type { Tour } from '../../../types/tour'
 
 interface BookingPriceHeaderProps {
   tour: Tour
@@ -34,11 +34,7 @@ export default function BookingPriceHeader({ tour }: BookingPriceHeaderProps) {
         )}
       </div>
 
-      {isPrivate && (
-        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          รองรับ {tour.minPeople}–{tour.maxPeople || tour.minPeople} ท่าน และคิดราคาแบบเหมาทั้งกรุ๊ป
-        </div>
-      )}
+
     </div>
   )
 }

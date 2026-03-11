@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { isAxiosError } from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
@@ -93,7 +93,6 @@ export default function AdminTourListPage() {
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">จัดการทัวร์</h1>
-            <p className="mt-2 text-sm text-gray-500">ยังเป็น table/list เดิม แต่ปรับ filter bar, action emphasis และ responsiveness ให้กระชับขึ้น</p>
           </div>
           <button
             type="button"

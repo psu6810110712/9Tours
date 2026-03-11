@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { User } from '../types/user'
 import { authService } from '../services/authService'
 import { bookingService } from '../services/bookingService'

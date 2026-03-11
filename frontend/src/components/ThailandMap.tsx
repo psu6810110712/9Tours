@@ -118,8 +118,8 @@ export default function ThailandMap({ provinceStats }: ThailandMapProps) {
         style={{ width: "100%", height: "100%" }}
       >
         <Geographies geography={geoUrl}>
-          {({ geographies }) =>
-            geographies.map(geo => {
+          {({ geographies }: { geographies: any[] }) =>
+            geographies.map((geo: any) => {
               const enName = geo.properties.name || geo.properties.NAME_1;
               const thName = PROVINCE_MAP[enName] || enName;
 

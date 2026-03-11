@@ -24,7 +24,7 @@ export default function BookingGuestSelector({
   if (isPrivate) {
     return (
       <div className="mb-5 rounded-[1.5rem] border border-amber-200 bg-amber-50 px-4 py-4">
-        <label className="mb-2 block text-sm font-semibold text-amber-800">จำนวนผู้เดินทาง</label>
+        <label className="mb-2 block text-lg font-semibold text-amber-800">จำนวนผู้เดินทาง</label>
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -32,8 +32,7 @@ export default function BookingGuestSelector({
             </svg>
           </div>
           <div>
-            <p className="text-sm font-bold text-amber-900">รองรับ {tour.minPeople}–{tour.maxPeople || tour.minPeople} ท่าน</p>
-            <p className="mt-1 text-xs text-amber-700">ราคาเหมาทั้งกรุ๊ป · ไม่คิดรายหัว</p>
+            <p className="text-[16px] font-medium text-amber-900">ทัวร์นี้เหมาะสำหรับ {tour.minPeople}–{tour.maxPeople || tour.minPeople} ท่าน</p>
           </div>
         </div>
       </div>

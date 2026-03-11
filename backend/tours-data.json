@@ -402,7 +402,7 @@
         "timeSlot": "13:00-17:00",
         "roundName": "รอบบ่าย",
         "maxCapacity": 10,
-        "currentBooked": 0
+        "currentBooked": 5
       },
       {
         "id": 508,
@@ -559,5 +559,209 @@
     "updatedAt": "2026-03-11T02:08:19.396Z",
     "childPrice": null,
     "minPeople": 1
+  },
+  {
+    "id": 102,
+    "tourCode": "11032026008",
+    "name": "ทัวร์หนุมาน",
+    "description": ".",
+    "tourType": "one_day",
+    "categories": [
+      "สายชิล",
+      "สายกิจกรรม",
+      "สายธรรมชาติ"
+    ],
+    "price": 255,
+    "childPrice": 128,
+    "minPeople": null,
+    "maxPeople": null,
+    "originalPrice": 300,
+    "images": [],
+    "highlights": [
+      "ยกเลิกฟรี",
+      "รวมที่พัก",
+      "มีรถรับส่ง",
+      "รถรับส่งสนามบิน",
+      "อาหารกลางวัน",
+      "เที่ยวเต็มวัน",
+      "มีไกด์นำเที่ยว"
+    ],
+    "itinerary": [],
+    "transportation": "",
+    "duration": "2 ชั่วโมง",
+    "region": "ภาคใต้",
+    "province": "สงขลา",
+    "accommodation": null,
+    "rating": 0,
+    "reviewCount": 0,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 10201,
+        "tourId": 102,
+        "startDate": "2026-03-11",
+        "endDate": "2026-03-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 10202,
+        "tourId": 102,
+        "startDate": "2026-03-12",
+        "endDate": "2026-03-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 10203,
+        "tourId": 102,
+        "startDate": "2026-03-13",
+        "endDate": "2026-03-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      }
+    ],
+    "createdAt": "2026-03-11T03:42:10.746Z",
+    "updatedAt": "2026-03-11T03:42:43.007Z"
+  },
+  {
+    "id": 103,
+    "tourCode": "11032026009",
+    "name": "ss",
+    "description": "ss",
+    "tourType": "package",
+    "categories": [
+      "สายธรรมชาติ"
+    ],
+    "price": 180,
+    "childPrice": null,
+    "minPeople": 4,
+    "maxPeople": 6,
+    "originalPrice": 200,
+    "images": [
+      "http://localhost:3000/uploads/tour-1773201330124-390049083.png"
+    ],
+    "highlights": [
+      "ยกเลิกฟรี"
+    ],
+    "itinerary": [],
+    "transportation": "",
+    "duration": "4 ชั่วโมง",
+    "region": "ภาคใต้",
+    "province": "สงขลา",
+    "accommodation": "โรงแรม",
+    "rating": 0,
+    "reviewCount": 0,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 10301,
+        "tourId": 103,
+        "startDate": "2026-04-01",
+        "endDate": "2026-04-03",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10302,
+        "tourId": 103,
+        "startDate": "2026-04-02",
+        "endDate": "2026-04-04",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10303,
+        "tourId": 103,
+        "startDate": "2026-04-03",
+        "endDate": "2026-04-05",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10304,
+        "tourId": 103,
+        "startDate": "2026-04-04",
+        "endDate": "2026-04-06",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10305,
+        "tourId": 103,
+        "startDate": "2026-04-05",
+        "endDate": "2026-04-07",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10306,
+        "tourId": 103,
+        "startDate": "2026-04-06",
+        "endDate": "2026-04-08",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10307,
+        "tourId": 103,
+        "startDate": "2026-04-07",
+        "endDate": "2026-04-09",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10308,
+        "tourId": 103,
+        "startDate": "2026-04-08",
+        "endDate": "2026-04-10",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10309,
+        "tourId": 103,
+        "startDate": "2026-04-09",
+        "endDate": "2026-04-11",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10310,
+        "tourId": 103,
+        "startDate": "2026-04-10",
+        "endDate": "2026-04-12",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      }
+    ],
+    "createdAt": "2026-03-11T03:58:18.293Z",
+    "updatedAt": "2026-03-11T05:29:47.700Z"
   }
 ]

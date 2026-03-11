@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import TourCard from '../components/TourCard'
 import SearchBar from '../components/common/SearchBar'
@@ -221,9 +221,6 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.22),rgba(15,23,42,0.58))]" />
           <div className="relative z-10 px-5 py-12 text-center text-white sm:px-8 sm:py-14 lg:px-12 lg:py-16">
             <div className="mx-auto max-w-3xl">
-              <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-white/80 backdrop-blur-sm">
-                9Tours curated trips
-              </span>
               <h1 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">มีสถานที่ในใจแล้วหรือยัง?</h1>
               <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
                 เที่ยวทั่วไทย ราคาดี จองง่าย เลือกทริปที่ใช่แล้วออกเดินทางได้ทันที
@@ -287,7 +284,7 @@ export default function HomePage() {
                   className={`ui-pressable rounded-full px-4 py-2 text-sm font-semibold ${selectedCats.has(category)
                     ? 'bg-[var(--color-accent)] text-white shadow-sm'
                     : 'bg-white/90 text-gray-700 hover:bg-white'
-                  }`}
+                    }`}
                 >
                   {category}
                 </button>
@@ -320,7 +317,7 @@ export default function HomePage() {
                   className={`group relative h-40 w-60 flex-shrink-0 overflow-hidden rounded-[1.6rem] border-2 text-left transition-all ${isSelected
                     ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] shadow-[0_12px_28px_rgba(37,99,235,0.18)]'
                     : 'border-transparent bg-white/80 opacity-95 hover:border-white hover:opacity-100 hover:shadow-[0_10px_24px_rgba(15,23,42,0.10)]'
-                  }`}
+                    }`}
                 >
                   <img
                     src={place.image}

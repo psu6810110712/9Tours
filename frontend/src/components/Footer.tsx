@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { FaEnvelope, FaFacebookF, FaGlobe, FaInstagram, FaPhone } from 'react-icons/fa'
 import { SiLine } from 'react-icons/si'
 
@@ -55,7 +55,6 @@ export default function Footer() {
           <ul className="space-y-2.5 text-sm font-medium text-gray-700">
             <li>ข้อกำหนดและเงื่อนไขการจอง</li>
             <li>นโยบายความเป็นส่วนตัว</li>
-            <li>เวลาทำการทุกวัน 09:00 - 20:00 น.</li>
           </ul>
         </div>
 

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Tour, TourSchedule } from '../../types/tour'
 import { useAuth } from '../../context/AuthContext'
@@ -23,8 +23,8 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const upcomingSchedules = useMemo(
     () => tour?.schedules
       ? tour.schedules
-          .filter((schedule: TourSchedule) => schedule.startDate >= today)
-          .sort((a: TourSchedule, b: TourSchedule) => a.startDate.localeCompare(b.startDate))
+        .filter((schedule: TourSchedule) => schedule.startDate >= today)
+        .sort((a: TourSchedule, b: TourSchedule) => a.startDate.localeCompare(b.startDate))
       : [],
     [tour?.schedules, today],
   )

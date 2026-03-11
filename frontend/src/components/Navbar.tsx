@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
@@ -250,7 +250,7 @@ export default function Navbar() {
                   className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors ${match(pathname)
                     ? 'border-amber-300 bg-amber-50 text-amber-800'
                     : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   {label}
                 </Link>

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import TourCard from '../components/TourCard'
 import SearchBar from '../components/common/SearchBar'
@@ -325,7 +325,7 @@ export default function ToursPage() {
                           className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-left text-sm font-medium transition-colors ${sortBy === option.value
                             ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                          }`}
+                            }`}
                         >
                           <span>{option.label}</span>
                           {sortBy === option.value && (
