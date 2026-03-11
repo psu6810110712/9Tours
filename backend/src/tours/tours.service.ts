@@ -49,6 +49,14 @@ function normalizeScheduleSignature(schedule: Partial<ScheduleRecord>) {
   ].join('|');
 }
 
+function normalizeBookedCount(value: unknown) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return 0;
+  }
+  return Math.max(0, Math.trunc(parsed));
+}
+
 function nextTourId() {
   return Math.max(99, ...DEMO_TOURS.map((tour) => Number(tour.id) || 0)) + 1;
 }
@@ -108,7 +116,7 @@ export class ToursService {
         timeSlot: schedule.timeSlot ?? null,
         roundName: schedule.roundName ?? null,
         maxCapacity: Number(schedule.maxCapacity),
-        currentBooked: Number(schedule.currentBooked || 0),
+        currentBooked: normalizeBookedCount(schedule.currentBooked),
       })),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -196,7 +204,7 @@ export class ToursService {
       throw new Error(`Schedule ${scheduleId} not found for tour ${tourId}`);
     }
 
-    const currentBooked = schedule.currentBooked || 0;
+    const currentBooked = normalizeBookedCount(schedule.currentBooked);
     const availableSeats = schedule.maxCapacity - currentBooked;
 
     return {
@@ -257,8 +265,8 @@ export class ToursService {
           roundName: schedule.roundName ?? null,
           maxCapacity: Number(schedule.maxCapacity),
           currentBooked: matchedExisting
-            ? Number(matchedExisting.currentBooked || 0)
-            : Number(schedule.currentBooked || 0),
+            ? normalizeBookedCount(matchedExisting.currentBooked)
+            : normalizeBookedCount(schedule.currentBooked),
         };
       });
     }
@@ -365,12 +373,13 @@ export class ToursService {
       if (!tour.schedules) continue;
       const schedule = tour.schedules.find((item: ScheduleRecord) => item.id === scheduleId);
       if (schedule) {
-        schedule.currentBooked = (schedule.currentBooked || 0) + addPax;
+        schedule.currentBooked = Math.max(0, normalizeBookedCount(schedule.currentBooked) + addPax);
         persistData();
         return;
       }
     }
   }
 }
+
 
 

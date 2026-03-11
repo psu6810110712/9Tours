@@ -31,6 +31,12 @@ export interface ItineraryItem {
   description: string
 }
 
+function normalizeBookedCount(value: number | string | null | undefined) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return 0
+  return Math.max(0, Math.trunc(parsed))
+}
+
 function getApiErrorMessage(error: unknown, fallback: string) {
   if (isAxiosError(error)) {
     const message = error.response?.data?.message
@@ -141,7 +147,7 @@ export default function AdminTourFormPage() {
             timeSlot: schedule.timeSlot || '',
             roundName: schedule.roundName || '',
             maxCapacity: schedule.maxCapacity,
-            currentBooked: schedule.currentBooked,
+            currentBooked: normalizeBookedCount(schedule.currentBooked),
             enabled: true,
           })),
         )
@@ -309,7 +315,7 @@ export default function AdminTourFormPage() {
           timeSlot: schedule.timeSlot || null,
           roundName: schedule.roundName || null,
           maxCapacity: Number(schedule.maxCapacity),
-          currentBooked: schedule.currentBooked,
+          currentBooked: normalizeBookedCount(schedule.currentBooked),
         })),
     }
 
@@ -547,3 +553,5 @@ export default function AdminTourFormPage() {
     </>
   )
 }
+
+
