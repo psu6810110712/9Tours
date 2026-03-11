@@ -62,23 +62,23 @@ export default function TourInfo({ tour }: TourInfoProps) {
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 px-5 py-4">
-            <p className="text-sm font-semibold text-gray-500">คะแนนรีวิว</p>
+            <p className="text-base font-semibold text-gray-500">คะแนนรีวิว</p>
             <div className="mt-3 flex items-center gap-3">
-              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-lg text-amber-500">
+              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-base text-amber-500">
                 ★
               </span>
               <div className="min-w-0">
                 <div className="flex items-end gap-2">
-                  <span className="text-[1.75rem] font-bold leading-none text-gray-900">{tour.rating.toFixed(1)}</span>
-                  <span className="mb-0.5 text-xs font-semibold text-gray-400">/ 5.0</span>
+                  <span className="text-[1.55rem] font-bold leading-none text-gray-900">{tour.rating.toFixed(1)}</span>
+                  <span className="mb-0.5 text-sm font-semibold text-gray-400">/ 5.0</span>
                 </div>
-                <p className="mt-1 text-xs font-medium text-gray-500">{tour.reviewCount} รีวิวจากผู้เดินทาง</p>
+                <p className="mt-1 text-sm font-medium text-gray-500">{tour.reviewCount} รีวิวจากผู้เดินทาง</p>
               </div>
             </div>
           </div>
 
           <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 px-5 py-4">
-            <p className="text-sm font-semibold text-gray-500">ระยะเวลา</p>
+            <p className="text-base font-semibold text-gray-500">ระยะเวลา</p>
             <div className="mt-3 flex items-center gap-3">
               <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
                 <span className="scale-90">
@@ -86,8 +86,8 @@ export default function TourInfo({ tour }: TourInfoProps) {
                 </span>
               </span>
               <div className="min-w-0">
-                <p className="text-[1.55rem] font-bold leading-none text-gray-900">{tour.duration}</p>
-                <p className="mt-1 text-xs font-medium text-gray-500">{durationCaption}</p>
+                <p className="text-[1.4rem] font-bold leading-none text-gray-900">{tour.duration}</p>
+                <p className="mt-1 text-sm font-medium text-gray-500">{durationCaption}</p>
               </div>
             </div>
           </div>
