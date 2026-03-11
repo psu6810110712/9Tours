@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
 import { buildDisplayName } from '../utils/profileValidation'
@@ -11,14 +12,23 @@ const NAV_LINKS = [
   { label: 'เที่ยวพร้อมที่พัก', path: '/tours?tourType=package' },
 ]
 
+const ADMIN_LINKS = [
+  { label: 'แดชบอร์ด', path: '/admin/dashboard', match: (pathname: string) => pathname === '/admin/dashboard' },
+  { label: 'จัดการทัวร์', path: '/admin/tours', match: (pathname: string) => pathname.startsWith('/admin/tours') },
+  { label: 'ตรวจสอบสลิป', path: '/admin/bookings', match: (pathname: string) => pathname.startsWith('/admin/bookings') },
+]
+
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [modal, setModal] = useState<'login' | 'register' | null>(null)
   const navigate = useNavigate()
   const location = useLocation()
   const { pathname, search } = location
   const [modalError, setModalError] = useState('')
+
+  useBodyScrollLock(mobileMenuOpen)
 
   const displayName = useMemo(() => {
     if (!user) {
@@ -63,6 +73,11 @@ export default function Navbar() {
     }
   }, [logout, navigate, pathname])
 
+  useEffect(() => {
+    setMenuOpen(false)
+    setMobileMenuOpen(false)
+  }, [pathname, search])
+
   const isActive = (path: string) => {
     const [targetPath, targetQuery] = path.split('?')
     if (targetQuery) {
@@ -74,6 +89,7 @@ export default function Navbar() {
   const handleLogout = () => {
     void logout()
     setMenuOpen(false)
+    setMobileMenuOpen(false)
     navigate('/')
   }
 
@@ -82,12 +98,18 @@ export default function Navbar() {
       ? 'border-b-2 border-[var(--color-primary)] pb-0.5 font-semibold text-[var(--color-primary)]'
       : 'border-b-2 border-transparent pb-0.5 text-gray-500 transition-colors hover:text-gray-900'
 
+  const mobileNavLinkClass = (path: string) =>
+    `rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors ${isActive(path)
+      ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary)]'
+      : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+    }`
+
   return (
     <>
-      <nav className="sticky top-0 z-40 border-b border-gray-200 bg-white">
-        <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between gap-8 px-8">
+      <nav className="sticky top-0 z-[var(--z-navbar)] border-b border-gray-200/90 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex-shrink-0">
-            <img src="/logo.png" alt="9Tours" className="h-16 w-auto" />
+            <img src="/logo.png" alt="9Tours" className="h-14 w-auto sm:h-16" />
           </Link>
 
           <div className="hidden items-center gap-8 text-[15px] md:flex">
@@ -96,22 +118,14 @@ export default function Navbar() {
                 {label}
               </Link>
             ))}
-            {isAdmin && (
-              <>
-                <Link to="/admin/dashboard" className={pathname === '/admin/dashboard' ? navLinkClass('/admin/dashboard') : 'border-b-2 border-transparent pb-0.5 text-gray-500 transition-colors hover:text-gray-900'}>
-                  แดชบอร์ด
-                </Link>
-                <Link to="/admin/tours" className={pathname.startsWith('/admin/tours') ? navLinkClass('/admin/tours') : 'border-b-2 border-transparent pb-0.5 text-gray-500 transition-colors hover:text-gray-900'}>
-                  จัดการทัวร์
-                </Link>
-                <Link to="/admin/bookings" className={pathname.startsWith('/admin/bookings') ? navLinkClass('/admin/bookings') : 'border-b-2 border-transparent pb-0.5 text-gray-500 transition-colors hover:text-gray-900'}>
-                  ตรวจสอบสลิป
-                </Link>
-              </>
-            )}
+            {isAdmin && ADMIN_LINKS.map(({ label, path, match }) => (
+              <Link key={path} to={path} className={match(pathname) ? navLinkClass(path) : 'border-b-2 border-transparent pb-0.5 text-gray-500 transition-colors hover:text-gray-900'}>
+                {label}
+              </Link>
+            ))}
           </div>
 
-          <div className="ml-auto flex items-center gap-4">
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
             {user ? (
               <>
                 {user.role === 'customer' && user.profileCompleted ? (
@@ -134,25 +148,31 @@ export default function Navbar() {
 
                 <div className="relative">
                   <button
+                    type="button"
                     onClick={() => setMenuOpen((prev) => !prev)}
-                    className="flex items-center gap-2.5 text-sm font-medium text-gray-700 transition-colors hover:text-gray-900"
+                    aria-expanded={menuOpen}
+                    className="ui-focus-ring ui-pressable flex items-center gap-2 rounded-full border border-transparent px-1.5 py-1 text-sm font-medium text-gray-700 hover:border-gray-200 hover:bg-gray-50 hover:text-gray-900"
                   >
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-bold text-white">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-bold text-white shadow-sm">
                       {avatarLabel}
                     </span>
                     <span className="hidden max-w-[14rem] truncate md:block">{displayName}</span>
+                    <svg className={`hidden h-4 w-4 text-gray-400 transition-transform md:block ${menuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m19 9-7 7-7-7" />
+                    </svg>
                   </button>
 
                   {menuOpen && (
                     <>
-                      <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                      <div className="absolute right-0 z-20 mt-2 w-56 rounded-xl border border-gray-100 bg-white py-1.5 text-sm shadow-lg">
+                      <button type="button" className="fixed inset-0 z-[47]" aria-label="ปิดเมนูผู้ใช้" onClick={() => setMenuOpen(false)} />
+                      <div className="ui-surface ui-pop absolute right-0 z-[48] mt-3 w-60 overflow-hidden border border-gray-100 bg-white py-1.5 text-sm">
                         <div className="border-b border-gray-100 px-4 py-3">
                           <p className="truncate font-semibold text-gray-800">{displayName}</p>
                           <p className="truncate text-xs text-gray-500">{user.email}</p>
                         </div>
                         {user.role === 'customer' && !user.profileCompleted && (
                           <button
+                            type="button"
                             onClick={() => {
                               setMenuOpen(false)
                               navigate('/auth/complete-profile')
@@ -163,6 +183,7 @@ export default function Navbar() {
                           </button>
                         )}
                         <button
+                          type="button"
                           onClick={handleLogout}
                           className="w-full px-4 py-2.5 text-left text-red-500 transition-colors hover:bg-red-50"
                         >
@@ -175,18 +196,111 @@ export default function Navbar() {
               </>
             ) : (
               <button
+                type="button"
                 onClick={() => {
                   setModalError('')
                   setModal('login')
                 }}
-                className="rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-primary-dark)]"
+                className="ui-focus-ring ui-pressable rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-primary-dark)] sm:px-5"
               >
                 เข้าสู่ระบบ
               </button>
             )}
+
+            <button
+              type="button"
+              aria-label={mobileMenuOpen ? 'ปิดเมนูนำทาง' : 'เปิดเมนูนำทาง'}
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              className="ui-focus-ring ui-pressable flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 md:hidden"
+            >
+              {mobileMenuOpen ? (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       </nav>
+
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[var(--z-drawer)] md:hidden">
+          <button
+            type="button"
+            aria-label="ปิดเมนูนำทาง"
+            className="ui-overlay absolute inset-0 top-[68px]"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className="ui-surface ui-pop absolute inset-x-4 top-[80px] max-h-[calc(100vh-6rem)] overflow-y-auto rounded-[1.75rem] border border-gray-100 bg-white p-4 shadow-[0_18px_44px_rgba(15,23,42,0.14)]">
+            <div className="space-y-2">
+              {NAV_LINKS.map(({ label, path }) => (
+                <Link key={path} to={path} className={mobileNavLinkClass(path)}>
+                  {label}
+                </Link>
+              ))}
+              {isAdmin && ADMIN_LINKS.map(({ label, path, match }) => (
+                <Link
+                  key={path}
+                  to={path}
+                  className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors ${match(pathname)
+                    ? 'border-amber-300 bg-amber-50 text-amber-800'
+                    : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+
+            {user ? (
+              <div className="mt-4 rounded-[1.5rem] border border-gray-100 bg-gray-50/80 p-4">
+                <p className="text-sm font-semibold text-gray-800">{displayName}</p>
+                <p className="mt-1 text-xs text-gray-500">{user.email}</p>
+
+                <div className="mt-4 space-y-2">
+                  {user.role === 'customer' && user.profileCompleted && (
+                    <Link to="/my-bookings" className="block rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+                      การจองของฉัน
+                    </Link>
+                  )}
+                  {user.role === 'customer' && !user.profileCompleted && (
+                    <Link to="/auth/complete-profile" className="block rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-100">
+                      กรอกข้อมูลให้ครบ
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full rounded-2xl border border-red-200 bg-white px-4 py-3 text-left text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+                  >
+                    ออกจากระบบ
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4 rounded-[1.5rem] border border-gray-100 bg-gray-50/80 p-4">
+                <p className="text-sm text-gray-600">เข้าสู่ระบบเพื่อดูการจองและรับคำแนะนำทริปส่วนตัว</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    setModalError('')
+                    setModal('login')
+                  }}
+                  className="ui-focus-ring ui-pressable mt-3 w-full rounded-2xl bg-[var(--color-primary)] px-4 py-3 text-sm font-semibold text-white hover:bg-[var(--color-primary-dark)]"
+                >
+                  เข้าสู่ระบบ
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {modal === 'login' && (
         <LoginModal

@@ -1,4 +1,4 @@
-const REGIONS = ['ภาคเหนือ', 'ภาคกลาง', 'ภาคใต้', 'ภาคตะวันออก', 'ภาคตะวันออกเฉียงเหนือ']
+﻿const REGIONS = ['ภาคเหนือ', 'ภาคกลาง', 'ภาคใต้', 'ภาคตะวันออก', 'ภาคตะวันออกเฉียงเหนือ']
 
 const PROVINCES_BY_REGION: Record<string, string[]> = {
   'ภาคเหนือ': ['เชียงใหม่', 'เชียงราย', 'ลำปาง', 'แม่ฮ่องสอน'],
@@ -11,17 +11,18 @@ const PROVINCES_BY_REGION: Record<string, string[]> = {
 const getMonthOptions = () => {
   const options = []
   const today = new Date()
-  let year = today.getFullYear()
-  let m = today.getMonth()
+  const year = today.getFullYear()
+  const month = today.getMonth()
 
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(year, m + i, 1)
-    const yyyy = d.getFullYear()
-    const mm = String(d.getMonth() + 1).padStart(2, '0')
-    const thMonth = d.toLocaleDateString('th-TH', { month: 'long' })
+  for (let index = 0; index < 12; index++) {
+    const date = new Date(year, month + index, 1)
+    const yyyy = date.getFullYear()
+    const mm = String(date.getMonth() + 1).padStart(2, '0')
+    const thMonth = date.toLocaleDateString('th-TH', { month: 'long' })
     const thYear = yyyy + 543
     options.push({ value: `${yyyy}-${mm}`, label: `${thMonth} ${thYear}` })
   }
+
   return options
 }
 
@@ -33,94 +34,121 @@ interface FilterSidebarProps {
   tourType: string
   search: string
   month: string
-  onRegionChange: (v: string) => void
-  onProvinceChange: (v: string) => void
-  onTourTypeChange: (v: string) => void
-  onMonthChange: (v: string) => void
+  onRegionChange: (value: string) => void
+  onProvinceChange: (value: string) => void
+  onTourTypeChange: (value: string) => void
+  onMonthChange: (value: string) => void
   onClear: () => void
+  mode?: 'sidebar' | 'drawer'
+  onClose?: () => void
 }
 
 export default function FilterSidebar({
-  region, province, tourType, search, month,
-  onRegionChange, onProvinceChange, onTourTypeChange, onMonthChange, onClear,
+  region,
+  province,
+  tourType,
+  search,
+  month,
+  onRegionChange,
+  onProvinceChange,
+  onTourTypeChange,
+  onMonthChange,
+  onClear,
+  mode = 'sidebar',
+  onClose,
 }: FilterSidebarProps) {
   const hasFilter = region || province || tourType || search || month
   const provinceOptions = region
     ? (PROVINCES_BY_REGION[region] ?? [])
     : Object.values(PROVINCES_BY_REGION).flat()
 
-  return (
-    <aside className="w-56 flex-shrink-0">
-      <div className="bg-white rounded-xl shadow-sm p-4 sticky top-20">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="font-bold text-gray-800">ตัวกรอง</h2>
-          {hasFilter && (
-            <button onClick={onClear} className="text-xs text-accent hover:underline">
-              ล้างทั้งหมด
-            </button>
-          )}
-        </div>
+  const isDrawer = mode === 'drawer'
 
-        {/* ประเภท */}
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">ประเภท</label>
-          <div className="space-y-1">
-            {[
-              { value: '', label: 'ทั้งหมด' },
-              { value: 'one_day', label: 'วันเดย์ทริป' },
-              { value: 'package', label: 'แพ็คเกจพร้อมที่พัก' },
-            ].map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => onTourTypeChange(opt.value)}
-                className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${tourType === opt.value
-                  ? 'bg-accent text-white'
-                  : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-              >
-                {opt.label}
+  return (
+    <aside className={isDrawer ? 'w-full' : 'w-full lg:w-64 lg:flex-shrink-0'}>
+      <div className={`ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-5 ${isDrawer ? '' : 'lg:sticky lg:top-24'}`}>
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h2 className="text-base font-bold text-gray-800">ตัวกรอง</h2>
+          <div className="flex items-center gap-2">
+            {hasFilter && (
+              <button type="button" onClick={onClear} className="text-xs font-semibold text-accent hover:underline">
+                ล้างทั้งหมด
               </button>
-            ))}
+            )}
+            {isDrawer && onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="ui-focus-ring flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
 
-        {/* เดือนเดินทาง */}
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">เดือนที่เดินทาง</label>
-          <select
-            value={month}
-            onChange={(e) => onMonthChange(e.target.value)}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none"
-          >
-            <option value="">ทุกเดือน</option>
-            {MONTH_OPTIONS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
-          </select>
-        </div>
+        <div className="space-y-5">
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">ประเภท</label>
+            <div className="space-y-2">
+              {[
+                { value: '', label: 'ทั้งหมด' },
+                { value: 'one_day', label: 'วันเดย์ทริป' },
+                { value: 'package', label: 'แพ็กเกจพร้อมที่พัก' },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => onTourTypeChange(option.value)}
+                  className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition-colors ${tourType === option.value
+                    ? 'border-amber-300 bg-amber-50 text-amber-800'
+                    : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        {/* ภาค */}
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">ภาค</label>
-          <select
-            value={region}
-            onChange={(e) => { onRegionChange(e.target.value); onProvinceChange('') }}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none"
-          >
-            <option value="">ทุกภาค</option>
-            {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-          </select>
-        </div>
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">เดือนที่เดินทาง</label>
+            <select
+              value={month}
+              onChange={(event) => onMonthChange(event.target.value)}
+              className="ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white"
+            >
+              <option value="">ทุกเดือน</option>
+              {MONTH_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </div>
 
-        {/* จังหวัด */}
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">จังหวัด</label>
-          <select
-            value={province}
-            onChange={(e) => onProvinceChange(e.target.value)}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none"
-          >
-            <option value="">ทุกจังหวัด</option>
-            {provinceOptions.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">ภาค</label>
+            <select
+              value={region}
+              onChange={(event) => {
+                onRegionChange(event.target.value)
+                onProvinceChange('')
+              }}
+              className="ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white"
+            >
+              <option value="">ทุกภาค</option>
+              {REGIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">จังหวัด</label>
+            <select
+              value={province}
+              onChange={(event) => onProvinceChange(event.target.value)}
+              className="ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white"
+            >
+              <option value="">ทุกจังหวัด</option>
+              {provinceOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </div>
         </div>
       </div>
     </aside>

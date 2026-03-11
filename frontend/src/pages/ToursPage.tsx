@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import TourCard from '../components/TourCard'
+import SearchBar from '../components/common/SearchBar'
 import FilterSidebar from '../components/tour/FilterSidebar'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import { tourService } from '../services/tourService'
 import type { Tour } from '../types/tour'
 
@@ -17,12 +19,15 @@ export default function ToursPage() {
   const [tours, setTours] = useState<Tour[]>([])
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState('default')
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const [region, setRegion] = useState(searchParams.get('region') || '')
   const [province, setProvince] = useState(searchParams.get('province') || '')
   const [tourType, setTourType] = useState(searchParams.get('tourType') || '')
   const [search, setSearch] = useState(searchParams.get('search') || '')
   const [month, setMonth] = useState(searchParams.get('month') || '')
+
+  useBodyScrollLock(mobileFiltersOpen)
 
   useEffect(() => {
     setLoading(true)
@@ -35,14 +40,13 @@ export default function ToursPage() {
         month: month || undefined,
       })
       .then(setTours)
-      .catch((err) => {
-        console.error(err)
+      .catch((error) => {
+        console.error(error)
         setTours([])
       })
       .finally(() => setLoading(false))
   }, [region, province, tourType, search, month])
 
-  // sync filter กับ URL
   useEffect(() => {
     const params: Record<string, string> = {}
     if (region) params.region = region
@@ -51,74 +55,141 @@ export default function ToursPage() {
     if (search) params.search = search
     if (month) params.month = month
     setSearchParams(params, { replace: true })
-  }, [region, province, tourType, search, month])
+  }, [region, province, tourType, search, month, setSearchParams])
 
-  const sortedTours = [...tours].sort((a, b) => {
-    if (sortBy === 'price_asc') return Number(a.price) - Number(b.price)
-    if (sortBy === 'price_desc') return Number(b.price) - Number(a.price)
-    if (sortBy === 'rating') return b.rating - a.rating
-    return 0
-  })
+  const sortedTours = useMemo(() => {
+    return [...tours].sort((a, b) => {
+      if (sortBy === 'price_asc') return Number(a.price) - Number(b.price)
+      if (sortBy === 'price_desc') return Number(b.price) - Number(a.price)
+      if (sortBy === 'rating') return b.rating - a.rating
+      return 0
+    })
+  }, [sortBy, tours])
+
+  const activeFilterCount = [region, province, tourType, search, month].filter(Boolean).length
+
+  const clearFilters = () => {
+    setRegion('')
+    setProvince('')
+    setTourType('')
+    setSearch('')
+    setMonth('')
+  }
 
   return (
     <>
-      {/* ===== แถบค้นหา — style เดียวกับ Hero search ใน HomePage ===== */}
-      <div className="max-w-7xl mx-auto px-4 pt-6 pb-2">
-        <div className="bg-white rounded-2xl shadow-sm p-2 flex items-center gap-1 max-w-2xl mx-auto">
-          <div className="flex items-center gap-2 flex-1 min-w-0 pl-3">
-            <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" strokeLinecap="round" />
-            </svg>
-            <input
-              type="text"
-              placeholder="ค้นหาทัวร์หรือสถานที่..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 py-2.5 text-gray-800 text-sm font-medium outline-none bg-transparent min-w-0"
-            />
+      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+        <div className="rounded-[2rem] bg-[linear-gradient(135deg,#f8fafc,#eef4ff)] px-4 py-6 sm:px-6">
+          <SearchBar
+            search={search}
+            setSearch={setSearch}
+            guests={1}
+            setGuests={() => undefined}
+            onSearch={() => undefined}
+            showGuests={false}
+          />
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">รวมทัวร์ทั้งหมด</h1>
+              <p className="mt-1 text-sm text-gray-500">ค้นหาทัวร์ตามจังหวัด ประเภท และช่วงเดือนที่ต้องการ</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setMobileFiltersOpen(true)}
+              className="ui-focus-ring ui-pressable inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:border-gray-300 hover:bg-gray-50 lg:hidden"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707L14 14v5l-4 2v-7L3.293 6.293A1 1 0 013 5.586V4z" />
+              </svg>
+              ตัวกรอง {activeFilterCount > 0 && <span className="rounded-full bg-[var(--color-primary-light)] px-2 py-0.5 text-xs text-[var(--color-primary)]">{activeFilterCount}</span>}
+            </button>
           </div>
-          <button
-            onClick={() => {/* search ทำงานแบบ realtime อยู่แล้วผ่าน useEffect */ }}
-            className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors flex-shrink-0"
-          >
-            ค้นหา
-          </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
-        <FilterSidebar
-          region={region} province={province} tourType={tourType} search={search} month={month}
-          onRegionChange={setRegion} onProvinceChange={setProvince}
-          onTourTypeChange={setTourType} onMonthChange={setMonth}
-          onClear={() => { setRegion(''); setProvince(''); setTourType(''); setSearch(''); setMonth('') }}
-        />
+      <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="hidden lg:block">
+          <FilterSidebar
+            region={region}
+            province={province}
+            tourType={tourType}
+            search={search}
+            month={month}
+            onRegionChange={setRegion}
+            onProvinceChange={setProvince}
+            onTourTypeChange={setTourType}
+            onMonthChange={setMonth}
+            onClear={clearFilters}
+          />
+        </div>
 
-        <main className="flex-1 min-w-0">
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm font-medium text-gray-500">
-              {loading ? 'กำลังโหลด...' : `พบ ${sortedTours.length} รายการ`}
-            </p>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 outline-none bg-white"
-            >
-              {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
+        <main className="min-w-0 flex-1">
+          <div className="mb-5 flex flex-col gap-3 rounded-[1.5rem] border border-gray-100 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-gray-700">
+                {loading ? 'กำลังโหลดรายการทัวร์...' : `พบทัวร์ ${sortedTours.length} รายการ`}
+              </p>
+              {activeFilterCount > 0 && !loading && (
+                <p className="mt-1 text-xs text-gray-400">กำลังแสดงผลตามตัวกรองที่เลือก</p>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              {activeFilterCount > 0 && (
+                <button type="button" onClick={clearFilters} className="text-sm font-medium text-accent hover:underline">
+                  ล้างตัวกรอง
+                </button>
+              )}
+              <select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value)}
+                className="ui-focus-ring rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white"
+              >
+                {SORT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </div>
           </div>
 
           {loading ? (
-            <div className="text-center py-20 text-gray-400">กำลังโหลด...</div>
+            <div className="ui-surface rounded-[1.5rem] px-6 py-20 text-center text-gray-400">กำลังโหลด...</div>
           ) : sortedTours.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">ไม่พบทัวร์ที่ตรงกับเงื่อนไข</div>
+            <div className="ui-surface rounded-[1.5rem] px-6 py-20 text-center">
+              <p className="text-lg font-semibold text-gray-700">ไม่พบทัวร์ที่ตรงกับเงื่อนไข</p>
+              <p className="mt-2 text-sm text-gray-400">ลองขยายช่วงเวลา หรือเลือกรายการตัวกรองให้น้อยลง</p>
+            </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {sortedTours.map((tour) => <TourCard key={tour.id} tour={tour} />)}
             </div>
           )}
         </main>
       </div>
+
+      {mobileFiltersOpen && (
+        <div className="fixed inset-0 z-[var(--z-drawer)] lg:hidden">
+          <button
+            type="button"
+            aria-label="ปิดตัวกรอง"
+            className="ui-overlay absolute inset-0"
+            onClick={() => setMobileFiltersOpen(false)}
+          />
+          <div className="absolute inset-x-4 bottom-4 top-4 overflow-y-auto">
+            <FilterSidebar
+              region={region}
+              province={province}
+              tourType={tourType}
+              search={search}
+              month={month}
+              onRegionChange={setRegion}
+              onProvinceChange={setProvince}
+              onTourTypeChange={setTourType}
+              onMonthChange={setMonth}
+              onClear={clearFilters}
+              mode="drawer"
+              onClose={() => setMobileFiltersOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </>
   )
 }

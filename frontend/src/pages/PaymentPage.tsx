@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { bookingService } from '../services/bookingService'
-import ProgressBar from '../components/common/ProgressBar'
-import BookingSummaryCard from '../components/booking/BookingSummaryCard'
+﻿import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
+import BookingSummaryCard from '../components/booking/BookingSummaryCard'
+import Modal from '../components/common/Modal'
+import ProgressBar from '../components/common/ProgressBar'
+import { bookingService } from '../services/bookingService'
 
 interface PaymentPageData {
   id: string | number
@@ -26,80 +27,72 @@ export default function PaymentPage() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // --- State สำหรับ Timer ---
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [isExpired, setIsExpired] = useState(false)
   const [uploadAnyway, setUploadAnyway] = useState(false)
-
-  // --- State สำหรับข้อมูลและการอัปโหลด ---
   const [bookingData, setBookingData] = useState<PaymentPageData | null>(null)
   const [loading, setLoading] = useState(true)
-
+  const [loadError, setLoadError] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // 1. ระบบดึงข้อมูลการจอง
   useEffect(() => {
     const fetchBooking = async () => {
       try {
         if (!bookingId) return
         const data = await bookingService.getBookingById(bookingId)
+
+        const startDate = data.schedule?.startDate
+        const endDate = data.schedule?.endDate
+        const formatDate = (value?: string) => value
+          ? new Date(value).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })
+          : '-'
+
+        const dateText = startDate && endDate
+          ? `${formatDate(startDate)} - ${formatDate(endDate)}`
+          : `อ้างอิงรอบเดินทาง: ${data.scheduleId}`
+
         setBookingData({
           id: data.id,
-          // ถ้า Backend มีส่งมาให้ใช้ของ Backend ถ้าไม่มีให้ใช้ที่ถือข้ามหน้ามา
-          tourCode: (data.schedule?.tour as any)?.tourCode || location.state?.tourCode || '-',
-          tourName: data.schedule?.tour?.name || location.state?.tourName || 'Loading...',
-          date: `อ้างอิงรอบเดินทาง: ${data.scheduleId}`,
+          tourCode: data.schedule?.tour?.tourCode || location.state?.tourCode || '-',
+          tourName: data.schedule?.tour?.name || location.state?.tourName || 'รายการจอง',
+          date: dateText,
           price: data.totalPrice || 0,
           adults: data.adults ?? location.state?.adults ?? (data.paxCount || 1),
           children: data.children ?? location.state?.children ?? 0,
           adultPrice: data.schedule?.tour?.price || 0,
-          childPrice: (data.schedule?.tour as any)?.childPrice || data.schedule?.tour?.price || 0,
+          childPrice: data.schedule?.tour?.childPrice || data.schedule?.tour?.price || 0,
           status: data.status,
-          image: typeof data.schedule?.tour?.images?.[0] === 'string' ? data.schedule.tour.images[0] : (data.schedule?.tour?.images?.[0] as any)?.url || location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
+          image: typeof data.schedule?.tour?.images?.[0] === 'string'
+            ? data.schedule.tour.images[0]
+            : location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
           isPrivate: !!data.schedule?.tour?.minPeople || location.state?.isPrivate || false,
-          createdAt: data.createdAt || new Date().toISOString()
+          createdAt: data.createdAt || new Date().toISOString(),
         })
-      } catch (err) {
-        console.error("Error fetching booking details:", err)
-        // กรณีดึงข้อมูลไม่สำเร็จ หรือเป็นการ Mock ให้ใส่ข้อมูลจำลองไปก่อน
-        setBookingData({
-          id: bookingId || '',
-          tourCode: 'ATV2026005',
-          tourName: 'ทัวร์เกาะพีพีดําน้ำชมปะการัง',
-          date: '17 เม.ย. พ.ศ.2569 - 19 เม.ย. พ.ศ.2569',
-          price: 4000,
-          adults: 2,
-          children: 1,
-          adultPrice: 1500,
-          childPrice: 1000,
-          status: 'pending_payment',
-          image: 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
-          isPrivate: false,
-          createdAt: new Date().toISOString()
-        })
+        setLoadError('')
+      } catch (error) {
+        console.error('Error fetching booking details:', error)
+        setLoadError('ไม่สามารถโหลดข้อมูลการชำระเงินได้ กรุณาลองเปิดรายการนี้อีกครั้งจากหน้าการจองของฉัน')
       } finally {
         setLoading(false)
       }
     }
-    fetchBooking()
-  }, [bookingId])
 
-  // 2. ระบบเวลานับถอยหลัง — ใช้ server time เท่านั้น (ไม่ใช้ localStorage เพราะทำให้เวลาเพี้ยน)
+    void fetchBooking()
+  }, [bookingId, location.state])
+
   useEffect(() => {
     if (!bookingData || !bookingId) return
 
-    // ถ้า booking ถูกยกเลิกแล้ว (โดย Cron Job หรือ Admin) แสดง expired ทันที
     if (bookingData.status === 'canceled') {
       setTimeLeft(0)
       setIsExpired(true)
       return
     }
 
-    // ถ้าไม่มี createdAt ให้เริ่มนับ 15 นาทีจากตอนนี้
     if (!bookingData.createdAt) {
       const expiryTime = Date.now() + 15 * 60 * 1000
       const updateTimer = () => {
@@ -112,31 +105,22 @@ export default function PaymentPage() {
       return () => clearInterval(interval)
     }
 
-    // คำนวณเวลาจาก createdAt ของ server
-    const PAYMENT_DURATION_MS = 15 * 60 * 1000
+    const paymentDurationMs = 15 * 60 * 1000
     const rawDate = bookingData.createdAt
     const now = Date.now()
-
-    // ลองทั้ง 2 แบบ: ตีความเป็น local time และ UTC
     const asLocal = new Date(rawDate).getTime()
-    const asUTC = new Date(rawDate.endsWith('Z') ? rawDate : rawDate + 'Z').getTime()
+    const asUtc = new Date(rawDate.endsWith('Z') ? rawDate : `${rawDate}Z`).getTime()
 
-    // เลือกแบบที่ใกล้ now ที่สุด (ไม่เกิน now) = แบบที่ถูกต้อง
-    const diffLocal = now - asLocal
-    const diffUTC = now - asUTC
     let createdTime: number
-    if (diffLocal >= 0 && (diffUTC < 0 || diffLocal <= diffUTC)) {
+    if (now - asLocal >= 0 && (now - asUtc < 0 || now - asLocal <= now - asUtc)) {
       createdTime = asLocal
-    } else if (diffUTC >= 0) {
-      createdTime = asUTC
+    } else if (now - asUtc >= 0) {
+      createdTime = asUtc
     } else {
-      createdTime = now // fallback: ถ้าไม่สมเหตุทั้งคู่ ให้เริ่มจากตอนนี้
+      createdTime = now
     }
 
-    const expiryTime = createdTime + PAYMENT_DURATION_MS
-    console.log('[Timer] createdTime:', new Date(createdTime).toISOString(), '| expiryTime:', new Date(expiryTime).toISOString(), '| remaining:', Math.floor((expiryTime - now) / 1000), 'sec')
-
-    // ถ้าหมดเวลาแล้ว แสดง expired ทันที
+    const expiryTime = createdTime + paymentDurationMs
     if (expiryTime <= now) {
       setTimeLeft(0)
       setIsExpired(true)
@@ -154,30 +138,42 @@ export default function PaymentPage() {
     return () => clearInterval(timerInterval)
   }, [bookingData, bookingId])
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+    }
+  }, [previewUrl])
+
   const formatTime = (seconds: number | null) => {
     if (seconds === null) return '--:--'
-    const m = Math.floor(seconds / 60)
-    const s = seconds % 60
-    return `${m}:${s < 10 ? '0' : ''}${s}`
+    const minutes = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`
   }
 
-  // 3. ฟังก์ชันจัดการไฟล์อัปโหลด (Preview)
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      setSelectedFile(file)
-      setPreviewUrl(URL.createObjectURL(file))
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files?.[0]) return
+
+    const file = event.target.files[0]
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
     }
+    setSelectedFile(file)
+    setPreviewUrl(URL.createObjectURL(file))
   }
 
-  const handleRemoveFile = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleRemoveFile = (event: MouseEvent) => {
+    event.stopPropagation()
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+    }
     setSelectedFile(null)
     setPreviewUrl(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  // 4. ส่งข้อมูลการชำระเงิน (Upload slip)
   const handleConfirmPayment = async () => {
     if (!selectedFile) {
       toast.error('กรุณาแนบหลักฐานการชำระเงินก่อนยืนยันครับ')
@@ -196,134 +192,155 @@ export default function PaymentPage() {
         Number(bookingId),
         bookingData.price,
         selectedFile,
-        'BANK_TRANSFER'
+        'BANK_TRANSFER',
       )
 
       setIsSubmitting(false)
       setShowSuccessModal(true)
-    } catch (err: unknown) {
+    } catch (error: unknown) {
       setIsSubmitting(false)
-      const error = err as { response?: { data?: { message?: string } } }
-      const errorMsg = error.response?.data?.message || 'ไม่สามารถอัปโหลดสลิปได้ กรุณาลองใหม่อีกครั้ง'
-      toast.error(errorMsg)
-      console.error('Error uploading payment slip:', err)
+      const resolvedError = error as { response?: { data?: { message?: string } } }
+      toast.error(resolvedError.response?.data?.message || 'ไม่สามารถอัปโหลดสลิปได้ กรุณาลองใหม่อีกครั้ง')
+      console.error('Error uploading payment slip:', error)
     }
   }
 
-  if (loading || !bookingData) {
+  if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center font-bold text-gray-400 text-lg">
+      <div className="flex flex-1 items-center justify-center text-lg font-bold text-gray-400">
         กำลังเตรียมข้อมูลการชำระเงิน...
       </div>
     )
   }
 
-  // ข้อมูลขั้นตอนการชำระเงิน (Icon images)
+  if (loadError || !bookingData) {
+    return (
+      <div className="bg-[#F8FAFC]">
+        <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="ui-surface rounded-[2rem] border border-gray-100 bg-white p-8 text-center">
+            <h1 className="text-2xl font-bold text-gray-900">ไม่พบข้อมูลการชำระเงิน</h1>
+            <p className="mt-3 text-sm leading-7 text-gray-500">{loadError}</p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <button type="button" onClick={() => navigate('/my-bookings')} className="ui-focus-ring ui-pressable rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-dark">
+                ไปที่การจองของฉัน
+              </button>
+              <button type="button" onClick={() => navigate('/')} className="ui-focus-ring ui-pressable rounded-2xl border border-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                กลับหน้าแรก
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
   const paymentSteps = [
     { icon: '/Icon_open_app.svg', text: 'เปิดแอปพลิเคชันธนาคารของคุณ' },
     { icon: '/Icon_scan.svg', text: 'สแกน QR ที่ปรากฏบนหน้าจอ' },
     { icon: '/Icon_check.svg', text: 'ตรวจสอบยอดเงินและชื่อผู้รับ' },
-    { icon: '/Icon_ticket.svg', text: 'อัปโหลดภาพสลิปและกดปุ่มยืนยันการชำระเงิน' }
-  ];
+    { icon: '/Icon_ticket.svg', text: 'อัปโหลดภาพสลิปและกดยืนยันการชำระเงิน' },
+  ]
 
   return (
-    <div className="bg-[#F8FAFC] relative">
-      {/* แถบแจ้งเตือนเวลา (Full width) */}
-      <div className={`${isExpired ? 'bg-red-500 text-white' : 'bg-red-50 text-red-500'} py-3 text-center text-base font-bold flex items-center justify-center gap-2 shadow-sm transition-colors`}>
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        {isExpired
-          ? 'หมดเวลาชำระเงิน กรุณาทำรายการจองใหม่อีกครั้ง'
-          : `กรุณาชำระเงินภายใน ${formatTime(timeLeft)} นาที`
-        }
+    <div className="bg-[#F8FAFC]">
+      <div className={`${isExpired ? 'bg-red-500 text-white' : 'bg-red-50 text-red-600'} px-4 py-3 text-center text-sm font-bold shadow-sm sm:text-base`}>
+        <div className="mx-auto flex max-w-7xl items-center justify-center gap-2">
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>
+            {isExpired
+              ? 'หมดเวลาชำระเงิน กรุณาทำรายการจองใหม่อีกครั้ง'
+              : `กรุณาชำระเงินภายใน ${formatTime(timeLeft)} นาที`}
+          </span>
+        </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-6 py-10">
-
-        {/* --- ส่วนหัว: ปุ่มย้อนกลับ & Progress Bar --- */}
-        <div className="relative mb-12 flex justify-center mt-4">
-          <button onClick={() => navigate(-1)} className="absolute left-0 top-0 mt-1 text-primary font-bold hover:underline flex items-center gap-1.5 text-base z-20 transition-all hover:-translate-x-1">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="relative mb-8 mt-2 flex flex-col items-center gap-4 md:gap-0">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="ui-pressable absolute left-0 top-0 hidden items-center gap-1.5 text-base font-bold text-primary hover:underline md:flex"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19 3 12m0 0 7-7m-7 7h18" />
             </svg>
             ย้อนกลับ
           </button>
-
           <ProgressBar currentStep={3} />
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-8 mt-10 text-center">สแกนเพื่อชำระเงิน</h1>
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-bold text-gray-900">สแกนเพื่อชำระเงิน</h1>
+          <p className="mt-2 text-sm text-gray-500">โอนเงินตาม QR ด้านล่าง และอัปโหลดสลิปเพื่อส่งหลักฐานการชำระเงิน</p>
+        </div>
 
-        {/* --- 3 Columns Layout (Middle container wider) --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr_1fr] xl:grid-cols-[1fr_1.4fr_1fr] gap-6 items-stretch max-w-7xl mx-auto">
-
-          {/* คอลัมน์ 1: QR Code */}
-          <div className="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col items-center pb-8 h-full">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1.2fr_1fr]">
+          <section className="ui-surface overflow-hidden rounded-[1.75rem] border border-gray-100 bg-white">
             <img
               src="/qr-payment.jpg"
               alt="PromptPay QR Code"
-              className="w-full h-auto object-contain mb-4"
+              className="w-full object-contain bg-slate-50 px-6 py-6"
             />
-            <div className="text-center px-6">
-              <p className="text-sm font-medium text-gray-500 mb-1.5">ชื่อบัญชี</p>
-              <p className="font-bold text-gray-800 text-xl">พัชรพล หมัดสุเด็น</p>
+            <div className="border-t border-gray-100 px-6 py-5 text-center">
+              <p className="text-sm font-medium text-gray-500">ชื่อบัญชี</p>
+              <p className="mt-1 text-xl font-bold text-gray-800">บริษัท ไนน์ทัวร์ แทรเวล จำกัด</p>
+              <p className="mt-2 text-xs text-gray-400">โปรดตรวจสอบยอดเงินและชื่อผู้รับก่อนโอนทุกครั้ง</p>
             </div>
-          </div>
+          </section>
 
-          {/* คอลัมน์ 2: สรุปข้อมูลการจอง */}
-          <div className="h-full flex flex-col">
-            <BookingSummaryCard
-              tourCode={bookingData.tourCode}
-              tourName={bookingData.tourName}
-              date={bookingData.date}
-              adults={bookingData.adults}
-              children={bookingData.children}
-              adultPrice={bookingData.adultPrice}
-              childPrice={bookingData.childPrice}
-              image={bookingData.image}
-              totalPrice={bookingData.price}
-              isPrivate={bookingData.isPrivate}
-            />
-          </div>
+          <BookingSummaryCard
+            tourCode={bookingData.tourCode}
+            tourName={bookingData.tourName}
+            date={bookingData.date}
+            adults={bookingData.adults}
+            children={bookingData.children}
+            adultPrice={bookingData.adultPrice}
+            childPrice={bookingData.childPrice}
+            image={bookingData.image}
+            totalPrice={bookingData.price}
+            isPrivate={bookingData.isPrivate}
+          />
 
-          {/* คอลัมน์ 3: อัปโหลดสลิป */}
-          <div className="bg-white p-8 md:p-10 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 h-full flex flex-col">
-            <h3 className="text-xl font-bold text-gray-800 mb-8 text-center">หลักฐานการชำระเงิน</h3>
+          <section className="ui-surface flex h-full flex-col rounded-[1.75rem] border border-gray-100 bg-white p-6 md:p-7">
+            <div className="mb-5">
+              <h3 className="text-xl font-bold text-gray-900">หลักฐานการชำระเงิน</h3>
+              <p className="mt-1 text-sm text-gray-500">อัปโหลดสลิปและตรวจสอบตัวอย่างก่อนกดยืนยัน</p>
+            </div>
 
-            {/* พื้นที่อัปโหลดไฟล์ */}
             <div
-              className={`border-2 border-dashed rounded-3xl relative flex flex-col items-center justify-center mb-8 overflow-hidden transition-all shrink-0
-                ${previewUrl ? 'border-gray-200 bg-gray-50 h-[260px]' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 cursor-pointer h-[200px] hover:border-blue-400'}
-              `}
+              className={`relative mb-6 overflow-hidden rounded-[1.5rem] border-2 border-dashed transition-all ${previewUrl
+                ? 'border-gray-200 bg-gray-50'
+                : 'cursor-pointer border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/40'
+              }`}
               onClick={() => !previewUrl && fileInputRef.current?.click()}
             >
               {previewUrl ? (
                 <>
-                  <img src={previewUrl} alt="Slip Preview" className="w-full h-full object-contain p-3" />
+                  <img src={previewUrl} alt="Slip Preview" className="h-[260px] w-full object-contain p-4" />
                   <button
+                    type="button"
                     onClick={handleRemoveFile}
-                    className="absolute top-3 right-3 bg-white/95 text-red-500 p-2.5 rounded-full shadow-md hover:bg-white hover:text-red-600 transition-all z-10"
+                    className="ui-focus-ring absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-red-500 shadow-md transition-colors hover:bg-white hover:text-red-600"
                     title="ลบรูปภาพ"
                   >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                     </svg>
                   </button>
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-900/80 text-white px-2 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-gray-900/85 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
                     อัปโหลดไฟล์เรียบร้อย
                   </div>
-
-
                 </>
               ) : (
-                <>
-                  <svg className="w-12 h-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                <div className="flex h-[220px] flex-col items-center justify-center px-6 text-center">
+                  <svg className="mb-4 h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                   </svg>
-                  <p className="text-base text-gray-800 font-bold mb-1.5">คลิกเพื่ออัปโหลดสลิป</p>
-                  <p className="text-sm text-gray-500">โปรดตรวจสอบสลิปก่อนอัพโหลดทุกครั้ง</p>
-                </>
+                  <p className="text-base font-bold text-gray-800">คลิกเพื่ออัปโหลดสลิป</p>
+                  <p className="mt-1 text-sm text-gray-500">รองรับไฟล์ JPG และ PNG</p>
+                </div>
               )}
 
               <input
@@ -333,139 +350,128 @@ export default function PaymentPage() {
                 accept="image/jpeg, image/png, image/jpg"
                 onChange={handleFileChange}
               />
-
             </div>
 
-            {/* --- ขั้นตอนการชำระเงิน (Icon images) --- */}
-            <div className="flex-grow">
-              <p className="font-bold text-gray-800 text-lg mb-6">ขั้นตอนการชำระเงิน</p>
-              <div className="space-y-5 text-gray-700">
+            {isExpired && uploadAnyway && (
+              <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                หมดเวลาจองแล้ว แต่คุณแจ้งว่าทำรายการโอนเสร็จสิ้น ระบบจึงยังเปิดให้อัปโหลดสลิปต่อได้
+              </div>
+            )}
+
+            <div className="mt-auto rounded-[1.5rem] border border-gray-100 bg-gray-50 p-4">
+              <p className="mb-4 text-base font-bold text-gray-800">ขั้นตอนการชำระเงิน</p>
+              <div className="space-y-4 text-gray-700">
                 {paymentSteps.map((step, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <img
-                      src={step.icon}
-                      alt={`Step ${index + 1}`}
-                      className="w-8 h-8 shrink-0 object-contain"
-                    />
-                    <p className="text-[15px] font-medium leading-normal">{step.text}</p>
+                  <div key={index} className="flex items-center gap-4 rounded-2xl bg-white px-4 py-3">
+                    <img src={step.icon} alt={`Step ${index + 1}`} className="h-8 w-8 shrink-0 object-contain" />
+                    <p className="text-sm font-medium leading-6">{step.text}</p>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-
+          </section>
         </div>
 
-        {/* ปุ่มยืนยัน */}
-        <div className="flex flex-col items-center mt-14">
+        <div className="mt-10 flex flex-col items-center">
           <button
+            type="button"
             onClick={handleConfirmPayment}
             disabled={isSubmitting || (isExpired && !uploadAnyway)}
-            className={`flex items-center justify-center gap-3 text-white font-bold py-4.5 px-24 rounded-full transition-all text-lg min-w-[340px] shadow-[0_10px_25px_rgba(37,99,235,0.25)] 
-              ${isSubmitting || (isExpired && !uploadAnyway)
-                ? 'bg-gray-400 cursor-not-allowed shadow-none'
-                : 'bg-primary hover:bg-primary-dark hover:-translate-y-[1.5px] active:translate-y-0'
-              }`}
+            className={`ui-focus-ring ui-pressable flex min-w-[280px] items-center justify-center gap-3 rounded-full px-8 py-4 text-lg font-bold text-white ${isSubmitting || (isExpired && !uploadAnyway)
+              ? 'cursor-not-allowed bg-gray-400 shadow-none hover:transform-none'
+              : 'bg-primary shadow-[0_10px_25px_rgba(37,99,235,0.25)] hover:bg-primary-dark'
+            }`}
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">
-                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg className="h-5 w-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4Zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647Z" />
                 </svg>
                 กำลังดำเนินการ...
               </span>
             ) : (
               <>
-                <svg className="w-5.5 h-5.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5Z" clipRule="evenodd" />
                 </svg>
                 ยืนยันการชำระเงิน
               </>
             )}
           </button>
 
-          <div className="flex gap-4 mt-5 text-sm font-medium text-gray-400">
-            <a href="#" className="hover:text-gray-600 underline underline-offset-2">ข้อกำหนดและเงื่อนไข</a>
+          <div className="mt-5 flex gap-4 text-sm font-medium text-gray-400">
+            <span>ข้อกำหนดและเงื่อนไขการชำระเงิน</span>
             <span>|</span>
-            <a href="#" className="hover:text-gray-600 underline underline-offset-2">นโยบายความเป็นส่วนตัว</a>
+            <span>นโยบายความเป็นส่วนตัว</span>
           </div>
         </div>
-
       </main>
 
-      {/* --- Success Modal --- */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => { }}></div>
-          <div className="bg-white rounded-[2.5rem] p-10 w-full max-w-sm relative z-10 flex flex-col items-center text-center shadow-2xl animate-fade-in-up border border-gray-100">
-
-            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-8">
-              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.4)]">
-                <svg className="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
+      <Modal isOpen={showSuccessModal} onClose={() => undefined} width="max-w-sm">
+        <div className="flex flex-col items-center text-center">
+          <div className="mb-7 flex h-24 w-24 items-center justify-center rounded-full bg-green-100">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-[0_0_20px_rgba(34,197,94,0.4)]">
+              <svg className="h-9 w-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
+          </div>
+          <h2 className="text-3xl font-bold text-gray-800">การชำระเงินเสร็จสิ้น</h2>
+          <p className="mt-3 text-[15px] font-medium leading-relaxed text-gray-500">
+            คุณสามารถตรวจสอบสถานะการจองได้
+            <br />
+            จากหน้าการจองของฉัน
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/my-bookings')}
+            className="ui-focus-ring ui-pressable mt-8 w-full rounded-full bg-primary py-4 text-lg font-bold text-white hover:bg-primary-dark"
+          >
+            การจองของฉัน
+          </button>
+        </div>
+      </Modal>
 
-            <h2 className="text-3xl font-bold text-gray-800 mb-3">การชำระเงินเสร็จสิ้น</h2>
-            <p className="text-gray-500 text-[15px] mb-10 leading-relaxed font-medium">
-              คุณสามารถตรวจสอบสถานะการจองได้<br />โดยกดไปที่การจองของฉัน
-            </p>
+      <Modal isOpen={isExpired && !uploadAnyway && !showSuccessModal} onClose={() => undefined} width="max-w-md">
+        <div className="flex flex-col items-center text-center">
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
+            <svg className="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800">หมดเวลาชำระเงิน</h2>
+          <p className="mt-3 text-[15px] font-medium leading-relaxed text-gray-500">
+            เวลาจองที่นั่งของคุณหมดลงแล้ว และที่นั่งได้ถูกคืนกลับเข้าสู่ระบบแล้ว อย่างไรก็ตาม หากคุณทำรายการชำระเงินเรียบร้อยแล้ว กรุณากดปุ่มด้านล่างเพื่ออัปโหลดสลิป
+          </p>
 
+          <div className="mt-8 flex w-full flex-col gap-3">
             <button
-              onClick={() => navigate('/my-bookings')}
-              className="w-full bg-primary text-white font-bold py-4 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
+              type="button"
+              onClick={() => setUploadAnyway(true)}
+              className="ui-focus-ring ui-pressable w-full rounded-full bg-primary py-3.5 text-lg font-bold text-white hover:bg-primary-dark"
             >
-              การจองของฉัน
+              ฉันโอนเงินเรียบร้อยแล้ว
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  if (bookingId) {
+                    await bookingService.cancelBooking(bookingId)
+                  }
+                } catch {
+                  // หากยกเลิกไม่ได้ Cron Job จะจัดการให้ภายหลัง
+                }
+                navigate('/')
+              }}
+              className="ui-focus-ring ui-pressable w-full rounded-full bg-gray-100 py-3.5 text-lg font-bold text-gray-700 hover:bg-gray-200"
+            >
+              เริ่มการจองใหม่
             </button>
           </div>
         </div>
-      )}
-
-      {/* --- Timeout Modal --- */}
-      {isExpired && !uploadAnyway && !showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-          <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-md relative z-10 flex flex-col items-center text-center shadow-2xl animate-fade-in-up border border-gray-100">
-
-            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
-              <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-
-            <h2 className="text-2xl font-bold text-gray-800 mb-3">หมดเวลาชำระเงิน</h2>
-            <p className="text-gray-500 text-[15px] mb-8 leading-relaxed font-medium">
-              เวลาจองที่นั่งของคุณหมดลงแล้ว และที่นั่งได้ถูกคืนกลับเข้าสู่ระบบแล้ว อย่างไรก็ตาม หากคุณทำรายการชำระเงินเรียบร้อยแล้ว กรุณากดปุ่มด้านล่างเพื่ออัปโหลดสลิป
-            </p>
-
-            <div className="flex flex-col gap-3 w-full">
-              <button
-                onClick={() => setUploadAnyway(true)}
-                className="w-full bg-primary text-white font-bold py-3.5 rounded-full hover:bg-primary-dark transition-colors shadow-lg text-lg"
-              >
-                ฉันโอนเงินเรียบร้อยแล้ว
-              </button>
-              <button
-                onClick={async () => {
-                  // ยกเลิก booking และคืนที่นั่งก่อน navigate ออก
-                  try {
-                    if (bookingId) {
-                      await bookingService.cancelBooking(bookingId)
-                    }
-                  } catch { /* ถ้ายกเลิกไม่ได้ก็ไม่เป็นไร Cron Job จะจัดการให้ */ }
-                  navigate('/')
-                }}
-                className="w-full bg-gray-100 text-gray-700 font-bold py-3.5 rounded-full hover:bg-gray-200 transition-colors text-lg"
-              >
-                เริ่มการจองใหม่
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      </Modal>
     </div>
   )
 }

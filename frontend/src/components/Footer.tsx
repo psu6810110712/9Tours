@@ -1,9 +1,10 @@
-import { FaPhone, FaEnvelope, FaGlobe, FaFacebookF, FaInstagram } from 'react-icons/fa'
+﻿import type { ReactNode } from 'react'
+import { FaEnvelope, FaFacebookF, FaGlobe, FaInstagram, FaPhone } from 'react-icons/fa'
 import { SiLine } from 'react-icons/si'
 
-function CircleIcon({ children }: { children: React.ReactNode }) {
+function CircleIcon({ children }: { children: ReactNode }) {
   return (
-    <span className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center flex-shrink-0">
+    <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm">
       {children}
     </span>
   )
@@ -11,77 +12,65 @@ function CircleIcon({ children }: { children: React.ReactNode }) {
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 mt-16">
-      <div className="max-w-7xl mx-auto px-8 py-10 grid grid-cols-4 gap-10">
-
-        {/* ติดต่อเรา */}
+    <footer className="mt-16 border-t border-gray-200 bg-white">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-10 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
         <div>
-          <h3 className="font-bold text-gray-900 text-sm mb-4">ติดต่อเรา</h3>
+          <h3 className="mb-4 text-sm font-bold text-gray-900">ติดต่อเรา</h3>
           <ul className="space-y-3">
             <li className="flex items-center gap-2.5">
-              <CircleIcon><FaPhone className="w-3 h-3 text-gray-600" /></CircleIcon>
-              <span className="text-sm text-gray-700">095-0323782</span>
+              <CircleIcon><FaPhone className="h-3 w-3 text-gray-600" /></CircleIcon>
+              <span className="text-sm font-medium text-gray-700">095-0323782</span>
             </li>
             <li className="flex items-center gap-2.5">
-              <CircleIcon><FaEnvelope className="w-3 h-3 text-gray-600" /></CircleIcon>
-              <span className="text-sm text-gray-700">info@9tours.com</span>
+              <CircleIcon><FaEnvelope className="h-3 w-3 text-gray-600" /></CircleIcon>
+              <span className="text-sm font-medium text-gray-700">info@9tours.com</span>
             </li>
             <li className="flex items-center gap-2.5">
-              <CircleIcon><FaGlobe className="w-3 h-3 text-gray-600" /></CircleIcon>
-              <span className="text-sm text-gray-700">www.9tours.com</span>
+              <CircleIcon><FaGlobe className="h-3 w-3 text-gray-600" /></CircleIcon>
+              <span className="text-sm font-medium text-gray-700">www.9tours.com</span>
             </li>
           </ul>
         </div>
 
-        {/* Social Media */}
         <div>
-          <h3 className="font-bold text-gray-900 text-sm mb-4">Social Media</h3>
+          <h3 className="mb-4 text-sm font-bold text-gray-900">Social Media</h3>
           <ul className="space-y-3">
             <li className="flex items-center gap-2.5">
-              <CircleIcon><SiLine className="w-3.5 h-3.5 text-[#06C755]" /></CircleIcon>
-              <span className="text-sm text-gray-700">Line</span>
+              <CircleIcon><SiLine className="h-3.5 w-3.5 text-[#06C755]" /></CircleIcon>
+              <span className="text-sm font-medium text-gray-700">Line Official</span>
             </li>
             <li className="flex items-center gap-2.5">
-              <CircleIcon><FaFacebookF className="w-3 h-3 text-[#1877F2]" /></CircleIcon>
-              <span className="text-sm text-gray-700">Facebook</span>
+              <CircleIcon><FaFacebookF className="h-3 w-3 text-[#1877F2]" /></CircleIcon>
+              <span className="text-sm font-medium text-gray-700">Facebook</span>
             </li>
             <li className="flex items-center gap-2.5">
-              <CircleIcon><FaInstagram className="w-3.5 h-3.5 text-[#E4405F]" /></CircleIcon>
-              <span className="text-sm text-gray-700">Instagram</span>
+              <CircleIcon><FaInstagram className="h-3.5 w-3.5 text-[#E4405F]" /></CircleIcon>
+              <span className="text-sm font-medium text-gray-700">Instagram</span>
             </li>
           </ul>
         </div>
 
-        {/* เกี่ยวกับ */}
         <div>
-          <h3 className="font-bold text-gray-900 text-sm mb-4">เกี่ยวกับ</h3>
-          <ul className="space-y-2.5">
-            <li>
-              <a href="#" className="text-sm text-gray-700 underline hover:text-accent transition-colors">
-                ข้อกำหนดและเงื่อนไข
-              </a>
-            </li>
-            <li>
-              <a href="#" className="text-sm text-gray-700 underline hover:text-accent transition-colors">
-                นโยบายความเป็นส่วนตัว
-              </a>
-            </li>
+          <h3 className="mb-4 text-sm font-bold text-gray-900">ข้อมูลสำคัญ</h3>
+          <ul className="space-y-2.5 text-sm font-medium text-gray-700">
+            <li>ข้อกำหนดและเงื่อนไขการจอง</li>
+            <li>นโยบายความเป็นส่วนตัว</li>
+            <li>เวลาทำการทุกวัน 09:00 - 20:00 น.</li>
           </ul>
         </div>
 
-        {/* ช่องทางการชำระเงิน */}
         <div>
-          <h3 className="font-bold text-gray-900 text-sm mb-4">ช่องทางการชำระเงิน</h3>
+          <h3 className="mb-4 text-sm font-bold text-gray-900">ช่องทางการชำระเงิน</h3>
           <img
             src="/thai-qr-payment.png"
             alt="Thai QR Payment"
             className="h-10 w-auto rounded"
           />
+          <p className="mt-3 text-sm font-medium text-gray-600">รองรับการชำระผ่าน Thai QR Payment</p>
         </div>
-
       </div>
 
-      <div className="border-t border-gray-100 py-4 text-center text-xs text-gray-400">
+      <div className="border-t border-gray-100 py-4 text-center text-xs font-medium text-gray-500">
         Copyright © 2026 9Tours Travel Thailand Co., Ltd. สงวนลิขสิทธิ์ตามกฎหมาย
       </div>
     </footer>
