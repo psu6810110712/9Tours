@@ -236,17 +236,17 @@ export default function BookingDateSelector({
           )}
 
           {selectedSchedule && (tour.tourType === 'package' || !!tour.minPeople) && (
-            <div className="mt-4 rounded-[1.25rem] border border-gray-100 bg-gray-50 px-4 py-4">
+            <div className="mt-4 rounded-[1.5rem] border border-blue-200 bg-blue-50 px-4 py-4">
+              <label className="mb-2 block text-lg font-semibold text-blue-800">วันที่ท่านเลือกคือ</label>
               <div className="flex items-center gap-3">
-                <div className="mt-4 rounded-3xl bg-blue-50 p-2 text-blue-600">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <rect x="3" y="4" width="18" height="18" rx="2" />
                     <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-[17px] font-semibold text-gray-500">วันที่ท่านเลือกคือ</p>
-                  <p className="mt-1 text-base font-semibold text-gray-900">
+                  <p className="text-[16px] font-medium text-blue-900">
                     {(() => {
                       const start = parseDate(selectedSchedule.startDate)
                       let dateText = ''
