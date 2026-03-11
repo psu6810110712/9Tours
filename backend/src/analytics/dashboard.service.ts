@@ -1,8 +1,9 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ObjectLiteral, Repository, SelectQueryBuilder } from 'typeorm';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { Tour } from '../tours/entities/tour.entity';
+import { TourSchedule } from '../tours/entities/tour-schedule.entity';
 import { User } from '../users/entities/user.entity';
 import { TourView } from './entities/tour-view.entity';
 
@@ -59,8 +60,8 @@ export class DashboardService {
       this.getBookingsByStatus(normalizedFilters),
       this.getRegionStats(normalizedFilters),
       this.getProvinceStats(normalizedFilters),
-      this.getViewsOverTime(),
-      this.getBookingsOverTime(),
+      this.getViewsOverTime(normalizedFilters),
+      this.getBookingsOverTime(normalizedFilters),
     ]);
 
     const conversionRate = summaryCards.totalViews > 0
@@ -87,18 +88,92 @@ export class DashboardService {
     };
   }
 
+  private parseDate(value?: string, endOfDay = false) {
+    if (!value) return null;
+
+    const parsed = new Date(`${value}T${endOfDay ? '23:59:59.999' : '00:00:00'}`);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
   private getDateRange(filters: DashboardFilters): { start: Date; end: Date } | null {
     if (!filters.startDate && !filters.endDate) return null;
 
-    const start = filters.startDate
-      ? new Date(`${filters.startDate}T00:00:00`)
-      : new Date('2000-01-01T00:00:00');
+    const requestedStart = this.parseDate(filters.startDate);
+    const requestedEnd = this.parseDate(filters.endDate, true);
 
-    const end = filters.endDate
-      ? new Date(`${filters.endDate}T23:59:59.999`)
-      : new Date();
+    let start = requestedStart ?? new Date('2000-01-01T00:00:00');
+    let end = requestedEnd ?? new Date();
+
+    if (start > end) {
+      start = this.parseDate(filters.endDate) ?? new Date(end);
+      end = this.parseDate(filters.startDate, true) ?? new Date(start);
+    }
 
     return { start, end };
+  }
+
+  private hasTourFilters(filters: DashboardFilters) {
+    return Boolean(
+      (filters.region && filters.region !== 'all')
+      || (filters.tourType && filters.tourType !== 'all'),
+    );
+  }
+
+  private applyTourFilters<T extends ObjectLiteral>(qb: SelectQueryBuilder<T>, filters: DashboardFilters, tourAlias = 't') {
+    if (filters.region && filters.region !== 'all') {
+      qb.andWhere(`${tourAlias}.region = :region`, { region: filters.region });
+    }
+    if (filters.tourType && filters.tourType !== 'all') {
+      qb.andWhere(`${tourAlias}.tourType = :tourType`, { tourType: filters.tourType });
+    }
+    return qb;
+  }
+
+  private applyBookingFilters<T extends ObjectLiteral>(qb: SelectQueryBuilder<T>, filters: DashboardFilters, bookingAlias = 'b') {
+    if (!this.hasTourFilters(filters)) {
+      return qb;
+    }
+
+    const scheduleAlias = `${bookingAlias}_schedule`;
+    const tourAlias = `${bookingAlias}_tour`;
+
+    qb
+      .innerJoin(TourSchedule, scheduleAlias, `${scheduleAlias}.id = ${bookingAlias}.scheduleId`)
+      .innerJoin(Tour, tourAlias, `${tourAlias}.id = ${scheduleAlias}.tourId`);
+
+    return this.applyTourFilters(qb, filters, tourAlias);
+  }
+
+  private applyViewFilters<T extends ObjectLiteral>(qb: SelectQueryBuilder<T>, filters: DashboardFilters, viewAlias = 'v') {
+    if (!this.hasTourFilters(filters)) {
+      return qb;
+    }
+
+    const tourAlias = `${viewAlias}_tour`;
+    qb.innerJoin(Tour, tourAlias, `${tourAlias}.id = ${viewAlias}.tourId`);
+    return this.applyTourFilters(qb, filters, tourAlias);
+  }
+
+  private shiftMonth(date: Date, months: number, endOfDay = false) {
+    const targetMonthStart = new Date(date.getFullYear(), date.getMonth() + months, 1);
+    const lastDay = new Date(targetMonthStart.getFullYear(), targetMonthStart.getMonth() + 1, 0).getDate();
+    const shifted = new Date(
+      targetMonthStart.getFullYear(),
+      targetMonthStart.getMonth(),
+      Math.min(date.getDate(), lastDay),
+    );
+
+    if (endOfDay) {
+      shifted.setHours(23, 59, 59, 999);
+    } else {
+      shifted.setHours(0, 0, 0, 0);
+    }
+
+    return shifted;
+  }
+
+  private isSameMonth(left: Date, right: Date) {
+    return left.getFullYear() === right.getFullYear() && left.getMonth() === right.getMonth();
   }
 
   private async getSummaryCards(filters: DashboardFilters) {
@@ -143,15 +218,6 @@ export class DashboardService {
     };
   }
 
-  private applyTourFilters<T extends { andWhere: (query: string, parameters?: Record<string, unknown>) => T }>(qb: T, filters: DashboardFilters) {
-    if (filters.region && filters.region !== 'all') {
-      qb.andWhere('t.region = :region', { region: filters.region });
-    }
-    if (filters.tourType && filters.tourType !== 'all') {
-      qb.andWhere('t.tourType = :tourType', { tourType: filters.tourType });
-    }
-    return qb;
-  }
 
   private async getTopTours(filters: DashboardFilters) {
     const qb = this.toursRepo
@@ -245,32 +311,35 @@ export class DashboardService {
       .sort((a, b) => b.count - a.count);
   }
 
-  private async getViewsOverTime() {
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
-    sixMonthsAgo.setDate(1);
-    sixMonthsAgo.setHours(0, 0, 0, 0);
+  private async getViewsOverTime(filters: DashboardFilters) {
+    const dateRange = this.getDateRange(filters);
+    const anchorEnd = dateRange?.end ?? new Date();
+    const windowStart = new Date(anchorEnd.getFullYear(), anchorEnd.getMonth() - 5, 1);
+    const queryStart = dateRange?.start && dateRange.start > windowStart ? dateRange.start : windowStart;
 
-    const raw: { month: string; views: string }[] = await this.tourViewsRepo
+    const qb = this.tourViewsRepo
       .createQueryBuilder('v')
       .select("TO_CHAR(v.viewedAt, 'YYYY-MM')", 'month')
       .addSelect('COUNT(*)', 'views')
-      .where('v.viewedAt >= :since', { since: sixMonthsAgo })
+      .where('v.viewedAt BETWEEN :start AND :end', { start: queryStart, end: anchorEnd });
+
+    this.applyViewFilters(qb, filters, 'v');
+
+    const raw: { month: string; views: string }[] = await qb
       .groupBy("TO_CHAR(v.viewedAt, 'YYYY-MM')")
       .orderBy('month', 'ASC')
       .getRawMany();
 
-    const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const thaiMonths = ['\u0e21.\u0e04.', '\u0e01.\u0e1e.', '\u0e21\u0e35.\u0e04.', '\u0e40\u0e21.\u0e22.', '\u0e1e.\u0e04.', '\u0e21\u0e34.\u0e22.', '\u0e01.\u0e04.', '\u0e2a.\u0e04.', '\u0e01.\u0e22.', '\u0e15.\u0e04.', '\u0e1e.\u0e22.', '\u0e18.\u0e04.'];
     const viewsMap: Record<string, number> = {};
 
     raw.forEach((row) => {
       viewsMap[row.month] = Number(row.views || 0);
     });
 
-    const now = new Date();
     const result: { month: string; views: number }[] = [];
     for (let index = 5; index >= 0; index -= 1) {
-      const date = new Date(now.getFullYear(), now.getMonth() - index, 1);
+      const date = new Date(anchorEnd.getFullYear(), anchorEnd.getMonth() - index, 1);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       result.push({
         month: thaiMonths[date.getMonth()],
@@ -281,28 +350,55 @@ export class DashboardService {
     return result;
   }
 
-  private async getBookingsOverTime() {
-    const now = new Date();
-    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+  private async getBookingsGroupedByDay(start: Date, end: Date, filters: DashboardFilters) {
+    if (start > end) {
+      return [] as { day: number; count: string }[];
+    }
+
+    const qb = this.bookingsRepo
+      .createQueryBuilder('b')
+      .select('EXTRACT(DAY FROM b.createdAt)::int', 'day')
+      .addSelect('COUNT(*)', 'count')
+      .where('b.createdAt BETWEEN :start AND :end', { start, end });
+
+    this.applyBookingFilters(qb, filters, 'b');
+
+    return qb
+      .groupBy('EXTRACT(DAY FROM b.createdAt)')
+      .getRawMany<{ day: number; count: string }>();
+  }
+
+  private async getBookingsOverTime(filters: DashboardFilters) {
+    const dateRange = this.getDateRange(filters);
+    const anchorDate = dateRange?.end ?? new Date();
+    const thisMonthStart = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1);
+    const thisMonthEnd = new Date(anchorDate.getFullYear(), anchorDate.getMonth() + 1, 0, 23, 59, 59, 999);
+    const lastMonthStart = new Date(anchorDate.getFullYear(), anchorDate.getMonth() - 1, 1);
+    const lastMonthEnd = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 0, 23, 59, 59, 999);
+
+    let currentRangeStart = thisMonthStart;
+    let currentRangeEnd = dateRange?.end && dateRange.end < thisMonthEnd ? dateRange.end : thisMonthEnd;
+    let previousRangeStart = lastMonthStart;
+    let previousRangeEnd = lastMonthEnd;
+
+    if (dateRange?.start && this.isSameMonth(dateRange.start, anchorDate) && dateRange.start > thisMonthStart) {
+      currentRangeStart = dateRange.start;
+      const shiftedStart = this.shiftMonth(dateRange.start, -1);
+      if (shiftedStart > previousRangeStart) {
+        previousRangeStart = shiftedStart;
+      }
+    }
+
+    if (dateRange?.end) {
+      const shiftedEnd = this.shiftMonth(dateRange.end, -1, true);
+      if (shiftedEnd < previousRangeEnd) {
+        previousRangeEnd = shiftedEnd;
+      }
+    }
 
     const [thisMonthRaw, lastMonthRaw] = await Promise.all([
-      this.bookingsRepo
-        .createQueryBuilder('b')
-        .select('EXTRACT(DAY FROM b.createdAt)::int', 'day')
-        .addSelect('COUNT(*)', 'count')
-        .where('b.createdAt BETWEEN :start AND :end', { start: thisMonthStart, end: thisMonthEnd })
-        .groupBy('EXTRACT(DAY FROM b.createdAt)')
-        .getRawMany<{ day: number; count: string }>(),
-      this.bookingsRepo
-        .createQueryBuilder('b')
-        .select('EXTRACT(DAY FROM b.createdAt)::int', 'day')
-        .addSelect('COUNT(*)', 'count')
-        .where('b.createdAt BETWEEN :start AND :end', { start: lastMonthStart, end: lastMonthEnd })
-        .groupBy('EXTRACT(DAY FROM b.createdAt)')
-        .getRawMany<{ day: number; count: string }>(),
+      this.getBookingsGroupedByDay(currentRangeStart, currentRangeEnd, filters),
+      this.getBookingsGroupedByDay(previousRangeStart, previousRangeEnd, filters),
     ]);
 
     const thisMonthMap: Record<number, number> = {};
@@ -314,7 +410,7 @@ export class DashboardService {
       lastMonthMap[row.day] = Number(row.count || 0);
     });
 
-    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const daysInMonth = new Date(anchorDate.getFullYear(), anchorDate.getMonth() + 1, 0).getDate();
     const result: { day: number; thisMonth: number; lastMonth: number }[] = [];
 
     for (let day = 1; day <= daysInMonth; day += 1) {

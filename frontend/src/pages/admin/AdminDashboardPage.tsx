@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Area,
   AreaChart,
@@ -18,6 +18,8 @@ import {
 } from 'recharts'
 import { dashboardService, EMPTY_DASHBOARD_DATA, type DashboardData, type DashboardFilters } from '../../services/dashboardService'
 
+import ThailandMap from '../../components/ThailandMap'
+
 const COLORS = ['#F5A623', '#3B82F6', '#10B981', '#EF4444', '#8B5CF6', '#EC4899']
 const PIE_COLORS = ['#F5A623', '#3B82F6', '#10B981', '#8B5CF6']
 const REGION_OPTIONS = [
@@ -29,6 +31,13 @@ const REGION_OPTIONS = [
   { value: 'ภาคตะวันตก', label: 'ภาคตะวันตก' },
   { value: 'ภาคใต้', label: 'ภาคใต้' },
 ]
+
+function formatLocalDateInputValue(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 function SummaryCard({ label, value, accent }: { label: string; value: string; accent: string }) {
   return (
@@ -47,9 +56,9 @@ export default function AdminDashboardPage() {
   const [filterStartDate, setFilterStartDate] = useState(() => {
     const date = new Date()
     date.setDate(1)
-    return date.toISOString().slice(0, 10)
+    return formatLocalDateInputValue(date)
   })
-  const [filterEndDate, setFilterEndDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [filterEndDate, setFilterEndDate] = useState(() => formatLocalDateInputValue(new Date()))
   const [filterRegion, setFilterRegion] = useState('all')
   const [filterTourType, setFilterTourType] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
@@ -361,7 +370,21 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="ui-surface min-h-[220px] rounded-[1.5rem] border border-gray-100 bg-white p-5" />
+              <div className="ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-5">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h2 className="font-bold text-gray-900">{"\u0e41\u0e1c\u0e19\u0e17\u0e35\u0e48\u0e04\u0e27\u0e32\u0e21\u0e19\u0e34\u0e22\u0e21\u0e15\u0e32\u0e21\u0e08\u0e31\u0e07\u0e2b\u0e27\u0e31\u0e14"}</h2>
+                  <p className="text-xs text-gray-400">{"\u0e2d\u0e49\u0e32\u0e07\u0e2d\u0e34\u0e07\u0e08\u0e32\u0e01\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e04\u0e27\u0e32\u0e21\u0e19\u0e34\u0e22\u0e21\u0e23\u0e32\u0e22\u0e08\u0e31\u0e07\u0e2b\u0e27\u0e31\u0e14"}</p>
+                </div>
+                {provinceStats.length > 0 ? (
+                  <div className="h-[320px]">
+                    <ThailandMap regionStats={regionStats} provinceStats={provinceStats} />
+                  </div>
+                ) : (
+                  <div className="flex h-[320px] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 text-sm text-gray-400">
+                    {"\u0e22\u0e31\u0e07\u0e44\u0e21\u0e48\u0e21\u0e35\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e08\u0e31\u0e07\u0e2b\u0e27\u0e31\u0e14\u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e41\u0e2a\u0e14\u0e07\u0e1a\u0e19\u0e41\u0e1c\u0e19\u0e17\u0e35\u0e48"}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </>
