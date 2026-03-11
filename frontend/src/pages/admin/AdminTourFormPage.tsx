@@ -1,24 +1,26 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
+import { isAxiosError } from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
-import { tourService } from '../../services/tourService'
-import ConfirmModal from '../../components/common/ConfirmModal'
 import { toast } from 'react-hot-toast'
-import type { CreateTourPayload } from '../../types/tour'
+import ConfirmModal from '../../components/common/ConfirmModal'
 import ImageUploadSection from '../../components/admin/tour-form/ImageUploadSection'
 import ItinerarySection from '../../components/admin/tour-form/ItinerarySection'
 import ScheduleSection from '../../components/admin/tour-form/ScheduleSection'
+import { tourService } from '../../services/tourService'
+import type { CreateTourPayload } from '../../types/tour'
 
-// ===== ค่าคงที่ที่ใช้ในฟอร์ม =====
 const CATEGORIES = ['สายธรรมชาติ', 'สายคาเฟ่', 'สายกิจกรรม', 'สายมู', 'สายชิล']
 const HIGHLIGHTS = ['ยกเลิกฟรี', 'มีรถรับส่ง', 'อาหารกลางวัน', 'เที่ยวเต็มวัน', 'มีไกด์นำเที่ยว', 'รวมที่พัก', 'รถรับส่งสนามบิน']
-const REGIONS = ['ภาคเหนือ', 'ภาคใต้', 'ภาคกลาง', 'ภาคตะวันออกเฉียงเหนือ', 'ภาคตะวันออก']
+const REGIONS = ['ภาคเหนือ', 'ภาคใต้', 'ภาคกลาง', 'ภาคตะวันออกเฉียงเหนือ', 'ภาคตะวันออก', 'ภาคตะวันตก']
 
 export interface ScheduleRow {
+  id?: number
   startDate: string
   endDate: string
   timeSlot: string
   roundName: string
   maxCapacity: number
+  currentBooked?: number
   enabled: boolean
 }
 
@@ -27,6 +29,30 @@ export interface ItineraryItem {
   time: string
   title: string
   description: string
+}
+
+function normalizeBookedCount(value: number | string | null | undefined) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return 0
+  return Math.max(0, Math.trunc(parsed))
+}
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (isAxiosError(error)) {
+    const message = error.response?.data?.message
+    if (Array.isArray(message)) {
+      return message.join(' ')
+    }
+    if (typeof message === 'string' && message.trim()) {
+      return message
+    }
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
+  }
+
+  return fallback
 }
 
 export default function AdminTourFormPage() {
@@ -40,7 +66,6 @@ export default function AdminTourFormPage() {
   const [error, setError] = useState('')
   const [tourCode, setTourCode] = useState('')
 
-  // ===== State ฟอร์ม =====
   const [tourType, setTourType] = useState<'package' | 'one_day'>('one_day')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -54,17 +79,12 @@ export default function AdminTourFormPage() {
   const [minPeople, setMinPeople] = useState('')
   const [maxPeople, setMaxPeople] = useState('')
   const [duration, setDuration] = useState('')
-
-  // State สำหรับรูปภาพ
   const [images, setImages] = useState<string[]>([])
   const [uploadingImage, setUploadingImage] = useState(false)
-
   const [schedules, setSchedules] = useState<ScheduleRow[]>([])
   const [transportation, setTransportation] = useState('')
   const [accommodation, setAccommodation] = useState('')
   const [itinerary, setItinerary] = useState<ItineraryItem[]>([])
-
-  // ===== State สำหรับเพิ่มหลายวันพร้อมกัน (เฉพาะ one_day) =====
   const [bulkFrom, setBulkFrom] = useState('')
   const [bulkTo, setBulkTo] = useState('')
   const [bulkCapacity, setBulkCapacity] = useState(20)
@@ -72,81 +92,84 @@ export default function AdminTourFormPage() {
   const [bulkDays, setBulkDays] = useState<Set<number>>(new Set([6, 0]))
   const [roundTemplates, setRoundTemplates] = useState<{ roundName: string; timeSlot: string }[]>([{ roundName: '', timeSlot: '' }])
 
-  // ถ้าเป็นหน้าแก้ไข → โหลดข้อมูลเดิมมาใส่ฟอร์ม
   useEffect(() => {
     if (!isEditing) return
-    tourService.getOne(Number(id)).then((tour) => {
-      if (!tour) return
-      setTourCode(tour.tourCode || '')
-      setTourType(tour.tourType)
-      setName(tour.name)
-      setDescription(tour.description)
-      setCategories(tour.categories)
-      setHighlights(tour.highlights)
-      setRegion(tour.region)
-      setProvince(tour.province)
-      let discount = 0
-      if (tour.originalPrice) {
-        discount = Math.round((1 - tour.price / tour.originalPrice) * 100)
-        setDiscountPercent(String(discount))
-        setPrice(String(tour.originalPrice))
-      } else {
-        setPrice(String(tour.price))
-      }
 
-      if (tour.childPrice) {
-        if (discount > 0) {
-          const origChild = Math.round(tour.childPrice / (1 - discount / 100))
-          setChildPrice(String(origChild))
-        } else {
-          setChildPrice(String(tour.childPrice))
+    setLoading(true)
+    setError('')
+
+    tourService.getOne(Number(id))
+      .then((tour) => {
+        if (!tour) {
+          setError('ไม่พบทัวร์ที่ต้องการแก้ไข')
+          return
         }
-      }
-      setMinPeople(tour.minPeople ? String(tour.minPeople) : '')
-      setMaxPeople(tour.maxPeople ? String(tour.maxPeople) : '')
-      setDuration(tour.duration || '')
-      setImages(tour.images || []) // โหลดรูปภาพเดิม
-      setTransportation(tour.transportation || '')
-      setAccommodation(tour.accommodation || '')
-      setItinerary(tour.itinerary || [])
-      setSchedules(
-        tour.schedules.map((s) => ({
-          startDate: s.startDate,
-          endDate: s.endDate,
-          timeSlot: s.timeSlot || '',
-          roundName: s.roundName || '',
-          maxCapacity: s.maxCapacity,
-          enabled: true,
-        }))
-      )
-      setLoading(false)
-    })
+
+        setTourCode(tour.tourCode || '')
+        setTourType(tour.tourType)
+        setName(tour.name)
+        setDescription(tour.description)
+        setCategories(tour.categories)
+        setHighlights(tour.highlights)
+        setRegion(tour.region)
+        setProvince(tour.province)
+
+        let discount = 0
+        if (tour.originalPrice) {
+          discount = Math.round((1 - tour.price / tour.originalPrice) * 100)
+          setDiscountPercent(String(discount))
+          setPrice(String(tour.originalPrice))
+        } else {
+          setPrice(String(tour.price))
+        }
+
+        if (tour.childPrice) {
+          if (discount > 0) {
+            const originalChild = Math.round(tour.childPrice / (1 - discount / 100))
+            setChildPrice(String(originalChild))
+          } else {
+            setChildPrice(String(tour.childPrice))
+          }
+        }
+
+        setMinPeople(tour.minPeople ? String(tour.minPeople) : '')
+        setMaxPeople(tour.maxPeople ? String(tour.maxPeople) : '')
+        setDuration(tour.duration || '')
+        setImages(tour.images || [])
+        setTransportation(tour.transportation || '')
+        setAccommodation(tour.accommodation || '')
+        setItinerary(tour.itinerary || [])
+        setSchedules(
+          tour.schedules.map((schedule) => ({
+            id: schedule.id,
+            startDate: schedule.startDate,
+            endDate: schedule.endDate,
+            timeSlot: schedule.timeSlot || '',
+            roundName: schedule.roundName || '',
+            maxCapacity: schedule.maxCapacity,
+            currentBooked: normalizeBookedCount(schedule.currentBooked),
+            enabled: true,
+          })),
+        )
+      })
+      .catch((loadError) => {
+        setError(getApiErrorMessage(loadError, 'ไม่สามารถโหลดข้อมูลทัวร์ได้'))
+      })
+      .finally(() => setLoading(false))
   }, [id, isEditing])
 
-  // ===== Handlers =====
-
-  const toggleChip = (
-    list: string[],
-    setList: (v: string[]) => void,
-    value: string
-  ) => {
-    setList(
-      list.includes(value)
-        ? list.filter((v2) => v2 !== value)
-        : [...list, value]
-    )
+  const toggleChip = (list: string[], setList: (value: string[]) => void, value: string) => {
+    setList(list.includes(value) ? list.filter((item) => item !== value) : [...list, value])
   }
 
-  // ===== Image Handlers =====
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return
-    const file = e.target.files[0]
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files?.length) return
+    const file = event.target.files[0]
 
-    // ตรวจสอบประเภทไฟล์ (รับเฉพาะ jpg/jpeg และ png)
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
     if (!validTypes.includes(file.type)) {
       toast.error('กรุณาแนบเฉพาะไฟล์ประเภท .jpg หรือ .png เท่านั้นครับ')
-      e.target.value = ''
+      event.target.value = ''
       return
     }
 
@@ -154,12 +177,12 @@ export default function AdminTourFormPage() {
       setUploadingImage(true)
       const url = await tourService.uploadImage(file)
       setImages((prev) => [...prev, url])
-    } catch (error) {
-      console.error(error)
+    } catch (uploadError) {
+      console.error(uploadError)
       toast.error('อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
     } finally {
       setUploadingImage(false)
-      e.target.value = ''
+      event.target.value = ''
     }
   }
 
@@ -167,29 +190,27 @@ export default function AdminTourFormPage() {
     setImages((prev) => prev.filter((_, index) => index !== indexToRemove))
   }
 
-  // ===== Schedule Handlers =====
   const addSchedule = () => {
     setSchedules([...schedules, { startDate: '', endDate: '', timeSlot: '', roundName: '', maxCapacity: 50, enabled: true }])
   }
 
   const removeSchedule = (index: number) => {
-    setSchedules(schedules.filter((_, i) => i !== index))
+    setSchedules(schedules.filter((_, itemIndex) => itemIndex !== index))
   }
 
   const updateSchedule = (index: number, field: keyof ScheduleRow, value: string | number | boolean) => {
-    setSchedules(schedules.map((s, i) => {
-      if (i !== index) return s
-      const updated = { ...s, [field]: value }
+    setSchedules(schedules.map((schedule, itemIndex) => {
+      if (itemIndex !== index) return schedule
+      const updated = { ...schedule, [field]: value }
 
-      // Auto-calculate endDate 
       if (field === 'startDate') {
         if (tourType === 'one_day') {
           updated.endDate = value as string
         } else if (tourType === 'package') {
-          const startD = new Date(value as string);
-          if (!isNaN(startD.getTime()) && bulkDuration > 1) {
-            startD.setDate(startD.getDate() + (bulkDuration - 1));
-            updated.endDate = startD.toISOString().slice(0, 10);
+          const startDate = new Date(value as string)
+          if (!Number.isNaN(startDate.getTime()) && bulkDuration > 1) {
+            startDate.setDate(startDate.getDate() + (bulkDuration - 1))
+            updated.endDate = startDate.toISOString().slice(0, 10)
           }
         }
       }
@@ -200,26 +221,25 @@ export default function AdminTourFormPage() {
   const handleBulkAdd = () => {
     if (!bulkFrom || !bulkTo || bulkFrom > bulkTo) return
     const result: ScheduleRow[] = []
-    const cur = new Date(bulkFrom)
+    const current = new Date(bulkFrom)
     const end = new Date(bulkTo)
 
     let rounds = [{ roundName: '', timeSlot: '' }]
     if (tourType === 'one_day') {
-      const validRounds = roundTemplates.filter((r) => r.timeSlot || r.roundName)
+      const validRounds = roundTemplates.filter((round) => round.timeSlot || round.roundName)
       if (validRounds.length > 0) rounds = validRounds
     } else {
       rounds = [{ roundName: 'Private Group', timeSlot: '' }]
     }
 
-    while (cur <= end) {
-      if (bulkDays.has(cur.getDay())) {
-        // Use local date instead of UTC to avoid timezone shift issues
-        const year = cur.getFullYear()
-        const month = String(cur.getMonth() + 1).padStart(2, '0')
-        const day = String(cur.getDate()).padStart(2, '0')
+    while (current <= end) {
+      if (bulkDays.has(current.getDay())) {
+        const year = current.getFullYear()
+        const month = String(current.getMonth() + 1).padStart(2, '0')
+        const day = String(current.getDate()).padStart(2, '0')
         const startDateStr = `${year}-${month}-${day}`
 
-        const endDateObj = new Date(cur)
+        const endDateObj = new Date(current)
         if (tourType === 'package' && bulkDuration > 1) {
           endDateObj.setDate(endDateObj.getDate() + (bulkDuration - 1))
         }
@@ -230,9 +250,7 @@ export default function AdminTourFormPage() {
         const endDateStr = `${endYear}-${endMonth}-${endDay}`
 
         for (const round of rounds) {
-          const alreadyExists = schedules.some(
-            (s) => s.startDate === startDateStr && s.timeSlot === round.timeSlot
-          )
+          const alreadyExists = schedules.some((schedule) => schedule.startDate === startDateStr && schedule.timeSlot === round.timeSlot)
           if (!alreadyExists) {
             result.push({
               startDate: startDateStr,
@@ -245,15 +263,14 @@ export default function AdminTourFormPage() {
           }
         }
       }
-      cur.setDate(cur.getDate() + 1)
+      current.setDate(current.getDate() + 1)
     }
+
     setSchedules((prev) => [...prev, ...result])
   }
 
-
-  // ===== Submit Handler =====
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
     setError('')
     setSaving(true)
 
@@ -266,7 +283,6 @@ export default function AdminTourFormPage() {
     if (numDiscount > 0 && numPrice > 0) {
       finalOriginalPrice = numPrice
       finalPrice = Math.round(numPrice * (1 - numDiscount / 100))
-
       if (finalChildPrice) {
         finalChildPrice = Math.round(finalChildPrice * (1 - numDiscount / 100))
       }
@@ -283,7 +299,7 @@ export default function AdminTourFormPage() {
       minPeople: minPeople ? Number(minPeople) : undefined,
       maxPeople: maxPeople ? Number(maxPeople) : undefined,
       highlights,
-      images: images, // ส่ง Array ของรูปภาพไปให้ Backend
+      images,
       transportation,
       duration,
       region,
@@ -291,13 +307,15 @@ export default function AdminTourFormPage() {
       accommodation: tourType === 'package' ? accommodation : null,
       itinerary,
       schedules: schedules
-        .filter((s) => s.enabled && s.startDate && s.endDate)
-        .map((s) => ({
-          startDate: s.startDate,
-          endDate: s.endDate,
-          timeSlot: s.timeSlot || null,
-          roundName: s.roundName || null,
-          maxCapacity: Number(s.maxCapacity),
+        .filter((schedule) => schedule.enabled && schedule.startDate && schedule.endDate)
+        .map((schedule) => ({
+          id: schedule.id,
+          startDate: schedule.startDate,
+          endDate: schedule.endDate,
+          timeSlot: schedule.timeSlot || null,
+          roundName: schedule.roundName || null,
+          maxCapacity: Number(schedule.maxCapacity),
+          currentBooked: normalizeBookedCount(schedule.currentBooked),
         })),
     }
 
@@ -308,179 +326,115 @@ export default function AdminTourFormPage() {
         await tourService.create(payload)
       }
       navigate('/admin/tours')
-    } catch {
-      setError('บันทึกไม่สำเร็จ กรุณาลองใหม่')
+    } catch (saveError) {
+      setError(getApiErrorMessage(saveError, 'บันทึกไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setSaving(false)
     }
   }
 
   if (loading) {
-    return (
-      <p className="flex-1 flex items-center justify-center text-gray-400">กำลังโหลด...</p>
-    )
+    return <p className="flex flex-1 items-center justify-center text-gray-400">กำลังโหลด...</p>
   }
 
-  const inputClass = 'w-full bg-gray-100 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-yellow-300'
-  const labelClass = 'text-sm font-bold text-gray-800 block mb-1'
+  const inputClass = 'ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-yellow-400 focus:bg-white'
+  const labelClass = 'mb-2 block text-sm font-semibold text-gray-800'
 
   return (
     <>
       <main className="flex-1">
-        <form onSubmit={handleSubmit} className="max-w-6xl mx-auto px-8 py-8">
-
-          {/* หัวข้อ + Toggle ประเภท */}
-          <div className="flex items-center gap-6 mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {isEditing ? 'แก้ไขทัวร์' : 'เพิ่มทัวร์ใหม่'}
-            </h1>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="tourType"
-                checked={tourType === 'one_day'}
-                onChange={() => setTourType('one_day')}
-                className="accent-yellow-500"
-              />
-              <span className="text-sm text-gray-700">วันเดย์ทริป</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="tourType"
-                checked={tourType === 'package'}
-                onChange={() => setTourType('package')}
-                className="accent-yellow-500"
-              />
-              <span className="text-sm text-gray-700">เที่ยวพร้อมที่พัก</span>
-            </label>
+        <form onSubmit={handleSubmit} className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{isEditing ? 'แก้ไขทัวร์' : 'เพิ่มทัวร์ใหม่'}</h1>
+              <p className="mt-2 text-sm text-gray-500">กรอกข้อมูลทัวร์ รูปภาพ รอบเดินทาง และรายละเอียดสำคัญให้พร้อมก่อนเผยแพร่</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 rounded-[1.5rem] border border-gray-200 bg-white px-4 py-3">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                <input type="radio" name="tourType" checked={tourType === 'one_day'} onChange={() => setTourType('one_day')} className="accent-yellow-500" />
+                วันเดย์ทริป
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                <input type="radio" name="tourType" checked={tourType === 'package'} onChange={() => setTourType('package')} className="accent-yellow-500" />
+                เที่ยวพร้อมที่พัก
+              </label>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            {/* ========== ฝั่งซ้าย: ข้อมูลทัวร์ ========== */}
-            <div className="bg-white rounded-2xl border-2 border-yellow-400 p-6 space-y-5">
-              <div className="grid grid-cols-[1fr_2fr] gap-4">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="ui-surface rounded-[1.75rem] border border-yellow-200 bg-white p-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_2fr]">
                 <div>
                   <label className={labelClass}>รหัสทัวร์</label>
-                  <input
-                    type="text"
-                    value={isEditing ? tourCode : 'สร้างอัตโนมัติ'}
-                    disabled
-                    className="w-full bg-gray-100 rounded-xl px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed"
-                  />
+                  <input type="text" value={isEditing ? tourCode : 'สร้างอัตโนมัติ'} disabled className="w-full cursor-not-allowed rounded-2xl border border-gray-200 bg-gray-100 px-4 py-3 text-sm text-gray-400" />
                 </div>
                 <div>
                   <label className={labelClass}>ชื่อทัวร์*</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className={inputClass}
-                  />
+                  <input type="text" value={name} onChange={(event) => setName(event.target.value)} required className={inputClass} />
                 </div>
               </div>
 
-              <div>
+              <div className="mt-5">
                 <span className={labelClass}>แท็กประเภทของทัวร์</span>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {CATEGORIES.map((cat) => (
+                <div className="flex flex-wrap gap-2">
+                  {CATEGORIES.map((category) => (
                     <button
-                      key={cat}
+                      key={category}
                       type="button"
-                      onClick={() => toggleChip(categories, setCategories, cat)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${categories.includes(cat)
-                        ? 'bg-yellow-400 border-yellow-400 text-gray-900'
-                        : 'bg-white border-gray-300 text-gray-600 hover:border-yellow-300'
-                        }`}
+                      onClick={() => toggleChip(categories, setCategories, category)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${categories.includes(category) ? 'border-yellow-400 bg-yellow-400 text-gray-900' : 'border-gray-300 bg-white text-gray-600 hover:border-yellow-300'}`}
                     >
-                      {cat}
+                      {category}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div>
+              <div className="mt-5">
                 <label className={labelClass}>รายละเอียดทัวร์*</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="รายละเอียดทัวร์"
-                  required
-                  rows={3}
-                  className={inputClass + ' resize-none'}
-                />
+                <textarea value={description} onChange={(event) => setDescription(event.target.value)} required rows={4} className={`${inputClass} resize-none`} />
               </div>
 
-              <div>
+              <div className="mt-5">
                 <span className={labelClass}>เกี่ยวกับทัวร์นี้</span>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {HIGHLIGHTS.map((h) => (
+                <div className="flex flex-wrap gap-2">
+                  {HIGHLIGHTS.map((highlight) => (
                     <button
-                      key={h}
+                      key={highlight}
                       type="button"
-                      onClick={() => toggleChip(highlights, setHighlights, h)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${highlights.includes(h)
-                        ? 'bg-yellow-400 border-yellow-400 text-gray-900'
-                        : 'bg-white border-gray-300 text-gray-600 hover:border-yellow-300'
-                        }`}
+                      onClick={() => toggleChip(highlights, setHighlights, highlight)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${highlights.includes(highlight) ? 'border-yellow-400 bg-yellow-400 text-gray-900' : 'border-gray-300 bg-white text-gray-600 hover:border-yellow-300'}`}
                     >
-                      {h}
+                      {highlight}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label className={labelClass}>ภาค*</label>
-                  <select
-                    value={region}
-                    onChange={(e) => setRegion(e.target.value)}
-                    required
-                    className={inputClass}
-                  >
+                  <select value={region} onChange={(event) => setRegion(event.target.value)} required className={inputClass}>
                     <option value="">เลือกภาค</option>
-                    {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+                    {REGIONS.map((regionOption) => <option key={regionOption} value={regionOption}>{regionOption}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className={labelClass}>จังหวัด*</label>
-                  <input
-                    type="text"
-                    value={province}
-                    onChange={(e) => setProvince(e.target.value)}
-                    required
-                    className={inputClass}
-                  />
+                  <input type="text" value={province} onChange={(event) => setProvince(event.target.value)} required className={inputClass} />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                   <label className={labelClass}>ระยะเวลา*</label>
-                  <input
-                    type="text"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    placeholder={tourType === 'one_day' ? 'เช่น 8 ชั่วโมง' : 'เช่น 3 วัน 2 คืน'}
-                    required
-                    className={inputClass}
-                  />
+                  <input type="text" value={duration} onChange={(event) => setDuration(event.target.value)} placeholder={tourType === 'one_day' ? 'เช่น 8 ชั่วโมง' : 'เช่น 3 วัน 2 คืน'} required className={inputClass} />
                 </div>
                 <div>
                   <label className={labelClass}>ราคาผู้ใหญ่*</label>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      required
-                      min={0}
-                      className={inputClass}
-                    />
-                    <span className="text-sm text-gray-600 whitespace-nowrap">บาท</span>
+                    <input type="number" value={price} onChange={(event) => setPrice(event.target.value)} required min={0} className={inputClass} />
+                    <span className="text-sm text-gray-600">บาท</span>
                   </div>
                 </div>
                 <div>
@@ -489,82 +443,49 @@ export default function AdminTourFormPage() {
                     <input
                       type="number"
                       value={discountPercent}
-                      onChange={(e) => {
-                        const val = Number(e.target.value)
-                        if (val >= 0 && val <= 100) setDiscountPercent(e.target.value)
+                      onChange={(event) => {
+                        const value = Number(event.target.value)
+                        if (value >= 0 && value <= 100) setDiscountPercent(event.target.value)
                       }}
                       min={0}
                       max={100}
                       placeholder="ไม่บังคับ"
                       className={inputClass}
                     />
-                    <span className="text-sm text-gray-600 whitespace-nowrap">%</span>
+                    <span className="text-sm text-gray-600">%</span>
                   </div>
                 </div>
                 <div>
                   <label className={labelClass}>ราคาเด็ก</label>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      value={childPrice}
-                      onChange={(e) => setChildPrice(e.target.value)}
-                      min={0}
-                      placeholder="ไม่บังคับ"
-                      className={inputClass}
-                    />
-                    <span className="text-sm text-gray-600 whitespace-nowrap">บาท</span>
+                    <input type="number" value={childPrice} onChange={(event) => setChildPrice(event.target.value)} min={0} placeholder="ไม่บังคับ" className={inputClass} />
+                    <span className="text-sm text-gray-600">บาท</span>
                   </div>
                 </div>
               </div>
 
               {tourType === 'package' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                  <span className="text-sm font-bold text-blue-800 block mb-2">ตั้งค่า Private Tour</span>
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="mt-5 rounded-[1.5rem] border border-blue-200 bg-blue-50 p-4">
+                  <span className="mb-2 block text-sm font-bold text-blue-800">ตั้งค่า Private Tour</span>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <label className="text-xs font-semibold text-blue-700 mb-1 block">จำนวนคนขั้นต่ำ (Min)*</label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={minPeople}
-                        onChange={(e) => setMinPeople(e.target.value)}
-                        required
-                        className="w-full bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400"
-                        placeholder="เช่น 4 คน"
-                      />
+                      <label className="mb-1 block text-xs font-semibold text-blue-700">จำนวนคนขั้นต่ำ (Min)*</label>
+                      <input type="number" min="1" value={minPeople} onChange={(event) => setMinPeople(event.target.value)} required className="w-full rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400" placeholder="เช่น 4 คน" />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-blue-700 mb-1 block">รับได้สูงสุด (Max)</label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={maxPeople}
-                        onChange={(e) => setMaxPeople(e.target.value)}
-                        className="w-full bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400"
-                        placeholder="เช่น 10 คน"
-                      />
+                      <label className="mb-1 block text-xs font-semibold text-blue-700">รับได้สูงสุด (Max)</label>
+                      <input type="number" min="1" value={maxPeople} onChange={(event) => setMaxPeople(event.target.value)} className="w-full rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400" placeholder="เช่น 10 คน" />
                     </div>
                   </div>
-                  <p className="text-xs text-blue-500 mt-2">
-                    * เมื่อระบุจำนวนคนขั้นต่ำ ระบบจะเปลี่ยนเป็นโหมด <strong>"เหมากลุ่ม (Private)"</strong> อัตโนมัติ โดยผู้จองสามารถเลือกวันเริ่มเดินทางได้อิสระ
-                  </p>
+                  <p className="mt-2 text-xs text-blue-500">เมื่อระบุจำนวนคนขั้นต่ำ ระบบจะเปลี่ยนเป็นโหมดเหมากลุ่ม (Private) อัตโนมัติ</p>
                 </div>
               )}
             </div>
 
-            {/* ========== ฝั่งขวา: รูปภาพ + กำหนดการ ========== */}
             <div className="space-y-6">
+              <ImageUploadSection images={images} uploadingImage={uploadingImage} onImageUpload={handleImageUpload} onRemoveImage={removeImage} />
 
-              {/* ระบบอัปโหลดรูปภาพ */}
-              <ImageUploadSection
-                images={images}
-                uploadingImage={uploadingImage}
-                onImageUpload={handleImageUpload}
-                onRemoveImage={removeImage}
-              />
-
-              {/* กำหนดการ (schedules) */}
-              <div className="bg-white rounded-2xl border-2 border-yellow-400 p-6">
+              <div className="ui-surface rounded-[1.75rem] border border-yellow-200 bg-white p-6">
                 <ScheduleSection
                   schedules={schedules}
                   tourType={tourType}
@@ -589,68 +510,36 @@ export default function AdminTourFormPage() {
             </div>
           </div>
 
-          {/* ตารางกิจกรรม (Itinerary) - เต็มหน้า */}
-          <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 mb-6 space-y-6">
-            <ItinerarySection
-              itinerary={itinerary}
-              tourType={tourType}
-              setItinerary={setItinerary}
-            />
-
-            <hr className="border-gray-100" />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* คำแนะนำการเดินทาง */}
+          <div className="ui-surface mt-6 rounded-[1.75rem] border border-gray-200 bg-white p-6">
+            <ItinerarySection itinerary={itinerary} tourType={tourType} setItinerary={setItinerary} />
+            <hr className="my-6 border-gray-100" />
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
                 <label className={labelClass}>คำแนะนำการเดินทาง</label>
-                <textarea
-                  value={transportation}
-                  onChange={(e) => setTransportation(e.target.value)}
-                  rows={3}
-                  className={inputClass + ' resize-none'}
-                />
+                <textarea value={transportation} onChange={(event) => setTransportation(event.target.value)} rows={3} className={`${inputClass} resize-none`} />
               </div>
-
               {tourType === 'package' && (
                 <div>
                   <label className={labelClass}>รายละเอียดที่พัก*</label>
-                  <textarea
-                    value={accommodation}
-                    onChange={(e) => setAccommodation(e.target.value)}
-                    required
-                    rows={3}
-                    placeholder="เช่น โรงแรม 3 ดาว ย่านนิมมาน"
-                    className={inputClass + ' resize-none'}
-                  />
+                  <textarea value={accommodation} onChange={(event) => setAccommodation(event.target.value)} required rows={3} placeholder="เช่น โรงแรม 3 ดาว ย่านนิมมาน" className={`${inputClass} resize-none`} />
                 </div>
               )}
             </div>
           </div>
 
-          {error && (
-            <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg mt-4">{error}</p>
-          )}
+          {error && <p className="mt-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
 
-          <div className="flex justify-end gap-3 mt-6">
-            <button
-              type="button"
-              onClick={() => setCancelModalOpen(true)}
-              className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold px-6 py-2.5 rounded-xl transition-colors"
-            >
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <button type="button" onClick={() => setCancelModalOpen(true)} className="ui-focus-ring ui-pressable rounded-2xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 hover:bg-gray-50">
               ยกเลิก
             </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors"
-            >
+            <button type="submit" disabled={saving} className="ui-focus-ring ui-pressable rounded-2xl bg-orange-500 px-6 py-3 font-semibold text-white hover:bg-orange-600 disabled:opacity-60">
               {saving ? 'กำลังบันทึก...' : 'บันทึก'}
             </button>
           </div>
         </form>
       </main>
 
-      {/* 🛑 Confirm Cancel Modal 🛑 */}
       <ConfirmModal
         isOpen={cancelModalOpen}
         title="ยกเลิกการแก้ไข?"
@@ -664,3 +553,5 @@ export default function AdminTourFormPage() {
     </>
   )
 }
+
+

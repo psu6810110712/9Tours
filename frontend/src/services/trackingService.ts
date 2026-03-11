@@ -1,4 +1,5 @@
 import api, { getAccessToken } from './api'
+import { API_BASE_URL } from './apiBaseUrl'
 
 export type TrackingEventType = 'page_view' | 'cta_click' | 'dwell_time'
 
@@ -16,7 +17,7 @@ interface TrackingPayload {
 const TRACKING_CONSENT_KEY = 'pdpa_analytics_consent'
 const TRACKING_SESSION_KEY = 'tracking_session_id'
 const TRACKING_ENABLED = import.meta.env.VITE_TRACKING_ENABLED !== 'false'
-const TRACKING_ENDPOINT = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/analytics/events`
+const TRACKING_ENDPOINT = `${API_BASE_URL}/analytics/events`
 
 // หมายเหตุ PDPA: ระบบจะส่งข้อมูลพฤติกรรมก็ต่อเมื่อผู้ใช้ให้ consent แล้วเท่านั้น
 export function hasTrackingConsent(): boolean {
