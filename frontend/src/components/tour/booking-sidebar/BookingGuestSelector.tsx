@@ -23,16 +23,21 @@ export default function BookingGuestSelector({
 
   if (isPrivate) {
     return (
-      <div className="mb-5 rounded-[1.5rem] border border-amber-200 bg-amber-50 px-4 py-4">
-        <label className="mb-2 block text-lg font-semibold text-amber-800">จำนวนผู้เดินทาง</label>
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <div className="mb-5 rounded-[1.5rem] border border-amber-200 bg-[#FFF8E8] px-5 py-5">
+        <label className="mb-3 block text-lg font-bold text-amber-800">จำนวนผู้เดินทาง</label>
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
           <div>
-            <p className="text-[16px] font-medium text-amber-600">ทัวร์นี้เหมาะสำหรับ {tour.minPeople}–{tour.maxPeople || tour.minPeople} ท่าน</p>
+            <p className="text-lg font-bold leading-snug text-amber-700">
+              ทัวร์นี้เหมาะสำหรับ {tour.minPeople}–{tour.maxPeople || tour.minPeople} ท่าน
+            </p>
+            <p className="mt-1 text-sm font-medium text-amber-600/80">
+              ระบบจะเหมาราคาเป็นกลุ่มตามช่วงจำนวนผู้เดินทางนี้
+            </p>
           </div>
         </div>
       </div>
