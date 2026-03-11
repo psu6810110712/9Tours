@@ -53,7 +53,7 @@ export default function TourCard({ tour }: TourCardProps) {
   return (
     <Link
       to={`/tours/${tour.id}`}
-      className="ui-surface ui-pressable group flex h-full flex-col overflow-hidden rounded-[1.65rem] border border-slate-200/80 bg-white"
+      className="ui-surface ui-pressable group flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white"
       onClick={() => {
         trackEvent({
           eventType: 'cta_click',
@@ -64,7 +64,7 @@ export default function TourCard({ tour }: TourCardProps) {
         })
       }}
     >
-      <div className="relative h-52 overflow-hidden bg-slate-100">
+      <div className="relative h-44 overflow-hidden bg-slate-100">
         <img
           src={coverImage}
           alt={tour.name}
@@ -72,73 +72,78 @@ export default function TourCard({ tour }: TourCardProps) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-slate-950/10 to-transparent" />
 
-        <div className="absolute left-4 top-4 flex items-center gap-2">
-          <span className="rounded-full bg-slate-950/65 px-3 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
+        <div className="absolute left-3 top-3 flex items-center gap-2">
+          <span className="rounded-full bg-slate-950/65 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
             {tour.tourType === 'one_day' ? 'วันเดย์ทริป' : 'แพ็กเกจ'}
           </span>
           {discountPercent && (
-            <span className="rounded-full bg-red-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+            <span className="rounded-full bg-red-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
               -{discountPercent}%
             </span>
           )}
         </div>
 
         {isPopular && (
-          <div className="absolute bottom-4 right-4 rounded-full bg-white/92 px-3 py-1 text-[11px] font-bold text-amber-700 shadow-sm backdrop-blur-sm">
+          <div className="absolute bottom-3 right-3 rounded-full bg-white/92 px-2.5 py-1 text-[10px] font-bold text-amber-700 shadow-sm backdrop-blur-sm">
             ยอดนิยม
           </div>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-4">
         <div>
-          <h3 className="line-clamp-2 min-h-[3.75rem] text-[1.35rem] font-bold leading-8 text-slate-900">
+          <h3 className="line-clamp-2 min-h-[3.2rem] text-[1.12rem] font-bold leading-6 text-slate-900">
             {tour.name}
           </h3>
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
-            <span className="inline-flex items-center gap-1.5 font-semibold">
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] text-slate-600">
+            <span className="inline-flex items-center gap-1.5 font-semibold leading-none">
               <LocationIcon />
               <span className="truncate">{tour.province}</span>
             </span>
-            <span className="inline-flex items-center gap-1.5 font-semibold">
+            <span className="inline-flex items-center gap-1.5 font-semibold leading-none">
               <ClockIcon />
               <span>{tour.duration}</span>
             </span>
           </div>
 
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1.5 text-sm font-semibold text-slate-700">
+          <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-[12px] font-semibold text-slate-700">
             <StarIcon />
             <span>{tour.rating.toFixed(1)}</span>
             <span className="text-slate-500">{tour.reviewCount.toLocaleString()} รีวิว</span>
           </div>
         </div>
 
-        <div className="mt-4 space-y-2.5">
+        <div className="mt-3 space-y-2">
           {highlightItems.map((highlight, index) => (
-            <div key={index} className="flex items-start gap-2 rounded-2xl bg-slate-50 px-3.5 py-3 text-sm text-slate-700">
+            <div key={index} className="flex items-start gap-2 rounded-[1rem] bg-slate-50 px-3 py-2 text-[13px] text-slate-700">
               <CheckIcon />
               <p className="line-clamp-1 font-medium">{highlight}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-auto pt-5">
-          <div className="rounded-[1.35rem] border border-slate-100 bg-slate-50 px-4 py-4">
-            <div className="mb-2 flex items-center gap-2 text-sm">
+        <div className="mt-auto pt-4">
+          <div className="flex items-end justify-between gap-3 rounded-[1.1rem] border border-slate-100 bg-slate-50 px-3.5 py-3">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                ราคาเริ่มต้น
+              </p>
+              <div className="mt-1 flex items-end gap-2 text-sm">
+                <span className="text-[1.6rem] font-black leading-none text-[var(--color-accent)]">
+                  ฿{Number(tour.price).toLocaleString()}
+                </span>
+                <span className="pb-0.5 font-semibold text-slate-500">/ ท่าน</span>
+              </div>
+            </div>
+            <div className="text-right text-xs">
               {hasDiscount && (
-                <span className="font-semibold text-slate-400 line-through">
+                <span className="block font-semibold text-slate-400 line-through">
                   ฿{Number(tour.originalPrice).toLocaleString()}
                 </span>
               )}
-              <span className="text-[1.9rem] font-black leading-none text-[var(--color-accent)]">
-                ฿{Number(tour.price).toLocaleString()}
-              </span>
-              <span className="font-semibold text-slate-500">/ ท่าน</span>
+              <p className="mt-1 font-semibold text-slate-500">จองง่าย</p>
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-              จองง่าย ยืนยันรวดเร็ว
-            </p>
           </div>
         </div>
       </div>

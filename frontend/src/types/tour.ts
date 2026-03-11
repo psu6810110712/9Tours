@@ -1,4 +1,4 @@
-export type TourType = 'one_day' | 'package'
+﻿export type TourType = 'one_day' | 'package'
 
 export interface TourSchedule {
   id: number
@@ -39,13 +39,14 @@ export interface Tour {
   updatedAt: string
 }
 
-// === Payload types for creating/updating tours ===
 export interface CreateSchedulePayload {
+  id?: number
   startDate: string
   endDate: string
   timeSlot: string | null
   roundName: string | null
   maxCapacity: number
+  currentBooked?: number
 }
 
 export interface CreateTourPayload {
@@ -67,5 +68,9 @@ export interface CreateTourPayload {
   accommodation: string | null
   itinerary: { day?: number; time: string; title: string; description: string }[]
   schedules: CreateSchedulePayload[]
+  isActive?: boolean
 }
 
+export interface UpdateTourPayload extends Partial<CreateTourPayload> {
+  isActive?: boolean
+}

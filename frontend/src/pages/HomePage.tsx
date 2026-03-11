@@ -177,13 +177,17 @@ export default function HomePage() {
     })
   }
 
+  const canSubmitHeroSearch = search.trim().length > 0
+
   const handleSearch = () => {
+    const trimmedSearch = search.trim()
+    if (!trimmedSearch) return
+
     const params = new URLSearchParams()
-    if (search) params.set('search', search)
+    params.set('search', trimmedSearch)
     if (tourType) params.set('tourType', tourType)
     if (selectedCats.size > 0) {
-      const categorySearch = [...selectedCats].join(' ')
-      params.set('search', search ? `${search} ${categorySearch}` : categorySearch)
+      params.set('categories', [...selectedCats].join(','))
     }
     navigate(`/tours?${params.toString()}`)
   }
@@ -270,6 +274,7 @@ export default function HomePage() {
                 childrenCount={childrenCount}
                 setChildrenCount={setChildrenCount}
                 onSearch={handleSearch}
+                searchDisabled={!canSubmitHeroSearch}
               />
             </div>
 
@@ -387,8 +392,3 @@ export default function HomePage() {
     </>
   )
 }
-
-
-
-
-

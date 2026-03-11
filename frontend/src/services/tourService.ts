@@ -1,5 +1,5 @@
-import api from './api'
-import type { Tour, CreateTourPayload } from '../types/tour'
+﻿import api from './api'
+import type { Tour, CreateTourPayload, UpdateTourPayload } from '../types/tour'
 
 export interface TourFilters {
   region?: string
@@ -8,6 +8,9 @@ export interface TourFilters {
   search?: string
   admin?: string
   month?: string
+  categories?: string[]
+  minPrice?: number
+  maxPrice?: number
 }
 
 export interface AvailableSeatsResponse {
@@ -20,8 +23,21 @@ export interface AvailableSeatsResponse {
 }
 
 export const tourService = {
-  getAll: (filters?: TourFilters) =>
-    api.get<Tour[]>('/tours', { params: filters }).then((r) => r.data),
+  getAll: (filters?: TourFilters) => {
+    const params: Record<string, number | string> = {}
+
+    if (filters?.region) params.region = filters.region
+    if (filters?.province) params.province = filters.province
+    if (filters?.tourType) params.tourType = filters.tourType
+    if (filters?.search) params.search = filters.search
+    if (filters?.admin) params.admin = filters.admin
+    if (filters?.month) params.month = filters.month
+    if (filters?.categories?.length) params.categories = filters.categories.join(',')
+    if (typeof filters?.minPrice === 'number') params.minPrice = filters.minPrice
+    if (typeof filters?.maxPrice === 'number') params.maxPrice = filters.maxPrice
+
+    return api.get<Tour[]>('/tours', { params }).then((r) => r.data)
+  },
 
   getRecommendations: (limit = 8) =>
     api.get<Tour[]>('/tours/recommendations', { params: { limit } }).then((r) => r.data),
@@ -32,13 +48,12 @@ export const tourService = {
   create: (data: CreateTourPayload) =>
     api.post<Tour>('/tours', data).then((r) => r.data),
 
-  update: (id: number, data: Partial<Tour> | CreateTourPayload) =>
+  update: (id: number, data: UpdateTourPayload | Partial<Tour>) =>
     api.patch<Tour>(`/tours/${id}`, data).then((r) => r.data),
 
   remove: (id: number) =>
     api.delete(`/tours/${id}`).then((r) => r.data),
 
-  // ฟังก์ชันสำหรับอัปโหลดรูปภาพ
   uploadImage: async (file: File) => {
     const formData = new FormData()
     formData.append('file', file)
@@ -48,7 +63,6 @@ export const tourService = {
     return response.data.url
   },
 
-  // ฟังก์ชันสำหรับดึงจำนวนที่นั่งว่าง
   getAvailableSeats: async (tourId: number, scheduleId: number): Promise<AvailableSeatsResponse> => {
     const response = await api.get<AvailableSeatsResponse>(
       `/tours/${tourId}/schedule/${scheduleId}/available-seats`

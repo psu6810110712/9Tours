@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -8,330 +8,90 @@ import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
 import { TourType } from './entities/tour.entity';
 
-// ข้อมูล mock สำหรับ demo วันที่ 20 ก.พ.
-// ถ้าทีม backend ทำ CRUD เสร็จแล้ว สามารถลบส่วนนี้แล้วเปลี่ยนไปใช้ DB จริงได้เลย
-// ตำแหน่งไฟล์ฐานข้อมูลจำลอง
 const DATA_FILE = path.join(process.cwd(), 'tours-data.json');
+const INITIAL_DATA: any[] = [];
 
-const INITIAL_DATA = [
-  {
-    id: 1,
-    tourCode: '15012026001',
-    name: 'เที่ยวภูเก็ต เมืองเก่า ถ่ายรูปคาเฟ่ทั้งวัน',
-    description: 'เดินเล่นย่านเมืองเก่าภูเก็ต คาเฟ่สวย ๆ และแลนด์มาร์กยอดฮิตในวันเดียว',
-    tourType: TourType.ONE_DAY,
-    categories: ['สายคาเฟ่', 'สายชิล'],
-    price: 2900,
-    originalPrice: 3200,
-    images: [
-      'https://images.unsplash.com/photo-1541417904950-b855846fe074?w=800',
-      'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800',
-      'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=800',
-      'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=800',
-      'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=800',
-    ],
-    highlights: ['บริการรถรับส่ง', 'รวมอาหารกลางวัน'],
-    itinerary: [],
-    transportation: 'รถตู้ปรับอากาศ',
-    duration: '8 ชั่วโมง',
-    region: 'ภาคใต้',
-    province: 'ภูเก็ต',
-    accommodation: null,
-    rating: 4.3,
-    reviewCount: 19,
-    isActive: true,
-    schedules: [
-      {
-        id: 101,
-        tourId: 1,
-        startDate: '2026-02-21',
-        endDate: '2026-02-21',
-        timeSlot: '09:00-17:00',
-        roundName: 'รอบเช้า',
-        maxCapacity: 20,
-        currentBooked: 8,
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 2,
-    tourCode: '15012026002',
-    name: 'ทัวร์เขื่อนเชี่ยวหลาน ล่องเรือ ชมหมอกตอนเช้า',
-    description: 'ล่องเรือชมวิวเขื่อนเชี่ยวหลาน น้ำสีเขียวมรกต พร้อมกิจกรรมพายเรือคายัค',
-    tourType: TourType.ONE_DAY,
-    categories: ['สายธรรมชาติ', 'สายชิล'],
-    price: 1800,
-    originalPrice: 2100,
-    images: [
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800',
-      'https://images.unsplash.com/photo-1504699894957-93f02c251aaa?w=800',
-      'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800',
-      'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800',
-      'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800',
-    ],
-    highlights: ['ล่องเรือชมวิว', 'พายเรือคายัค'],
-    itinerary: [],
-    transportation: 'เรือหางยาว + รถตู้',
-    duration: '8 ชั่วโมง',
-    region: 'ภาคใต้',
-    province: 'สุราษฎร์ธานี',
-    accommodation: null,
-    rating: 4.9,
-    reviewCount: 95,
-    isActive: true,
-    schedules: [
-      {
-        id: 201,
-        tourId: 2,
-        startDate: '2026-02-22',
-        endDate: '2026-02-22',
-        timeSlot: '08:00-16:00',
-        roundName: 'รอบปกติ',
-        maxCapacity: 25,
-        currentBooked: 11,
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 3,
-    tourCode: '20012026003',
-    name: 'แพ็คเกจเชียงใหม่ 3 วัน 2 คืน ชมดอยอินทนนท์',
-    description: 'เที่ยวเชียงใหม่ครบทั้งดอยวัดคาเฟ่ ที่พักสบายย่านนิมมาน',
-    tourType: TourType.PACKAGE,
-    categories: ['สายธรรมชาติ', 'สายชิล'],
-    price: 6900,
-    originalPrice: 7500,
-    images: [
-      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800',
-      'https://images.unsplash.com/photo-1528181304800-259b08848526?w=800',
-      'https://images.unsplash.com/photo-1512100356356-de1b84283e18?w=800',
-      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800',
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
-    ],
-    highlights: ['รวมที่พัก', 'รถรับส่งสนามบิน'],
-    itinerary: [],
-    transportation: 'รถตู้ส่วนตัว',
-    duration: '3 วัน 2 คืน',
-    region: 'ภาคเหนือ',
-    province: 'เชียงใหม่',
-    accommodation: 'โรงแรม 3 ดาว ย่านนิมมาน',
-    rating: 4.7,
-    reviewCount: 48,
-    isActive: true,
-    schedules: [
-      {
-        id: 301,
-        tourId: 3,
-        startDate: '2026-02-24',
-        endDate: '2026-02-26',
-        timeSlot: null,
-        roundName: 'แพ็กเกจ 3 วัน 2 คืน',
-        maxCapacity: 15,
-        currentBooked: 6,
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 4,
-    tourCode: '25012026004',
-    name: 'เกาะพีพี ดำน้ำดูปะการัง เต็มวัน',
-    description: 'นั่งสปีดโบ๊ทไปเกาะพีพี ดำน้ำ 2 จุด พร้อมอาหารกลางวันบุฟเฟ่ต์',
-    tourType: TourType.ONE_DAY,
-    categories: ['สายกิจกรรม', 'สายธรรมชาติ'],
-    price: 2300,
-    originalPrice: null,
-    images: [
-      'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800',
-      'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
-      'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800',
-      'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800',
-      'https://images.unsplash.com/photo-1518990034670-3eb04d6ea23b?w=800',
-    ],
-    highlights: ['ดำน้ำดูปะการัง', 'รวมอุปกรณ์ดำน้ำ'],
-    itinerary: [],
-    transportation: 'สปีดโบ๊ท',
-    duration: '8 ชั่วโมง',
-    region: 'ภาคใต้',
-    province: 'ภูเก็ต',
-    accommodation: null,
-    rating: 4.5,
-    reviewCount: 65,
-    isActive: true,
-    schedules: [
-      {
-        id: 401,
-        tourId: 4,
-        startDate: '2026-02-23',
-        endDate: '2026-02-23',
-        timeSlot: '10:00-18:00',
-        roundName: 'รอบทะเลสวย',
-        maxCapacity: 18,
-        currentBooked: 18,
-      },
-      {
-        id: 402,
-        tourId: 4,
-        startDate: '2026-02-25',
-        endDate: '2026-02-25',
-        timeSlot: '10:00-18:00',
-        roundName: 'รอบพิเศษ',
-        maxCapacity: 18,
-        currentBooked: 9,
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 5,
-    tourCode: 'ATV2026005',
-    name: 'ขับ ATV ตะลุยป่า ภูเก็ต (Join Trip)',
-    description: 'ผจญภัยขับ ATV เส้นทางธรรมชาติ วิวทะเลและภูเขา พร้อมครูฝึกดูแลอย่างใกล้ชิด',
-    tourType: TourType.ONE_DAY,
-    categories: ['สายลุย', 'สายกิจกรรม'],
-    price: 1500,
-    originalPrice: 1900,
-    images: [
-      'https://images.unsplash.com/photo-1616174783309-8f388da5362e?w=800',
-      'https://images.unsplash.com/photo-1599557291771-859a1a457c13?w=800',
-      'https://images.unsplash.com/photo-1533230676263-5464731df400?w=800',
-      'https://images.unsplash.com/photo-1596489438096-76472304859a?w=800',
-      'https://images.unsplash.com/photo-1570460984850-629851722e13?w=800',
-    ],
-    highlights: ['ขับ ATV 1 ชั่วโมง', 'รวมอุปกรณ์ความปลอดภัย', 'ครูฝึกมืออาชีพ'],
-    itinerary: [],
-    transportation: 'รถรับส่งในโซน',
-    duration: '4 ชั่วโมง',
-    region: 'ภาคใต้',
-    province: 'ภูเก็ต',
-    accommodation: null,
-    rating: 4.8,
-    reviewCount: 42,
-    isActive: true,
-    schedules: [
-      {
-        id: 501,
-        tourId: 5,
-        startDate: '2026-02-25',
-        endDate: '2026-02-25',
-        timeSlot: '08:00-12:00',
-        roundName: 'รอบเช้า',
-        maxCapacity: 10,
-        currentBooked: 2,
-      },
-      {
-        id: 502,
-        tourId: 5,
-        startDate: '2026-02-25',
-        endDate: '2026-02-25',
-        timeSlot: '13:00-17:00',
-        roundName: 'รอบบ่าย',
-        maxCapacity: 10,
-        currentBooked: 8,
-      },
-      {
-        id: 503,
-        tourId: 5,
-        startDate: '2026-02-26',
-        endDate: '2026-02-26',
-        timeSlot: '08:00-12:00',
-        roundName: 'รอบเช้า',
-        maxCapacity: 10,
-        currentBooked: 0,
-      },
-      {
-        id: 504,
-        tourId: 5,
-        startDate: '2026-02-26',
-        endDate: '2026-02-26',
-        timeSlot: '13:00-17:00',
-        roundName: 'รอบบ่าย',
-        maxCapacity: 10,
-        currentBooked: 5,
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+type TourRecord = any;
+type ScheduleRecord = any;
 
-// โหลดข้อมูล (ใส่ Type any[] เพื่อป้องกัน TS Error 'never[]')
-let DEMO_TOURS: any[] = [];
-try {
-  if (fs.existsSync(DATA_FILE)) {
-    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-    DEMO_TOURS = JSON.parse(raw);
-    console.log('✅ Loaded tours from database file');
-  } else {
-    DEMO_TOURS = INITIAL_DATA;
-    fs.writeFileSync(DATA_FILE, JSON.stringify(DEMO_TOURS, null, 2));
+let DEMO_TOURS: TourRecord[] = [];
+
+function loadToursFromDisk() {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+      return JSON.parse(raw);
+    }
+  } catch (error) {
+    console.error('loadToursFromDisk error:', error);
   }
-} catch (error) {
-  DEMO_TOURS = INITIAL_DATA;
+  return [...INITIAL_DATA];
 }
 
-// ฟังก์ชันเซฟข้อมูล
-const persistData = () => {
+function reloadTours() {
+  DEMO_TOURS = loadToursFromDisk();
+}
+
+function persistData() {
   try {
     fs.writeFileSync(DATA_FILE, JSON.stringify(DEMO_TOURS, null, 2));
   } catch (error) {
     console.error('Save error:', error);
   }
-};
-
-// โหลดข้อมูลใหม่จากไฟล์ทุกครั้งที่ต้องการอ่าน เพราะ bookings.service.ts อาจแก้ไขไฟล์โดยตรง
-function reloadTours() {
-  try {
-    if (fs.existsSync(DATA_FILE)) {
-      const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-      DEMO_TOURS = JSON.parse(raw);
-    }
-  } catch (e) {
-    console.error('reloadTours error:', e);
-  }
 }
+
+function normalizeScheduleSignature(schedule: Partial<ScheduleRecord>) {
+  return [
+    schedule.startDate || '',
+    schedule.endDate || '',
+    schedule.timeSlot || '',
+    schedule.roundName || '',
+  ].join('|');
+}
+
+function nextTourId() {
+  return Math.max(99, ...DEMO_TOURS.map((tour) => Number(tour.id) || 0)) + 1;
+}
+
+function makeTourCode() {
+  const date = new Date();
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const seq = String(DEMO_TOURS.length + 1).padStart(3, '0');
+  return `${dd}${mm}${date.getFullYear()}${seq}`;
+}
+
+reloadTours();
 
 @Injectable()
 export class ToursService {
   constructor(
     @InjectRepository(BehaviorEvent)
     private readonly behaviorEventsRepo: Repository<BehaviorEvent>,
-  ) { }
-
-  private nextId = Math.max(...DEMO_TOURS.map(t => t.id), 99) + 1;
-  private codeSeq = DEMO_TOURS.length + 1;
-
-  // สร้างรหัสทัวร์: DDMMYYYY + ลำดับ 3 หลัก เช่น 19022026005
-  private makeTourCode(): string {
-    const d = new Date();
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const seq = String(this.codeSeq++).padStart(3, '0');
-    return `${dd}${mm}${d.getFullYear()}${seq}`;
-  }
+  ) {}
 
   create(dto: CreateTourDto) {
+    reloadTours();
+    const tourId = nextTourId();
+
     const newTour = {
-      id: this.nextId++,
-      tourCode: this.makeTourCode(),
+      id: tourId,
+      tourCode: makeTourCode(),
       name: dto.name,
       description: dto.description,
       tourType: dto.tourType as unknown as TourType,
       categories: dto.categories || [],
       price: Number(dto.price),
-      childPrice: dto.childPrice ? Number(dto.childPrice) : null,
-      minPeople: dto.minPeople ? Number(dto.minPeople) : null,
-      maxPeople: dto.maxPeople ? Number(dto.maxPeople) : null,
-      originalPrice: dto.originalPrice ? Number(dto.originalPrice) : null,
+      childPrice: dto.childPrice != null ? Number(dto.childPrice) : null,
+      minPeople: dto.minPeople != null ? Number(dto.minPeople) : null,
+      maxPeople: dto.maxPeople != null ? Number(dto.maxPeople) : null,
+      originalPrice: dto.originalPrice != null ? Number(dto.originalPrice) : null,
       images: dto.images || [],
       highlights: dto.highlights || [],
-      itinerary: dto.itinerary || [],
+      itinerary: (dto.itinerary || []).map((item) => ({
+        ...item,
+        day: item.day != null ? Number(item.day) : undefined,
+      })),
       transportation: dto.transportation || '',
       duration: dto.duration,
       region: dto.region,
@@ -339,28 +99,26 @@ export class ToursService {
       accommodation: dto.accommodation || null,
       rating: 0,
       reviewCount: 0,
-      isActive: true,
-      schedules: (dto.schedules || []).map((s, i) => ({
-        id: this.nextId * 100 + i,
-        tourId: this.nextId - 1,
-        startDate: s.startDate,
-        endDate: s.endDate,
-        timeSlot: (s as any).timeSlot || '',
-        roundName: (s as any).roundName || '',
-        maxCapacity: Number(s.maxCapacity),
-        currentBooked: 0,
+      isActive: dto.isActive ?? true,
+      schedules: (dto.schedules || []).map((schedule, index) => ({
+        id: tourId * 100 + index + 1,
+        tourId,
+        startDate: schedule.startDate,
+        endDate: schedule.endDate,
+        timeSlot: schedule.timeSlot ?? null,
+        roundName: schedule.roundName ?? null,
+        maxCapacity: Number(schedule.maxCapacity),
+        currentBooked: Number(schedule.currentBooked || 0),
       })),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    // cast เป็น any เพราะ TypeScript infer type ของ DEMO_TOURS จาก literal values
-    // ทำให้ originalPrice: number | null ไม่ตรงกับ type ที่ infer ไว้
-    DEMO_TOURS.push(newTour as any);
+
+    DEMO_TOURS.push(newTour);
     persistData();
     return newTour;
   }
 
-  // admin=true จะ return ทุกทัวร์ รวมที่ปิดใช้งาน
   findAll(filters?: {
     region?: string;
     province?: string;
@@ -368,59 +126,72 @@ export class ToursService {
     search?: string;
     admin?: string;
     month?: string;
+    categories?: string | string[];
+    minPrice?: string | number;
+    maxPrice?: string | number;
   }) {
-    const { region, province, tourType, search, admin, month } = filters || {};
+    const { region, province, tourType, search, admin, month, categories, minPrice, maxPrice } = filters || {};
 
-    reloadTours(); // อ่านข้อมูลล่าสุดจากไฟล์ทุกครั้ง
+    const parsedCategories = (Array.isArray(categories) ? categories : String(categories || '').split(','))
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean);
+    const parsedMinPrice = typeof minPrice === 'string' ? Number(minPrice) : minPrice;
+    const parsedMaxPrice = typeof maxPrice === 'string' ? Number(maxPrice) : maxPrice;
+
+    reloadTours();
 
     let result = admin === 'true'
       ? [...DEMO_TOURS]
-      : DEMO_TOURS.filter((t) => t.isActive);
+      : DEMO_TOURS.filter((tour) => tour.isActive);
 
     if (region) {
-      result = result.filter((t) => t.region === region);
+      result = result.filter((tour) => tour.region === region);
     }
     if (province) {
-      result = result.filter((t) => t.province === province);
+      result = result.filter((tour) => tour.province === province);
     }
     if (tourType) {
-      result = result.filter((t) => t.tourType === tourType);
+      result = result.filter((tour) => tour.tourType === tourType);
+    }
+    if (parsedCategories.length > 0) {
+      result = result.filter((tour) => Array.isArray(tour.categories)
+        && tour.categories.some((category: string) => parsedCategories.includes(String(category).trim().toLowerCase())));
+    }
+    if (Number.isFinite(parsedMinPrice)) {
+      result = result.filter((tour) => Number(tour.price) >= Number(parsedMinPrice));
+    }
+    if (Number.isFinite(parsedMaxPrice)) {
+      result = result.filter((tour) => Number(tour.price) <= Number(parsedMaxPrice));
     }
     if (search && search.trim()) {
       const term = search.trim().toLowerCase();
       result = result.filter(
-        (t) =>
-          t.name.toLowerCase().includes(term) ||
-          t.description.toLowerCase().includes(term) ||
-          t.province.toLowerCase().includes(term) ||
-          (t.categories && t.categories.some((c: string) => c.toLowerCase().includes(term))),
+        (tour) => String(tour.name || '').toLowerCase().includes(term)
+          || String(tour.description || '').toLowerCase().includes(term)
+          || String(tour.province || '').toLowerCase().includes(term),
       );
     }
-
     if (month) {
-      result = result.filter((t) => {
-        if (!t.schedules || t.schedules.length === 0) return false;
-        // month is expected to be "YYYY-MM" format
-        return t.schedules.some((s: any) => s.startDate && s.startDate.startsWith(month));
-      });
+      result = result.filter((tour) => Array.isArray(tour.schedules)
+        && tour.schedules.some((schedule: ScheduleRecord) => schedule.startDate && schedule.startDate.startsWith(month)));
     }
 
     return result;
   }
 
   findOne(id: number) {
-    reloadTours(); // อ่านข้อมูลล่าสุดจากไฟล์ทุกครั้ง
-    return DEMO_TOURS.find((t) => t.id === id) || null;
+    reloadTours();
+    return DEMO_TOURS.find((tour) => tour.id === id) || null;
   }
 
   getAvailableSeats(tourId: number, scheduleId: number) {
-    reloadTours(); // อ่านข้อมูลล่าสุดจากไฟล์ทุกครั้ง
-    const tour = DEMO_TOURS.find((t) => t.id === tourId);
+    reloadTours();
+    const tour = DEMO_TOURS.find((item) => item.id === tourId);
     if (!tour) {
       throw new Error(`Tour ${tourId} not found`);
     }
 
-    const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
+    const schedule = tour.schedules.find((item: ScheduleRecord) => item.id === scheduleId);
     if (!schedule) {
       throw new Error(`Schedule ${scheduleId} not found for tour ${tourId}`);
     }
@@ -439,25 +210,57 @@ export class ToursService {
   }
 
   update(id: number, dto: UpdateTourDto) {
-    const tour = DEMO_TOURS.find((t) => t.id === id);
+    reloadTours();
+    const tour = DEMO_TOURS.find((item) => item.id === id);
     if (!tour) return null;
 
-    // แยก schedules ออกจาก dto เพื่อไม่ให้ Object.assign ลบ schedules เดิมทิ้ง
-    const { schedules: newSchedules, ...rest } = dto as any;
-    Object.assign(tour, rest, { updatedAt: new Date() });
+    const { schedules: incomingSchedules, ...rest } = dto as any;
+    const normalizedRest = { ...rest };
 
-    // ถ้า frontend ส่ง schedules มา → สร้าง schedules ใหม่ทั้งชุด
-    if (newSchedules && Array.isArray(newSchedules)) {
-      tour.schedules = newSchedules.map((s: any, i: number) => ({
-        id: tour.id * 100 + i,
-        tourId: tour.id,
-        startDate: s.startDate,
-        endDate: s.endDate,
-        timeSlot: s.timeSlot || '',
-        roundName: s.roundName || '',
-        maxCapacity: Number(s.maxCapacity),
-        currentBooked: 0,
+    if (normalizedRest.price !== undefined) normalizedRest.price = Number(normalizedRest.price);
+    if (normalizedRest.childPrice !== undefined && normalizedRest.childPrice !== null) normalizedRest.childPrice = Number(normalizedRest.childPrice);
+    if (normalizedRest.originalPrice !== undefined && normalizedRest.originalPrice !== null) normalizedRest.originalPrice = Number(normalizedRest.originalPrice);
+    if (normalizedRest.minPeople !== undefined && normalizedRest.minPeople !== null) normalizedRest.minPeople = Number(normalizedRest.minPeople);
+    if (normalizedRest.maxPeople !== undefined && normalizedRest.maxPeople !== null) normalizedRest.maxPeople = Number(normalizedRest.maxPeople);
+    if (Array.isArray(normalizedRest.itinerary)) {
+      normalizedRest.itinerary = normalizedRest.itinerary.map((item: any) => ({
+        ...item,
+        day: item?.day != null ? Number(item.day) : undefined,
       }));
+    }
+
+    Object.assign(tour, normalizedRest, { updatedAt: new Date() });
+
+    if (Array.isArray(incomingSchedules)) {
+      const existingSchedules = Array.isArray(tour.schedules) ? tour.schedules : [];
+      const existingById = new Map(existingSchedules
+        .filter((schedule: ScheduleRecord) => schedule?.id != null)
+        .map((schedule: ScheduleRecord) => [Number(schedule.id), schedule]));
+      const existingBySignature = new Map(existingSchedules
+        .map((schedule: ScheduleRecord) => [normalizeScheduleSignature(schedule), schedule]));
+      let nextScheduleId = Math.max(
+        tour.id * 100,
+        ...existingSchedules.map((schedule: ScheduleRecord) => Number(schedule.id) || 0),
+      ) + 1;
+
+      tour.schedules = incomingSchedules.map((schedule: ScheduleRecord) => {
+        const incomingId = schedule?.id != null ? Number(schedule.id) : undefined;
+        const matchedExisting = (incomingId != null ? existingById.get(incomingId) : undefined)
+          || existingBySignature.get(normalizeScheduleSignature(schedule));
+
+        return {
+          id: matchedExisting?.id ?? incomingId ?? nextScheduleId++,
+          tourId: tour.id,
+          startDate: schedule.startDate,
+          endDate: schedule.endDate,
+          timeSlot: schedule.timeSlot ?? null,
+          roundName: schedule.roundName ?? null,
+          maxCapacity: Number(schedule.maxCapacity),
+          currentBooked: matchedExisting
+            ? Number(matchedExisting.currentBooked || 0)
+            : Number(schedule.currentBooked || 0),
+        };
+      });
     }
 
     persistData();
@@ -465,20 +268,21 @@ export class ToursService {
   }
 
   remove(id: number) {
-    const tour = DEMO_TOURS.find((t) => t.id === id);
+    reloadTours();
+    const tour = DEMO_TOURS.find((item) => item.id === id);
     if (!tour) return null;
-    // soft delete: ซ่อนจากหน้าผู้ใช้ แต่ admin ยังเห็น
+
     tour.isActive = false;
+    tour.updatedAt = new Date();
     persistData();
     return { id, deleted: true };
   }
 
-  // แนะนำทัวร์แบบ Personalized โดยใช้พฤติกรรมผู้ใช้ + fallback เพื่อให้หน้าแรกมีข้อมูลเสมอ
   async getRecommendationsForUser(userId: string, limit = 8) {
     const safeLimit = Math.max(1, Math.min(Number(limit) || 8, 12));
     const activeTours = this.findAll();
-    const activeMap = new Map<number, any>(activeTours.map((tour: any) => [tour.id, tour]));
-    const resultTours: any[] = [];
+    const activeMap = new Map<number, TourRecord>(activeTours.map((tour: TourRecord) => [tour.id, tour]));
+    const resultTours: TourRecord[] = [];
     const usedTourIds = new Set<number>();
 
     const addIfActive = (tourId: number) => {
@@ -489,7 +293,6 @@ export class ToursService {
       resultTours.push(tour);
     };
 
-    // 1) Personalized score จากพฤติกรรมผู้ใช้ใน 90 วันล่าสุด
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
     const personalized = await this.behaviorEventsRepo
@@ -517,7 +320,6 @@ export class ToursService {
 
     personalized.forEach((row) => addIfActive(Number(row.tourId)));
 
-    // 2) Fallback เป็นทัวร์ที่กำลังนิยมโดยรวมใน 30 วันล่าสุด
     if (resultTours.length < safeLimit) {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -544,26 +346,24 @@ export class ToursService {
       trending.forEach((row) => addIfActive(Number(row.tourId)));
     }
 
-    // 3) Fallback สุดท้าย: เรียงตามความนิยมคงที่จากข้อมูลรีวิว
     if (resultTours.length < safeLimit) {
-      const staticPopular = [...activeTours].sort((a: any, b: any) => {
+      const staticPopular = [...activeTours].sort((a: TourRecord, b: TourRecord) => {
         if ((b.reviewCount || 0) !== (a.reviewCount || 0)) {
           return (b.reviewCount || 0) - (a.reviewCount || 0);
         }
         return (b.rating || 0) - (a.rating || 0);
       });
-      staticPopular.forEach((tour: any) => addIfActive(tour.id));
+      staticPopular.forEach((tour: TourRecord) => addIfActive(tour.id));
     }
 
     return resultTours.slice(0, safeLimit);
   }
 
-  // ✅ เพิ่มฟังก์ชันอัปเดตที่นั่ง เพื่อให้ Bookings/Payments Service เรียกใช้ได้
-  // จะได้อัปเดตทั้งในตัวแปร Memory และไฟล์ JSON
   updateScheduleBookedCount(scheduleId: number, addPax: number) {
+    reloadTours();
     for (const tour of DEMO_TOURS) {
       if (!tour.schedules) continue;
-      const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
+      const schedule = tour.schedules.find((item: ScheduleRecord) => item.id === scheduleId);
       if (schedule) {
         schedule.currentBooked = (schedule.currentBooked || 0) + addPax;
         persistData();

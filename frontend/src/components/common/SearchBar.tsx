@@ -10,6 +10,7 @@ export interface SearchBarProps {
   setChildrenCount?: (value: number) => void
   onSearch: () => void
   showGuests?: boolean
+  searchDisabled?: boolean
 }
 
 const MIN_ADULTS = 1
@@ -97,6 +98,7 @@ export default function SearchBar({
   setChildrenCount,
   onSearch,
   showGuests = true,
+  searchDisabled = false,
 }: SearchBarProps) {
   const [isGuestPickerOpen, setIsGuestPickerOpen] = useState(false)
   const [guestPickerPosition, setGuestPickerPosition] = useState<GuestPickerPosition | null>(null)
@@ -245,7 +247,11 @@ export default function SearchBar({
                 placeholder="ค้นหาทัวร์หรือสถานที่..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                onKeyDown={(event) => event.key === 'Enter' && onSearch()}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !searchDisabled) {
+                    onSearch()
+                  }
+                }}
                 className="w-full min-w-0 bg-transparent text-base font-semibold text-gray-800 outline-none placeholder:font-medium placeholder:text-gray-400 sm:text-lg"
               />
             </div>
@@ -289,7 +295,11 @@ export default function SearchBar({
           <button
             type="button"
             onClick={onSearch}
-            className="ui-focus-ring ui-pressable rounded-[1.45rem] bg-[var(--color-primary)] px-7 py-4 text-base font-bold text-white shadow-[0_16px_30px_rgba(37,99,235,0.22)] hover:bg-[var(--color-primary-dark)] lg:min-w-[152px]"
+            disabled={searchDisabled}
+            className={`ui-focus-ring ui-pressable rounded-[1.45rem] px-7 py-4 text-base font-bold text-white shadow-[0_16px_30px_rgba(37,99,235,0.22)] lg:min-w-[152px] ${searchDisabled
+              ? 'cursor-not-allowed bg-slate-300 shadow-none hover:bg-slate-300'
+              : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)]'
+            }`}
           >
             ค้นหา
           </button>
