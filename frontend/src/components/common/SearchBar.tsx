@@ -141,7 +141,7 @@ export default function SearchBar({
   const fieldPaddingClasses = transparent ? 'rounded-[1.2rem] px-4 py-2.5' : 'rounded-[1.35rem] px-5 py-3'
   const searchIconWrapperClasses = transparent ? 'h-9 w-9' : 'h-10 w-10'
   const searchInputClasses = transparent ? 'text-[14px] sm:text-[14px]' : 'text-[15px] sm:text-[15px]'
-  const searchButtonClasses = transparent ? 'rounded-[1.1rem] px-4 py-2 text-[15px] sm:min-w-[112px]' : 'rounded-[1.35rem] px-5 py-3 text-[15px] sm:min-w-[140px]'
+  const searchButtonClasses = transparent ? 'rounded-[1.2rem] px-4 py-1 text-[16px] sm:min-w-[90px]' : 'rounded-[1.35rem] px-5 py-3 text-[15px] sm:min-w-[140px]'
 
   useEffect(() => {
     if (!isGuestPickerOpen) return
