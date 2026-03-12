@@ -305,9 +305,10 @@
     "originalPrice": 2000,
     "images": [
       "http://localhost:3000/uploads/tour-1772341946989-783950595.png",
-      "http://localhost:3000/uploads/tour-1772341994364-127686848.png",
-      "http://localhost:3000/uploads/tour-1772341998559-229064272.png",
-      "http://localhost:3000/uploads/tour-1773198209618-951459924.png"
+      "http://localhost:3000/uploads/tour-1773304824599-645235724.png",
+      "http://localhost:3000/uploads/tour-1773304844762-236399908.png",
+      "http://localhost:3000/uploads/tour-1773304894669-433904524.png",
+      "http://localhost:3000/uploads/tour-1773304899510-835156623.png"
     ],
     "highlights": [
       "ขับ ATV 1 ชั่วโมง",
@@ -506,7 +507,7 @@
       }
     ],
     "createdAt": "2026-03-01T05:05:17.106Z",
-    "updatedAt": "2026-03-11T03:16:51.239Z",
+    "updatedAt": "2026-03-12T08:41:42.492Z",
     "childPrice": 450
   },
   {
