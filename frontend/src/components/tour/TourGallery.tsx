@@ -16,6 +16,7 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
   const nextIndex = images.length > 1 ? (activeIndex === images.length - 1 ? 0 : activeIndex + 1) : 0
   const galleryAspectClass = 'aspect-[16/10]'
   const thumbnailAspectClass = 'aspect-[16/10]'
+  const galleryArrowButtonClass = 'ui-arrow-button-gallery h-12 w-12'
   const mobileGalleryRef = useRef<HTMLDivElement | null>(null)
   const desktopLeftRef = useRef<HTMLDivElement | null>(null)
   const desktopCenterRef = useRef<HTMLButtonElement | null>(null)
@@ -149,12 +150,12 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
               <ScrollerArrowButton
                 direction="left"
                 onClick={showPrevWithAnimation}
-                className="absolute left-4 top-1/2 z-10 -translate-y-1/2"
+                className={`${galleryArrowButtonClass} absolute left-3 top-1/2 z-10 -translate-y-1/2`}
               />
               <ScrollerArrowButton
                 direction="right"
                 onClick={showNextWithAnimation}
-                className="absolute right-4 top-1/2 z-10 -translate-y-1/2"
+                className={`${galleryArrowButtonClass} absolute right-3 top-1/2 z-10 -translate-y-1/2`}
               />
             </>
           )}
@@ -178,7 +179,16 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
             alt=""
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-slate-950/50" />
+          <div className="absolute inset-0 bg-slate-950/40" />
+          {images.length > 1 && (
+            <div className="absolute inset-y-0 right-0 flex w-[44%] items-center justify-center bg-gradient-to-r from-transparent via-slate-950/48 to-slate-950/88">
+              <ScrollerArrowButton
+                direction="left"
+                onClick={showPrevWithAnimation}
+                className={galleryArrowButtonClass}
+              />
+            </div>
+          )}
         </div>
 
         <button
@@ -206,21 +216,6 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
           )}
         </button>
 
-        {images.length > 1 && (
-          <>
-            <ScrollerArrowButton
-              direction="left"
-              onClick={showPrevWithAnimation}
-              className="absolute left-[16%] top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
-            />
-            <ScrollerArrowButton
-              direction="right"
-              onClick={showNextWithAnimation}
-              className="absolute right-[16%] top-1/2 z-10 translate-x-1/2 -translate-y-1/2"
-            />
-          </>
-        )}
-
         <div
           ref={desktopRightRef}
           className="relative h-full overflow-hidden rounded-r-[1.9rem] border border-slate-200 bg-slate-100"
@@ -231,7 +226,16 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
               alt=""
               className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-slate-950/50" />
+            <div className="absolute inset-0 bg-slate-950/40" />
+            {images.length > 1 && (
+              <div className="absolute inset-y-0 left-0 flex w-[44%] items-center justify-center bg-gradient-to-l from-transparent via-slate-950/48 to-slate-950/88">
+                <ScrollerArrowButton
+                  direction="right"
+                  onClick={showNextWithAnimation}
+                  className={galleryArrowButtonClass}
+                />
+              </div>
+            )}
           </div>
 
           <button
@@ -289,12 +293,12 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
                     <ScrollerArrowButton
                       direction="left"
                       onClick={showPrev}
-                      className="absolute left-6 top-1/2 z-10 -translate-y-1/2"
+                      className={`${galleryArrowButtonClass} absolute left-6 top-1/2 z-10 -translate-y-1/2`}
                     />
                     <ScrollerArrowButton
                       direction="right"
                       onClick={showNext}
-                      className="absolute right-6 top-1/2 z-10 -translate-y-1/2"
+                      className={`${galleryArrowButtonClass} absolute right-6 top-1/2 z-10 -translate-y-1/2`}
                     />
                   </>
                 )}

@@ -88,9 +88,10 @@ interface RailShellProps {
   onPrev: () => void
   onNext: () => void
   className?: string
+  showFade?: boolean
 }
 
-function RailShell({ children, scrollRef, canScrollLeft, canScrollRight, onPrev, onNext, className = '' }: RailShellProps) {
+function RailShell({ children, scrollRef, canScrollLeft, canScrollRight, onPrev, onNext, className = '', showFade = false }: RailShellProps) {
   return (
     <div className="relative">
       <div
@@ -101,8 +102,8 @@ function RailShell({ children, scrollRef, canScrollLeft, canScrollRight, onPrev,
         {children}
       </div>
 
-      {canScrollLeft && <div className="ui-rail-fade-left" />}
-      {canScrollRight && <div className="ui-rail-fade-right" />}
+      {showFade && canScrollLeft && <div className="ui-rail-fade-left" />}
+      {showFade && canScrollRight && <div className="ui-rail-fade-right" />}
 
       {canScrollLeft && (
         <ScrollerArrowButton
@@ -324,6 +325,7 @@ export default function HomePage() {
               onPrev={() => scrollRow(tourScrollRef, -300)}
               onNext={() => scrollRow(tourScrollRef, 300)}
               className="pb-2"
+              showFade
             >
               {displayedTours.map((tour) => (
                 <div key={tour.id} className="w-[292px] flex-shrink-0">
@@ -350,6 +352,7 @@ export default function HomePage() {
                 onPrev={() => scrollRow(recommendationScrollRef, -280)}
                 onNext={() => scrollRow(recommendationScrollRef, 280)}
                 className="pb-2"
+                showFade
               >
                 {recommendedTours.map((tour) => (
                   <div key={tour.id} className="w-[292px] flex-shrink-0">

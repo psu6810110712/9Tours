@@ -89,6 +89,7 @@ function normalizeHighlight(text: string) {
 }
 
 export default function TourCard({ tour }: TourCardProps) {
+  const isPrivate = !!tour.minPeople
   const originalPrice = tour.originalPrice
   const hasDiscount = typeof originalPrice === 'number' && originalPrice > tour.price
   const discountPercent = hasDiscount
@@ -108,7 +109,7 @@ export default function TourCard({ tour }: TourCardProps) {
   return (
     <Link
       to={`/tours/${tour.id}`}
-      className="group flex h-full flex-col overflow-hidden rounded-[1.15rem] border border-gray-200 bg-white shadow-[0_3px_10px_rgba(15,23,42,0.05)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(15,23,42,0.10)]"
+      className="group relative flex h-full flex-col overflow-hidden rounded-[1.15rem] border border-gray-200 bg-white shadow-[0_3px_10px_rgba(15,23,42,0.05)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(15,23,42,0.10)]"
       onClick={() => {
         trackEvent({
           eventType: 'cta_click',
@@ -119,6 +120,14 @@ export default function TourCard({ tour }: TourCardProps) {
         })
       }}
     >
+      {hasDiscount && (
+        <div className="absolute right-0 top-0 z-10 flex min-h-[1rem] min-w-[2rem] flex-col items-center justify-center rounded-bl-[1.15rem] rounded-tr-[0.25rem] bg-red-500 px-4 py-2.5 text-right text-white">
+          <p className="text-[1rem] font-black leading-none">ลด {discountPercent}%</p>
+          <p className=" text-[1rem] font-semibold leading-none text-white/80 line-through">
+          </p>
+        </div>
+      )}
+
       <div className="h-[180px] overflow-hidden border-b border-gray-100 bg-slate-100">
         <img
           src={coverImage}
@@ -127,8 +136,8 @@ export default function TourCard({ tour }: TourCardProps) {
         />
       </div>
 
-      <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-2.5">
-        <h3 className="mt-1 line-clamp-2 min-h-[4rem] text-[1.2rem] font-semibold leading-[1.5] text-gray-900">
+      <div className="grid flex-1 grid-rows-[auto_auto_1fr_auto] px-3.5 pb-5 pt-3.5">
+        <h3 className="line-clamp-2 text-[1.25rem] font-bold leading-[1.5] text-gray-900">
           {tour.name}
         </h3>
 
@@ -149,27 +158,19 @@ export default function TourCard({ tour }: TourCardProps) {
           ))}
         </div>
 
-        <div className="mt-auto pt-3">
-          <div className="flex items-end justify-between gap-3 border-t border-gray-200 pt-2.5">
-            <div className="min-w-0">
-              {hasDiscount ? (
-                <p className="mt-1.5 text-[16px] font-semibold leading-none text-gray-400 line-through">
-                 ราคาเต็ม {Number(tour.originalPrice).toLocaleString()} บาท
-                </p>
-              ) : (
-                <div className="h-[20px]" />
-              )}
-              <div className="mt-1 flex items-end gap-1 text-gray-900">
-                <span className="text-[1.75rem] font-extrabold leading-none">{Number(tour.price).toLocaleString()}</span>
-                <span className="mt-1 text-[20px] font-semibold text-gray-600">บาท</span>
+        <div className="-mx-2 -mb-8 mt-2 border-t border-gray-200">
+          <div className="relative min-h-[6.25rem] px-3.5 py-2.5">
+            <div>
+              <p className="text-[1.05rem] font-semibold text-gray-500">
+                {isPrivate ? 'ราคาเหมาส่วนตัว' : 'ราคาเริ่มต้น'}
+              </p>
+              <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-gray-900">
+                <span className="text-[2rem] font-extrabold leading-none">{Number(tour.price).toLocaleString()}</span>
+                <span className="text-[1rem] font-semibold text-gray-500">
+                  {isPrivate ? 'บาท' : 'บาท / ท่าน'}
+                </span>
               </div>
             </div>
-
-            {discountPercent && (
-              <span className="rounded-full bg-red-500 px-4 py-2 text-[15px] font-extrabold leading-none text-white shadow-sm">
-                ลด {discountPercent}%
-              </span>
-            )}
           </div>
         </div>
       </div>
