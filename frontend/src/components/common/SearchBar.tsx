@@ -11,6 +11,7 @@ export interface SearchBarProps {
   onSearch: () => void
   showGuests?: boolean
   searchDisabled?: boolean
+  className?: string
 }
 
 const MIN_ADULTS = 1
@@ -99,6 +100,7 @@ export default function SearchBar({
   onSearch,
   showGuests = true,
   searchDisabled = false,
+  className = '',
 }: SearchBarProps) {
   const [isGuestPickerOpen, setIsGuestPickerOpen] = useState(false)
   const [guestPickerPosition, setGuestPickerPosition] = useState<GuestPickerPosition | null>(null)
@@ -232,10 +234,10 @@ export default function SearchBar({
 
   return (
     <>
-      <div className="ui-surface mx-auto w-full max-w-4xl rounded-[2rem] border border-white/70 bg-white/95 p-2 shadow-[0_24px_60px_rgba(15,23,42,0.18)] backdrop-blur-xl">
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-          <label className="flex min-w-0 flex-1 items-center gap-4 rounded-[1.45rem] bg-white px-4 py-3.5 sm:px-5">
-            <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.08)]">
+      <div className={`ui-surface mx-auto w-full max-w-6xl rounded-[1.9rem] border border-white/70 bg-white/95 px-3 py-1.5 shadow-[0_22px_48px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:px-3.5 sm:py-2 ${className}`.trim()}>
+        <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center">
+          <label className="flex min-w-0 flex-1 items-center gap-3.5 rounded-[1.35rem] bg-white px-5 py-3 sm:px-5">
+            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.08)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.1}>
                 <circle cx="11" cy="11" r="7.5" />
                 <path d="m20 20-3.8-3.8" strokeLinecap="round" />
@@ -252,22 +254,22 @@ export default function SearchBar({
                     onSearch()
                   }
                 }}
-                className="w-full min-w-0 bg-transparent text-base font-semibold text-gray-800 outline-none placeholder:font-medium placeholder:text-gray-400 sm:text-lg"
+                className="w-full min-w-0 bg-transparent text-[15px] font-semibold text-gray-800 outline-none placeholder:font-medium placeholder:text-gray-400 sm:text-base"
               />
             </div>
           </label>
 
           {showGuests && (
-            <div className="relative lg:min-w-[240px]">
+            <div className="relative lg:min-w-[228px]">
               <button
                 ref={guestTriggerRef}
                 type="button"
                 onClick={() => setIsGuestPickerOpen((prev) => !prev)}
-                className="ui-focus-ring flex w-full items-center gap-3 rounded-[1.45rem] border border-gray-100 bg-gray-50 px-4 py-3.5 text-left lg:border-none lg:bg-white lg:pl-5"
+                className="ui-focus-ring flex w-full items-center gap-3 rounded-[1.35rem] border border-gray-100 bg-gray-50 px-5 py-3 text-left lg:bg-white"
                 aria-haspopup="dialog"
                 aria-expanded={isGuestPickerOpen}
               >
-                <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.08)]">
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.08)]">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
@@ -296,7 +298,7 @@ export default function SearchBar({
             type="button"
             onClick={onSearch}
             disabled={searchDisabled}
-            className={`ui-focus-ring ui-pressable rounded-[1.45rem] px-7 py-4 text-base font-bold text-white shadow-[0_16px_30px_rgba(37,99,235,0.22)] lg:min-w-[152px] ${searchDisabled
+            className={`ui-focus-ring ui-pressable rounded-[1.35rem] px-6 py-3.5 text-[15px] font-bold text-white shadow-[0_14px_28px_rgba(37,99,235,0.2)] lg:min-w-[146px] ${searchDisabled
               ? 'cursor-not-allowed bg-slate-300 shadow-none hover:bg-slate-300'
               : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)]'
             }`}

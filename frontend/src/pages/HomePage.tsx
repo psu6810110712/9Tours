@@ -272,18 +272,25 @@ export default function HomePage() {
                 setChildrenCount={setChildrenCount}
                 onSearch={handleSearch}
                 searchDisabled={!canSubmitHeroSearch}
+                className="max-w-5xl"
               />
             </div>
 
-            <div className="mx-auto mt-5 flex max-w-3xl flex-wrap justify-center gap-2.5">
+            <div className="mx-auto mt-6 max-w-3xl text-center text-white">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/68">เลือกแนวทริปที่สนใจ</p>
+              <p className="mt-2 text-sm font-medium text-white/82 sm:text-[15px]">แตะหมวดด้านล่างเพื่อช่วยกรองทริปให้ตรงกับสไตล์ที่คุณอยากเที่ยว</p>
+            </div>
+
+            <div className="mx-auto mt-4 flex max-w-4xl flex-wrap justify-center gap-3">
               {CATEGORIES.map((category) => (
                 <button
                   key={category}
                   type="button"
+                  aria-pressed={selectedCats.has(category)}
                   onClick={() => toggleCategory(category)}
-                  className={`ui-pressable rounded-full px-4 py-2 text-sm font-semibold ${selectedCats.has(category)
-                    ? 'bg-[var(--color-accent)] text-white shadow-sm'
-                    : 'bg-white/90 text-gray-700 hover:bg-white'
+                  className={`ui-pressable rounded-full px-5 py-2.5 text-sm font-semibold sm:px-6 sm:text-[15px] ${selectedCats.has(category)
+                    ? 'bg-[var(--color-accent)] text-white shadow-[0_10px_22px_rgba(245,166,35,0.22)]'
+                    : 'bg-white/92 text-gray-700 shadow-[0_8px_18px_rgba(15,23,42,0.08)] hover:bg-white'
                     }`}
                 >
                   {category}
