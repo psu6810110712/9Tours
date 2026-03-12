@@ -20,7 +20,17 @@ interface PaymentPageData {
   image: string
   isPrivate: boolean
   createdAt: string
+  contactPrefix?: string | null
+  contactName?: string | null
+  contactEmail?: string | null
+  contactPhone?: string | null
 }
+
+type PaymentPhase = 'active' | 'grace' | 'closed'
+
+const ACTIVE_PAYMENT_WINDOW_SECONDS = 1 * 60
+const SLIP_UPLOAD_GRACE_SECONDS = 3 * 60
+const TOTAL_SLIP_UPLOAD_WINDOW_SECONDS = ACTIVE_PAYMENT_WINDOW_SECONDS + SLIP_UPLOAD_GRACE_SECONDS
 
 export default function PaymentPage() {
   const { bookingId } = useParams<{ bookingId: string }>()
@@ -28,8 +38,7 @@ export default function PaymentPage() {
   const location = useLocation()
 
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
-  const [isExpired, setIsExpired] = useState(false)
-  const [uploadAnyway, setUploadAnyway] = useState(false)
+  const [paymentPhase, setPaymentPhase] = useState<PaymentPhase>('active')
   const [bookingData, setBookingData] = useState<PaymentPageData | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -38,6 +47,22 @@ export default function PaymentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const resolveCreatedTime = (rawDate: string) => {
+    const now = Date.now()
+    const asLocal = new Date(rawDate).getTime()
+    const asUtc = new Date(rawDate.endsWith('Z') ? rawDate : `${rawDate}Z`).getTime()
+
+    if (now - asLocal >= 0 && (now - asUtc < 0 || now - asLocal <= now - asUtc)) {
+      return asLocal
+    }
+
+    if (now - asUtc >= 0) {
+      return asUtc
+    }
+
+    return now
+  }
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -60,17 +85,21 @@ export default function PaymentPage() {
           tourCode: data.schedule?.tour?.tourCode || location.state?.tourCode || '-',
           tourName: data.schedule?.tour?.name || location.state?.tourName || 'รายการจอง',
           date: dateText,
-          price: data.totalPrice || 0,
+          price: Number(data.totalPrice || 0),
           adults: data.adults ?? location.state?.adults ?? (data.paxCount || 1),
           children: data.children ?? location.state?.children ?? 0,
-          adultPrice: data.schedule?.tour?.price || 0,
-          childPrice: data.schedule?.tour?.childPrice || data.schedule?.tour?.price || 0,
+          adultPrice: Number(data.schedule?.tour?.price || 0),
+          childPrice: Number(data.schedule?.tour?.childPrice || data.schedule?.tour?.price || 0),
           status: data.status,
           image: typeof data.schedule?.tour?.images?.[0] === 'string'
             ? data.schedule.tour.images[0]
             : location.state?.image || 'https://images.unsplash.com/photo-1528181304800-2f140819898f?auto=format&fit=crop&w=300',
           isPrivate: !!data.schedule?.tour?.minPeople || location.state?.isPrivate || false,
           createdAt: data.createdAt || new Date().toISOString(),
+          contactPrefix: data.contactPrefix ?? null,
+          contactName: data.contactName ?? null,
+          contactEmail: data.contactEmail ?? null,
+          contactPhone: data.contactPhone ?? null,
         })
         setLoadError('')
       } catch (error) {
@@ -89,48 +118,31 @@ export default function PaymentPage() {
 
     if (bookingData.status === 'canceled') {
       setTimeLeft(0)
-      setIsExpired(true)
+      setPaymentPhase('closed')
       return
     }
 
-    if (!bookingData.createdAt) {
-      const expiryTime = Date.now() + 15 * 60 * 1000
-      const updateTimer = () => {
-        const remaining = Math.max(0, Math.floor((expiryTime - Date.now()) / 1000))
-        setTimeLeft(remaining)
-        if (remaining <= 0) setIsExpired(true)
-      }
-      updateTimer()
-      const interval = setInterval(updateTimer, 1000)
-      return () => clearInterval(interval)
-    }
-
-    const paymentDurationMs = 15 * 60 * 1000
-    const rawDate = bookingData.createdAt
-    const now = Date.now()
-    const asLocal = new Date(rawDate).getTime()
-    const asUtc = new Date(rawDate.endsWith('Z') ? rawDate : `${rawDate}Z`).getTime()
-
-    let createdTime: number
-    if (now - asLocal >= 0 && (now - asUtc < 0 || now - asLocal <= now - asUtc)) {
-      createdTime = asLocal
-    } else if (now - asUtc >= 0) {
-      createdTime = asUtc
-    } else {
-      createdTime = now
-    }
-
-    const expiryTime = createdTime + paymentDurationMs
-    if (expiryTime <= now) {
-      setTimeLeft(0)
-      setIsExpired(true)
-      return
-    }
+    const createdTime = bookingData.createdAt ? resolveCreatedTime(bookingData.createdAt) : Date.now()
+    const paymentDeadline = createdTime + (ACTIVE_PAYMENT_WINDOW_SECONDS * 1000)
+    const uploadDeadline = createdTime + (TOTAL_SLIP_UPLOAD_WINDOW_SECONDS * 1000)
 
     const updateTimer = () => {
-      const remaining = Math.max(0, Math.floor((expiryTime - Date.now()) / 1000))
-      setTimeLeft(remaining)
-      if (remaining <= 0) setIsExpired(true)
+      const now = Date.now()
+
+      if (now < paymentDeadline) {
+        setPaymentPhase('active')
+        setTimeLeft(Math.max(0, Math.floor((paymentDeadline - now) / 1000)))
+        return
+      }
+
+      if (now < uploadDeadline) {
+        setPaymentPhase('grace')
+        setTimeLeft(Math.max(0, Math.floor((uploadDeadline - now) / 1000)))
+        return
+      }
+
+      setPaymentPhase('closed')
+      setTimeLeft(0)
     }
 
     updateTimer()
@@ -174,7 +186,24 @@ export default function PaymentPage() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
+  const handleRestartBooking = async () => {
+    try {
+      if (bookingId && bookingData?.status !== 'canceled') {
+        await bookingService.cancelBooking(bookingId)
+      }
+    } catch {
+      // หากยกเลิกไม่ได้ Cron Job จะจัดการให้ภายหลัง
+    }
+
+    navigate('/')
+  }
+
   const handleConfirmPayment = async () => {
+    if (paymentPhase === 'closed') {
+      toast.error('หมดเวลารับสลิปแล้ว กรุณากลับไปจองใหม่ครับ')
+      return
+    }
+
     if (!selectedFile) {
       toast.error('กรุณาแนบหลักฐานการชำระเงินก่อนยืนยันครับ')
       return
@@ -240,19 +269,32 @@ export default function PaymentPage() {
     { icon: '/Icon_check.svg', text: 'ตรวจสอบยอดเงินและชื่อผู้รับ' },
     { icon: '/Icon_ticket.svg', text: 'อัปโหลดภาพสลิปและกดยืนยันการชำระเงิน' },
   ]
+  const transferHelpSteps = [
+    'ตรวจสอบว่าแอปธนาคารรองรับ QR Payment',
+    'โปรดตรวจสอบการเชื่อตออินเทอร์เน็ตของท่านและลองใหม่อีกครั้ง',
+    'ติดต่อที่ เพจเฟสบุก 9Tours หรือ Line @9Tours_Travel',
+  ]
+  const isGraceUploadWindow = paymentPhase === 'grace'
+  const isPaymentClosed = paymentPhase === 'closed'
+  const paymentBannerTone = isPaymentClosed
+    ? 'bg-red-500 text-white'
+    : isGraceUploadWindow
+      ? 'bg-red-50 text-red-600'
+      : 'bg-red-50 text-red-600'
+  const paymentBannerMessage = isPaymentClosed
+    ? 'ปิดรับการแนบสลิปแล้ว กรุณาจองใหม่อีกครั้ง'
+    : isGraceUploadWindow
+      ? `กรุณาอัปโหลดสลิปภายใน ${formatTime(timeLeft)} นาที`
+      : `กรุณาชำระเงินภายใน ${formatTime(timeLeft)} นาที`
 
   return (
     <div className="bg-[#F8FAFC]">
-      <div className={`${isExpired ? 'bg-red-500 text-white' : 'bg-red-50 text-red-600'} px-4 py-3 text-center text-sm font-bold shadow-sm sm:text-base`}>
+      <div className={`${paymentBannerTone} px-4 py-3 text-center text-base font-bold shadow-sm sm:text-lg`}>
         <div className="mx-auto flex max-w-7xl items-center justify-center gap-2">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span>
-            {isExpired
-              ? 'หมดเวลาชำระเงิน กรุณาทำรายการจองใหม่อีกครั้ง'
-              : `กรุณาชำระเงินภายใน ${formatTime(timeLeft)} นาที`}
-          </span>
+          <span>{paymentBannerMessage}</span>
         </div>
       </div>
 
@@ -261,7 +303,7 @@ export default function PaymentPage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="ui-pressable absolute left-0 top-0 hidden items-center gap-1.5 text-base font-bold text-primary hover:underline md:flex"
+            className="ui-pressable absolute left-0 top-0 hidden items-center gap-1.5 text-lg font-bold text-primary hover:underline md:flex"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 19 3 12m0 0 7-7m-7 7h18" />
@@ -273,20 +315,34 @@ export default function PaymentPage() {
 
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-gray-900">สแกนเพื่อชำระเงิน</h1>
-          <p className="mt-2 text-sm text-gray-500">โอนเงินตาม QR ด้านล่าง และอัปโหลดสลิปเพื่อส่งหลักฐานการชำระเงิน</p>
+          <p className="mt-2 text-base text-gray-500">โอนเงินตาม QR ด้านล่าง และอัปโหลดสลิปเพื่อส่งหลักฐานการชำระเงิน</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1.2fr_1fr]">
-          <section className="ui-surface overflow-hidden rounded-[1.75rem] border border-gray-100 bg-white">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_1.15fr_1fr]">
+          <section className="ui-surface flex h-full flex-col overflow-hidden rounded-[1.65rem] border border-gray-100 bg-white">
             <img
               src="/qr-payment.jpg"
               alt="PromptPay QR Code"
-              className="w-full object-contain bg-slate-50 px-6 py-6"
+              className="w-full object-contain bg-slate-50 px-5 py-5"
             />
-            <div className="border-t border-gray-100 px-6 py-5 text-center">
-              <p className="text-sm font-medium text-gray-500">ชื่อบัญชี</p>
-              <p className="mt-1 text-xl font-bold text-gray-800">บริษัท ไนน์ทัวร์ แทรเวล จำกัด</p>
-              <p className="mt-2 text-xs text-gray-400">โปรดตรวจสอบยอดเงินและชื่อผู้รับก่อนโอนทุกครั้ง</p>
+            <div className="border-t border-gray-100 px-5 py-4 text-center">
+              <p className="text-base font-medium text-gray-500">ชื่อบัญชี</p>
+              <p className="mt-1 text-xl font-bold leading-tight text-gray-800">บริษัท ไนน์ทัวร์ แทรเวล จำกัด</p>
+            </div>
+            <div className="mt-auto px-5 pb-5">
+              <div className="rounded-[1.2rem] border border-gray-100 bg-gray-50/80 p-4 text-left">
+                <p className="text-base font-bold text-gray-800">หากท่านพบปัญหาขณะชำระเงิน</p>
+                <div className="mt-3 space-y-2.5">
+                  {transferHelpSteps.map((step, index) => (
+                    <div key={step} className="flex gap-3 text-[15px] leading-6 text-gray-900/85">
+                      <span className="mt-0.5 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-sm font-bold text-gray-900">
+                        {index + 1}
+                      </span>
+                      <p>{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
 
@@ -301,24 +357,30 @@ export default function PaymentPage() {
             image={bookingData.image}
             totalPrice={bookingData.price}
             isPrivate={bookingData.isPrivate}
+            contactPrefix={bookingData.contactPrefix}
+            contactName={bookingData.contactName}
+            contactEmail={bookingData.contactEmail}
+            contactPhone={bookingData.contactPhone}
           />
 
-          <section className="ui-surface flex h-full flex-col rounded-[1.75rem] border border-gray-100 bg-white p-6 md:p-7">
-            <div className="mb-5">
+          <section className="ui-surface flex h-full flex-col rounded-[1.65rem] border border-gray-100 bg-white p-5 md:p-6">
+            <div className="mb-4">
               <h3 className="text-xl font-bold text-gray-900">หลักฐานการชำระเงิน</h3>
-              <p className="mt-1 text-sm text-gray-500">อัปโหลดสลิปและตรวจสอบตัวอย่างก่อนกดยืนยัน</p>
+              <p className="mt-1 text-base text-gray-500">อัปโหลดสลิปและตรวจสอบตัวอย่างก่อนกดยืนยัน</p>
             </div>
 
             <div
-              className={`relative mb-6 overflow-hidden rounded-[1.5rem] border-2 border-dashed transition-all ${previewUrl
+              className={`relative mb-4 overflow-hidden rounded-[1.35rem] border-2 border-dashed transition-all ${previewUrl
                 ? 'border-gray-200 bg-gray-50'
-                : 'cursor-pointer border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/40'
+                : isPaymentClosed
+                  ? 'cursor-not-allowed border-gray-200 bg-gray-100/80'
+                  : 'cursor-pointer border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/40'
               }`}
-              onClick={() => !previewUrl && fileInputRef.current?.click()}
+              onClick={() => !previewUrl && !isPaymentClosed && fileInputRef.current?.click()}
             >
               {previewUrl ? (
                 <>
-                  <img src={previewUrl} alt="Slip Preview" className="h-[260px] w-full object-contain p-4" />
+                  <img src={previewUrl} alt="Slip Preview" className="h-[220px] w-full object-contain p-4" />
                   <button
                     type="button"
                     onClick={handleRemoveFile}
@@ -334,12 +396,12 @@ export default function PaymentPage() {
                   </div>
                 </>
               ) : (
-                <div className="flex h-[220px] flex-col items-center justify-center px-6 text-center">
-                  <svg className="mb-4 h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <div className="flex h-[190px] flex-col items-center justify-center px-6 text-center">
+                  <svg className="mb-3 h-11 w-11 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                   </svg>
-                  <p className="text-base font-bold text-gray-800">คลิกเพื่ออัปโหลดสลิป</p>
-                  <p className="mt-1 text-sm text-gray-500">รองรับไฟล์ JPG และ PNG</p>
+                  <p className="text-lg font-bold text-gray-800">คลิกเพื่ออัปโหลดสลิป</p>
+                  <p className="mt-1 text-base text-gray-500">รองรับไฟล์ JPG และ PNG</p>
                 </div>
               )}
 
@@ -349,22 +411,22 @@ export default function PaymentPage() {
                 className="hidden"
                 accept="image/jpeg, image/png, image/jpg"
                 onChange={handleFileChange}
+                disabled={isPaymentClosed}
               />
             </div>
 
-            {isExpired && uploadAnyway && (
-              <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                หมดเวลาจองแล้ว แต่คุณแจ้งว่าทำรายการโอนเสร็จสิ้น ระบบจึงยังเปิดให้อัปโหลดสลิปต่อได้
-              </div>
+            {isGraceUploadWindow && (
+              <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5">
+                <p className="text-base text-xl  text-center font-bold text-red-600">โปรดแนบสลิปภายใน {formatTime(timeLeft)} นาที</p>              </div>
             )}
 
-            <div className="mt-auto rounded-[1.5rem] border border-gray-100 bg-gray-50 p-4">
-              <p className="mb-4 text-base font-bold text-gray-800">ขั้นตอนการชำระเงิน</p>
-              <div className="space-y-4 text-gray-700">
+            <div className="rounded-[1.3rem] border border-gray-100 bg-gray-50 p-3.5">
+              <p className="mb-3 text-lg font-bold text-gray-800">ขั้นตอนการชำระเงิน</p>
+              <div className="space-y-3 text-gray-700">
                 {paymentSteps.map((step, index) => (
-                  <div key={index} className="flex items-center gap-4 rounded-2xl bg-white px-4 py-3">
-                    <img src={step.icon} alt={`Step ${index + 1}`} className="h-8 w-8 shrink-0 object-contain" />
-                    <p className="text-sm font-medium leading-6">{step.text}</p>
+                  <div key={index} className="flex items-center gap-3 rounded-[1.05rem] bg-white px-3.5 py-2.5">
+                    <img src={step.icon} alt={`Step ${index + 1}`} className="h-7 w-7 shrink-0 object-contain" />
+                    <p className="text-base font-medium leading-6">{step.text}</p>
                   </div>
                 ))}
               </div>
@@ -376,8 +438,8 @@ export default function PaymentPage() {
           <button
             type="button"
             onClick={handleConfirmPayment}
-            disabled={isSubmitting || (isExpired && !uploadAnyway)}
-            className={`ui-focus-ring ui-pressable flex min-w-[280px] items-center justify-center gap-3 rounded-full px-8 py-4 text-lg font-bold text-white ${isSubmitting || (isExpired && !uploadAnyway)
+            disabled={isSubmitting || isPaymentClosed}
+            className={`ui-focus-ring ui-pressable flex min-w-[280px] items-center justify-center gap-3 rounded-full px-8 py-4 text-lg font-bold text-white ${isSubmitting || isPaymentClosed
               ? 'cursor-not-allowed bg-gray-400 shadow-none hover:transform-none'
               : 'bg-primary shadow-[0_10px_25px_rgba(37,99,235,0.25)] hover:bg-primary-dark'
             }`}
@@ -400,7 +462,7 @@ export default function PaymentPage() {
             )}
           </button>
 
-          <div className="mt-5 flex gap-4 text-sm font-medium text-gray-400">
+          <div className="mt-5 flex gap-4 text-base font-medium text-gray-400">
             <span>ข้อกำหนดและเงื่อนไขการชำระเงิน</span>
             <span>|</span>
             <span>นโยบายความเป็นส่วนตัว</span>
@@ -433,41 +495,31 @@ export default function PaymentPage() {
         </div>
       </Modal>
 
-      <Modal isOpen={isExpired && !uploadAnyway && !showSuccessModal} onClose={() => undefined} width="max-w-md">
+      <Modal isOpen={isPaymentClosed && !showSuccessModal} onClose={() => undefined} width="max-w-sm">
         <div className="flex flex-col items-center text-center">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
-            <svg className="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
+            <svg className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">หมดเวลาชำระเงิน</h2>
-          <p className="mt-3 text-[15px] font-medium leading-relaxed text-gray-500">
-            เวลาจองที่นั่งของคุณหมดลงแล้ว และที่นั่งได้ถูกคืนกลับเข้าสู่ระบบแล้ว อย่างไรก็ตาม หากคุณทำรายการชำระเงินเรียบร้อยแล้ว กรุณากดปุ่มด้านล่างเพื่ออัปโหลดสลิป
-          </p>
+          <h2 className="text-[1.75rem] font-bold text-gray-800">หมดเวลารับสลิปแล้ว</h2>
+          <div className="mt-2 w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3.5 text-left">
+            <p className="text-sm font-semibold text-gray-500">ช่องทางติดต่อทีมงาน</p>
+            <div className="mt-2 space-y-1.5 text-[15px] leading-6 text-gray-700">
+              <p><span className="font-semibold text-gray-900">โทรศัพท์:</span> 095-0323782</p>
+              <p><span className="font-semibold text-gray-900">แชต:</span> Line Official หรือ Facebook</p>
+            </div>
+          </div>
 
-          <div className="mt-8 flex w-full flex-col gap-3">
+          <div className="mt-5 flex w-full flex-col gap-3">
             <button
               type="button"
-              onClick={() => setUploadAnyway(true)}
+              onClick={() => {
+                void handleRestartBooking()
+              }}
               className="ui-focus-ring ui-pressable w-full rounded-full bg-primary py-3.5 text-lg font-bold text-white hover:bg-primary-dark"
             >
-              ฉันโอนเงินเรียบร้อยแล้ว
-            </button>
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  if (bookingId) {
-                    await bookingService.cancelBooking(bookingId)
-                  }
-                } catch {
-                  // หากยกเลิกไม่ได้ Cron Job จะจัดการให้ภายหลัง
-                }
-                navigate('/')
-              }}
-              className="ui-focus-ring ui-pressable w-full rounded-full bg-gray-100 py-3.5 text-lg font-bold text-gray-700 hover:bg-gray-200"
-            >
-              เริ่มการจองใหม่
+              กลับไปจองใหม่
             </button>
           </div>
         </div>
