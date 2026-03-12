@@ -128,11 +128,11 @@ export default function TourCard({ tour }: TourCardProps) {
       </div>
 
       <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-2.5">
-        <h3 className="mt-1 line-clamp-2 min-h-[4.2rem] text-[1.2rem] font-semibold leading-[1.85] text-gray-900">
+        <h3 className="mt-1 line-clamp-2 min-h-[4rem] text-[1.2rem] font-semibold leading-[1.5] text-gray-900">
           {tour.name}
         </h3>
 
-        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[16px] font-semibold text-gray-600">
+        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[16px] font-bold text-gray-600">
           <span className="inline-flex items-center gap-1 leading-none text-gray-700">
             <StarIcon />
             <span>{tour.rating.toFixed(1)}</span>
