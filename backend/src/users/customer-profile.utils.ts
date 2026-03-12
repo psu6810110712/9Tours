@@ -1,4 +1,4 @@
-﻿export const CUSTOMER_PREFIXES = ['นาย', 'นาง', 'นางสาว'] as const;
+export const CUSTOMER_PREFIXES = ['นาย', 'นาง', 'นางสาว'] as const;
 
 export type CustomerPrefix = (typeof CUSTOMER_PREFIXES)[number];
 
@@ -14,7 +14,7 @@ function trimString(value: unknown) {
 }
 
 export function normalizeEmail(value: unknown) {
-  return trimString(value).toLowerCase();
+  return typeof value === 'string' ? value.trim() : '';
 }
 
 export function sanitizeCustomerName(value: unknown) {

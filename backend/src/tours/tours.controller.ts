@@ -60,6 +60,13 @@ export class ToursController {
     return this.toursService.getRecommendationsForUser(userId || '', safeLimit);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get('admin/overview')
+  getAdminOverview() {
+    return this.toursService.getAdminOverview();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.toursService.findOne(+id);
