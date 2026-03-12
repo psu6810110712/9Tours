@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react'
-import { adminService, type TourOverview } from '../../services/adminService'
+import { adminService, type TourOverview, type TourScheduleOverview } from '../../services/adminService'
 import { toast } from 'react-hot-toast'
-
+import type { Booking } from '../../types/booking'
+import Modal from '../../components/common/Modal'
 export default function AdminTourOverview() {
     const [tours, setTours] = useState<TourOverview[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
     const [filter, setFilter] = useState<'all' | 'available' | 'full'>('all')
 
+    const [selectedSchedule, setSelectedSchedule] = useState<{ schedule: TourScheduleOverview, tourName: string } | null>(null)
+    const [scheduleBookings, setScheduleBookings] = useState<Booking[]>([])
+    const [loadingBookings, setLoadingBookings] = useState(false)
     useEffect(() => {
         const load = async () => {
             try {
@@ -44,6 +48,37 @@ export default function AdminTourOverview() {
     const formatDate = (d: string) => {
         if (!d) return '-'
         return new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })
+    }
+
+    const getBookingStatusProps = (status: string) => {
+        switch (status) {
+            case 'pending_payment':
+                return { label: 'รอชำระเงิน', color: 'bg-orange-100 text-orange-700' }
+            case 'awaiting_approval':
+                return { label: 'รอตรวจสอบ', color: 'bg-yellow-100 text-yellow-700' }
+            case 'confirmed':
+            case 'success':
+                return { label: 'ยืนยันแล้ว', color: 'bg-green-100 text-green-700' }
+            case 'canceled':
+            case 'refund_completed':
+                return { label: 'ยกเลิก', color: 'bg-gray-100 text-gray-500' }
+            default:
+                return { label: status, color: 'bg-gray-100 text-gray-500' }
+        }
+    }
+
+    const handleScheduleClick = async (schedule: TourScheduleOverview, tourName: string) => {
+        setSelectedSchedule({ schedule, tourName })
+        setLoadingBookings(true)
+        setScheduleBookings([])
+        try {
+            const bookings = await adminService.getBookingsBySchedule(schedule.id)
+            setScheduleBookings(bookings)
+        } catch {
+            toast.error('ไม่สามารถดึงข้อมูลการจองได้')
+        } finally {
+            setLoadingBookings(false)
+        }
     }
 
     const totalBooked = tours.reduce((sum, t) => sum + t.schedules.reduce((s, sc) => s + sc.currentBooked, 0), 0)
@@ -108,11 +143,10 @@ export default function AdminTourOverview() {
                     <button
                         key={f}
                         onClick={() => setFilter(f)}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                            filter === f
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${filter === f
                                 ? 'bg-yellow-400 text-white shadow-sm'
                                 : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                        }`}
+                            }`}
                     >
                         {f === 'all' ? 'ทั้งหมด' : f === 'available' ? '🟢 มีที่ว่าง' : '🔴 เต็มแล้ว'}
                     </button>
@@ -169,7 +203,11 @@ export default function AdminTourOverview() {
                                     {tour.schedules.map((sc) => {
                                         const colors = getOccupancyColor(sc.occupancyPercent)
                                         return (
-                                            <div key={sc.id} className="px-6 py-3 flex items-center gap-4">
+                                            <div
+                                                key={sc.id}
+                                                onClick={() => handleScheduleClick(sc, tour.name)}
+                                                className="px-6 py-3 flex items-center gap-4 cursor-pointer hover:bg-yellow-50/50 transition-colors"
+                                            >
                                                 <div className="w-44 flex-shrink-0">
                                                     <p className="text-sm font-medium text-gray-700">{sc.roundName || `รอบ ${sc.id}`}</p>
                                                     <p className="text-xs text-gray-400">
@@ -211,6 +249,75 @@ export default function AdminTourOverview() {
                         </div>
                     ))}
                 </div>
+            )}
+
+            {/* Bookings Modal */}
+            {selectedSchedule && (
+                <Modal isOpen={true} onClose={() => setSelectedSchedule(null)} width="max-w-4xl">
+                    <button
+                        onClick={() => setSelectedSchedule(null)}
+                        className="absolute right-5 top-5 w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        ✕
+                    </button>
+
+                    <div className="mb-6">
+                        <h2 className="text-xl font-bold text-gray-800 mb-1">รายชื่อผู้จอง</h2>
+                        <p className="text-sm text-gray-500">
+                            ทัวร์: {selectedSchedule.tourName} • รอบ: {selectedSchedule.schedule.roundName || `รอบ ${selectedSchedule.schedule.id}`} • {formatDate(selectedSchedule.schedule.startDate)}
+                        </p>
+                    </div>
+
+                    {loadingBookings ? (
+                        <div className="py-20 flex justify-center text-gray-400">กำลังโหลดรายชื่อ...</div>
+                    ) : scheduleBookings.length === 0 ? (
+                        <div className="py-20 flex justify-center text-gray-400 bg-gray-50 rounded-2xl border border-gray-100">
+                            ยังไม่มีผู้จองในรอบนี้
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto rounded-xl border border-gray-200">
+                            <table className="w-full text-left text-sm whitespace-nowrap">
+                                <thead className="bg-gray-50 text-gray-600 font-semibold border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-6 py-3">ชื่อผู้ติดต่อ</th>
+                                        <th className="px-6 py-3">อีเมล / เบอร์โทร</th>
+                                        <th className="px-6 py-3 text-right">จำนวน</th>
+                                        <th className="px-6 py-3 text-center">สถานะ</th>
+                                        <th className="px-6 py-3">วันที่จอง</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100 bg-white">
+                                    {scheduleBookings.map(b => {
+                                        const statusProps = getBookingStatusProps(b.status)
+                                        return (
+                                            <tr key={b.id} className="hover:bg-gray-50 transition-colors">
+                                                <td className="px-6 py-4 font-medium text-gray-800">
+                                                    {(b.contactName || b.user?.name) || '-'}
+                                                </td>
+                                                <td className="px-6 py-4 text-xs text-gray-500">
+                                                    <div>{b.contactEmail || b.user?.email}</div>
+                                                    <div>{b.contactPhone || b.user?.phone}</div>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <span className="font-semibold text-gray-800">{b.paxCount}</span>
+                                                    <span className="text-gray-400 text-xs ml-1">ที่</span>
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusProps.color}`}>
+                                                        {statusProps.label}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-xs text-gray-500">
+                                                    {formatDate(b.createdAt)}
+                                                </td>
+                                            </tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </Modal>
             )}
         </main>
     )

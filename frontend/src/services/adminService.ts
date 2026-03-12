@@ -41,4 +41,9 @@ export const adminService = {
         const response = await api.get<TourOverview[]>('/tours/admin/overview')
         return response.data
     },
+
+    getBookingsBySchedule: async (scheduleId: number): Promise<Booking[]> => {
+        const response = await api.get<Booking[]>(`/bookings/admin/schedule/${scheduleId}`)
+        return response.data
+    },
 }

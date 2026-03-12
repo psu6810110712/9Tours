@@ -41,6 +41,13 @@ export class BookingsController {
     return this.bookingsService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get('admin/schedule/:scheduleId')
+  async findBySchedule(@Param('scheduleId') scheduleId: string) {
+    return this.bookingsService.findByScheduleId(+scheduleId);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req: any) {
