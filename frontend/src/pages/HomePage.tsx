@@ -220,7 +220,7 @@ export default function HomePage() {
           className="relative overflow-hidden rounded-[2rem]"
           style={{ backgroundImage: 'url(/hero-bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
         >
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.22),rgba(15,23,42,0.58))]" />
+          <div className="absolute inset-0 bg-black/30" />
           <div className="relative z-10 px-5 py-12 text-center text-white sm:px-8 sm:py-14 lg:px-12 lg:py-16">
             <div className="mx-auto max-w-3xl">
               <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">เลือกสไตล์ที่ชอบ แล้วหาทริปที่ใช่</h1>
