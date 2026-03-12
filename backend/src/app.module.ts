@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { validateEnv } from './config/env.validation';
 
 @Module({
@@ -43,6 +44,7 @@ import { validateEnv } from './config/env.validation';
     BookingsModule,
     PaymentsModule,
     AnalyticsModule,
+    NotificationsModule,
   ],
 })
 export class AppModule { }
