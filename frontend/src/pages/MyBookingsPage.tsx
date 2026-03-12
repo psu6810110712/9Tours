@@ -4,9 +4,11 @@ import { toast } from 'react-hot-toast'
 import ConfirmModal from '../components/common/ConfirmModal'
 import Modal from '../components/common/Modal'
 import { bookingService } from '../services/bookingService'
+import { buildDisplayName } from '../utils/profileValidation'
 
 interface MyBookingItem {
   id: number
+  tourId: number | null
   tourCode: string
   tourName: string
   date: string
@@ -22,6 +24,17 @@ interface MyBookingItem {
   accommodation: string
   createdAt: string
   paidAt: string
+  contactPrefix?: string | null
+  contactName?: string | null
+  contactEmail?: string | null
+  contactPhone?: string | null
+  specialRequest?: string
+  roundName?: string | null
+  timeSlot?: string | null
+  duration?: string | null
+  transportation?: string | null
+  highlights: string[]
+  itinerary: { day?: number; time: string; title: string; description: string }[]
 }
 
 const tabs = ['ทั้งหมด', 'รอชำระเงิน', 'รอตรวจสอบ', 'สำเร็จ', 'ยกเลิกแล้ว']
@@ -76,6 +89,7 @@ export default function MyBookingPage() {
 
         return {
           id: booking.id,
+          tourId: booking.schedule?.tour?.id ?? null,
           tourCode: booking.schedule?.tour?.tourCode || `T-${booking.scheduleId}`,
           tourName: booking.schedule?.tour?.name || 'รายการจอง',
           date: `รอบเดินทางอ้างอิง: ${booking.scheduleId}`,
@@ -93,6 +107,17 @@ export default function MyBookingPage() {
           accommodation: booking.schedule?.tour?.accommodation || '',
           createdAt: booking.createdAt || '',
           paidAt: finalPaidAt,
+          contactPrefix: booking.contactPrefix ?? null,
+          contactName: booking.contactName ?? null,
+          contactEmail: booking.contactEmail ?? null,
+          contactPhone: booking.contactPhone ?? null,
+          specialRequest: booking.specialRequest || '',
+          roundName: booking.schedule?.roundName || null,
+          timeSlot: booking.schedule?.timeSlot || null,
+          duration: booking.schedule?.tour?.duration || null,
+          transportation: booking.schedule?.tour?.transportation || null,
+          highlights: booking.schedule?.tour?.highlights || [],
+          itinerary: booking.schedule?.tour?.itinerary || [],
         }
       })
 
@@ -168,6 +193,25 @@ export default function MyBookingPage() {
   const selectedCanPay = selectedBooking?.status === 'รอชำระเงิน'
   const selectedCanCancel = selectedBooking ? CANCELLABLE_STATUSES.includes(selectedBooking.status) : false
   const selectedHidePriceBreakdown = selectedBooking ? PRICE_BREAKDOWN_HIDDEN_STATUSES.includes(selectedBooking.status) : false
+  const selectedContactName = selectedBooking ? buildDisplayName(selectedBooking.contactPrefix, selectedBooking.contactName) || selectedBooking.contactName || '-' : '-'
+  const selectedRoundLabel = selectedBooking?.roundName || selectedBooking?.timeSlot || '-'
+  const selectedTourNotes = selectedBooking?.highlights?.slice(0, 3) || []
+  const selectedItineraryPreview = selectedBooking?.itinerary?.slice(0, 2) || []
+  const showBookingExtraDetails = Boolean(
+    selectedBooking
+    && (
+      selectedHidePriceBreakdown
+      || selectedBooking.contactEmail
+      || selectedBooking.contactPhone
+      || selectedBooking.specialRequest
+      || selectedBooking.duration
+      || selectedBooking.transportation
+      || selectedTourNotes.length > 0
+      || selectedItineraryPreview.length > 0
+      || selectedBooking.roundName
+      || selectedBooking.timeSlot
+    )
+  )
 
   return (
     <div className="bg-[#F8FAFC]">
@@ -307,20 +351,24 @@ export default function MyBookingPage() {
 
       <Modal isOpen={selectedBooking !== null} onClose={() => setSelectedBooking(null)} width="max-w-4xl">
         {selectedBooking && (
-          <div className="space-y-5">
-            <div className={`flex items-start justify-between gap-4 rounded-[1.25rem] px-5 py-4 text-white sm:px-6 ${getModalHeaderColor(selectedBooking.status)}`}>
+          <div className="relative space-y-5 pt-1">
+            <button
+              type="button"
+              onClick={() => setSelectedBooking(null)}
+              className="ui-focus-ring absolute right-0 top-0 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-700"
+              aria-label="ปิดหน้าต่างรายละเอียดการจอง"
+              title="ปิด"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className={`rounded-[1.25rem] px-5 py-4 pr-14 text-white sm:px-6 sm:pr-16 ${getModalHeaderColor(selectedBooking.status)}`}>
               <div className="min-w-0">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/80">สถานะการจอง</p>
                 <h3 className="mt-1 text-lg font-bold leading-6 sm:text-xl">{getModalHeaderText(selectedBooking.status)}</h3>
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectedBooking(null)}
-                className="ui-focus-ring flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-lg font-bold leading-none transition-colors hover:bg-white/30"
-                aria-label="ปิดรายละเอียดการจอง"
-              >
-                ×
-              </button>
             </div>
               <div className="rounded-[1.25rem] border border-gray-100 bg-gray-50 px-5 py-4">
                 <h4 className="mb-3 text-sm font-bold text-gray-800">ข้อมูลการจอง</h4>
@@ -404,6 +452,87 @@ export default function MyBookingPage() {
                         {Math.round(selectedBooking.price).toLocaleString()}
                       </span>
                       <span className="ml-2 text-base font-bold text-gray-800">บาท</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {showBookingExtraDetails && (
+                <div className="grid gap-5 lg:grid-cols-2">
+                  <div className="rounded-[1.5rem] border border-gray-100 bg-white p-5">
+                    <h4 className="mb-4 text-sm font-bold text-gray-800">ข้อมูลติดต่อผู้จอง</h4>
+                    <div className="space-y-3 text-sm leading-7 text-gray-700">
+                      <div className="grid grid-cols-[110px_1fr] gap-3">
+                        <span className="font-bold text-gray-800">ชื่อผู้จอง</span>
+                        <span>{selectedContactName}</span>
+                      </div>
+                      <div className="grid grid-cols-[110px_1fr] gap-3">
+                        <span className="font-bold text-gray-800">อีเมล</span>
+                        <span className="break-all">{selectedBooking.contactEmail || '-'}</span>
+                      </div>
+                      <div className="grid grid-cols-[110px_1fr] gap-3">
+                        <span className="font-bold text-gray-800">โทรศัพท์</span>
+                        <span>{selectedBooking.contactPhone || '-'}</span>
+                      </div>
+                      {selectedBooking.specialRequest && (
+                        <div className="grid grid-cols-[110px_1fr] gap-3">
+                          <span className="font-bold text-gray-800">คำขอเพิ่มเติม</span>
+                          <span className="whitespace-pre-wrap">{selectedBooking.specialRequest}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-5">
+                    <h4 className="mb-4 text-sm font-bold text-gray-800">ข้อมูลทัวร์เพิ่มเติม</h4>
+                    <div className="space-y-3 text-sm leading-7 text-gray-700">
+                      <div className="grid grid-cols-[110px_1fr] gap-3">
+                        <span className="font-bold text-gray-800">รอบเดินทาง</span>
+                        <span>{selectedRoundLabel}</span>
+                      </div>
+                      <div className="grid grid-cols-[110px_1fr] gap-3">
+                        <span className="font-bold text-gray-800">ระยะเวลา</span>
+                        <span>{selectedBooking.duration || '-'}</span>
+                      </div>
+                      <div className="grid grid-cols-[110px_1fr] gap-3">
+                        <span className="font-bold text-gray-800">การเดินทาง</span>
+                        <span>{selectedBooking.transportation || '-'}</span>
+                      </div>
+
+                      {selectedTourNotes.length > 0 && (
+                        <div className="grid grid-cols-[110px_1fr] gap-3">
+                          <span className="font-bold text-gray-800">คำแนะนำ</span>
+                          <div className="flex flex-wrap gap-2 pt-0.5">
+                            {selectedTourNotes.map((note) => (
+                              <span
+                                key={note}
+                                className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200"
+                              >
+                                {note}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedItineraryPreview.length > 0 && (
+                        <div className="grid grid-cols-[110px_1fr] gap-3">
+                          <span className="font-bold text-gray-800">กำหนดการ</span>
+                          <div className="space-y-2">
+                            {selectedItineraryPreview.map((item, index) => (
+                              <div key={`${item.time}-${item.title}-${index}`} className="rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-gray-200">
+                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-400">
+                                  {[item.day ? `Day ${item.day}` : null, item.time || null].filter(Boolean).join(' • ') || `ช่วงที่ ${index + 1}`}
+                                </p>
+                                <p className="mt-1 font-semibold text-gray-800">{item.title}</p>
+                                {item.description && (
+                                  <p className="mt-0.5 line-clamp-2 text-gray-500">{item.description}</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

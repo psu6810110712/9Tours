@@ -19,7 +19,7 @@ export default function ScrollerArrowButton({
       aria-label={ariaLabel || (direction === 'left' ? 'เลื่อนไปทางซ้าย' : 'เลื่อนไปทางขวา')}
       onClick={onClick}
       disabled={disabled}
-      className={`ui-focus-ring ui-pressable ui-arrow-button ${disabled ? 'cursor-not-allowed opacity-45 hover:transform-none' : ''} ${className}`.trim()}
+      className={`ui-focus-ring ui-arrow-button ${disabled ? 'cursor-not-allowed opacity-45' : ''} ${className}`.trim()}
     >
       <svg
         className={`h-5 w-5 ${direction === 'right' ? 'rotate-180' : ''}`}

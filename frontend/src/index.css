@@ -143,17 +143,31 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 9999px;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  background: rgba(239, 246, 255, 0.96);
-  color: var(--color-primary);
-  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.18);
-  backdrop-filter: blur(12px);
+  border: 1px solid #38bdf8;
+  background: #38bdf8;
+  color: #ffffff;
 }
 
 .ui-arrow-button:hover:not(:disabled) {
-  background: rgba(37, 99, 235, 0.98);
-  color: white;
-  border-color: rgba(37, 99, 235, 0.96);
+  background: #38bdf8;
+  color: #ffffff;
+  border-color: #38bdf8;
+  transform: none;
+}
+
+.ui-arrow-button.ui-arrow-button-gallery {
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.ui-arrow-button.ui-arrow-button-gallery:hover:not(:disabled) {
+  background: transparent;
+  color: #ffffff;
+  border-color: transparent;
+  transform: none;
 }
 
 .ui-rail-fade-right {
