@@ -158,14 +158,14 @@ export default function TourCard({ tour }: TourCardProps) {
           ))}
         </div>
 
-        <div className="-mx-2 -mb-8 mt-2 border-t border-gray-200">
+        <div className="-mx-2 -mb-8 mt-5 border-t border-gray-200">
           <div className="relative min-h-[6.25rem] px-3.5 py-2.5">
             <div>
               <p className="text-[1.05rem] font-semibold text-gray-500">
                 {isPrivate ? 'ราคาเหมาส่วนตัว' : 'ราคาเริ่มต้น'}
               </p>
-              <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-gray-900">
-                <span className="text-[2rem] font-extrabold leading-none">{Number(tour.price).toLocaleString()}</span>
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-gray-900">
+                <span className="mt-1 text-[1.7rem] font-extrabold leading-none">{Number(tour.price).toLocaleString()}</span>
                 <span className="text-[1rem] font-semibold text-gray-500">
                   {isPrivate ? 'บาท' : 'บาท / ท่าน'}
                 </span>
