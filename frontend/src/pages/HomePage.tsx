@@ -223,13 +223,10 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.22),rgba(15,23,42,0.58))]" />
           <div className="relative z-10 px-5 py-12 text-center text-white sm:px-8 sm:py-14 lg:px-12 lg:py-16">
             <div className="mx-auto max-w-3xl">
-              <h1 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">มีสถานที่ในใจแล้วหรือยัง?</h1>
-              <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
-                เที่ยวทั่วไทย ราคาดี จองง่าย เลือกทริปที่ใช่แล้วออกเดินทางได้ทันที
-              </p>
+              <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">เริ่มค้นหาทริปของคุณที่นี่</h1>
             </div>
 
-            <div className="mt-8 flex justify-center">
+            <div className="hidden mt-8 justify-center">
               <div className="relative inline-grid grid-cols-2 rounded-full border border-white/20 bg-white/10 p-1 backdrop-blur-md">
                 <div
                   className="absolute inset-y-1 rounded-full bg-[var(--color-accent)] shadow-md transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)]"
@@ -264,22 +261,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="mt-8">
-              <SearchBar
-                search={search}
-                setSearch={setSearch}
-                guests={guests}
-                setGuests={setGuests}
-                childrenCount={childrenCount}
-                setChildrenCount={setChildrenCount}
-                onSearch={handleSearch}
-                searchDisabled={!canSubmitHeroSearch}
-                className="max-w-5xl"
-              />
-            </div>
 
-            <div className="mx-auto mt-6 max-w-3xl text-center text-white">
-              <p className="mt-10 text-sm font-medium text-white/82 sm:text-[16px]">กำลังมองหาทริปแนวไหนอยู่? เลือกแล้วกดค้นหาเลย</p>
+            <div className="mx-auto mt-4 max-w-3xl text-center text-white">
+              <p className="mt-10 text-sm font-semibold text-white/90 sm:text-[24px]">กำลังมองหาทริปแนวไหนอยู่? เลือกแล้วกดค้นหาเลย</p>
             </div>
 
             <div className="mx-auto mt-4 flex max-w-4xl flex-wrap justify-center gap-3">
@@ -297,6 +281,23 @@ export default function HomePage() {
                   {category}
                 </button>
               ))}
+            </div>
+
+            <div className="mt-6">
+              <SearchBar
+                search={search}
+                setSearch={setSearch}
+                guests={guests}
+                setGuests={setGuests}
+                childrenCount={childrenCount}
+                setChildrenCount={setChildrenCount}
+                onSearch={handleSearch}
+                showGuests={false}
+                searchDisabled={!canSubmitHeroSearch}
+                className="max-w-5xl"
+                tourType={tourType}
+                setTourType={setTourType}
+              />
             </div>
           </div>
         </section>

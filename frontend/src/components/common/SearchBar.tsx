@@ -12,6 +12,8 @@ export interface SearchBarProps {
   showGuests?: boolean
   searchDisabled?: boolean
   className?: string
+  tourType?: '' | 'one_day' | 'package'
+  setTourType?: (value: '' | 'one_day' | 'package') => void
 }
 
 const MIN_ADULTS = 1
@@ -101,6 +103,8 @@ export default function SearchBar({
   showGuests = true,
   searchDisabled = false,
   className = '',
+  tourType,
+  setTourType,
 }: SearchBarProps) {
   const [isGuestPickerOpen, setIsGuestPickerOpen] = useState(false)
   const [guestPickerPosition, setGuestPickerPosition] = useState<GuestPickerPosition | null>(null)
@@ -108,6 +112,7 @@ export default function SearchBar({
   const guestTriggerRef = useRef<HTMLButtonElement>(null)
 
   const hasChildrenPicker = typeof childrenCount === 'number' && typeof setChildrenCount === 'function'
+  const hasTourTypePicker = typeof tourType === 'string' && typeof setTourType === 'function'
   const resolvedChildrenCount = hasChildrenPicker ? childrenCount : 0
   const totalTravelers = guests + resolvedChildrenCount
   const canIncreaseAdults = totalTravelers < MAX_TRAVELERS
@@ -234,9 +239,46 @@ export default function SearchBar({
 
   return (
     <>
-      <div className={`ui-surface mx-auto w-full max-w-6xl rounded-[1.9rem] border border-white/70 bg-white/95 px-3 py-1.5 shadow-[0_22px_48px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:px-3.5 sm:py-2 ${className}`.trim()}>
-        <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center">
-          <label className="flex min-w-0 flex-1 items-center gap-3.5 rounded-[1.35rem] bg-white px-5 py-3 sm:px-5">
+      <div className={`ui-surface mx-auto w-full max-w-6xl rounded-[1.9rem] border border-white/70 bg-white/95 p-2.5 shadow-[0_22px_48px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:p-3 ${className}`.trim()}>
+        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-stretch">
+          {hasTourTypePicker && (
+            <div className="lg:flex-shrink-0">
+              <div className="relative inline-grid w-full grid-cols-2 rounded-[1.35rem] border border-slate-200 bg-slate-50 p-1.5 sm:w-auto">
+                <div
+                  className="absolute inset-y-1.5 rounded-[0.95rem] bg-[var(--color-accent)] shadow-md transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)]"
+                  style={{
+                    width: 'calc(50% - 6px)',
+                    left: tourType === 'package' ? 'calc(50% + 3px)' : '4px',
+                    opacity: tourType ? 1 : 0,
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setTourType(tourType === 'one_day' ? '' : 'one_day')}
+                  className={`relative z-10 flex min-h-[52px] items-center justify-center gap-2 rounded-[0.95rem] px-4 py-3 text-[13px] font-semibold transition-colors sm:px-4 ${tourType === 'one_day' ? 'text-white' : 'text-slate-500 hover:text-slate-800'}`}
+                >
+                  <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <rect x="2" y="7" width="20" height="14" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 14l1.5 1.5L14 12" />
+                  </svg>
+                  วันเดย์ทริป
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTourType(tourType === 'package' ? '' : 'package')}
+                  className={`relative z-10 flex min-h-[52px] items-center justify-center gap-2 rounded-[0.95rem] px-4 py-3 text-[13px] font-semibold transition-colors sm:px-4 ${tourType === 'package' ? 'text-white' : 'text-slate-500 hover:text-slate-800'}`}
+                >
+                  <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0 7-7 7 7M5 10v10a1 1 0 001 1h3m10-11 2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                  แพ็กเกจพร้อมที่พัก
+                </button>
+              </div>
+            </div>
+          )}
+
+          <label className="flex min-w-0 flex-1 items-center gap-3 rounded-[1.35rem] bg-white px-5 py-3 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.8)]">
             <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.08)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.1}>
                 <circle cx="11" cy="11" r="7.5" />
@@ -254,57 +296,59 @@ export default function SearchBar({
                     onSearch()
                   }
                 }}
-                className="w-full min-w-0 bg-transparent text-[15px] font-semibold text-gray-800 outline-none placeholder:font-medium placeholder:text-gray-400 sm:text-base"
+                className="w-full min-w-0 bg-transparent text-[15px] font-semibold text-gray-800 outline-none placeholder:font-medium placeholder:text-gray-400 sm:text-[15px]"
               />
             </div>
           </label>
 
-          {showGuests && (
-            <div className="relative lg:min-w-[228px]">
-              <button
-                ref={guestTriggerRef}
-                type="button"
-                onClick={() => setIsGuestPickerOpen((prev) => !prev)}
-                className="ui-focus-ring flex w-full items-center gap-3 rounded-[1.35rem] border border-gray-100 bg-gray-50 px-5 py-3 text-left lg:bg-white"
-                aria-haspopup="dialog"
-                aria-expanded={isGuestPickerOpen}
-              >
-                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.08)]">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">ผู้เดินทาง</p>
-                  <p className="mt-1 text-base font-semibold text-gray-800">{totalTravelers} ท่าน</p>
-                  {hasChildrenPicker && (
-                    <p className="mt-0.5 truncate text-xs font-medium text-gray-400">{guestSummary}</p>
-                  )}
-                </div>
-                <svg
-                  className={`h-5 w-5 flex-shrink-0 text-gray-500 transition-transform ${isGuestPickerOpen ? 'rotate-180' : ''}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.4}
+          <div className="flex flex-col gap-2 sm:flex-row lg:flex-shrink-0">
+            {showGuests && (
+              <div className="relative sm:min-w-[228px]">
+                <button
+                  ref={guestTriggerRef}
+                  type="button"
+                  onClick={() => setIsGuestPickerOpen((prev) => !prev)}
+                  className="ui-focus-ring flex h-full w-full items-center gap-3 rounded-[1.35rem] border border-gray-100 bg-gray-50 px-5 py-3 text-left lg:bg-white"
+                  aria-haspopup="dialog"
+                  aria-expanded={isGuestPickerOpen}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
-            </div>
-          )}
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.08)]">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">ผู้เดินทาง</p>
+                    <p className="mt-1 text-base font-semibold text-gray-800">{totalTravelers} ท่าน</p>
+                    {hasChildrenPicker && (
+                      <p className="mt-0.5 truncate text-xs font-medium text-gray-400">{guestSummary}</p>
+                    )}
+                  </div>
+                  <svg
+                    className={`h-5 w-5 flex-shrink-0 text-gray-500 transition-transform ${isGuestPickerOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.4}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+              </div>
+            )}
 
-          <button
-            type="button"
-            onClick={onSearch}
-            disabled={searchDisabled}
-            className={`ui-focus-ring ui-pressable rounded-[1.35rem] px-6 py-3.5 text-[15px] font-bold text-white shadow-[0_14px_28px_rgba(37,99,235,0.2)] lg:min-w-[146px] ${searchDisabled
-              ? 'cursor-not-allowed bg-slate-300 shadow-none hover:bg-slate-300'
-              : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)]'
-            }`}
-          >
-            ค้นหา
-          </button>
+            <button
+              type="button"
+              onClick={onSearch}
+              disabled={searchDisabled}
+              className={`ui-focus-ring ui-pressable rounded-[1.35rem] px-5 py-3 text-[15px] font-bold text-white shadow-[0_14px_28px_rgba(37,99,235,0.2)] sm:min-w-[140px] ${searchDisabled
+                ? 'cursor-not-allowed bg-slate-300 shadow-none hover:bg-slate-300'
+                : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)]'
+              }`}
+            >
+              ค้นหา
+            </button>
+          </div>
         </div>
       </div>
       {guestPicker}

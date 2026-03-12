@@ -154,7 +154,7 @@ export default function TourCard({ tour }: TourCardProps) {
             <div className="min-w-0">
               {hasDiscount ? (
                 <p className="mt-1.5 text-[16px] font-semibold leading-none text-gray-400 line-through">
-                  ฿{Number(tour.originalPrice).toLocaleString()}
+                 ราคาเต็ม {Number(tour.originalPrice).toLocaleString()} บาท
                 </p>
               ) : (
                 <div className="h-[20px]" />
