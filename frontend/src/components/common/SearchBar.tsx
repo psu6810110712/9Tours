@@ -122,6 +122,7 @@ export default function SearchBar({
   const surfaceClasses = transparent
     ? 'border-white/15 bg-white/10 shadow-[0_22px_48px_rgba(15,23,42,0.2)]'
     : 'border-white/70 bg-white/95 shadow-[0_22px_48px_rgba(15,23,42,0.16)]'
+  const blurClasses = transparent ? 'backdrop-blur-sm' : 'backdrop-blur-xl'
   const segmentClasses = transparent
     ? 'border-white/30 bg-white/80 shadow-[0_10px_24px_rgba(15,23,42,0.12)]'
     : 'border-slate-200 bg-slate-50'
@@ -255,7 +256,7 @@ export default function SearchBar({
 
   return (
     <>
-      <div className={`ui-surface mx-auto w-full max-w-6xl rounded-[3rem] border p-2.5 backdrop-blur-xl sm:p-3 ${surfaceClasses} ${className}`.trim()}>
+      <div className={`ui-surface mx-auto w-full max-w-6xl rounded-[3rem] border p-2.5 sm:p-3 ${blurClasses} ${surfaceClasses} ${className}`.trim()}>
         <div className="flex flex-col gap-2.5 lg:flex-row lg:items-stretch">
           {hasTourTypePicker && (
             <div className="lg:flex-shrink-0">

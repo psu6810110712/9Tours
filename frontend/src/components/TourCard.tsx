@@ -128,7 +128,7 @@ export default function TourCard({ tour }: TourCardProps) {
       </div>
 
       <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-2.5">
-        <h3 className="mt-1.5 line-clamp-2 min-h-[2.95rem] text-[1.02rem] font-extrabold leading-5 text-gray-900">
+        <h3 className="mt-1 line-clamp-2 min-h-[3.75rem] text-[1.25rem] font-semibold leading-7 text-gray-900">
           {tour.name}
         </h3>
 
@@ -143,7 +143,7 @@ export default function TourCard({ tour }: TourCardProps) {
           {isPopular && <FeaturedBadge />}
         </div>
 
-        <div className="mt-1.5 grid gap-1.5">
+        <div className="mt-2 grid gap-1.5">
           {detailItems.map((item, index) => (
             <DetailItem key={`${item.text}-${index}`} icon={item.icon} text={item.text} />
           ))}
