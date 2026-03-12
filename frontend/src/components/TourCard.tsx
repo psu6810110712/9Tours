@@ -128,11 +128,11 @@ export default function TourCard({ tour }: TourCardProps) {
       </div>
 
       <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-2.5">
-        <h3 className="line-clamp-2 min-h-[2.95rem] text-[1.02rem] font-extrabold leading-5 text-gray-900">
+        <h3 className="mt-1.5 line-clamp-2 min-h-[2.95rem] text-[1.02rem] font-extrabold leading-5 text-gray-900">
           {tour.name}
         </h3>
 
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[16px] font-semibold text-gray-600">
+        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[16px] font-semibold text-gray-600">
           <span className="inline-flex items-center gap-1 leading-none text-gray-700">
             <StarIcon />
             <span>{tour.rating.toFixed(1)}</span>
@@ -143,7 +143,7 @@ export default function TourCard({ tour }: TourCardProps) {
           {isPopular && <FeaturedBadge />}
         </div>
 
-        <div className="mt-2.5 grid gap-1.5">
+        <div className="mt-1.5 grid gap-1.5">
           {detailItems.map((item, index) => (
             <DetailItem key={`${item.text}-${index}`} icon={item.icon} text={item.text} />
           ))}
@@ -153,11 +153,11 @@ export default function TourCard({ tour }: TourCardProps) {
           <div className="flex items-end justify-between gap-3 border-t border-gray-200 pt-2.5">
             <div className="min-w-0">
               {hasDiscount ? (
-                <p className="text-[13px] font-semibold leading-none text-gray-400 line-through">
+                <p className="mt-1.5 text-[16px] font-semibold leading-none text-gray-400 line-through">
                   ฿{Number(tour.originalPrice).toLocaleString()}
                 </p>
               ) : (
-                <div className="h-[13px]" />
+                <div className="h-[20px]" />
               )}
               <div className="mt-1 flex items-end gap-1 text-gray-900">
                 <span className="text-[1.75rem] font-extrabold leading-none">{Number(tour.price).toLocaleString()}</span>

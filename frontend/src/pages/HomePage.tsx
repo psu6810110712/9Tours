@@ -177,14 +177,16 @@ export default function HomePage() {
     })
   }
 
-  const canSubmitHeroSearch = search.trim().length > 0
+  const canSubmitHeroSearch = search.trim().length > 0 || selectedCats.size > 0 || Boolean(tourType)
 
   const handleSearch = () => {
     const trimmedSearch = search.trim()
-    if (!trimmedSearch) return
+    if (!trimmedSearch && selectedCats.size === 0 && !tourType) return
 
     const params = new URLSearchParams()
-    params.set('search', trimmedSearch)
+    if (trimmedSearch) {
+      params.set('search', trimmedSearch)
+    }
     if (tourType) params.set('tourType', tourType)
     if (selectedCats.size > 0) {
       params.set('categories', [...selectedCats].join(','))
@@ -277,8 +279,7 @@ export default function HomePage() {
             </div>
 
             <div className="mx-auto mt-6 max-w-3xl text-center text-white">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/68">เลือกแนวทริปที่สนใจ</p>
-              <p className="mt-2 text-sm font-medium text-white/82 sm:text-[15px]">แตะหมวดด้านล่างเพื่อช่วยกรองทริปให้ตรงกับสไตล์ที่คุณอยากเที่ยว</p>
+              <p className="mt-10 text-sm font-medium text-white/82 sm:text-[16px]">กำลังมองหาทริปแนวไหนอยู่? เลือกแล้วกดค้นหาเลย</p>
             </div>
 
             <div className="mx-auto mt-4 flex max-w-4xl flex-wrap justify-center gap-3">
