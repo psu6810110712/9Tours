@@ -13,6 +13,7 @@ import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 import { ToursService } from '../tours/tours.service';
 import { User } from '../users/entities/user.entity';
 import { normalizeEmail, normalizeThaiPhoneInput, sanitizeCustomerName } from '../users/customer-profile.utils';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class BookingsService {
@@ -22,6 +23,7 @@ export class BookingsService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private toursService: ToursService,
+    private notificationsService: NotificationsService,
   ) { }
 
   private findScheduleInData(scheduleId: number): { tour: any; schedule: any } | null {
@@ -299,24 +301,31 @@ export class BookingsService {
     booking.status = newStatus;
     const updated = await this.bookingsRepository.save(booking);
 
+    // Fetch schedule data for the response and for the email
     const found = this.findScheduleInData(updated.scheduleId);
-    return {
+
+    // Call the email service (asynchronous/non-blocking)
+    const emailResult = {
       ...updated,
-      schedule: found
-        ? {
-          ...found.schedule,
-          tour: {
-            id: found.tour.id,
-            tourCode: found.tour.tourCode,
-            name: found.tour.name,
-            price: found.tour.price,
-            childPrice: found.tour.childPrice,
-            images: found.tour.images,
-            accommodation: found.tour.accommodation || null,
-          },
-        }
-        : null,
+      schedule: found ? {
+        ...found.schedule,
+        tour: {
+          id: found.tour.id,
+          tourCode: found.tour.tourCode,
+          name: found.tour.name,
+          price: found.tour.price,
+          childPrice: found.tour.childPrice,
+          images: found.tour.images,
+          accommodation: found.tour.accommodation || null,
+        },
+      } : null,
+      user: booking.user,
     };
+
+    // Send email notification silently, don't block the request if it fails
+    this.notificationsService.sendBookingStatusEmail(emailResult as Booking, previousStatus, newStatus).catch(e => console.error(e));
+
+    return emailResult;
   }
 
   async findOne(id: number, userId?: string, isAdmin?: boolean) {
