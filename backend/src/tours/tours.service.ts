@@ -368,16 +368,46 @@ export class ToursService {
     return resultTours.slice(0, safeLimit);
   }
 
+  // ✅ เพิ่มฟังก์ชันอัปเดตที่นั่ง เพื่อให้ Bookings/Payments Service เรียกใช้ได้
+  // จะได้อัปเดตทั้งในตัวแปร Memory และไฟล์ JSON
   updateScheduleBookedCount(scheduleId: number, addPax: number) {
-    reloadTours();
     for (const tour of DEMO_TOURS) {
       if (!tour.schedules) continue;
-      const schedule = tour.schedules.find((item: ScheduleRecord) => item.id === scheduleId);
+      const schedule = tour.schedules.find((s: any) => s.id === scheduleId);
       if (schedule) {
-        schedule.currentBooked = Math.max(0, normalizeBookedCount(schedule.currentBooked) + addPax);
+        schedule.currentBooked = (schedule.currentBooked || 0) + addPax;
         persistData();
         return;
       }
     }
+  }
+
+  // ✅ สำหรับ Admin: ดูภาพรวมการจองของแต่ละทัวร์และรอบ
+  getAdminOverview() {
+    reloadTours();
+    return DEMO_TOURS.map((tour: any) => ({
+      id: tour.id,
+      tourCode: tour.tourCode,
+      name: tour.name,
+      tourType: tour.tourType,
+      province: tour.province,
+      region: tour.region,
+      images: tour.images?.slice(0, 1) || [],
+      isActive: tour.isActive,
+      totalSchedules: (tour.schedules || []).length,
+      schedules: (tour.schedules || []).map((s: any) => ({
+        id: s.id,
+        startDate: s.startDate,
+        endDate: s.endDate,
+        roundName: s.roundName,
+        timeSlot: s.timeSlot,
+        maxCapacity: s.maxCapacity,
+        currentBooked: s.currentBooked || 0,
+        availableSeats: s.maxCapacity - (s.currentBooked || 0),
+        occupancyPercent: s.maxCapacity > 0
+          ? Math.min(100, Math.round(((s.currentBooked || 0) / s.maxCapacity) * 100))
+          : 0,
+      })),
+    }));
   }
 }

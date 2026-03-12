@@ -1,4 +1,4 @@
-﻿import {
+import {
   Injectable,
   BadRequestException,
   NotFoundException,
@@ -410,5 +410,38 @@ export class BookingsService {
         }
         : null,
     };
+  }
+
+  async findByScheduleId(scheduleId: number): Promise<any[]> {
+    const bookings = await this.bookingsRepository.find({
+      where: {
+        scheduleId,
+        status: Not(In([BookingStatus.CANCELED, BookingStatus.REFUND_COMPLETED])),
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      relations: ['user'],
+    });
+
+    const found = this.findScheduleInData(scheduleId);
+
+    return bookings.map((booking) => ({
+      ...booking,
+      schedule: found
+        ? {
+          ...found.schedule,
+          tour: {
+            id: found.tour.id,
+            tourCode: found.tour.tourCode,
+            name: found.tour.name,
+            price: found.tour.price,
+            childPrice: found.tour.childPrice,
+            images: found.tour.images,
+            accommodation: found.tour.accommodation || null,
+          },
+        }
+        : null,
+    }));
   }
 }

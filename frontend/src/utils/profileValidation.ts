@@ -1,4 +1,4 @@
-﻿export const PREFIX_OPTIONS = ['นาย', 'นาง', 'นางสาว'] as const;
+export const PREFIX_OPTIONS = ['นาย', 'นาง', 'นางสาว'] as const;
 
 export type CustomerPrefix = (typeof PREFIX_OPTIONS)[number];
 
@@ -26,7 +26,7 @@ function trimString(value: string) {
 }
 
 export function normalizeEmail(value: string) {
-  return trimString(value).toLowerCase();
+  return trimString(value);
 }
 
 export function sanitizeCustomerName(value: string) {

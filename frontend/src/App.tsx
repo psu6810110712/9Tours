@@ -1,4 +1,4 @@
-﻿import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import Layout from './components/Layout'
@@ -10,6 +10,7 @@ import AdminTourListPage from './pages/admin/AdminTourListPage'
 import AdminTourFormPage from './pages/admin/AdminTourFormPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminBookings from './pages/admin/AdminBookings'
+import AdminTourOverview from './pages/admin/AdminTourOverview'
 import ProtectedRoute from './components/ProtectedRoute'
 import BookingInfoPage from './pages/BookingInfoPage'
 import PaymentPage from './pages/PaymentPage'
@@ -97,6 +98,14 @@ function App() {
               element={
                 <ProtectedRoute requiredRole="admin">
                   <AdminTourListPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/tour-overview"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminTourOverview />
                 </ProtectedRoute>
               }
             />

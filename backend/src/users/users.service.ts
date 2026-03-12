@@ -1,4 +1,4 @@
-﻿import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -157,7 +157,7 @@ export class UsersService {
   }
 
   private normalizeEmail(email?: string | null) {
-    return email?.trim().toLowerCase() ?? '';
+    return email?.trim() ?? '';
   }
 
   private async ensureUniqueContactInfo(preparedUserData: Partial<User>, excludeUserId?: string) {
