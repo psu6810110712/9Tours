@@ -1,3 +1,8 @@
+﻿interface MonthOption {
+  value: string
+  label: string
+}
+
 const REGIONS = ['ภาคเหนือ', 'ภาคกลาง', 'ภาคใต้', 'ภาคตะวันออก', 'ภาคตะวันออกเฉียงเหนือ']
 
 const PROVINCES_BY_REGION: Record<string, string[]> = {
@@ -8,119 +13,235 @@ const PROVINCES_BY_REGION: Record<string, string[]> = {
   'ภาคตะวันออกเฉียงเหนือ': ['ขอนแก่น', 'นครราชสีมา', 'อุดรธานี'],
 }
 
-const getMonthOptions = () => {
-  const options = []
-  const today = new Date()
-  let year = today.getFullYear()
-  let m = today.getMonth()
-
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(year, m + i, 1)
-    const yyyy = d.getFullYear()
-    const mm = String(d.getMonth() + 1).padStart(2, '0')
-    const thMonth = d.toLocaleDateString('th-TH', { month: 'long' })
-    const thYear = yyyy + 543
-    options.push({ value: `${yyyy}-${mm}`, label: `${thMonth} ${thYear}` })
-  }
-  return options
-}
-
-const MONTH_OPTIONS = getMonthOptions()
-
 interface FilterSidebarProps {
   region: string
   province: string
   tourType: string
   search: string
+  categories: string[]
   month: string
-  onRegionChange: (v: string) => void
-  onProvinceChange: (v: string) => void
-  onTourTypeChange: (v: string) => void
-  onMonthChange: (v: string) => void
+  minPrice: number
+  maxPrice: number
+  priceBounds: {
+    min: number
+    max: number
+  }
+  availableCategories: string[]
+  availableMonths: MonthOption[]
+  onRegionChange: (value: string) => void
+  onProvinceChange: (value: string) => void
+  onTourTypeChange: (value: string) => void
+  onCategoryToggle: (value: string) => void
+  onMonthChange: (value: string) => void
+  onMinPriceChange: (value: number) => void
+  onMaxPriceChange: (value: number) => void
   onClear: () => void
+  mode?: 'sidebar' | 'drawer'
+  onClose?: () => void
 }
 
 export default function FilterSidebar({
-  region, province, tourType, search, month,
-  onRegionChange, onProvinceChange, onTourTypeChange, onMonthChange, onClear,
+  region,
+  province,
+  tourType,
+  search,
+  categories,
+  month,
+  minPrice,
+  maxPrice,
+  priceBounds,
+  availableCategories,
+  availableMonths,
+  onRegionChange,
+  onProvinceChange,
+  onTourTypeChange,
+  onCategoryToggle,
+  onMonthChange,
+  onMinPriceChange,
+  onMaxPriceChange,
+  onClear,
+  mode = 'sidebar',
+  onClose,
 }: FilterSidebarProps) {
-  const hasFilter = region || province || tourType || search || month
+  const hasPriceFilter = minPrice > priceBounds.min || maxPrice < priceBounds.max
+  const hasFilter = region || province || tourType || search || month || categories.length > 0 || hasPriceFilter
   const provinceOptions = region
     ? (PROVINCES_BY_REGION[region] ?? [])
     : Object.values(PROVINCES_BY_REGION).flat()
 
-  return (
-    <aside className="w-56 flex-shrink-0">
-      <div className="bg-white rounded-xl shadow-sm p-4 sticky top-20">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="font-bold text-gray-800">ตัวกรอง</h2>
-          {hasFilter && (
-            <button onClick={onClear} className="text-xs text-accent hover:underline">
-              ล้างทั้งหมด
-            </button>
-          )}
-        </div>
+  const isDrawer = mode === 'drawer'
+  const priceRange = Math.max(1, priceBounds.max - priceBounds.min)
+  const leftPercent = ((minPrice - priceBounds.min) / priceRange) * 100
+  const rightPercent = 100 - (((maxPrice - priceBounds.min) / priceRange) * 100)
 
-        {/* ประเภท */}
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">ประเภท</label>
-          <div className="space-y-1">
-            {[
-              { value: '', label: 'ทั้งหมด' },
-              { value: 'one_day', label: 'วันเดย์ทริป' },
-              { value: 'package', label: 'แพ็คเกจพร้อมที่พัก' },
-            ].map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => onTourTypeChange(opt.value)}
-                className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${tourType === opt.value
-                  ? 'bg-accent text-white'
-                  : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-              >
-                {opt.label}
+  return (
+    <aside className={isDrawer ? 'w-full' : 'w-full lg:w-72 lg:flex-shrink-0'}>
+      <div className={`ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-5 ${isDrawer ? '' : 'lg:sticky lg:top-24'}`}>
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h2 className="text-base font-bold text-gray-800">ตัวกรอง</h2>
+          <div className="flex items-center gap-2">
+            {hasFilter && (
+              <button type="button" onClick={onClear} className="text-xs font-semibold text-accent hover:underline">
+                ล้างทั้งหมด
               </button>
-            ))}
+            )}
+            {isDrawer && onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="ui-focus-ring flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
 
-        {/* เดือนเดินทาง */}
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">เดือนที่เดินทาง</label>
-          <select
-            value={month}
-            onChange={(e) => onMonthChange(e.target.value)}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none"
-          >
-            <option value="">ทุกเดือน</option>
-            {MONTH_OPTIONS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
-          </select>
-        </div>
+        <div className="space-y-5">
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">ประเภท</label>
+            <div className="space-y-2">
+              {[
+                { value: '', label: 'ทั้งหมด' },
+                { value: 'one_day', label: 'วันเดย์ทริป' },
+                { value: 'package', label: 'แพ็กเกจพร้อมที่พัก' },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => onTourTypeChange(option.value)}
+                  className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition-colors ${tourType === option.value
+                    ? 'border-amber-300 bg-amber-50 text-amber-800'
+                    : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        {/* ภาค */}
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">ภาค</label>
-          <select
-            value={region}
-            onChange={(e) => { onRegionChange(e.target.value); onProvinceChange('') }}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none"
-          >
-            <option value="">ทุกภาค</option>
-            {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-          </select>
-        </div>
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">หมวดหมู่</label>
+            <div className="flex flex-wrap gap-2">
+              {availableCategories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => onCategoryToggle(category)}
+                  className={`rounded-full border px-3 py-2 text-sm font-semibold transition-colors ${categories.includes(category)
+                    ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary)]'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        {/* จังหวัด */}
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">จังหวัด</label>
-          <select
-            value={province}
-            onChange={(e) => onProvinceChange(e.target.value)}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none"
-          >
-            <option value="">ทุกจังหวัด</option>
-            {provinceOptions.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">เดือนที่เดินทาง</label>
+              {month && (
+                <button type="button" onClick={() => onMonthChange('')} className="text-xs font-semibold text-accent hover:underline">
+                  ล้าง
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => onMonthChange('')}
+                className={`rounded-full border px-3 py-2 text-sm font-semibold transition-colors ${month === ''
+                  ? 'border-amber-300 bg-amber-50 text-amber-800'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                ทุกเดือน
+              </button>
+              {availableMonths.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => onMonthChange(option.value)}
+                  className={`rounded-full border px-3 py-2 text-sm font-semibold transition-colors ${month === option.value
+                    ? 'border-amber-300 bg-amber-50 text-amber-800'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">ช่วงราคา</label>
+              <span className="text-xs font-semibold text-gray-500">
+                ฿{minPrice.toLocaleString()} - ฿{maxPrice.toLocaleString()}
+              </span>
+            </div>
+            <div className="rounded-[1.2rem] border border-gray-200 bg-gray-50 px-4 py-4">
+              <div className="relative h-8">
+                <div className="absolute left-0 top-1/2 h-2 w-full -translate-y-1/2 rounded-full bg-gray-200" />
+                <div
+                  className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-gradient-to-r from-[var(--color-primary)] to-amber-400"
+                  style={{ left: `${leftPercent}%`, right: `${rightPercent}%` }}
+                />
+                <input
+                  type="range"
+                  min={priceBounds.min}
+                  max={priceBounds.max}
+                  step={100}
+                  value={minPrice}
+                  onChange={(event) => onMinPriceChange(Number(event.target.value))}
+                  className="pointer-events-none absolute left-0 top-1/2 h-2 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--color-primary)] [&::-webkit-slider-thumb]:shadow-sm"
+                />
+                <input
+                  type="range"
+                  min={priceBounds.min}
+                  max={priceBounds.max}
+                  step={100}
+                  value={maxPrice}
+                  onChange={(event) => onMaxPriceChange(Number(event.target.value))}
+                  className="pointer-events-none absolute left-0 top-1/2 h-2 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-500 [&::-webkit-slider-thumb]:shadow-sm"
+                />
+              </div>
+              <div className="mt-4 flex items-center justify-between text-xs font-semibold text-gray-500">
+                <span>ต่ำสุด ฿{priceBounds.min.toLocaleString()}</span>
+                <span>สูงสุด ฿{priceBounds.max.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">ภาค</label>
+            <select
+              value={region}
+              onChange={(event) => {
+                onRegionChange(event.target.value)
+                onProvinceChange('')
+              }}
+              className="ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white"
+            >
+              <option value="">ทุกภาค</option>
+              {REGIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">จังหวัด</label>
+            <select
+              value={province}
+              onChange={(event) => onProvinceChange(event.target.value)}
+              className="ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white"
+            >
+              <option value="">ทุกจังหวัด</option>
+              {provinceOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </div>
         </div>
       </div>
     </aside>

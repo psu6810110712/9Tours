@@ -1,4 +1,5 @@
-import type { User } from './user'
+﻿import type { User } from './user'
+import type { CustomerPrefix } from '../utils/profileValidation'
 
 export interface Payment {
   id: number
@@ -29,18 +30,22 @@ export interface Schedule {
 
 export interface Booking {
   id: number
-  userId: number
+  userId: string
   scheduleId: number
   paxCount: number
   adults: number
   children: number
   totalPrice: number
-  status: string // 'PENDING_PAYMENT' | 'CONFIRMED' | 'CANCELED'
+  status: string
   createdAt: string
   payments: Payment[]
   schedule: Schedule | null
   user?: User
   specialRequest?: string
+  contactPrefix?: CustomerPrefix | null
+  contactName?: string | null
+  contactEmail?: string | null
+  contactPhone?: string | null
 }
 
 export interface CreateBookingDto {
@@ -49,4 +54,8 @@ export interface CreateBookingDto {
   adults?: number
   children?: number
   specialRequest?: string
+  contactPrefix: CustomerPrefix
+  contactName: string
+  contactEmail: string
+  contactPhone: string
 }

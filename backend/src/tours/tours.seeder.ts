@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tour } from './entities/tour.entity';
 import { TourSchedule } from './entities/tour-schedule.entity';
+import { parseToursData } from './tours-data.util';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -20,13 +21,13 @@ export class ToursSeederService implements OnModuleInit {
       // Check if schedules already exist
       const existingSchedules = await this.scheduleRepository.count();
       if (existingSchedules > 0) {
-        console.log(`✅ Tour schedules already seeded (${existingSchedules} schedules), skipping...`);
+        console.log(`Tour schedules already seeded (${existingSchedules} schedules), skipping...`);
         return;
       }
 
       const dataFile = path.join(process.cwd(), 'tours-data.json');
       if (fs.existsSync(dataFile)) {
-        const toursData = JSON.parse(fs.readFileSync(dataFile, 'utf-8'));
+        const toursData = parseToursData<Record<string, any>>(fs.readFileSync(dataFile, 'utf-8'));
 
         for (const tourData of toursData) {
           // Find existing tour in database
@@ -57,10 +58,10 @@ export class ToursSeederService implements OnModuleInit {
         }
 
         const totalSchedules = await this.scheduleRepository.count();
-        console.log(`✅ Seeded ${totalSchedules} tour schedules from tours-data.json`);
+        console.log(`Seeded ${totalSchedules} tour schedules from tours-data.json`);
       }
     } catch (error) {
-      console.error('❌ Error seeding tours:', error);
+      console.error('Error seeding tours:', error);
     }
   }
 }

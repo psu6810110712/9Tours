@@ -9,20 +9,16 @@ import { UserRole } from '../users/entities/user.entity';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
 export class DashboardController {
-    constructor(private readonly dashboardService: DashboardService) { }
+  constructor(private readonly dashboardService: DashboardService) {}
 
-    @Get('dashboard')
-    async getDashboard(
-        @Query('startDate') startDate?: string,
-        @Query('endDate') endDate?: string,
-        @Query('region') region?: string,
-        @Query('tourType') tourType?: string,
-    ) {
-        const filters: DashboardFilters = { startDate, endDate, region, tourType };
-        try {
-            return await this.dashboardService.getDashboardData(filters);
-        } catch (e) {
-            return { error: e.message, stack: e.stack };
-        }
-    }
+  @Get('dashboard')
+  getDashboard(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('region') region?: string,
+    @Query('tourType') tourType?: string,
+  ) {
+    const filters: DashboardFilters = { startDate, endDate, region, tourType };
+    return this.dashboardService.getDashboardData(filters);
+  }
 }

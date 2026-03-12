@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   NotFoundException,
   BadRequestException,
@@ -17,13 +17,13 @@ export class PaymentsService {
     private paymentsRepository: Repository<Payment>,
     @InjectRepository(Booking)
     private bookingsRepository: Repository<Booking>,
-    private toursService: ToursService, // ✅ เพิ่ม ToursService
+    private toursService: ToursService,
   ) { }
 
   async createPayment(
     createPaymentDto: CreatePaymentDto,
     slipFile: Express.Multer.File,
-    userId: number,
+    userId: string,
   ) {
     const { bookingId, paymentMethod } = createPaymentDto;
 
@@ -37,7 +37,6 @@ export class PaymentsService {
       );
     }
 
-    // ตรวจสอบว่า booking ถูกยกเลิกอัตโนมัติจากระบบคืนที่นั่งหรือไม่ (Hard Cutoff)
     if (booking.status === BookingStatus.CANCELED) {
       throw new BadRequestException(
         'เซสชันการชำระเงินหมดอายุแล้ว และที่นั่งได้ถูกคืนให้ส่วนกลางไปแล้ว หากท่านทำการโอนเงินสำเร็จไปแล้ว กรุณาติดต่อแอดมินผ่าน Line หรือ Facebook เพื่อรับเงินคืนหรือรับความช่วยเหลือ'
@@ -54,7 +53,6 @@ export class PaymentsService {
       throw new BadRequestException('ต้องแนบไฟล์สลิปการโอนเงิน');
     }
 
-    // สร้าง Payment record
     const newPayment = this.paymentsRepository.create({
       bookingId,
       amountPaid: booking.totalPrice,
@@ -64,8 +62,6 @@ export class PaymentsService {
 
     const savedPayment = await this.paymentsRepository.save(newPayment);
 
-    // อัปเดตสถานะ Booking → AWAITING_APPROVAL
-    // (ที่นั่งถูก hold ไปแล้วตั้งแต่สร้าง booking จึงไม่ต้อง update currentBooked อีก)
     booking.status = BookingStatus.AWAITING_APPROVAL;
     await this.bookingsRepository.save(booking);
 
