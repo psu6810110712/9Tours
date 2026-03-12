@@ -260,7 +260,7 @@ export default function HomePage() {
                 onSearch={handleSearch}
                 showGuests={false}
                 searchDisabled={!canSubmitHeroSearch}
-                className="max-w-5xl"
+                className="max-w-4xl"
                 transparent
                 tourType={tourType}
                 setTourType={setTourType}
