@@ -14,6 +14,7 @@ export interface SearchBarProps {
   className?: string
   tourType?: '' | 'one_day' | 'package'
   setTourType?: (value: '' | 'one_day' | 'package') => void
+  transparent?: boolean
 }
 
 const MIN_ADULTS = 1
@@ -105,6 +106,7 @@ export default function SearchBar({
   className = '',
   tourType,
   setTourType,
+  transparent = false,
 }: SearchBarProps) {
   const [isGuestPickerOpen, setIsGuestPickerOpen] = useState(false)
   const [guestPickerPosition, setGuestPickerPosition] = useState<GuestPickerPosition | null>(null)
@@ -117,6 +119,20 @@ export default function SearchBar({
   const totalTravelers = guests + resolvedChildrenCount
   const canIncreaseAdults = totalTravelers < MAX_TRAVELERS
   const canIncreaseChildren = totalTravelers < MAX_TRAVELERS
+  const surfaceClasses = transparent
+    ? 'border-white/15 bg-white/10 shadow-[0_22px_48px_rgba(15,23,42,0.2)]'
+    : 'border-white/70 bg-white/95 shadow-[0_22px_48px_rgba(15,23,42,0.16)]'
+  const segmentClasses = transparent
+    ? 'border-white/30 bg-white/80 shadow-[0_10px_24px_rgba(15,23,42,0.12)]'
+    : 'border-slate-200 bg-slate-50'
+  const activeSegmentClasses = transparent
+    ? 'bg-[var(--color-accent)] shadow-[0_10px_22px_rgba(245,166,35,0.22)]'
+    : 'bg-[var(--color-accent)] shadow-md'
+  const fieldClasses = 'bg-white/90 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.8)]'
+  const inputToneClasses = 'text-gray-800 placeholder:text-gray-400'
+  const inactiveSegmentTextClasses = transparent
+    ? 'text-slate-400 hover:text-slate-900'
+    : 'text-slate-500 hover:text-slate-800'
 
   useEffect(() => {
     if (!isGuestPickerOpen) return
@@ -239,25 +255,25 @@ export default function SearchBar({
 
   return (
     <>
-      <div className={`ui-surface mx-auto w-full max-w-6xl rounded-[1.9rem] border border-white/70 bg-white/95 p-2.5 shadow-[0_22px_48px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:p-3 ${className}`.trim()}>
+      <div className={`ui-surface mx-auto w-full max-w-6xl rounded-[3rem] border p-2.5 backdrop-blur-xl sm:p-3 ${surfaceClasses} ${className}`.trim()}>
         <div className="flex flex-col gap-2.5 lg:flex-row lg:items-stretch">
           {hasTourTypePicker && (
             <div className="lg:flex-shrink-0">
-              <div className="relative inline-grid w-full grid-cols-2 rounded-[1.35rem] border border-slate-200 bg-slate-50 p-1.5 sm:w-auto">
+              <div className={`relative inline-grid w-full grid-cols-2 rounded-[1.35rem] border p-1.5 sm:w-auto ${segmentClasses}`.trim()}>
                 <div
-                  className="absolute inset-y-1.5 rounded-[0.95rem] bg-[var(--color-accent)] shadow-md transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)]"
+                  className={`absolute inset-y-1.5 rounded-[1rem] transition-all duration-200 ease-[cubic-bezier(.4,0,.2,1)] ${activeSegmentClasses}`.trim()}
                   style={{
-                    width: 'calc(50% - 6px)',
-                    left: tourType === 'package' ? 'calc(50% + 3px)' : '4px',
+                    width: 'calc(50% - 8px)',
+                    left: tourType === 'package' ? 'calc(50% + 3px)' : '5.5px',
                     opacity: tourType ? 1 : 0,
                   }}
                 />
                 <button
                   type="button"
                   onClick={() => setTourType(tourType === 'one_day' ? '' : 'one_day')}
-                  className={`relative z-10 flex min-h-[52px] items-center justify-center gap-2 rounded-[0.95rem] px-4 py-3 text-[13px] font-semibold transition-colors sm:px-4 ${tourType === 'one_day' ? 'text-white' : 'text-slate-500 hover:text-slate-800'}`}
+                  className={`relative z-10 flex min-h-[14px] items-center justify-left gap-2 rounded-[0.95rem] px-4 py-3 text-[15px] font-semibold transition-colors sm:px-4 ${tourType === 'one_day' ? 'text-white' : inactiveSegmentTextClasses}`}
                 >
-                  <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <svg className="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 27" stroke="currentColor" strokeWidth={1.5}>
                     <rect x="2" y="7" width="20" height="14" rx="2" strokeLinecap="round" strokeLinejoin="round" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 14l1.5 1.5L14 12" />
@@ -267,9 +283,9 @@ export default function SearchBar({
                 <button
                   type="button"
                   onClick={() => setTourType(tourType === 'package' ? '' : 'package')}
-                  className={`relative z-10 flex min-h-[52px] items-center justify-center gap-2 rounded-[0.95rem] px-4 py-3 text-[13px] font-semibold transition-colors sm:px-4 ${tourType === 'package' ? 'text-white' : 'text-slate-500 hover:text-slate-800'}`}
+                  className={`relative z-10 flex min-h-[14px] items-center justify-center gap-2 rounded-[0.95rem] px-4 py-3 text-[15px] font-semibold transition-colors sm:px-4 ${tourType === 'package' ? 'text-white' : inactiveSegmentTextClasses}`}
                 >
-                  <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <svg className="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 27" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0 7-7 7 7M5 10v10a1 1 0 001 1h3m10-11 2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                   </svg>
                   แพ็กเกจพร้อมที่พัก
@@ -278,7 +294,7 @@ export default function SearchBar({
             </div>
           )}
 
-          <label className="flex min-w-0 flex-1 items-center gap-3 rounded-[1.35rem] bg-white px-5 py-3 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.8)]">
+          <label className={`flex min-w-0 flex-1 items-center gap-3 rounded-[1.35rem] px-5 py-3 ${fieldClasses}`.trim()}>
             <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.08)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.1}>
                 <circle cx="11" cy="11" r="7.5" />
@@ -296,7 +312,7 @@ export default function SearchBar({
                     onSearch()
                   }
                 }}
-                className="w-full min-w-0 bg-transparent text-[15px] font-semibold text-gray-800 outline-none placeholder:font-medium placeholder:text-gray-400 sm:text-[15px]"
+                className={`w-full min-w-0 bg-transparent text-[15px] font-semibold outline-none placeholder:font-medium sm:text-[15px] ${inputToneClasses}`.trim()}
               />
             </div>
           </label>
