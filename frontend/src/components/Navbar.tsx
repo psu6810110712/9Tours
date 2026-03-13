@@ -105,9 +105,13 @@ export default function Navbar() {
       : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
     }`
 
+  const navShellClass = isAdmin
+    ? 'fixed inset-x-0 top-0 z-[var(--z-navbar)] border-b border-gray-200/90 bg-white/95 backdrop-blur'
+    : 'sticky top-0 z-[var(--z-navbar)] border-b border-gray-200/90 bg-white/95 backdrop-blur'
+
   return (
     <>
-      <nav className="sticky top-0 z-[var(--z-navbar)] border-b border-gray-200/90 bg-white/95 backdrop-blur">
+      <nav className={navShellClass}>
         <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex-shrink-0">
             <img src="/logo.png" alt="9Tours" className="h-14 w-auto sm:h-16" />

@@ -54,22 +54,12 @@ export default function AdminTourPreviewCard({ tour }: AdminTourPreviewCardProps
   const detailItems = getCardDetailItems(tour)
 
   return (
-    <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white shadow-[0_28px_60px_rgba(15,23,42,0.16)]">
-      <div className="border-b border-slate-100 bg-gradient-to-r from-slate-900 via-slate-800 to-orange-500 px-5 py-4 text-white">
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Live Card Preview</p>
-        <div className="mt-3 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-lg font-bold leading-tight">นี่คือการ์ดที่ลูกค้าจะเห็น</p>
-            <p className="mt-1 text-sm text-white/75">อัปเดตแบบเรียลไทม์ตามข้อมูลที่กรอกทางขวา</p>
-          </div>
-          <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white/85">
-            {tour.province}
-          </span>
+    <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white">
+      <div className="bg-white p-5">
+        <div className="mb-4 text-center">
+          <p className="text-base text-xl font-bold text-gray-800">นี่คือการ์ดที่ลูกค้าจะเห็น</p>
         </div>
-      </div>
-
-      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.22),_transparent_34%),linear-gradient(180deg,#fffdf7_0%,#ffffff_58%,#f8fafc_100%)] p-5">
-        <div className="relative overflow-hidden rounded-[1.15rem] border border-gray-200 bg-white shadow-[0_3px_10px_rgba(15,23,42,0.05)]">
+        <div className="relative overflow-hidden rounded-[1.15rem] border border-gray-200 bg-white">
           {hasDiscount && (
             <div className="absolute right-0 top-0 z-10 flex min-h-[1rem] min-w-[2rem] flex-col items-center justify-center rounded-bl-[1.15rem] rounded-tr-[0.25rem] bg-red-500 px-4 py-2.5 text-right text-white">
               <p className="text-[1rem] font-black leading-none">ลด {discountPercent}%</p>
@@ -80,7 +70,7 @@ export default function AdminTourPreviewCard({ tour }: AdminTourPreviewCardProps
             {hasCoverImage ? (
               <img src={coverImage} alt={tour.name} className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-slate-100 to-slate-200 px-6 text-center">
+              <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-slate-100 px-6 text-center">
                 <PhotoIcon />
                 <div>
                   <p className="text-lg font-bold text-slate-600">ไม่มีภาพประกอบสำหรับทัวร์นี้</p>

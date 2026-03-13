@@ -11,8 +11,18 @@ import { tourService } from '../../services/tourService'
 import type { CreateTourPayload, Tour } from '../../types/tour'
 
 const CATEGORIES = ['สายธรรมชาติ', 'สายคาเฟ่', 'สายกิจกรรม', 'สายมู', 'สายชิล']
-const HIGHLIGHTS = ['ยกเลิกฟรี', 'มีรถรับส่ง', 'อาหารกลางวัน', 'เที่ยวเต็มวัน', 'มีไกด์นำเที่ยว', 'รวมที่พัก', 'รถรับส่งสนามบิน']
 const REGIONS = ['ภาคเหนือ', 'ภาคใต้', 'ภาคกลาง', 'ภาคตะวันออกเฉียงเหนือ', 'ภาคตะวันออก', 'ภาคตะวันตก']
+const ONE_DAY_HIGHLIGHTS = ['เที่ยวเต็มวัน', 'มีไกด์นำเที่ยว', 'อาหารกลางวัน', 'มีรถรับส่ง', 'ยกเลิกฟรี', 'แวะจุดไฮไลต์ครบ', 'กิจกรรมแน่นไม่เร่งรีบ']
+const PACKAGE_HIGHLIGHTS = ['รวมที่พัก', 'โรงแรมติดทะเล', 'อาหารเช้ารวม', 'มีรถรับส่งสนามบิน', 'เหมาะกับคู่รัก', 'พักผ่อนสบาย', 'เที่ยวหลายวันแบบไม่เหนื่อย']
+const PROVINCES_BY_REGION: Record<string, string[]> = {
+  ภาคเหนือ: ['เชียงใหม่', 'เชียงราย', 'ลำปาง', 'แม่ฮ่องสอน', 'น่าน', 'สุโขทัย', 'เพชรบูรณ์'],
+  ภาคใต้: ['ภูเก็ต', 'กระบี่', 'สุราษฎร์ธานี', 'สงขลา', 'ชุมพร', 'นครศรีธรรมราช', 'พังงา', 'ตรัง'],
+  ภาคกลาง: ['กรุงเทพฯ', 'พระนครศรีอยุธยา', 'นครนายก', 'สุพรรณบุรี', 'อยุธยา'],
+  ภาคตะวันออกเฉียงเหนือ: ['ขอนแก่น', 'นครราชสีมา', 'อุดรธานี', 'เลย', 'อุบลราชธานี', 'บุรีรัมย์'],
+  ภาคตะวันออก: ['ชลบุรี', 'ระยอง', 'จันทบุรี'],
+  ภาคตะวันตก: ['กาญจนบุรี', 'ประจวบคีรีขันธ์', 'ราชบุรี'],
+}
+const ALL_PROVINCES = Array.from(new Set(Object.values(PROVINCES_BY_REGION).flat())).sort((a, b) => a.localeCompare(b, 'th'))
 
 export interface ScheduleRow {
   id?: number
@@ -63,12 +73,48 @@ function updateHighlightAtIndex(list: string[], index: number, value: string) {
   return next
 }
 
+function isBlank(value: string) {
+  return value.trim().length === 0
+}
+
 function SectionHeading({ title, description }: { title: string; description: string }) {
   return (
-    <div className="mb-6 flex flex-col gap-1">
-      <h2 className="text-lg font-bold text-gray-900">{title}</h2>
-      <p className="text-sm text-gray-500">{description}</p>
+    <div className="mb-5 flex flex-col gap-1.5">
+      <h2 className="text-[1.55rem] font-extrabold leading-tight text-gray-900">{title}</h2>
+      {description ? <p className="text-base text-gray-600">{description}</p> : null}
     </div>
+  )
+}
+
+function FieldLabel({
+  text,
+  required = false,
+  className = '',
+}: {
+  text: string
+  required?: boolean
+  className?: string
+}) {
+  return (
+    <label className={`mb-2 block text-base font-bold leading-tight text-gray-900 ${className}`.trim()}>
+      <span>{text}</span>
+      {required && <span className="ml-0.5 text-red-500">*</span>}
+    </label>
+  )
+}
+
+function FineLabel({
+  text,
+  required = false,
+}: {
+  text: string
+  required?: boolean
+}) {
+  return (
+    <label className="mb-2 block text-sm font-semibold leading-tight text-gray-700">
+      <span>{text}</span>
+      {required && <span className="ml-0.5 text-red-500">*</span>}
+    </label>
   )
 }
 
@@ -402,6 +448,31 @@ export default function AdminTourFormPage() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     setError('')
+
+    const missingFields: string[] = []
+
+    if (isBlank(name)) missingFields.push('ชื่อทัวร์')
+    if (isBlank(region)) missingFields.push('ภาค')
+    if (isBlank(province)) missingFields.push('จังหวัด')
+    if (isBlank(description)) missingFields.push('รายละเอียดทัวร์')
+    if (isBlank(duration)) missingFields.push('ระยะเวลา')
+    if (isBlank(price)) missingFields.push('ราคาผู้ใหญ่')
+    if (isBlank(highlights[0] || '')) missingFields.push('บรรทัดที่ 2 บนการ์ด')
+
+    if (tourType === 'one_day' && isBlank(highlights[1] || '')) {
+      missingFields.push('บรรทัดที่ 3 บนการ์ด')
+    }
+
+    if (tourType === 'package') {
+      if (isBlank(minPeople)) missingFields.push('จำนวนคนขั้นต่ำ (Min)')
+      if (isBlank(accommodation)) missingFields.push('รายละเอียดที่พัก')
+    }
+
+    if (missingFields.length > 0) {
+      toast.error(`กรุณากรอกข้อมูลให้ครบ: ${missingFields[0]}`)
+      return
+    }
+
     setSaving(true)
 
     const numPrice = Number(price)
@@ -467,8 +538,7 @@ export default function AdminTourFormPage() {
     return <p className="flex flex-1 items-center justify-center text-gray-400">กำลังโหลด...</p>
   }
 
-  const inputClass = 'ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-yellow-400 focus:bg-white'
-  const labelClass = 'mb-2 block text-sm font-semibold text-gray-800'
+  const inputClass = 'ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3.5 text-base font-medium text-gray-900 outline-none focus:border-yellow-400 focus:bg-white'
   const previewTour = buildPreviewTour({
     id,
     tourCode,
@@ -490,76 +560,97 @@ export default function AdminTourFormPage() {
     minPeople,
     maxPeople,
   })
+  const provinceOptions = region ? (PROVINCES_BY_REGION[region] || ALL_PROVINCES) : ALL_PROVINCES
+  const highlightSuggestions = tourType === 'package' ? PACKAGE_HIGHLIGHTS : ONE_DAY_HIGHLIGHTS
 
   return (
     <>
       <main className="flex-1">
-        <form onSubmit={handleSubmit} className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="grid gap-8 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
+        <form noValidate onSubmit={handleSubmit} className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="grid items-start gap-8 xl:grid-cols-[minmax(320px,365px)_minmax(0,1fr)]">
             <aside className="hidden self-start xl:block">
-              <div className="sticky top-24 max-h-[calc(100vh-7rem)] space-y-4">
+              <div className="fixed top-42 w-[360px] 2xl:w-[380px]">
+                <div className="max-h-[calc(100vh-7rem)] overflow-y-auto pr-2">
                 <AdminTourPreviewCard tour={previewTour} />
-                <div className="rounded-[1.5rem] border border-orange-100 bg-orange-50 px-5 py-4 text-sm text-orange-900">
-                  ปรับชื่อ ราคา ไฮไลต์ และรูปภาพทางด้านขวา แล้วดูผลบนการ์ดนี้ได้ทันที
                 </div>
               </div>
             </aside>
 
             <div>
-              <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{isEditing ? 'แก้ไขทัวร์' : 'เพิ่มทัวร์ใหม่'}</h1>
-                  <p className="mt-2 text-sm text-gray-500">กรอกข้อมูลทัวร์ รูปภาพ รอบเดินทาง และรายละเอียดสำคัญให้พร้อมก่อนเผยแพร่</p>
-                </div>
-                <div className="flex flex-wrap items-center gap-3 rounded-[1.5rem] border border-gray-200 bg-white px-4 py-3">
-                  <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                    <input type="radio" name="tourType" checked={tourType === 'one_day'} onChange={() => setTourType('one_day')} className="accent-yellow-500" />
-                    วันเดย์ทริป
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                    <input type="radio" name="tourType" checked={tourType === 'package'} onChange={() => setTourType('package')} className="accent-yellow-500" />
-                    เที่ยวพร้อมที่พัก
-                  </label>
+              <div className="mb-6">
+                <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+                  <div className="inline-flex w-fit flex-wrap items-center gap-2 rounded-[1.35rem] border border-gray-200 bg-white p-2">
+                    <label className={`flex cursor-pointer items-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${tourType === 'one_day' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
+                      <input type="radio" name="tourType" checked={tourType === 'one_day'} onChange={() => setTourType('one_day')} className="accent-yellow-500" />
+                      วันเดย์ทริป
+                    </label>
+                    <label className={`flex cursor-pointer items-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${tourType === 'package' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
+                      <input type="radio" name="tourType" checked={tourType === 'package'} onChange={() => setTourType('package')} className="accent-yellow-500" />
+                      เที่ยวพร้อมที่พัก
+                    </label>
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-6">
-                <div className="ui-surface rounded-[1.75rem] border border-yellow-200 bg-white p-6">
+                <div className="ui-surface rounded-[1.75rem] border border-yellow-200 bg-white p-6 md:p-7">
                   <SectionHeading
-                    title="Card Preview Settings"
-                    description="แก้ไขข้อมูลหลักที่จะแสดงผลบนการ์ดพรีวิวทางซ้ายมือ"
+                    title="ข้อมูลทัวร์พื้นฐาน"
+                    description=""
                   />
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_2fr]">
                     <div>
-                      <label className={labelClass}>รหัสทัวร์</label>
+                      <FieldLabel text="รหัสทัวร์" />
                       <input type="text" value={isEditing ? tourCode : 'สร้างอัตโนมัติ'} disabled className="w-full cursor-not-allowed rounded-2xl border border-gray-200 bg-gray-100 px-4 py-3 text-sm text-gray-400" />
                     </div>
                     <div>
-                      <label className={labelClass}>ชื่อทัวร์*</label>
-                      <p className="mb-2 text-xs font-medium text-gray-500">Shown on card title</p>
+                      <FieldLabel text="ชื่อทัวร์" required />
                       <input type="text" value={name} onChange={(event) => setName(event.target.value)} required className={inputClass} />
                     </div>
                   </div>
 
-                  <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <label className={labelClass}>ระยะเวลา*</label>
-                      <p className="mb-2 text-xs font-medium text-gray-500">Shown as the first detail line on the card</p>
-                      <input type="text" value={duration} onChange={(event) => setDuration(event.target.value)} placeholder={tourType === 'one_day' ? 'เช่น 8 ชั่วโมง' : 'เช่น 3 วัน 2 คืน'} required className={inputClass} />
+                      <FieldLabel text="ภาค" required />
+                      <select
+                        value={region}
+                        onChange={(event) => {
+                          const nextRegion = event.target.value
+                          setRegion(nextRegion)
+                          if (province && nextRegion && !(PROVINCES_BY_REGION[nextRegion] || []).includes(province)) {
+                            setProvince('')
+                          }
+                        }}
+                        required
+                        className={inputClass}
+                      >
+                        <option value="">เลือกภาค</option>
+                        {REGIONS.map((regionOption) => <option key={regionOption} value={regionOption}>{regionOption}</option>)}
+                      </select>
                     </div>
                     <div>
-                      <label className={labelClass}>ราคาผู้ใหญ่*</label>
-                      <p className="mb-2 text-xs font-medium text-gray-500">Displayed as starting price</p>
-                      <div className="flex items-center gap-2">
-                        <input type="number" value={price} onChange={(event) => setPrice(event.target.value)} required min={0} className={inputClass} />
-                        <span className="text-sm text-gray-600">บาท</span>
-                      </div>
+                      <FieldLabel text="จังหวัด" required />
+                      <input
+                        type="text"
+                        list="province-options"
+                        value={province}
+                        onChange={(event) => setProvince(event.target.value)}
+                        required
+                        placeholder={region ? 'เลือกหรือพิมพ์จังหวัด' : 'เลือกภาคก่อน หรือพิมพ์จังหวัด'}
+                        className={inputClass}
+                      />
+                      <datalist id="province-options">
+                        {provinceOptions.map((provinceOption) => (
+                          <option key={provinceOption} value={provinceOption} />
+                        ))}
+                      </datalist>
                     </div>
                   </div>
 
-                  <div className="mt-5">
-                    <span className={labelClass}>แท็กประเภทของทัวร์</span>
+                  <div className="mt-6">
+                    <FieldLabel text="แท็กประเภทของทัวร์" />
                     <div className="flex flex-wrap gap-2">
                       {CATEGORIES.map((category) => (
                         <button
@@ -574,110 +665,13 @@ export default function AdminTourFormPage() {
                     </div>
                   </div>
 
-                  <div className="mt-5">
-                    <label className={labelClass}>รายละเอียดทัวร์*</label>
-                    <textarea value={description} onChange={(event) => setDescription(event.target.value)} required rows={4} className={`${inputClass} resize-none`} />
-                  </div>
-
-                  <div className="mt-5">
-                    <span className={labelClass}>ข้อความบนการ์ดทัวร์</span>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <label className="mb-2 block text-xs font-semibold text-gray-600">บรรทัดที่ 2 บนการ์ด*</label>
-                        <p className="mb-2 text-xs font-medium text-gray-500">Card line 2</p>
-                        <input
-                          type="text"
-                          value={highlights[0] || ''}
-                          onChange={(event) => setHighlights((prev) => updateHighlightAtIndex(prev, 0, event.target.value))}
-                          required
-                          placeholder="เช่น ล่องแพเปียกและคาเฟ่แม่น้ำ"
-                          className={inputClass}
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-xs font-semibold text-gray-600">
-                          {tourType === 'package' ? 'บรรทัดสำรอง (รายละเอียดที่พักจะขึ้นบรรทัดที่ 3)' : 'บรรทัดที่ 3 บนการ์ด*'}
-                        </label>
-                        <p className="mb-2 text-xs font-medium text-gray-500">
-                          {tourType === 'package' ? 'Used when package accommodation is not set' : 'Card line 3'}
-                        </p>
-                        <input
-                          type="text"
-                          value={highlights[1] || ''}
-                          onChange={(event) => setHighlights((prev) => updateHighlightAtIndex(prev, 1, event.target.value))}
-                          required={tourType === 'one_day'}
-                          placeholder={tourType === 'package' ? 'เช่น เหมาะกับคู่รักและครอบครัว' : 'เช่น รวมอาหารกลางวัน'}
-                          className={inputClass}
-                        />
-                      </div>
-                    </div>
-                    <p className="mt-2 text-xs text-gray-500">
-                      บรรทัดที่ 1 บนการ์ดใช้ค่าจากระยะเวลาเสมอ เช่น ครึ่งวัน, เต็มวัน, 3 วัน 2 คืน
-                    </p>
-                  </div>
-
-                  <div className="mt-5">
-                    <span className={labelClass}>ตัวอย่างข้อความแนะนำ</span>
-                    <div className="flex flex-wrap gap-2">
-                      {HIGHLIGHTS.map((highlight) => (
-                        <button
-                          key={highlight}
-                          type="button"
-                          onClick={() => applyHighlightSuggestion(highlight)}
-                          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${(highlights[0] || '').trim() === highlight || (highlights[1] || '').trim() === highlight ? 'border-yellow-400 bg-yellow-400 text-gray-900' : 'border-gray-300 bg-white text-gray-600 hover:border-yellow-300'}`}
-                        >
-                          {highlight}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <label className={labelClass}>ภาค*</label>
-                      <select value={region} onChange={(event) => setRegion(event.target.value)} required className={inputClass}>
-                        <option value="">เลือกภาค</option>
-                        {REGIONS.map((regionOption) => <option key={regionOption} value={regionOption}>{regionOption}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className={labelClass}>จังหวัด*</label>
-                      <input type="text" value={province} onChange={(event) => setProvince(event.target.value)} required className={inputClass} />
-                    </div>
-                  </div>
-
-                  <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <div>
-                      <label className={labelClass}>ส่วนลด (%)</label>
-                      <p className="mb-2 text-xs font-medium text-gray-500">Applies to the preview card price instantly</p>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          value={discountPercent}
-                          onChange={(event) => {
-                            const value = Number(event.target.value)
-                            if (value >= 0 && value <= 100) setDiscountPercent(event.target.value)
-                          }}
-                          min={0}
-                          max={100}
-                          placeholder="ไม่บังคับ"
-                          className={inputClass}
-                        />
-                        <span className="text-sm text-gray-600">%</span>
-                      </div>
-                    </div>
-                    <div>
-                      <label className={labelClass}>ราคาเด็ก</label>
-                      <p className="mb-2 text-xs font-medium text-gray-500">ข้อมูลเสริมสำหรับการขาย ไม่แสดงบนการ์ดหลัก</p>
-                      <div className="flex items-center gap-2">
-                        <input type="number" value={childPrice} onChange={(event) => setChildPrice(event.target.value)} min={0} placeholder="ไม่บังคับ" className={inputClass} />
-                        <span className="text-sm text-gray-600">บาท</span>
-                      </div>
-                    </div>
+                  <div className="mt-6">
+                    <FieldLabel text="รายละเอียดทัวร์" required />
+                    <textarea value={description} onChange={(event) => setDescription(event.target.value)} required rows={4} className={`${inputClass} min-h-[9rem] resize-y leading-7`} />
                   </div>
 
                   {tourType === 'package' && (
-                    <div className="mt-5 rounded-[1.5rem] border border-blue-200 bg-blue-50 p-4">
+                    <div className="mt-6 rounded-[1.5rem] border border-blue-200 bg-blue-50 p-4">
                       <span className="mb-2 block text-sm font-bold text-blue-800">ตั้งค่า Private Tour</span>
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
@@ -694,13 +688,98 @@ export default function AdminTourFormPage() {
                   )}
                 </div>
 
-                <div className="ui-surface rounded-[1.75rem] border border-gray-200 bg-white p-6">
+                <div className="ui-surface rounded-[1.75rem] border border-gray-200 bg-white p-6 md:p-7">
                   <SectionHeading
-                    title="Media & Schedule"
-                    description="จัดการภาพปกและรอบเดินทาง โดยไม่เปลี่ยนพฤติกรรมเดิมของฟอร์ม"
+                    title="Pricing & Card Content"
+                    description=""
                   />
 
-                  <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50/60 p-4">
+                  <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.1fr_1fr_0.85fr_0.85fr]">
+                    <div>
+                      <FieldLabel text="ระยะเวลา" required />
+                      <input type="text" value={duration} onChange={(event) => setDuration(event.target.value)} placeholder={tourType === 'one_day' ? 'เช่น 8 ชั่วโมง' : 'เช่น 3 วัน 2 คืน'} required className={inputClass} />
+                    </div>
+                    <div>
+                      <FieldLabel text="ราคาผู้ใหญ่" required />
+                      <div className="flex items-center gap-2">
+                        <input type="number" value={price} onChange={(event) => setPrice(event.target.value)} required min={0} className={inputClass} />
+                        <span className="text-base font-semibold text-gray-600">บาท</span>
+                      </div>
+                    </div>
+                    <div>
+                      <FieldLabel text="ส่วนลด (%)" />
+                      <input
+                        type="number"
+                        value={discountPercent}
+                        onChange={(event) => {
+                          const value = Number(event.target.value)
+                          if (value >= 0 && value <= 100) setDiscountPercent(event.target.value)
+                        }}
+                        min={0}
+                        max={100}
+                        placeholder="ไม่บังคับ"
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <FieldLabel text="ราคาเด็ก" />
+                      <input type="number" value={childPrice} onChange={(event) => setChildPrice(event.target.value)} min={0} placeholder="ไม่บังคับ" className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 rounded-[1.5rem] border border-gray-100 bg-gray-50/70 p-4 md:p-5">
+                    <FieldLabel text="ข้อความบนการ์ดทัวร์" />
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <FineLabel text="บรรทัดที่ 2 บนการ์ด" required />
+                        <input
+                          type="text"
+                          value={highlights[0] || ''}
+                          onChange={(event) => setHighlights((prev) => updateHighlightAtIndex(prev, 0, event.target.value))}
+                          required
+                          placeholder="เช่น ล่องแพเปียกและคาเฟ่แม่น้ำ"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <FineLabel text={tourType === 'package' ? 'บรรทัดสำรอง (รายละเอียดที่พักจะขึ้นบรรทัดที่ 3)' : 'บรรทัดที่ 3 บนการ์ด'} required={tourType === 'one_day'} />
+                        <input
+                          type="text"
+                          value={highlights[1] || ''}
+                          onChange={(event) => setHighlights((prev) => updateHighlightAtIndex(prev, 1, event.target.value))}
+                          required={tourType === 'one_day'}
+                          placeholder={tourType === 'package' ? 'เช่น เหมาะกับคู่รักและครอบครัว' : 'เช่น รวมอาหารกลางวัน'}
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <span className="mb-2 block text-sm font-semibold text-gray-700">
+                        ตัวอย่างข้อความแนะนำ{tourType === 'package' ? 'สำหรับแพ็กเกจพร้อมที่พัก' : 'สำหรับวันเดย์ทริป'}
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {highlightSuggestions.map((highlight) => (
+                          <button
+                            key={highlight}
+                            type="button"
+                            onClick={() => applyHighlightSuggestion(highlight)}
+                            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${(highlights[0] || '').trim() === highlight || (highlights[1] || '').trim() === highlight ? 'border-yellow-400 bg-yellow-400 text-gray-900' : 'border-gray-300 bg-white text-gray-600 hover:border-yellow-300'}`}
+                          >
+                            {highlight}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="ui-surface rounded-[1.75rem] border border-gray-200 bg-white p-6 md:p-7">
+                  <SectionHeading
+                    title="Media & Availability"
+                    description=""
+                  />
+
+                  <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50/40 p-4 md:p-5">
                     <div className="mb-4">
                       <h3 className="text-sm font-bold text-gray-900">Cover & Gallery</h3>
                       <p className="mt-1 text-xs text-gray-500">รูปแรกจะถูกใช้เป็นภาพหลักบนการ์ดพรีวิว</p>
@@ -708,55 +787,55 @@ export default function AdminTourFormPage() {
                     <ImageUploadSection images={images} uploadingImage={uploadingImage} onImageUpload={handleImageUpload} onRemoveImage={removeImage} />
                   </div>
 
-                  <div className="mt-6 rounded-[1.5rem] border border-gray-100 bg-gray-50/60 p-4">
+                  <div className="mt-5 rounded-[1.5rem] border border-gray-100 bg-gray-50/40 p-4 md:p-5">
                     <div className="mb-4">
                       <h3 className="text-sm font-bold text-gray-900">Available Schedules</h3>
                       <p className="mt-1 text-xs text-gray-500">กำหนดวันเดินทางและรอบเวลาตามรูปแบบทัวร์ที่เลือก</p>
                     </div>
-                    <div className="rounded-[1.25rem] bg-white p-4">
-                    <ScheduleSection
-                      schedules={schedules}
-                      tourType={tourType}
-                      bulkFrom={bulkFrom}
-                      bulkTo={bulkTo}
-                      bulkCapacity={bulkCapacity}
-                      bulkDuration={bulkDuration}
-                      bulkDays={bulkDays}
-                      roundTemplates={roundTemplates}
-                      setBulkFrom={setBulkFrom}
-                      setBulkTo={setBulkTo}
-                      setBulkCapacity={setBulkCapacity}
-                      setBulkDuration={setBulkDuration}
-                      setBulkDays={setBulkDays}
-                      setRoundTemplates={setRoundTemplates}
-                      addSchedule={addSchedule}
-                      removeSchedule={removeSchedule}
-                      updateSchedule={updateSchedule}
-                      handleBulkAdd={handleBulkAdd}
-                    />
+                    <div className="rounded-[1.25rem] border border-gray-100 bg-white p-4">
+                      <ScheduleSection
+                        schedules={schedules}
+                        tourType={tourType}
+                        bulkFrom={bulkFrom}
+                        bulkTo={bulkTo}
+                        bulkCapacity={bulkCapacity}
+                        bulkDuration={bulkDuration}
+                        bulkDays={bulkDays}
+                        roundTemplates={roundTemplates}
+                        setBulkFrom={setBulkFrom}
+                        setBulkTo={setBulkTo}
+                        setBulkCapacity={setBulkCapacity}
+                        setBulkDuration={setBulkDuration}
+                        setBulkDays={setBulkDays}
+                        setRoundTemplates={setRoundTemplates}
+                        addSchedule={addSchedule}
+                        removeSchedule={removeSchedule}
+                        updateSchedule={updateSchedule}
+                        handleBulkAdd={handleBulkAdd}
+                      />
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="ui-surface mt-6 rounded-[1.75rem] border border-gray-200 bg-white p-6">
-                <SectionHeading
-                  title="Trip Details"
-                  description="ใส่รายละเอียดทริปเพิ่มเติมเพื่อให้ข้อมูลครบก่อนเผยแพร่"
-                />
-                <ItinerarySection itinerary={itinerary} tourType={tourType} setItinerary={setItinerary} />
-                <hr className="my-6 border-gray-100" />
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
-                    <label className={labelClass}>คำแนะนำการเดินทาง</label>
-                    <textarea value={transportation} onChange={(event) => setTransportation(event.target.value)} rows={3} className={`${inputClass} resize-none`} />
-                  </div>
-                  {tourType === 'package' && (
+                <div className="ui-surface rounded-[1.75rem] border border-gray-200 bg-white p-6 md:p-7">
+                  <SectionHeading
+                    title="Itinerary & Operations"
+                    description=""
+                  />
+                  <ItinerarySection itinerary={itinerary} tourType={tourType} setItinerary={setItinerary} />
+                  <hr className="my-6 border-gray-100" />
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
-                      <label className={labelClass}>รายละเอียดที่พัก*</label>
-                      <textarea value={accommodation} onChange={(event) => setAccommodation(event.target.value)} required rows={3} placeholder="เช่น โรงแรม 3 ดาว ย่านนิมมาน" className={`${inputClass} resize-none`} />
+                      <FieldLabel text="คำแนะนำการเดินทาง" />
+                      <textarea value={transportation} onChange={(event) => setTransportation(event.target.value)} rows={4} className={`${inputClass} min-h-[8rem] resize-y leading-7`} />
                     </div>
-                  )}
+                    {tourType === 'package' && (
+                      <div>
+                        <FieldLabel text="รายละเอียดที่พัก" required />
+                        <textarea value={accommodation} onChange={(event) => setAccommodation(event.target.value)} required rows={4} placeholder="เช่น โรงแรม 3 ดาว ย่านนิมมาน" className={`${inputClass} min-h-[8rem] resize-y leading-7`} />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -788,5 +867,3 @@ export default function AdminTourFormPage() {
     </>
   )
 }
-
-

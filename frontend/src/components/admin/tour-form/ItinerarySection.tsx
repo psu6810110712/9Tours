@@ -13,6 +13,23 @@ interface ItinerarySectionProps {
     setItinerary: React.Dispatch<React.SetStateAction<ItineraryItem[]>>;
 }
 
+function normalizeTimeValue(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+
+    const match = trimmed.match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return '';
+
+    const hours = Number(match[1]);
+    const minutes = Number(match[2]);
+
+    if (!Number.isInteger(hours) || !Number.isInteger(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+        return '';
+    }
+
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
 export default function ItinerarySection({
     itinerary,
     tourType,
@@ -31,9 +48,9 @@ export default function ItinerarySection({
     };
 
     return (
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mt-8">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+        <div>
+            <div className="mb-5 flex items-center justify-between">
+                <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800">
                     <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
@@ -51,9 +68,9 @@ export default function ItinerarySection({
                 </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
                 {itinerary.map((item, index) => (
-                    <div key={index} className="flex gap-4 items-start p-4 hover:bg-gray-50 rounded-xl transition-colors border border-transparent hover:border-gray-100 group">
+                    <div key={index} className="group flex items-start gap-4 rounded-[1.25rem] border border-gray-100 bg-gray-50/45 p-4 transition-colors hover:bg-gray-50">
                         {tourType === 'package' && (
                             <div className="w-24 shrink-0">
                                 <label className="block text-xs font-bold text-gray-500 mb-1">วันที่</label>
@@ -70,10 +87,10 @@ export default function ItinerarySection({
                         <div className="w-32 shrink-0">
                             <label className="block text-xs font-bold text-gray-500 mb-1">เวลา</label>
                             <input
-                                type="text"
+                                type="time"
+                                step="60"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                                placeholder="08:00"
-                                value={item.time}
+                                value={normalizeTimeValue(item.time)}
                                 onChange={(e) => updateItinerary(index, 'time', e.target.value)}
                             />
                         </div>
