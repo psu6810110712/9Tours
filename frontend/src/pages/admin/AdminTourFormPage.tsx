@@ -63,6 +63,15 @@ function updateHighlightAtIndex(list: string[], index: number, value: string) {
   return next
 }
 
+function SectionHeading({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="mb-6 flex flex-col gap-1">
+      <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+      <p className="text-sm text-gray-500">{description}</p>
+    </div>
+  )
+}
+
 function buildPreviewTour({
   id,
   tourCode,
@@ -487,8 +496,8 @@ export default function AdminTourFormPage() {
       <main className="flex-1">
         <form onSubmit={handleSubmit} className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid gap-8 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
-            <aside className="hidden xl:block">
-              <div className="sticky top-24 space-y-4">
+            <aside className="hidden self-start xl:block">
+              <div className="sticky top-24 max-h-[calc(100vh-7rem)] space-y-4">
                 <AdminTourPreviewCard tour={previewTour} />
                 <div className="rounded-[1.5rem] border border-orange-100 bg-orange-50 px-5 py-4 text-sm text-orange-900">
                   ปรับชื่อ ราคา ไฮไลต์ และรูปภาพทางด้านขวา แล้วดูผลบนการ์ดนี้ได้ทันที
@@ -514,8 +523,13 @@ export default function AdminTourFormPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6">
                 <div className="ui-surface rounded-[1.75rem] border border-yellow-200 bg-white p-6">
+                  <SectionHeading
+                    title="Card Preview Settings"
+                    description="แก้ไขข้อมูลหลักที่จะแสดงผลบนการ์ดพรีวิวทางซ้ายมือ"
+                  />
+
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_2fr]">
                     <div>
                       <label className={labelClass}>รหัสทัวร์</label>
@@ -523,7 +537,24 @@ export default function AdminTourFormPage() {
                     </div>
                     <div>
                       <label className={labelClass}>ชื่อทัวร์*</label>
+                      <p className="mb-2 text-xs font-medium text-gray-500">Shown on card title</p>
                       <input type="text" value={name} onChange={(event) => setName(event.target.value)} required className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <label className={labelClass}>ระยะเวลา*</label>
+                      <p className="mb-2 text-xs font-medium text-gray-500">Shown as the first detail line on the card</p>
+                      <input type="text" value={duration} onChange={(event) => setDuration(event.target.value)} placeholder={tourType === 'one_day' ? 'เช่น 8 ชั่วโมง' : 'เช่น 3 วัน 2 คืน'} required className={inputClass} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>ราคาผู้ใหญ่*</label>
+                      <p className="mb-2 text-xs font-medium text-gray-500">Displayed as starting price</p>
+                      <div className="flex items-center gap-2">
+                        <input type="number" value={price} onChange={(event) => setPrice(event.target.value)} required min={0} className={inputClass} />
+                        <span className="text-sm text-gray-600">บาท</span>
+                      </div>
                     </div>
                   </div>
 
@@ -553,6 +584,7 @@ export default function AdminTourFormPage() {
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
                         <label className="mb-2 block text-xs font-semibold text-gray-600">บรรทัดที่ 2 บนการ์ด*</label>
+                        <p className="mb-2 text-xs font-medium text-gray-500">Card line 2</p>
                         <input
                           type="text"
                           value={highlights[0] || ''}
@@ -566,6 +598,9 @@ export default function AdminTourFormPage() {
                         <label className="mb-2 block text-xs font-semibold text-gray-600">
                           {tourType === 'package' ? 'บรรทัดสำรอง (รายละเอียดที่พักจะขึ้นบรรทัดที่ 3)' : 'บรรทัดที่ 3 บนการ์ด*'}
                         </label>
+                        <p className="mb-2 text-xs font-medium text-gray-500">
+                          {tourType === 'package' ? 'Used when package accommodation is not set' : 'Card line 3'}
+                        </p>
                         <input
                           type="text"
                           value={highlights[1] || ''}
@@ -613,18 +648,8 @@ export default function AdminTourFormPage() {
 
                   <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
                     <div>
-                      <label className={labelClass}>ระยะเวลา*</label>
-                      <input type="text" value={duration} onChange={(event) => setDuration(event.target.value)} placeholder={tourType === 'one_day' ? 'เช่น 8 ชั่วโมง' : 'เช่น 3 วัน 2 คืน'} required className={inputClass} />
-                    </div>
-                    <div>
-                      <label className={labelClass}>ราคาผู้ใหญ่*</label>
-                      <div className="flex items-center gap-2">
-                        <input type="number" value={price} onChange={(event) => setPrice(event.target.value)} required min={0} className={inputClass} />
-                        <span className="text-sm text-gray-600">บาท</span>
-                      </div>
-                    </div>
-                    <div>
                       <label className={labelClass}>ส่วนลด (%)</label>
+                      <p className="mb-2 text-xs font-medium text-gray-500">Applies to the preview card price instantly</p>
                       <div className="flex items-center gap-2">
                         <input
                           type="number"
@@ -643,6 +668,7 @@ export default function AdminTourFormPage() {
                     </div>
                     <div>
                       <label className={labelClass}>ราคาเด็ก</label>
+                      <p className="mb-2 text-xs font-medium text-gray-500">ข้อมูลเสริมสำหรับการขาย ไม่แสดงบนการ์ดหลัก</p>
                       <div className="flex items-center gap-2">
                         <input type="number" value={childPrice} onChange={(event) => setChildPrice(event.target.value)} min={0} placeholder="ไม่บังคับ" className={inputClass} />
                         <span className="text-sm text-gray-600">บาท</span>
@@ -668,10 +694,26 @@ export default function AdminTourFormPage() {
                   )}
                 </div>
 
-                <div className="space-y-6">
-                  <ImageUploadSection images={images} uploadingImage={uploadingImage} onImageUpload={handleImageUpload} onRemoveImage={removeImage} />
+                <div className="ui-surface rounded-[1.75rem] border border-gray-200 bg-white p-6">
+                  <SectionHeading
+                    title="Media & Schedule"
+                    description="จัดการภาพปกและรอบเดินทาง โดยไม่เปลี่ยนพฤติกรรมเดิมของฟอร์ม"
+                  />
 
-                  <div className="ui-surface rounded-[1.75rem] border border-yellow-200 bg-white p-6">
+                  <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50/60 p-4">
+                    <div className="mb-4">
+                      <h3 className="text-sm font-bold text-gray-900">Cover & Gallery</h3>
+                      <p className="mt-1 text-xs text-gray-500">รูปแรกจะถูกใช้เป็นภาพหลักบนการ์ดพรีวิว</p>
+                    </div>
+                    <ImageUploadSection images={images} uploadingImage={uploadingImage} onImageUpload={handleImageUpload} onRemoveImage={removeImage} />
+                  </div>
+
+                  <div className="mt-6 rounded-[1.5rem] border border-gray-100 bg-gray-50/60 p-4">
+                    <div className="mb-4">
+                      <h3 className="text-sm font-bold text-gray-900">Available Schedules</h3>
+                      <p className="mt-1 text-xs text-gray-500">กำหนดวันเดินทางและรอบเวลาตามรูปแบบทัวร์ที่เลือก</p>
+                    </div>
+                    <div className="rounded-[1.25rem] bg-white p-4">
                     <ScheduleSection
                       schedules={schedules}
                       tourType={tourType}
@@ -692,11 +734,16 @@ export default function AdminTourFormPage() {
                       updateSchedule={updateSchedule}
                       handleBulkAdd={handleBulkAdd}
                     />
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div className="ui-surface mt-6 rounded-[1.75rem] border border-gray-200 bg-white p-6">
+                <SectionHeading
+                  title="Trip Details"
+                  description="ใส่รายละเอียดทริปเพิ่มเติมเพื่อให้ข้อมูลครบก่อนเผยแพร่"
+                />
                 <ItinerarySection itinerary={itinerary} tourType={tourType} setItinerary={setItinerary} />
                 <hr className="my-6 border-gray-100" />
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
