@@ -81,7 +81,7 @@ export default function FilterSidebar({
           <h2 className="text-base font-bold text-gray-800">ตัวกรอง</h2>
           <div className="flex items-center gap-2">
             {hasFilter && (
-              <button type="button" onClick={onClear} className="text-xs font-semibold text-accent hover:underline">
+              <button type="button" onClick={onClear} className="text-md font-semibold text-accent hover:underline">
                 ล้างทั้งหมด
               </button>
             )}
@@ -99,7 +99,7 @@ export default function FilterSidebar({
 
         <div className="space-y-5">
           <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">ประเภท</label>
+            <label className="mb-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">ประเภท</label>
             <div className="space-y-2">
               {[
                 { value: '', label: 'ทั้งหมด' },
@@ -111,8 +111,8 @@ export default function FilterSidebar({
                   type="button"
                   onClick={() => onTourTypeChange(option.value)}
                   className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition-colors ${tourType === option.value
-                    ? 'border-amber-300 bg-amber-50 text-amber-800'
-                    : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                    ? 'border-blue-200 bg-blue-50 text-blue-500'
+                    : 'border-blue-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50'
                   }`}
                 >
                   {option.label}
@@ -122,7 +122,7 @@ export default function FilterSidebar({
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">หมวดหมู่</label>
+            <label className="mb-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">หมวดหมู่</label>
             <div className="flex flex-wrap gap-2">
               {availableCategories.map((category) => (
                 <button
@@ -142,7 +142,7 @@ export default function FilterSidebar({
 
           <div>
             <div className="mb-2 flex items-center justify-between gap-3">
-              <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">เดือนที่เดินทาง</label>
+              <label className="mt-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">เดือนที่เดินทาง</label>
               {month && (
                 <button type="button" onClick={() => onMonthChange('')} className="text-xs font-semibold text-accent hover:underline">
                   ล้าง
@@ -178,8 +178,8 @@ export default function FilterSidebar({
 
           <div>
             <div className="mb-3 flex items-center justify-between gap-3">
-              <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">ช่วงราคา</label>
-              <span className="text-xs font-semibold text-gray-500">
+              <label className="mt-4 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">ช่วงราคา</label>
+              <span className="mt-4 text-md font-semibold text-gray-500">
                 ฿{minPrice.toLocaleString()} - ฿{maxPrice.toLocaleString()}
               </span>
             </div>
@@ -210,14 +210,14 @@ export default function FilterSidebar({
                 />
               </div>
               <div className="mt-4 flex items-center justify-between text-xs font-semibold text-gray-500">
-                <span>ต่ำสุด ฿{priceBounds.min.toLocaleString()}</span>
-                <span>สูงสุด ฿{priceBounds.max.toLocaleString()}</span>
+                <span>ต่ำสุด {priceBounds.min.toLocaleString()} บาท</span>
+                <span>สูงสุด {priceBounds.max.toLocaleString()} บาท</span>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">ภาค</label>
+            <label className="mt-3 mb-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">ภาค</label>
             <select
               value={region}
               onChange={(event) => {
@@ -232,7 +232,7 @@ export default function FilterSidebar({
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">จังหวัด</label>
+            <label className="mt-3 mb-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">จังหวัด</label>
             <select
               value={province}
               onChange={(event) => onProvinceChange(event.target.value)}

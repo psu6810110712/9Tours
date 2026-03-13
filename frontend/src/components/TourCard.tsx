@@ -95,7 +95,8 @@ export default function TourCard({ tour }: TourCardProps) {
   const discountPercent = hasDiscount
     ? Math.round((1 - tour.price / originalPrice) * 100)
     : null
-  const coverImage = tour.images[0] || 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=400'
+  const coverImage = tour.images.find((image) => typeof image === 'string' && image.trim().length > 0) || ''
+  const hasCoverImage = coverImage.length > 0
   const isPopular = tour.reviewCount > 50
 
   const detailItems = [
@@ -129,11 +130,17 @@ export default function TourCard({ tour }: TourCardProps) {
       )}
 
       <div className="h-[180px] overflow-hidden border-b border-gray-100 bg-slate-100">
-        <img
-          src={coverImage}
-          alt={tour.name}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-        />
+        {hasCoverImage ? (
+          <img
+            src={coverImage}
+            alt={tour.name}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 px-6 text-center">
+            <p className="text-lg font-bold text-slate-600">ไม่มีภาพประกอบสำหรับทัวร์นี้</p>
+          </div>
+        )}
       </div>
 
       <div className="grid flex-1 grid-rows-[auto_auto_1fr_auto] px-3.5 pb-5 pt-3.5">

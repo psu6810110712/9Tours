@@ -529,10 +529,10 @@
     "accommodation": null,
     "rating": 0,
     "reviewCount": 0,
-    "isActive": false,
+    "isActive": true,
     "schedules": [],
     "createdAt": "2026-03-05T13:13:49.988Z",
-    "updatedAt": "2026-03-11T02:08:54.007Z",
+    "updatedAt": "2026-03-13T03:06:42.993Z",
     "childPrice": null
   },
   {
@@ -554,10 +554,10 @@
     "accommodation": "1\n",
     "rating": 0,
     "reviewCount": 0,
-    "isActive": false,
+    "isActive": true,
     "schedules": [],
     "createdAt": "2026-03-05T13:14:16.449Z",
-    "updatedAt": "2026-03-11T02:08:19.396Z",
+    "updatedAt": "2026-03-13T03:06:43.954Z",
     "childPrice": null,
     "minPeople": 1
   },
@@ -595,7 +595,7 @@
     "accommodation": null,
     "rating": 0,
     "reviewCount": 0,
-    "isActive": false,
+    "isActive": true,
     "schedules": [
       {
         "id": 10201,
@@ -629,7 +629,7 @@
       }
     ],
     "createdAt": "2026-03-11T03:42:10.746Z",
-    "updatedAt": "2026-03-11T09:25:55.865Z"
+    "updatedAt": "2026-03-13T03:06:46.256Z"
   },
   {
     "id": 103,
@@ -659,7 +659,7 @@
     "accommodation": "โรงแรม",
     "rating": 0,
     "reviewCount": 0,
-    "isActive": false,
+    "isActive": true,
     "schedules": [
       {
         "id": 10301,
@@ -763,6 +763,6 @@
       }
     ],
     "createdAt": "2026-03-11T03:58:18.293Z",
-    "updatedAt": "2026-03-11T09:25:56.997Z"
+    "updatedAt": "2026-03-13T03:06:45.395Z"
   }
 ]
