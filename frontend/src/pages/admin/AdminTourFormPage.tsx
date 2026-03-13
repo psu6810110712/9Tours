@@ -582,41 +582,46 @@ export default function AdminTourFormPage() {
             </aside>
 
             <div>
-              <div className="mb-6">
-                <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
-
-                  <div className="inline-flex w-fit flex-wrap items-center gap-2 rounded-[1.35rem] border border-gray-200 bg-white p-2">
-                    <label className={`flex cursor-pointer items-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${tourType === 'one_day' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
+              <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
+                <div className="flex flex-col items-start gap-3">
+                  <label className="text-sm font-bold text-gray-900">ประเภททัวร์</label>
+                  <div className="inline-flex w-full flex-wrap items-center gap-2 rounded-[1.35rem] border border-gray-200 bg-white p-2">
+                    <label className={`flex min-w-[11rem] flex-1 cursor-pointer items-center justify-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${tourType === 'one_day' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
                       <input type="radio" name="tourType" checked={tourType === 'one_day'} onChange={() => setTourType('one_day')} className="accent-yellow-500" />
                       วันเดย์ทริป
                     </label>
-                    <label className={`flex cursor-pointer items-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${tourType === 'package' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <label className={`flex min-w-[11rem] flex-1 cursor-pointer items-center justify-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${tourType === 'package' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
                       <input type="radio" name="tourType" checked={tourType === 'package'} onChange={() => setTourType('package')} className="accent-yellow-500" />
                       เที่ยวพร้อมที่พัก
                     </label>
                   </div>
+                  <p className="text-sm text-gray-500">ใช้กำหนดโครงของทริป เช่น ระยะเวลาและรายละเอียดที่พัก</p>
                 </div>
-                <div className="mt-4 inline-flex w-fit flex-wrap items-center gap-2 rounded-[1.35rem] border border-gray-200 bg-white p-2">
-                  <label className={`flex cursor-pointer items-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${bookingMode === 'join' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
-                    <input
-                      type="radio"
-                      name="bookingMode"
-                      checked={bookingMode === 'join'}
-                      onChange={() => setBookingMode('join')}
-                      className="accent-yellow-500"
-                    />
-                    Join Trip
-                  </label>
-                  <label className={`flex cursor-pointer items-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${bookingMode === 'private' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
-                    <input
-                      type="radio"
-                      name="bookingMode"
-                      checked={bookingMode === 'private'}
-                      onChange={() => setBookingMode('private')}
-                      className="accent-yellow-500"
-                    />
-                    Private Group
-                  </label>
+                <div className="flex flex-col items-start gap-3">
+                  <label className="text-sm font-bold text-gray-900">รูปแบบการจอง</label>
+                  <div className="inline-flex w-full flex-wrap items-center gap-2 rounded-[1.35rem] border border-gray-200 bg-white p-2">
+                    <label className={`flex min-w-[11rem] flex-1 cursor-pointer items-center justify-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${bookingMode === 'join' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
+                      <input
+                        type="radio"
+                        name="bookingMode"
+                        checked={bookingMode === 'join'}
+                        onChange={() => setBookingMode('join')}
+                        className="accent-yellow-500"
+                      />
+                      Join Trip
+                    </label>
+                    <label className={`flex min-w-[11rem] flex-1 cursor-pointer items-center justify-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${bookingMode === 'private' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
+                      <input
+                        type="radio"
+                        name="bookingMode"
+                        checked={bookingMode === 'private'}
+                        onChange={() => setBookingMode('private')}
+                        className="accent-yellow-500"
+                      />
+                      Private Group
+                    </label>
+                  </div>
+                  <p className="text-sm text-gray-500">ตัวเลือกนี้จะเปลี่ยนส่วนกำหนดการและจำนวนผู้เดินทางด้านล่าง</p>
                 </div>
               </div>
 
@@ -698,8 +703,9 @@ export default function AdminTourFormPage() {
                   </div>
 
                   {bookingMode === 'private' && (
-                    <div className="mt-6 rounded-[1.5rem] border border-blue-200 bg-blue-50 p-4">
+                    <div className="mt-6 rounded-[1.5rem] border-2 border-blue-300 bg-blue-50 p-4">
                       <span className="mb-2 block text-sm font-bold text-blue-800">ตั้งค่า Private Tour</span>
+                      <p className="mb-4 text-sm text-blue-700">บล็อกนี้จะแสดงเมื่อเลือก Private Group</p>
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
                           <label className="mb-1 block text-xs font-semibold text-blue-700">จำนวนคนขั้นต่ำ (Min)*</label>
@@ -813,7 +819,12 @@ export default function AdminTourFormPage() {
                   </div>
 
                   <div className="mt-5 rounded-[1.5rem] border border-gray-100 bg-gray-50/40 p-4 md:p-5">
-                    <div className="rounded-[1.25rem] border border-gray-100 bg-white p-4">
+                    <p className="mb-4 text-sm text-gray-500">
+                      {bookingMode === 'join'
+                        ? 'กำหนดวันเดินทาง พร้อมรอบเวลาและชื่อรอบ'
+                        : 'กำหนดวันเดินทางสำหรับกรุ๊ปส่วนตัว โดยไม่ต้องใส่รอบเวลา'}
+                    </p>
+                    <div className={`rounded-[1.25rem] bg-white p-4 ${bookingMode === 'join' ? 'border-2 border-blue-200' : 'border-2 border-amber-200'}`}>
                       <ScheduleSection
                         schedules={schedules}
                         tourType={tourType}
@@ -850,6 +861,7 @@ export default function AdminTourFormPage() {
                     {tourType === 'package' && (
                       <div>
                         <FieldLabel text="รายละเอียดที่พัก" required />
+                        <p className="mb-2 text-sm text-gray-500">ช่องนี้จะแสดงบนการ์ดพรีวิวในบรรทัดที่ 3</p>
                         <textarea value={accommodation} onChange={(event) => setAccommodation(event.target.value)} required rows={4} placeholder="เช่น โรงแรม 3 ดาว ย่านนิมมาน" className={`${inputClass} min-h-[8rem] resize-y leading-7`} />
                       </div>
                     )}
