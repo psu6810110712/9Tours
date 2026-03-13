@@ -23,16 +23,6 @@ function CheckIcon() {
   )
 }
 
-function CrossIcon() {
-  return (
-    <svg className="h-4 w-4 flex-shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.1}>
-      <circle cx="12" cy="12" r="8.5" />
-      <path strokeLinecap="round" d="M9 9l6 6" />
-      <path strokeLinecap="round" d="M15 9l-6 6" />
-    </svg>
-  )
-}
-
 function StarIcon() {
   return (
     <svg className="h-7 w-7 flex-shrink-0 fill-current text-yellow-400" viewBox="0 0 20 23" aria-hidden="true">
@@ -50,16 +40,14 @@ function FeaturedBadge() {
 }
 
 interface DetailItemProps {
-  icon: 'clock' | 'check' | 'cross'
+  icon: 'clock' | 'check'
   text: string
 }
 
 function DetailItem({ icon, text }: DetailItemProps) {
   const iconNode = icon === 'clock'
     ? <ClockIcon />
-    : icon === 'cross'
-      ? <CrossIcon />
-      : <CheckIcon />
+    : <CheckIcon />
 
   return (
     <div className="flex items-center gap-2 text-[16px] font-medium leading-tight text-gray-600">
@@ -69,23 +57,17 @@ function DetailItem({ icon, text }: DetailItemProps) {
   )
 }
 
-function normalizeHighlight(text: string) {
-  if (text.includes('รถรับส่ง')) return 'บริการรถรับส่ง'
-  if (text.includes('อาหาร')) return 'รวมอาหารกลางวัน'
-  if (text.includes('ยกเลิก')) return 'สามารถยกเลิกได้'
-  if (text.includes('ไม่รวม')) return 'ไม่รวมค่าใช้จ่ายเพิ่มเติม'
-  if (text.includes('ไกด์')) return 'มีไกด์นำเที่ยว'
-  if (text.includes('ส่วนลด')) return 'มีส่วนลดสำหรับเด็ก'
-  if (text.includes('ส่วนตัว')) return 'เหมาะสำหรับทริปส่วนตัว'
-  if (text.includes('กลุ่ม')) return 'เหมาะสำหรับทริปกลุ่ม'
-  if (text.includes('กิจกรรม')) return 'มีกิจกรรมสนุกๆ'
-  if (text.includes('ธรรมชาติ')) return 'ชมธรรมชาติสวยงาม'
-  if (text.includes('วัฒนธรรม')) return 'สัมผัสวัฒนธรรมท้องถิ่น'
-  if (text.includes('ประวัติศาสตร์')) return 'เรียนรู้ประวัติศาสตร์'
-  if (text.includes('ผจญภัย')) return 'เหมาะสำหรับคนรักการผจญภัย'
-  if (text.includes('พักผ่อน')) return 'เหมาะสำหรับคนรักการพักผ่อน'
-  if (text.includes('ถ่ายรูป')) return 'มีจุดถ่ายรูปสวยๆ'
-  return text
+function getCardDetailItems(tour: Tour) {
+  const secondLine = tour.highlights[0]?.trim() || 'รายละเอียดเด่นของทัวร์'
+  const thirdLine = tour.tourType === 'package'
+    ? tour.accommodation?.trim() || 'มีที่พักรวมในแพ็กเกจ'
+    : tour.highlights[1]?.trim() || 'ไฮไลต์เพิ่มเติมของทริป'
+
+  return [
+    { icon: 'clock' as const, text: tour.duration },
+    { icon: 'check' as const, text: secondLine },
+    { icon: 'check' as const, text: thirdLine },
+  ]
 }
 
 export default function TourCard({ tour }: TourCardProps) {
@@ -99,11 +81,7 @@ export default function TourCard({ tour }: TourCardProps) {
   const hasCoverImage = coverImage.length > 0
   const isPopular = tour.reviewCount > 50
 
-  const detailItems = [
-    { icon: 'clock' as const, text: tour.duration },
-    { icon: 'cross' as const, text: normalizeHighlight(tour.highlights.find((item) => item.includes('ยกเลิก')) || 'สามารถยกเลิกได้') },
-    { icon: 'check' as const, text: normalizeHighlight(tour.highlights.find((item) => !item.includes('ยกเลิก')) || 'รวมอาหารกลางวัน') },
-  ]
+  const detailItems = getCardDetailItems(tour)
 
   const metaText = isPopular ? 'ทัวร์ยอดนิยม' : 'แนะนำสำหรับคุณ'
 
