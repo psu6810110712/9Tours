@@ -1,4 +1,3 @@
-
 interface ScheduleRow {
     startDate: string;
     endDate: string;
@@ -11,14 +10,13 @@ interface ScheduleRow {
 interface ScheduleSectionProps {
     schedules: ScheduleRow[];
     tourType: 'package' | 'one_day';
-    // State from parent
+    bookingMode: 'join' | 'private';
     bulkFrom: string;
     bulkTo: string;
     bulkCapacity: number;
     bulkDuration: number;
     bulkDays: Set<number>;
     roundTemplates: { roundName: string; timeSlot: string }[];
-    // Actions
     setBulkFrom: (val: string) => void;
     setBulkTo: (val: string) => void;
     setBulkCapacity: (val: number) => void;
@@ -31,9 +29,12 @@ interface ScheduleSectionProps {
     handleBulkAdd: () => void;
 }
 
+const DAY_LABELS = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+
 export default function ScheduleSection({
     schedules,
     tourType,
+    bookingMode,
     bulkFrom,
     bulkTo,
     bulkCapacity,
@@ -49,16 +50,18 @@ export default function ScheduleSection({
     addSchedule,
     removeSchedule,
     updateSchedule,
-    handleBulkAdd
+    handleBulkAdd,
 }: ScheduleSectionProps) {
+    const capacityLabel = bookingMode === 'private' ? 'คน/กรุ๊ป' : 'คน/รอบ';
+
     return (
         <div>
-            <span className="text-sm font-bold text-gray-800 block mb-3">กำหนดการ</span>
+            <span className="mb-3 block text-xl font-bold text-gray-800">กำหนดรอบที่เปิดจอง</span>
 
-            <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 mb-3 space-y-2">
+            <div className="mb-3 space-y-2 rounded-xl border border-orange-200 bg-orange-50 p-3">
                 <p className="text-xs font-bold text-orange-700">เพิ่มหลายวันพร้อมกัน (Bulk Add)</p>
 
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-1">
                         <span className="text-xs text-gray-500">จาก</span>
                         <input
@@ -73,7 +76,7 @@ export default function ScheduleSection({
                                     const start = new Date(newFrom);
                                     const end = new Date(bulkTo);
                                     if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
-                                        let current = new Date(start);
+                                        const current = new Date(start);
                                         while (current <= end) {
                                             nextDays.add(current.getDay());
                                             current.setDate(current.getDate() + 1);
@@ -83,15 +86,14 @@ export default function ScheduleSection({
                                 } else if (newFrom) {
                                     const start = new Date(newFrom);
                                     if (!isNaN(start.getTime())) {
-                                        const nextDays = new Set<number>();
-                                        nextDays.add(start.getDay());
-                                        setBulkDays(nextDays);
+                                        setBulkDays(new Set([start.getDay()]));
                                     }
                                 }
                             }}
-                            className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-orange-400"
+                            className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-orange-400"
                         />
                     </div>
+
                     <div className="flex items-center gap-1">
                         <span className="text-xs text-gray-500">ถึง</span>
                         <input
@@ -106,7 +108,7 @@ export default function ScheduleSection({
                                     const start = new Date(bulkFrom);
                                     const end = new Date(newTo);
                                     if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
-                                        let current = new Date(start);
+                                        const current = new Date(start);
                                         while (current <= end) {
                                             nextDays.add(current.getDay());
                                             current.setDate(current.getDate() + 1);
@@ -116,13 +118,11 @@ export default function ScheduleSection({
                                 } else if (newTo) {
                                     const end = new Date(newTo);
                                     if (!isNaN(end.getTime())) {
-                                        const nextDays = new Set<number>();
-                                        nextDays.add(end.getDay());
-                                        setBulkDays(nextDays);
+                                        setBulkDays(new Set([end.getDay()]));
                                     }
                                 }
                             }}
-                            className="bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-orange-400"
+                            className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-orange-400"
                         />
                     </div>
 
@@ -134,7 +134,7 @@ export default function ScheduleSection({
                                 min={1}
                                 value={bulkDuration}
                                 onChange={(e) => setBulkDuration(Number(e.target.value))}
-                                className="w-12 bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-center outline-none focus:border-orange-400"
+                                className="w-12 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-center text-xs outline-none focus:border-orange-400"
                             />
                             <span className="text-xs text-gray-500">วัน</span>
                         </div>
@@ -146,14 +146,14 @@ export default function ScheduleSection({
                             value={bulkCapacity}
                             min={1}
                             onChange={(e) => setBulkCapacity(Number(e.target.value))}
-                            className="w-14 bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-center outline-none focus:border-orange-400"
+                            className="w-14 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-center text-xs outline-none focus:border-orange-400"
                         />
-                        <span className="text-xs text-gray-500">คน/รอบ</span>
+                        <span className="text-xs text-gray-500">{capacityLabel}</span>
                     </div>
                 </div>
 
-                <div className="flex gap-1.5 flex-wrap">
-                    {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((label, dayIdx) => (
+                <div className="flex flex-wrap gap-1.5">
+                    {DAY_LABELS.map((label, dayIdx) => (
                         <button
                             key={dayIdx}
                             type="button"
@@ -162,28 +162,30 @@ export default function ScheduleSection({
                                 next.has(dayIdx) ? next.delete(dayIdx) : next.add(dayIdx);
                                 setBulkDays(next);
                             }}
-                            className={`w-8 h-8 rounded-full text-xs font-semibold transition-colors ${bulkDays.has(dayIdx)
-                                ? 'bg-orange-400 text-white'
-                                : 'bg-white border border-gray-300 text-gray-500'
-                                }`}
+                            className={`h-8 w-8 rounded-full text-xs font-semibold transition-colors ${
+                                bulkDays.has(dayIdx)
+                                    ? 'bg-orange-400 text-white'
+                                    : 'border border-gray-300 bg-white text-gray-500'
+                            }`}
                         >
                             {label}
                         </button>
                     ))}
                 </div>
 
-                {tourType === 'one_day' && (
-                    <div className="border border-blue-200 bg-blue-50 rounded-lg p-2 space-y-1.5">
+                {bookingMode === 'join' && (
+                    <div className="space-y-1.5 rounded-lg border border-blue-200 bg-blue-50 p-2">
                         <div className="flex items-center justify-between">
-                            <p className="text-xs font-bold text-blue-700">⏱ รอบเวลา (Join Trip)</p>
+                            <p className="text-xs font-bold text-blue-700">รอบเวลา (Join Trip)</p>
                             <button
                                 type="button"
                                 onClick={() => setRoundTemplates([...roundTemplates, { roundName: '', timeSlot: '' }])}
-                                className="text-xs text-blue-500 hover:text-blue-700 font-semibold"
+                                className="text-xs font-semibold text-blue-500 hover:text-blue-700"
                             >
                                 + เพิ่มรอบ
                             </button>
                         </div>
+
                         {roundTemplates.map((rt, ri) => (
                             <div key={ri} className="flex items-center gap-1.5">
                                 <input
@@ -195,7 +197,7 @@ export default function ScheduleSection({
                                         setRoundTemplates(next);
                                     }}
                                     placeholder="เช่น 08:00-12:00"
-                                    className="flex-1 bg-white border border-blue-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-blue-400"
+                                    className="flex-1 rounded-lg border border-blue-200 bg-white px-2 py-1 text-xs outline-none focus:border-blue-400"
                                 />
                                 <input
                                     type="text"
@@ -206,18 +208,21 @@ export default function ScheduleSection({
                                         setRoundTemplates(next);
                                     }}
                                     placeholder="ชื่อรอบ เช่น รอบเช้า"
-                                    className="flex-1 bg-white border border-blue-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-blue-400"
+                                    className="flex-1 rounded-lg border border-blue-200 bg-white px-2 py-1 text-xs outline-none focus:border-blue-400"
                                 />
                                 {roundTemplates.length > 1 && (
                                     <button
                                         type="button"
                                         onClick={() => setRoundTemplates(roundTemplates.filter((_, i) => i !== ri))}
-                                        className="text-red-400 hover:text-red-600 text-xs"
-                                    >✕</button>
+                                        className="text-xs text-red-400 hover:text-red-600"
+                                    >
+                                        ×
+                                    </button>
                                 )}
                             </div>
                         ))}
-                        <p className="text-xs text-blue-400">ถ้าไม่กรอกเวลา = สร้าง 1 รอบต่อวัน (ทัวร์ปกติ)</p>
+
+                        <p className="text-xs text-blue-400">ถ้าไม่กรอกเวลา ระบบจะสร้าง 1 รอบต่อวันให้อัตโนมัติ</p>
                     </div>
                 )}
 
@@ -225,7 +230,7 @@ export default function ScheduleSection({
                     type="button"
                     onClick={handleBulkAdd}
                     disabled={!bulkFrom || !bulkTo}
-                    className="text-xs font-semibold text-white bg-orange-400 hover:bg-orange-500 disabled:opacity-40 px-4 py-1.5 rounded-full transition-colors"
+                    className="rounded-full bg-orange-400 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-orange-500 disabled:opacity-40"
                 >
                     สร้างกำหนดการ
                 </button>
@@ -234,20 +239,21 @@ export default function ScheduleSection({
             <button
                 type="button"
                 onClick={addSchedule}
-                className="text-xs font-semibold text-orange-500 border border-orange-300 hover:bg-orange-50 px-3 py-1 rounded-full transition-colors mb-2"
+                className="mb-2 rounded-full border border-orange-300 px-3 py-1 text-xs font-semibold text-orange-500 transition-colors hover:bg-orange-50"
             >
                 + เพิ่มทีละรอบ
             </button>
 
-            <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+            <div className="max-h-52 space-y-2 overflow-y-auto pr-1">
                 {schedules.map((s, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm flex-wrap">
+                    <div key={i} className="flex flex-wrap items-center gap-2 text-sm">
                         <input
                             type="date"
                             value={s.startDate}
                             onChange={(e) => updateSchedule(i, 'startDate', e.target.value)}
-                            className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-yellow-400"
+                            className="rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs outline-none focus:border-yellow-400"
                         />
+
                         {tourType === 'package' && (
                             <>
                                 <span className="text-gray-400">ถึง</span>
@@ -255,84 +261,87 @@ export default function ScheduleSection({
                                     type="date"
                                     value={s.endDate}
                                     onChange={(e) => updateSchedule(i, 'endDate', e.target.value)}
-                                    className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-yellow-400"
+                                    className="rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs outline-none focus:border-yellow-400"
                                 />
                             </>
                         )}
-                        {tourType === 'one_day' && (
+
+                        {bookingMode === 'join' && (
                             <input
                                 type="text"
                                 value={s.timeSlot}
                                 onChange={(e) => updateSchedule(i, 'timeSlot', e.target.value)}
                                 placeholder="เช่น 08:00-12:00"
-                                title="ช่วงเวลา (Join Trip)"
-                                className="w-32 bg-gray-50 border border-blue-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-blue-400"
+                                title="ช่วงเวลา"
+                                className="w-32 rounded-lg border border-blue-200 bg-gray-50 px-2 py-1.5 text-xs outline-none focus:border-blue-400"
                             />
                         )}
-                        {tourType === 'one_day' && (
+
+                        {bookingMode === 'join' && (
                             <input
                                 type="text"
                                 value={s.roundName}
                                 onChange={(e) => updateSchedule(i, 'roundName', e.target.value)}
                                 placeholder="ชื่อรอบ เช่น รอบเช้า"
                                 title="ชื่อรอบ"
-                                className="w-28 bg-gray-50 border border-blue-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-blue-400"
+                                className="w-28 rounded-lg border border-blue-200 bg-gray-50 px-2 py-1.5 text-xs outline-none focus:border-blue-400"
                             />
                         )}
+
                         <input
                             type="number"
                             value={s.maxCapacity}
                             onChange={(e) => updateSchedule(i, 'maxCapacity', Number(e.target.value))}
                             min={1}
-                            className="w-16 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-center outline-none focus:border-yellow-400"
+                            className="w-16 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-center text-xs outline-none focus:border-yellow-400"
                         />
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
-                            {tourType === 'one_day' ? 'คน/รอบ' : 'คน/กรุ๊ป'}
-                        </span>
+                        <span className="whitespace-nowrap text-xs text-gray-500">{capacityLabel}</span>
+
                         <input
                             type="checkbox"
                             checked={s.enabled}
                             onChange={(e) => updateSchedule(i, 'enabled', e.target.checked)}
                             className="accent-yellow-500"
                         />
+
                         <button
                             type="button"
                             onClick={() => removeSchedule(i)}
-                            className="text-red-400 hover:text-red-600 text-xs"
+                            className="text-xs text-red-400 hover:text-red-600"
                             title="ลบรอบนี้"
                         >
-                            ✕
+                            ×
                         </button>
                     </div>
                 ))}
+
                 {schedules.length === 0 && (
-                    <p className="text-xs text-gray-400 py-2">ยังไม่มีกำหนดการ</p>
+                    <p className="py-2 text-xs text-gray-400">ยังไม่มีกำหนดการ</p>
                 )}
             </div>
 
-            {schedules.filter(s => s.enabled).length > 0 && (
-                <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-3">
-                    <div className="flex items-center justify-between mb-2">
+            {schedules.filter((s) => s.enabled).length > 0 && (
+                <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+                    <div className="mb-2 flex items-center justify-between">
                         <p className="text-xs font-bold text-gray-500">สรุปกำหนดการ</p>
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">
-                            รวม {schedules.filter(s => s.enabled).length} รอบ
+                        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700">
+                            รวม {schedules.filter((s) => s.enabled).length} รอบ
                         </span>
                     </div>
-                    <div className="text-xs text-gray-600 space-y-1">
-                        <p>📅 <strong>จำนวนวัน:</strong> {new Set(schedules.filter(s => s.enabled).map(s => s.startDate)).size} วัน</p>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                            {Array.from(new Set(schedules.filter(s => s.enabled).map(s => s.startDate)))
+                    <div className="space-y-1 text-xs text-gray-600">
+                        <p>
+                            <strong>จำนวนวัน:</strong>{' '}
+                            {new Set(schedules.filter((s) => s.enabled).map((s) => s.startDate)).size} วัน
+                        </p>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                            {Array.from(new Set(schedules.filter((s) => s.enabled).map((s) => s.startDate)))
                                 .sort()
                                 .slice(0, 5)
-                                .map(d => (
-                                    <span key={d} className="bg-white border border-gray-200 px-1.5 py-0.5 rounded text-[10px]">
-                                        {new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
+                                .map((date) => (
+                                    <span key={date} className="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px]">
+                                        {new Date(date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
                                     </span>
-                                ))
-                            }
-                            {new Set(schedules.filter(s => s.enabled).map(s => s.startDate)).size > 5 && (
-                                <span className="text-gray-400 pl-1">...และอื่นๆ</span>
-                            )}
+                                ))}
                         </div>
                     </div>
                 </div>

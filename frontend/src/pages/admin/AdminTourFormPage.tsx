@@ -224,6 +224,7 @@ export default function AdminTourFormPage() {
   const [tourCode, setTourCode] = useState('')
 
   const [tourType, setTourType] = useState<'package' | 'one_day'>('one_day')
+  const [bookingMode, setBookingMode] = useState<'join' | 'private'>('join')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [categories, setCategories] = useState<string[]>([])
@@ -264,6 +265,7 @@ export default function AdminTourFormPage() {
 
         setTourCode(tour.tourCode || '')
         setTourType(tour.tourType)
+        setBookingMode(tour.minPeople ? 'private' : 'join')
         setName(tour.name)
         setDescription(tour.description)
         setCategories(tour.categories)
@@ -401,7 +403,7 @@ export default function AdminTourFormPage() {
     const end = new Date(bulkTo)
 
     let rounds = [{ roundName: '', timeSlot: '' }]
-    if (tourType === 'one_day') {
+    if (bookingMode === 'join') {
       const validRounds = roundTemplates.filter((round) => round.timeSlot || round.roundName)
       if (validRounds.length > 0) rounds = validRounds
     } else {
@@ -426,7 +428,7 @@ export default function AdminTourFormPage() {
         const endDateStr = `${endYear}-${endMonth}-${endDay}`
 
         for (const round of rounds) {
-          const alreadyExists = schedules.some((schedule) => schedule.startDate === startDateStr && schedule.timeSlot === round.timeSlot)
+          const alreadyExists = schedules.some((schedule) => schedule.startDate === startDateStr && schedule.timeSlot === round.timeSlot && schedule.roundName === round.roundName)
           if (!alreadyExists) {
             result.push({
               startDate: startDateStr,
@@ -463,8 +465,11 @@ export default function AdminTourFormPage() {
       missingFields.push('บรรทัดที่ 3 บนการ์ด')
     }
 
-    if (tourType === 'package') {
+    if (bookingMode === 'private') {
       if (isBlank(minPeople)) missingFields.push('จำนวนคนขั้นต่ำ (Min)')
+    }
+
+    if (tourType === 'package') {
       if (isBlank(accommodation)) missingFields.push('รายละเอียดที่พัก')
     }
 
@@ -497,8 +502,8 @@ export default function AdminTourFormPage() {
       price: finalPrice,
       originalPrice: finalOriginalPrice,
       childPrice: finalChildPrice,
-      minPeople: minPeople ? Number(minPeople) : undefined,
-      maxPeople: maxPeople ? Number(maxPeople) : undefined,
+      minPeople: bookingMode === 'private' && minPeople ? Number(minPeople) : undefined,
+      maxPeople: bookingMode === 'private' && maxPeople ? Number(maxPeople) : undefined,
       highlights: highlights.map((item) => item.trim()).filter(Boolean),
       images,
       transportation,
@@ -557,8 +562,8 @@ export default function AdminTourFormPage() {
     accommodation,
     itinerary,
     schedules,
-    minPeople,
-    maxPeople,
+    minPeople: bookingMode === 'private' ? minPeople : '',
+    maxPeople: bookingMode === 'private' ? maxPeople : '',
   })
   const provinceOptions = region ? (PROVINCES_BY_REGION[region] || ALL_PROVINCES) : ALL_PROVINCES
   const highlightSuggestions = tourType === 'package' ? PACKAGE_HIGHLIGHTS : ONE_DAY_HIGHLIGHTS
@@ -590,6 +595,28 @@ export default function AdminTourFormPage() {
                       เที่ยวพร้อมที่พัก
                     </label>
                   </div>
+                </div>
+                <div className="mt-4 inline-flex w-fit flex-wrap items-center gap-2 rounded-[1.35rem] border border-gray-200 bg-white p-2">
+                  <label className={`flex cursor-pointer items-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${bookingMode === 'join' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <input
+                      type="radio"
+                      name="bookingMode"
+                      checked={bookingMode === 'join'}
+                      onChange={() => setBookingMode('join')}
+                      className="accent-yellow-500"
+                    />
+                    Join Trip
+                  </label>
+                  <label className={`flex cursor-pointer items-center gap-2 rounded-[1rem] px-4 py-2.5 text-base font-semibold transition-colors ${bookingMode === 'private' ? 'bg-yellow-400 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <input
+                      type="radio"
+                      name="bookingMode"
+                      checked={bookingMode === 'private'}
+                      onChange={() => setBookingMode('private')}
+                      className="accent-yellow-500"
+                    />
+                    Private Group
+                  </label>
                 </div>
               </div>
 
@@ -670,7 +697,7 @@ export default function AdminTourFormPage() {
                     <textarea value={description} onChange={(event) => setDescription(event.target.value)} required rows={4} className={`${inputClass} min-h-[9rem] resize-y leading-7`} />
                   </div>
 
-                  {tourType === 'package' && (
+                  {bookingMode === 'private' && (
                     <div className="mt-6 rounded-[1.5rem] border border-blue-200 bg-blue-50 p-4">
                       <span className="mb-2 block text-sm font-bold text-blue-800">ตั้งค่า Private Tour</span>
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -683,14 +710,13 @@ export default function AdminTourFormPage() {
                           <input type="number" min="1" value={maxPeople} onChange={(event) => setMaxPeople(event.target.value)} className="w-full rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400" placeholder="เช่น 10 คน" />
                         </div>
                       </div>
-                      <p className="mt-2 text-xs text-blue-500">เมื่อระบุจำนวนคนขั้นต่ำ ระบบจะเปลี่ยนเป็นโหมดเหมากลุ่ม (Private) อัตโนมัติ</p>
                     </div>
                   )}
                 </div>
 
                 <div className="ui-surface rounded-[1.75rem] border border-gray-200 bg-white p-6 md:p-7">
                   <SectionHeading
-                    title="Pricing & Card Content"
+                    title="ราคาและไฮไลต์ของทัวร์"
                     description=""
                   />
 
@@ -775,27 +801,23 @@ export default function AdminTourFormPage() {
 
                 <div className="ui-surface rounded-[1.75rem] border border-gray-200 bg-white p-6 md:p-7">
                   <SectionHeading
-                    title="Media & Availability"
+                    title="ภาพประกอบและรอบการเดินทาง"
                     description=""
                   />
 
                   <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50/40 p-4 md:p-5">
                     <div className="mb-4">
-                      <h3 className="text-sm font-bold text-gray-900">Cover & Gallery</h3>
-                      <p className="mt-1 text-xs text-gray-500">รูปแรกจะถูกใช้เป็นภาพหลักบนการ์ดพรีวิว</p>
+                      <p className="mt-1 text-md text-gray-500">รูปแรกจะถูกใช้เป็นภาพหลักบนการ์ดทัวร์</p>
                     </div>
                     <ImageUploadSection images={images} uploadingImage={uploadingImage} onImageUpload={handleImageUpload} onRemoveImage={removeImage} />
                   </div>
 
                   <div className="mt-5 rounded-[1.5rem] border border-gray-100 bg-gray-50/40 p-4 md:p-5">
-                    <div className="mb-4">
-                      <h3 className="text-sm font-bold text-gray-900">Available Schedules</h3>
-                      <p className="mt-1 text-xs text-gray-500">กำหนดวันเดินทางและรอบเวลาตามรูปแบบทัวร์ที่เลือก</p>
-                    </div>
                     <div className="rounded-[1.25rem] border border-gray-100 bg-white p-4">
                       <ScheduleSection
                         schedules={schedules}
                         tourType={tourType}
+                        bookingMode={bookingMode}
                         bulkFrom={bulkFrom}
                         bulkTo={bulkTo}
                         bulkCapacity={bulkCapacity}
@@ -818,10 +840,6 @@ export default function AdminTourFormPage() {
                 </div>
 
                 <div className="ui-surface rounded-[1.75rem] border border-gray-200 bg-white p-6 md:p-7">
-                  <SectionHeading
-                    title="Itinerary & Operations"
-                    description=""
-                  />
                   <ItinerarySection itinerary={itinerary} tourType={tourType} setItinerary={setItinerary} />
                   <hr className="my-6 border-gray-100" />
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
