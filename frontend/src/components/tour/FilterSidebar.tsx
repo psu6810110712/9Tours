@@ -1,7 +1,11 @@
+import { useState } from 'react'
+
 interface MonthOption {
   value: string
   label: string
 }
+
+const CATEGORY_VISIBLE_COUNT = 6
 
 const REGIONS = ['ภาคเหนือ', 'ภาคกลาง', 'ภาคใต้', 'ภาคตะวันออก', 'ภาคตะวันออกเฉียงเหนือ']
 
@@ -69,6 +73,21 @@ export default function FilterSidebar({
     ? (PROVINCES_BY_REGION[region] ?? [])
     : Object.values(PROVINCES_BY_REGION).flat()
 
+  const [showAllCategories, setShowAllCategories] = useState(false)
+
+  // Sort categories: selected ones first, then the rest keep original order
+  const sortedCategories = [...availableCategories].sort((a, b) => {
+    const aSelected = categories.includes(a) ? 0 : 1
+    const bSelected = categories.includes(b) ? 0 : 1
+    return aSelected - bSelected
+  })
+
+  const hasMoreCategories = sortedCategories.length > CATEGORY_VISIBLE_COUNT
+  const visibleCategories = showAllCategories
+    ? sortedCategories
+    : sortedCategories.slice(0, CATEGORY_VISIBLE_COUNT)
+  const hiddenCount = sortedCategories.length - CATEGORY_VISIBLE_COUNT
+
   const isDrawer = mode === 'drawer'
   const priceRange = Math.max(1, priceBounds.max - priceBounds.min)
   const leftPercent = ((minPrice - priceBounds.min) / priceRange) * 100
@@ -100,36 +119,53 @@ export default function FilterSidebar({
         <div className="space-y-5">
           <div>
             <label className="mb-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">ประเภท</label>
-            <div className="space-y-2">
-              {[
+            {(() => {
+              const tourTypeOptions = [
                 { value: '', label: 'ทั้งหมด' },
                 { value: 'one_day', label: 'วันเดย์ทริป' },
-                { value: 'package', label: 'แพ็กเกจพร้อมที่พัก' },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => onTourTypeChange(option.value)}
-                  className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition-colors ${tourType === option.value
-                    ? 'border-blue-200 bg-blue-50 text-blue-500'
-                    : 'border-blue-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+                { value: 'package', label: 'แพ็กเกจ' },
+              ]
+              const activeIndex = tourTypeOptions.findIndex((o) => o.value === tourType)
+              const count = tourTypeOptions.length
+
+              return (
+                <div className="relative flex rounded-full border border-gray-200 bg-gray-100 p-1">
+                  {/* Sliding indicator */}
+                  <div
+                    className="absolute top-1 bottom-1 rounded-full shadow-sm transition-all duration-300 ease-in-out"
+                    style={{
+                      width: `calc(${100 / count}% - 0px)`,
+                      left: `calc(${(activeIndex < 0 ? 0 : activeIndex) * (100 / count)}% + 0px)`,
+                      background: 'var(--color-primary)',
+                    }}
+                  />
+                  {tourTypeOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => onTourTypeChange(option.value)}
+                      className={`relative z-10 flex-1 rounded-full px-2 py-2 text-center text-sm font-semibold transition-colors duration-300 ${tourType === option.value
+                        ? 'text-white'
+                        : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )
+            })()}
           </div>
 
           <div>
             <label className="mb-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">หมวดหมู่</label>
-            <div className="flex flex-wrap gap-2">
-              {availableCategories.map((category) => (
+            <div className="grid grid-cols-3 gap-2">
+              {visibleCategories.map((category) => (
                 <button
                   key={category}
                   type="button"
                   onClick={() => onCategoryToggle(category)}
-                  className={`rounded-full border px-3 py-2 text-sm font-semibold transition-colors ${categories.includes(category)
+                  className={`rounded-full border px-2 py-2 text-center text-sm font-semibold transition-colors ${categories.includes(category)
                     ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary)]'
                     : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                   }`}
@@ -138,6 +174,15 @@ export default function FilterSidebar({
                 </button>
               ))}
             </div>
+            {hasMoreCategories && (
+              <button
+                type="button"
+                onClick={() => setShowAllCategories(!showAllCategories)}
+                className="mt-2 flex w-full items-center justify-center gap-1 rounded-full border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/5 px-3 py-2 text-sm font-semibold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-primary)]/10"
+              >
+                {showAllCategories ? '▲ แสดงน้อยลง' : `▼ +${hiddenCount} เพิ่มเติม`}
+              </button>
+            )}
           </div>
 
           <div>

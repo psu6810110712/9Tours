@@ -144,12 +144,12 @@ export default function TourCard({ tour }: TourCardProps) {
       </div>
 
       <div className="grid flex-1 grid-rows-[auto_auto_1fr_auto] px-3.5 pb-5 pt-3.5">
-        <h3 className="line-clamp-2 text-[1.25rem] font-bold leading-[1.5] text-gray-900">
+        <h3 className="mt-1 line-clamp-2 text-[1.125rem] font-bold leading-[1.4] text-gray-700">
           {tour.name}
         </h3>
 
-        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[16px] font-bold text-gray-600">
-          <span className="inline-flex items-center gap-1 leading-none text-gray-700">
+        <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[16px] font-extrabold text-gray-600">
+          <span className="inline-flex items-center gap-1 leading-none text-gray-600">
             <StarIcon />
             <span>{tour.rating.toFixed(1)}</span>
             <span className="text-gray-500">({tour.reviewCount.toLocaleString()} รีวิว)</span>
@@ -168,12 +168,12 @@ export default function TourCard({ tour }: TourCardProps) {
         <div className="-mx-2 -mb-8 mt-5 border-t border-gray-200">
           <div className="relative min-h-[6.25rem] px-3.5 py-2.5">
             <div>
-              <p className="text-[1.05rem] font-semibold text-gray-500">
+              <p className="text-[1.05rem] font-semibold text-gray-700">
                 {isPrivate ? 'ราคาเหมาส่วนตัว' : 'ราคาเริ่มต้น'}
               </p>
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-gray-900">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-gray-700">
                 <span className="mt-1 text-[1.7rem] font-extrabold leading-none">{Number(tour.price).toLocaleString()}</span>
-                <span className="text-[1rem] font-semibold text-gray-500">
+                <span className="text-[1rem] font-semibold text-gray-700">
                   {isPrivate ? 'บาท' : 'บาท / ท่าน'}
                 </span>
               </div>
