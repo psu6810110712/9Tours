@@ -1,4 +1,4 @@
-﻿interface MonthOption {
+interface MonthOption {
   value: string
   label: string
 }

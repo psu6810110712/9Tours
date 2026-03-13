@@ -228,7 +228,7 @@ export default function ToursPage() {
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-        <div className="rounded-[2rem] px-4 py-6 sm:px-6">
+        <div className="rounded-[2rem] px-4 py-2 sm:px-6">
           <SearchBar
             search={search}
             setSearch={setSearch}
@@ -239,8 +239,8 @@ export default function ToursPage() {
           />
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">รวมทัวร์ทั้งหมด</h1>
-              <p className="mt-1 text-sm text-gray-500">ค้นหาทัวร์ตามจังหวัด ประเภท หมวดหมู่ เดือน และช่วงราคาที่ต้องการ</p>
+              <h1 className="mt-4 text-xl font-bold text-gray-900">รวมทัวร์ทั้งหมด</h1>
+              <p className="mt-2 text-md text-gray-500">ค้นหาทัวร์ตามจังหวัด ประเภท หมวดหมู่ เดือน และช่วงราคาที่ต้องการ</p>
             </div>
             <button
               type="button"
@@ -282,21 +282,11 @@ export default function ToursPage() {
         </div>
 
         <main className="min-w-0 flex-1">
-          <div className="mb-5 flex flex-col gap-3 rounded-[1.5rem] border border-gray-100 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-6 flex flex-col gap-3">
             <div>
-              <p className="text-sm font-semibold text-gray-700">
-                {loading ? 'กำลังโหลดรายการทัวร์...' : `พบทัวร์ ${sortedTours.length} รายการ`}
-              </p>
-              {activeFilterCount > 0 && !loading && (
-                <p className="mt-1 text-xs text-gray-400">กำลังแสดงผลตามตัวกรองที่เลือก</p>
-              )}
+              <p className="text-lg font-semibold text-gray-700"></p>
             </div>
             <div className="flex items-center gap-3">
-              {activeFilterCount > 0 && (
-                <button type="button" onClick={clearFilters} className="text-sm font-medium text-accent hover:underline">
-                  ล้างตัวกรอง
-                </button>
-              )}
               <div ref={sortMenuRef} className="relative">
                 <button
                   type="button"
@@ -312,7 +302,7 @@ export default function ToursPage() {
                 </button>
 
                 {sortMenuOpen && (
-                  <div className="ui-pop absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-[220px] rounded-[1.2rem] border border-gray-200 bg-white p-2 shadow-[0_20px_40px_rgba(15,23,42,0.14)]">
+                  <div className="ui-pop absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-[190px] rounded-[1.4rem] border border-gray-200 bg-white p-2 shadow-[0_20px_40px_rgba(15,23,42,0.14)]">
                     <div role="listbox" aria-label="เรียงลำดับทัวร์" className="space-y-1">
                       {SORT_OPTIONS.map((option) => (
                         <button
@@ -322,7 +312,7 @@ export default function ToursPage() {
                             setSortBy(option.value)
                             setSortMenuOpen(false)
                           }}
-                          className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-left text-sm font-medium transition-colors ${sortBy === option.value
+                          className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-left text-md font-medium transition-colors ${sortBy === option.value
                             ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                             }`}
