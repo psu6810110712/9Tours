@@ -1,4 +1,4 @@
-﻿import { BadRequestException, ForbiddenException, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
@@ -8,7 +8,7 @@ import { RefreshSession } from './entities/refresh-session.entity'
 import { UsersService } from '../users/users.service'
 import { AuthProvider, User, UserRole } from '../users/entities/user.entity'
 
-type RefreshSessionRecord = RefreshSession & { user?: User }
+type RefreshSessionRecord = Omit<RefreshSession, 'user'> & { user?: User }
 
 describe('AuthService', () => {
   let authService: AuthService
@@ -96,7 +96,8 @@ describe('AuthService', () => {
         revokedAt: session.revokedAt ?? null,
         rotatedToSessionId: session.rotatedToSessionId ?? null,
         createdAt: session.createdAt ?? new Date(),
-        user: session.user,
+        user: session.user as User | undefined,
+
       }
 
       const existingIndex = refreshSessions.findIndex((item) => item.id === persistedSession.id)
@@ -157,7 +158,7 @@ describe('AuthService', () => {
         callback({ getRepository: () => refreshSessionRepo }),
     }
 
-    authService = new AuthService(usersService, jwtService, configService, refreshSessionRepo)
+    authService = new AuthService(usersService, jwtService, configService)
   })
 
   it('registers public users as customers even if a role is supplied', async () => {

@@ -1,4 +1,4 @@
-﻿import { BadRequestException } from '@nestjs/common'
+import { BadRequestException } from '@nestjs/common'
 import { BookingsService } from './bookings.service'
 import { Booking, BookingStatus } from './entities/booking.entity'
 import { User, UserRole, AuthProvider } from '../users/entities/user.entity'
@@ -86,7 +86,12 @@ describe('BookingsService', () => {
       updateScheduleBookedCount: jest.fn(),
     }
 
-    service = new BookingsService(bookingsRepository, usersRepository, toursService)
+    const notificationsService = {
+      sendBookingConfirmation: jest.fn(),
+      sendStatusUpdate: jest.fn(),
+    }
+
+    service = new BookingsService(bookingsRepository, usersRepository, toursService, notificationsService as any)
   })
 
   it('stores booking contact snapshot and syncs the customer profile in one transaction', async () => {

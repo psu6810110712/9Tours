@@ -1,12 +1,86 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Notification, NotificationType } from './entities/notification.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 
 @Injectable()
 export class NotificationsService {
     private readonly logger = new Logger(NotificationsService.name);
 
-    constructor(private readonly mailerService: MailerService) { }
+    constructor(
+        @InjectRepository(Notification)
+        private readonly notificationRepo: Repository<Notification>,
+        private readonly mailerService: MailerService,
+    ) { }
+
+    // ─── In-App Notification Methods ─────────────────────────────────
+
+    async createBookingNotification(
+        userId: string,
+        bookingId: number,
+        type: NotificationType,
+        tourName: string,
+    ) {
+        let title = '';
+        let message = '';
+
+        switch (type) {
+            case NotificationType.BOOKING_CONFIRMED:
+                title = 'การจองได้รับการยืนยัน';
+                message = `การจอง #${bookingId} สำหรับ "${tourName}" ได้รับการยืนยันเรียบร้อยแล้ว`;
+                break;
+            case NotificationType.BOOKING_SUCCESS:
+                title = 'การจองสำเร็จ';
+                message = `การจอง #${bookingId} สำหรับ "${tourName}" สำเร็จเรียบร้อยแล้ว เตรียมตัวเดินทางได้เลย!`;
+                break;
+            case NotificationType.BOOKING_CANCELED:
+                title = 'การจองถูกยกเลิก';
+                message = `การจอง #${bookingId} สำหรับ "${tourName}" ถูกยกเลิก กรุณาติดต่อแอดมินหากมีข้อสงสัย`;
+                break;
+        }
+
+        const notification = this.notificationRepo.create({
+            userId,
+            bookingId,
+            type,
+            title,
+            message,
+        });
+
+        return this.notificationRepo.save(notification);
+    }
+
+    async findAllForUser(userId: string) {
+        return this.notificationRepo.find({
+            where: { userId },
+            order: { createdAt: 'DESC' },
+            take: 50,
+        });
+    }
+
+    async countUnread(userId: string): Promise<number> {
+        return this.notificationRepo.count({
+            where: { userId, isRead: false },
+        });
+    }
+
+    async markAsRead(id: number, userId: string) {
+        await this.notificationRepo.update(
+            { id, userId },
+            { isRead: true },
+        );
+    }
+
+    async markAllAsRead(userId: string) {
+        await this.notificationRepo.update(
+            { userId, isRead: false },
+            { isRead: true },
+        );
+    }
+
+    // ─── Email Notification (existing) ───────────────────────────────
 
     async sendBookingStatusEmail(booking: Booking, previousStatus: string, newStatus: string) {
         // Only send email when transitioning from awaiting_approval to confirmed or success

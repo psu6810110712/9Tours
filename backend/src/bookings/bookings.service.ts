@@ -1,4 +1,4 @@
-﻿import {
+import {
   Injectable,
   BadRequestException,
   NotFoundException,
@@ -14,6 +14,7 @@ import { ToursService } from '../tours/tours.service';
 import { User } from '../users/entities/user.entity';
 import { normalizeEmail, normalizeThaiPhoneInput, sanitizeCustomerName } from '../users/customer-profile.utils';
 import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/entities/notification.entity';
 
 @Injectable()
 export class BookingsService {
@@ -249,9 +250,14 @@ export class BookingsService {
               id: found.tour.id,
               tourCode: found.tour.tourCode,
               name: found.tour.name,
+              description: found.tour.description,
               price: found.tour.price,
               childPrice: found.tour.childPrice,
               images: found.tour.images,
+              highlights: found.tour.highlights || [],
+              itinerary: found.tour.itinerary || [],
+              transportation: found.tour.transportation || null,
+              duration: found.tour.duration || null,
               accommodation: found.tour.accommodation || null,
             },
           }
@@ -324,6 +330,20 @@ export class BookingsService {
 
     // Send email notification silently, don't block the request if it fails
     this.notificationsService.sendBookingStatusEmail(emailResult as Booking, previousStatus, newStatus).catch(e => console.error(e));
+
+    // Create in-app notification for relevant status transitions
+    const tourName = found?.tour?.name || 'ทัวร์';
+    const isConfirmed = previousStatus === BookingStatus.AWAITING_APPROVAL && newStatus === BookingStatus.CONFIRMED;
+    const isSuccess = previousStatus === BookingStatus.AWAITING_APPROVAL && newStatus === BookingStatus.SUCCESS;
+    const wasRejected = previousStatus === BookingStatus.AWAITING_APPROVAL && newStatus === BookingStatus.CANCELED;
+
+    if (isConfirmed) {
+      this.notificationsService.createBookingNotification(booking.userId, booking.id, NotificationType.BOOKING_CONFIRMED, tourName).catch(e => console.error(e));
+    } else if (isSuccess) {
+      this.notificationsService.createBookingNotification(booking.userId, booking.id, NotificationType.BOOKING_SUCCESS, tourName).catch(e => console.error(e));
+    } else if (wasRejected) {
+      this.notificationsService.createBookingNotification(booking.userId, booking.id, NotificationType.BOOKING_CANCELED, tourName).catch(e => console.error(e));
+    }
 
     return emailResult;
   }
@@ -410,5 +430,38 @@ export class BookingsService {
         }
         : null,
     };
+  }
+
+  async findByScheduleId(scheduleId: number): Promise<any[]> {
+    const bookings = await this.bookingsRepository.find({
+      where: {
+        scheduleId,
+        status: Not(In([BookingStatus.CANCELED, BookingStatus.REFUND_COMPLETED])),
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      relations: ['user'],
+    });
+
+    const found = this.findScheduleInData(scheduleId);
+
+    return bookings.map((booking) => ({
+      ...booking,
+      schedule: found
+        ? {
+          ...found.schedule,
+          tour: {
+            id: found.tour.id,
+            tourCode: found.tour.tourCode,
+            name: found.tour.name,
+            price: found.tour.price,
+            childPrice: found.tour.childPrice,
+            images: found.tour.images,
+            accommodation: found.tour.accommodation || null,
+          },
+        }
+        : null,
+    }));
   }
 }

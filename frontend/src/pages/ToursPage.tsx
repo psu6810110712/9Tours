@@ -228,7 +228,7 @@ export default function ToursPage() {
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-        <div className="rounded-[2rem] bg-[linear-gradient(135deg,#f8fafc,#eef4ff)] px-4 py-6 sm:px-6">
+        <div className="rounded-[2rem] px-4 py-6 sm:px-6">
           <SearchBar
             search={search}
             setSearch={setSearch}

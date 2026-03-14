@@ -1,4 +1,4 @@
-﻿import {
+import {
   Body,
   Controller,
   Get,
@@ -33,11 +33,11 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { refresh_token, rememberMe, ...result } = await this.authService.register(
+    const { refresh_token, ...result } = await this.authService.register(
       createUserDto,
       this.extractSessionContext(req),
     );
-    this.setRefreshCookie(res, refresh_token, rememberMe);
+    this.setRefreshCookie(res, refresh_token, false);
     return result;
   }
 
@@ -96,11 +96,11 @@ export class AuthController {
       throw new UnauthorizedException('ไม่พบ refresh token');
     }
 
-    const { refresh_token, rememberMe, ...result } = await this.authService.refreshToken(
+    const { refresh_token, ...result } = await this.authService.refreshToken(
       token,
       this.extractSessionContext(req),
     );
-    this.setRefreshCookie(res, refresh_token, rememberMe);
+    this.setRefreshCookie(res, refresh_token, false);
     return result;
   }
 

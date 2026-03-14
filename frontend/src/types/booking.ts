@@ -12,6 +12,7 @@ export interface Payment {
 export interface Tour {
   id: number
   name: string
+  description?: string
   price: number
   tourCode?: string
   childPrice?: number
@@ -19,12 +20,18 @@ export interface Tour {
   maxPeople?: number
   images: string[]
   accommodation?: string
+  duration?: string | null
+  transportation?: string | null
+  highlights?: string[]
+  itinerary?: { day?: number; time: string; title: string; description: string }[]
 }
 
 export interface Schedule {
   id: number
   startDate: string
   endDate: string
+  timeSlot?: string | null
+  roundName?: string | null
   tour: Tour
 }
 

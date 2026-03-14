@@ -88,9 +88,10 @@ interface RailShellProps {
   onPrev: () => void
   onNext: () => void
   className?: string
+  showFade?: boolean
 }
 
-function RailShell({ children, scrollRef, canScrollLeft, canScrollRight, onPrev, onNext, className = '' }: RailShellProps) {
+function RailShell({ children, scrollRef, canScrollLeft, canScrollRight, onPrev, onNext, className = '', showFade = false }: RailShellProps) {
   return (
     <div className="relative">
       <div
@@ -101,8 +102,8 @@ function RailShell({ children, scrollRef, canScrollLeft, canScrollRight, onPrev,
         {children}
       </div>
 
-      {canScrollLeft && <div className="ui-rail-fade-left" />}
-      {canScrollRight && <div className="ui-rail-fade-right" />}
+      {showFade && canScrollLeft && <div className="ui-rail-fade-left" />}
+      {showFade && canScrollRight && <div className="ui-rail-fade-right" />}
 
       {canScrollLeft && (
         <ScrollerArrowButton
@@ -177,14 +178,16 @@ export default function HomePage() {
     })
   }
 
-  const canSubmitHeroSearch = search.trim().length > 0
+  const canSubmitHeroSearch = search.trim().length > 0 || selectedCats.size > 0 || Boolean(tourType)
 
   const handleSearch = () => {
     const trimmedSearch = search.trim()
-    if (!trimmedSearch) return
+    if (!trimmedSearch && selectedCats.size === 0 && !tourType) return
 
     const params = new URLSearchParams()
-    params.set('search', trimmedSearch)
+    if (trimmedSearch) {
+      params.set('search', trimmedSearch)
+    }
     if (tourType) params.set('tourType', tourType)
     if (selectedCats.size > 0) {
       params.set('categories', [...selectedCats].join(','))
@@ -218,51 +221,35 @@ export default function HomePage() {
           className="relative overflow-hidden rounded-[2rem]"
           style={{ backgroundImage: 'url(/hero-bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
         >
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.22),rgba(15,23,42,0.58))]" />
+          <div className="absolute inset-0 bg-black/30" />
           <div className="relative z-10 px-5 py-12 text-center text-white sm:px-8 sm:py-14 lg:px-12 lg:py-16">
             <div className="mx-auto max-w-3xl">
-              <h1 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">มีสถานที่ในใจแล้วหรือยัง?</h1>
-              <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
-                เที่ยวทั่วไทย ราคาดี จองง่าย เลือกทริปที่ใช่แล้วออกเดินทางได้ทันที
-              </p>
+              <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">เลือกสไตล์ที่ชอบ แล้วหาทริปที่ใช่</h1>
             </div>
 
-            <div className="mt-8 flex justify-center">
-              <div className="relative inline-grid grid-cols-2 rounded-full border border-white/20 bg-white/10 p-1 backdrop-blur-md">
-                <div
-                  className="absolute inset-y-1 rounded-full bg-[var(--color-accent)] shadow-md transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)]"
-                  style={{
-                    width: 'calc(50% - 4px)',
-                    left: tourType === 'package' ? 'calc(50% + 2px)' : '4px',
-                    opacity: tourType ? 1 : 0,
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setTourType(tourType === 'one_day' ? '' : 'one_day')}
-                  className={`relative z-10 flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-semibold transition-colors sm:px-5 ${tourType === 'one_day' ? 'text-white' : 'text-white/65 hover:text-white/95'}`}
-                >
-                  <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <rect x="2" y="7" width="20" height="14" rx="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 14l1.5 1.5L14 12" />
-                  </svg>
-                  วันเดย์ทริป
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTourType(tourType === 'package' ? '' : 'package')}
-                  className={`relative z-10 flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-semibold transition-colors sm:px-5 ${tourType === 'package' ? 'text-white' : 'text-white/65 hover:text-white/95'}`}
-                >
-                  <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0 7-7 7 7M5 10v10a1 1 0 001 1h3m10-11 2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                  แพ็กเกจพร้อมที่พัก
-                </button>
-              </div>
+
+            <div className="mx-auto mt-4 max-w-3xl text-center text-white">
+              <p className="mt-10 text-sm font-semibold text-white/90 sm:text-[24px]">กำลังมองหาทริปแนวไหนอยู่? เลือกแล้วกดค้นหาเลย</p>
             </div>
 
-            <div className="mt-8">
+            <div className="mx-auto mt-4 flex max-w-4xl flex-wrap justify-center gap-3">
+              {CATEGORIES.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  aria-pressed={selectedCats.has(category)}
+                  onClick={() => toggleCategory(category)}
+                  className={`ui-pressable rounded-full px-5 py-2.5 text-sm font-semibold sm:px-6 sm:text-[15px] ${selectedCats.has(category)
+                    ? 'bg-[var(--color-accent)] text-white shadow-[0_10px_22px_rgba(245,166,35,0.22)]'
+                    : 'bg-white/90 text-gray-700 shadow-[0_8px_18px_rgba(15,23,42,0.08)] hover:bg-[rgba(245,166,35,0.85)] hover:text-white hover:shadow-[0_10px_20px_rgba(245,166,35,0.18)]'
+                    }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-6">
               <SearchBar
                 search={search}
                 setSearch={setSearch}
@@ -271,24 +258,13 @@ export default function HomePage() {
                 childrenCount={childrenCount}
                 setChildrenCount={setChildrenCount}
                 onSearch={handleSearch}
+                showGuests={false}
                 searchDisabled={!canSubmitHeroSearch}
+                className="max-w-4xl"
+                transparent
+                tourType={tourType}
+                setTourType={setTourType}
               />
-            </div>
-
-            <div className="mx-auto mt-5 flex max-w-3xl flex-wrap justify-center gap-2.5">
-              {CATEGORIES.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() => toggleCategory(category)}
-                  className={`ui-pressable rounded-full px-4 py-2 text-sm font-semibold ${selectedCats.has(category)
-                    ? 'bg-[var(--color-accent)] text-white shadow-sm'
-                    : 'bg-white/90 text-gray-700 hover:bg-white'
-                    }`}
-                >
-                  {category}
-                </button>
-              ))}
             </div>
           </div>
         </section>
@@ -349,6 +325,7 @@ export default function HomePage() {
               onPrev={() => scrollRow(tourScrollRef, -300)}
               onNext={() => scrollRow(tourScrollRef, 300)}
               className="pb-2"
+              showFade
             >
               {displayedTours.map((tour) => (
                 <div key={tour.id} className="w-[292px] flex-shrink-0">
@@ -375,6 +352,7 @@ export default function HomePage() {
                 onPrev={() => scrollRow(recommendationScrollRef, -280)}
                 onNext={() => scrollRow(recommendationScrollRef, 280)}
                 className="pb-2"
+                showFade
               >
                 {recommendedTours.map((tour) => (
                   <div key={tour.id} className="w-[292px] flex-shrink-0">

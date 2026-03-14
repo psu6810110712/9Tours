@@ -5,6 +5,7 @@ import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
 import { buildDisplayName } from '../utils/profileValidation'
+import NotificationBell from './NotificationBell'
 
 const NAV_LINKS = [
   { label: 'หน้าแรก', path: '/' },
@@ -14,7 +15,8 @@ const NAV_LINKS = [
 
 const ADMIN_LINKS = [
   { label: 'แดชบอร์ด', path: '/admin/dashboard', match: (pathname: string) => pathname === '/admin/dashboard' },
-  { label: 'จัดการทัวร์', path: '/admin/tours', match: (pathname: string) => pathname.startsWith('/admin/tours') },
+  { label: 'จัดการทัวร์', path: '/admin/tours', match: (pathname: string) => pathname === '/admin/tours' || pathname === '/admin/tours/create' || pathname.startsWith('/admin/tours/edit') },
+  { label: 'ภาพรวมทัวร์', path: '/admin/tour-overview', match: (pathname: string) => pathname === '/admin/tour-overview' },
   { label: 'ตรวจสอบสลิป', path: '/admin/bookings', match: (pathname: string) => pathname.startsWith('/admin/bookings') },
 ]
 
@@ -135,6 +137,10 @@ export default function Navbar() {
                   >
                     การจองของฉัน
                   </Link>
+                ) : null}
+
+                {user.role === 'customer' && user.profileCompleted ? (
+                  <NotificationBell />
                 ) : null}
 
                 {user.role === 'customer' && !user.profileCompleted ? (
