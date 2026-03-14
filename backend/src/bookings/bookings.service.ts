@@ -189,6 +189,16 @@ export class BookingsService {
 
     this.toursService.updateScheduleBookedCount(scheduleId, seatsToHold);
 
+    // Notify all admins about the new booking
+    this.notificationsService.notifyAdminsNewBooking({
+      bookingId: booking.id,
+      tourName: tour.name,
+      customerName: normalizedContactName,
+      paxCount,
+      totalPrice,
+      scheduleDate: schedule.startDate || undefined,
+    }).catch((e) => console.error(e));
+
     return {
       ...booking,
       schedule: {

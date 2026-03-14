@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Notification, NotificationType } from './entities/notification.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 
 @Injectable()
 export class NotificationsService {
@@ -12,6 +13,8 @@ export class NotificationsService {
     constructor(
         @InjectRepository(Notification)
         private readonly notificationRepo: Repository<Notification>,
+        @InjectRepository(User)
+        private readonly userRepo: Repository<User>,
         private readonly mailerService: MailerService,
     ) { }
 
@@ -78,6 +81,63 @@ export class NotificationsService {
             { userId, isRead: false },
             { isRead: true },
         );
+    }
+
+    // ─── Admin Notification Methods ──────────────────────────────────
+
+    async notifyAdminsNewBooking(details: {
+        bookingId: number;
+        tourName: string;
+        customerName: string;
+        paxCount: number;
+        totalPrice: number;
+        scheduleDate?: string;
+    }) {
+        const admins = await this.userRepo.find({ where: { role: UserRole.ADMIN } });
+        if (admins.length === 0) return;
+
+        const title = 'มีการจองใหม่';
+        const priceFmt = Number(details.totalPrice).toLocaleString();
+        const datePart = details.scheduleDate ? ` | วันเดินทาง: ${details.scheduleDate}` : '';
+        const message = `การจอง #${details.bookingId} — "${details.tourName}" โดย ${details.customerName} (${details.paxCount} ท่าน) ยอด ฿${priceFmt}${datePart}`;
+
+        const notifications = admins.map((admin) =>
+            this.notificationRepo.create({
+                userId: admin.id,
+                bookingId: details.bookingId,
+                type: NotificationType.NEW_BOOKING,
+                title,
+                message,
+            }),
+        );
+
+        await this.notificationRepo.save(notifications);
+    }
+
+    async notifyAdminsPaymentUploaded(details: {
+        bookingId: number;
+        tourName: string;
+        customerName: string;
+        amount: number;
+    }) {
+        const admins = await this.userRepo.find({ where: { role: UserRole.ADMIN } });
+        if (admins.length === 0) return;
+
+        const title = 'มีสลิปรอตรวจสอบ';
+        const amountFmt = Number(details.amount).toLocaleString();
+        const message = `การจอง #${details.bookingId} — "${details.tourName}" | ${details.customerName} อัปโหลดสลิป ฿${amountFmt} รอตรวจสอบ`;
+
+        const notifications = admins.map((admin) =>
+            this.notificationRepo.create({
+                userId: admin.id,
+                bookingId: details.bookingId,
+                type: NotificationType.PAYMENT_UPLOADED,
+                title,
+                message,
+            }),
+        );
+
+        await this.notificationRepo.save(notifications);
     }
 
     // ─── Email Notification (existing) ───────────────────────────────

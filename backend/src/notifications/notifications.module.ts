@@ -5,10 +5,11 @@ import { ConfigService } from '@nestjs/config';
 import { Notification } from './entities/notification.entity';
 import { NotificationsService } from './notifications.service';
 import { NotificationsController } from './notifications.controller';
+import { User } from '../users/entities/user.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Notification]),
+        TypeOrmModule.forFeature([Notification, User]),
         MailerModule.forRootAsync({
             inject: [ConfigService],
             useFactory: (config: ConfigService) => ({

@@ -1,4 +1,4 @@
-﻿import {
+import {
   Injectable,
   NotFoundException,
   BadRequestException,
@@ -9,6 +9,7 @@ import { Payment } from './entities/payment.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { ToursService } from '../tours/tours.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PaymentsService {
@@ -18,6 +19,7 @@ export class PaymentsService {
     @InjectRepository(Booking)
     private bookingsRepository: Repository<Booking>,
     private toursService: ToursService,
+    private notificationsService: NotificationsService,
   ) { }
 
   async createPayment(
@@ -64,6 +66,22 @@ export class PaymentsService {
 
     booking.status = BookingStatus.AWAITING_APPROVAL;
     await this.bookingsRepository.save(booking);
+
+    // Notify admins about the uploaded slip
+    let tourName = 'ทัวร์';
+    const tours = this.toursService.findAll({ admin: 'true' });
+    for (const t of tours) {
+      if (t.schedules?.some((s: any) => s.id === booking.scheduleId)) {
+        tourName = t.name;
+        break;
+      }
+    }
+    this.notificationsService.notifyAdminsPaymentUploaded({
+      bookingId: booking.id,
+      tourName,
+      customerName: booking.contactName || 'ลูกค้า',
+      amount: booking.totalPrice,
+    }).catch((e) => console.error(e));
 
     return {
       message: 'การชำระเงินสำเร็จ',

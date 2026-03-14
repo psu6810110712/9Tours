@@ -143,6 +143,10 @@ export default function Navbar() {
                   <NotificationBell />
                 ) : null}
 
+                {isAdmin ? (
+                  <NotificationBell />
+                ) : null}
+
                 {user.role === 'customer' && !user.profileCompleted ? (
                   <Link
                     to="/auth/complete-profile"
