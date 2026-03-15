@@ -7,6 +7,7 @@ import { DashboardStatsDaily } from './entities/dashboard-stats-daily.entity';
 import { Booking } from '../bookings/entities/booking.entity';
 import { User } from '../users/entities/user.entity';
 import { Tour } from '../tours/entities/tour.entity';
+import { TourSchedule } from '../tours/entities/tour-schedule.entity';
 import { DashboardSeederService } from './dashboard.seeder';
 import { BehaviorEvent } from './entities/behavior-event.entity';
 import { EventsController } from './events.controller';
@@ -16,7 +17,7 @@ import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([TourView, DashboardStatsDaily, Booking, User, Tour, BehaviorEvent]),
+        TypeOrmModule.forFeature([TourView, DashboardStatsDaily, Booking, User, Tour, TourSchedule, BehaviorEvent]),
         ToursModule,
     ],
     providers: [DashboardService, DashboardSeederService, EventsService, OptionalJwtAuthGuard],
