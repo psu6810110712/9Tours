@@ -12,19 +12,24 @@ import { User } from '../users/entities/user.entity';
         TypeOrmModule.forFeature([Notification, User]),
         MailerModule.forRootAsync({
             inject: [ConfigService],
-            useFactory: (config: ConfigService) => ({
-                transport: {
-                    host: config.get('SMTP_HOST', 'sandbox.smtp.mailtrap.io'),
-                    port: config.get('SMTP_PORT', 2525),
-                    auth: {
-                        user: config.get('SMTP_USER'),
-                        pass: config.get('SMTP_PASS'),
+            useFactory: (config: ConfigService) => {
+                const port = Number(config.get('SMTP_PORT', 2525));
+
+                return {
+                    transport: {
+                        host: config.get('SMTP_HOST', 'sandbox.smtp.mailtrap.io'),
+                        port,
+                        secure: port === 465,
+                        auth: {
+                            user: config.get('SMTP_USER'),
+                            pass: config.get('SMTP_PASS'),
+                        },
                     },
-                },
-                defaults: {
-                    from: config.get('SMTP_FROM', '"9Tours Booking" <noreply@9tours.com>'),
-                },
-            }),
+                    defaults: {
+                        from: config.get('SMTP_FROM', '"9Tours Booking" <noreply@9tours.com>'),
+                    },
+                };
+            },
         }),
     ],
     controllers: [NotificationsController],

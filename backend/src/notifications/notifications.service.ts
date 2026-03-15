@@ -150,7 +150,10 @@ export class NotificationsService {
         // Also notify if it's canceled from awaiting_approval (rejected)
         const wasRejected = previousStatus === BookingStatus.AWAITING_APPROVAL && newStatus === BookingStatus.CANCELED;
 
-        if (!validTransition && !wasRejected) return;
+        if (!validTransition && !wasRejected) {
+            this.logger.debug(`Skip booking status email for booking ${booking.id}: ${previousStatus} -> ${newStatus}`);
+            return;
+        }
 
         try {
             const email = booking.contactEmail || booking.user?.email;
@@ -210,7 +213,9 @@ export class NotificationsService {
 
             this.logger.log(`Status email sent to ${email} for booking ${booking.id}`);
         } catch (error) {
-            this.logger.error(`Failed to send email for booking ${booking.id}`, error);
+            const message = error instanceof Error ? error.message : String(error);
+            const stack = error instanceof Error ? error.stack : undefined;
+            this.logger.error(`Failed to send email for booking ${booking.id}: ${message}`, stack);
         }
     }
 }

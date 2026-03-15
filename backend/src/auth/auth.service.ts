@@ -73,14 +73,7 @@ export class AuthService {
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        phone: user.phone,
-        profileCompleted: Boolean(user.prefix && user.name && user.email && user.phone),
-      },
+      user: this.usersService.toPublicUser(user),
     };
   }
 
@@ -121,8 +114,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-    const { password, ...result } = user as any;
-    return result;
+    return this.usersService.toPublicUser(user);
   }
 
   async logout(refreshToken?: string) {

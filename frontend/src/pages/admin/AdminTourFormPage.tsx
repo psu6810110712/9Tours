@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { isAxiosError } from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
@@ -246,9 +246,8 @@ export default function AdminTourFormPage() {
   const [bulkFrom, setBulkFrom] = useState('')
   const [bulkTo, setBulkTo] = useState('')
   const [bulkCapacity, setBulkCapacity] = useState(20)
-  const [bulkDuration, setBulkDuration] = useState(1)
-  const [bulkDays, setBulkDays] = useState<Set<number>>(new Set([6, 0]))
-  const [roundTemplates, setRoundTemplates] = useState<{ roundName: string; timeSlot: string }[]>([{ roundName: '', timeSlot: '' }])
+  const [bulkDuration, setBulkDuration] = useState<number>(1)
+  const [bulkDays, setBulkDays] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     if (!isEditing) return
@@ -368,12 +367,12 @@ export default function AdminTourFormPage() {
     setImages((prev) => prev.filter((_, index) => index !== indexToRemove))
   }
 
-  const addSchedule = () => {
-    setSchedules([...schedules, { startDate: '', endDate: '', timeSlot: '', roundName: '', maxCapacity: 50, enabled: true }])
-  }
-
   const removeSchedule = (index: number) => {
     setSchedules(schedules.filter((_, itemIndex) => itemIndex !== index))
+  }
+
+  const removeSchedules = (indicesToRemove: number[]) => {
+    setSchedules(schedules.filter((_, itemIndex) => !indicesToRemove.includes(itemIndex)))
   }
 
   const updateSchedule = (index: number, field: keyof ScheduleRow, value: string | number | boolean) => {
@@ -402,13 +401,9 @@ export default function AdminTourFormPage() {
     const current = new Date(bulkFrom)
     const end = new Date(bulkTo)
 
-    let rounds = [{ roundName: '', timeSlot: '' }]
-    if (bookingMode === 'join') {
-      const validRounds = roundTemplates.filter((round) => round.timeSlot || round.roundName)
-      if (validRounds.length > 0) rounds = validRounds
-    } else {
-      rounds = [{ roundName: 'Private Group', timeSlot: '' }]
-    }
+    // Create one single schedule round per day automatically since
+    // user requested to remove explicit timeslot/roundName UI definition.
+    const rounds = [{ roundName: '', timeSlot: '' }]
 
     while (current <= end) {
       if (bulkDays.has(current.getDay())) {
@@ -574,9 +569,9 @@ export default function AdminTourFormPage() {
         <form noValidate onSubmit={handleSubmit} className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid items-start gap-8 xl:grid-cols-[minmax(320px,365px)_minmax(0,1fr)]">
             <aside className="hidden self-start xl:block">
-              <div className="fixed top-42 w-[360px] 2xl:w-[380px]">
+              <div className="fixed top-48 w-[360px] 2xl:w-[380px]">
                 <div className="max-h-[calc(100vh-7rem)] overflow-y-auto pr-2">
-                <AdminTourPreviewCard tour={previewTour} />
+                  <AdminTourPreviewCard tour={previewTour} />
                 </div>
               </div>
             </aside>
@@ -834,15 +829,13 @@ export default function AdminTourFormPage() {
                         bulkCapacity={bulkCapacity}
                         bulkDuration={bulkDuration}
                         bulkDays={bulkDays}
-                        roundTemplates={roundTemplates}
                         setBulkFrom={setBulkFrom}
                         setBulkTo={setBulkTo}
                         setBulkCapacity={setBulkCapacity}
                         setBulkDuration={setBulkDuration}
                         setBulkDays={setBulkDays}
-                        setRoundTemplates={setRoundTemplates}
-                        addSchedule={addSchedule}
                         removeSchedule={removeSchedule}
+                        removeSchedules={removeSchedules}
                         updateSchedule={updateSchedule}
                         handleBulkAdd={handleBulkAdd}
                       />

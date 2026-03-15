@@ -18,30 +18,26 @@ interface BookingSidebarProps {
 export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const today = new Date().toISOString().slice(0, 10)
+  const today = useRef(new Date().toISOString().slice(0, 10)).current
 
-  const upcomingSchedules = useMemo(
-    () => tour?.schedules
-      ? tour.schedules
-        .filter((schedule: TourSchedule) => schedule.startDate >= today)
-        .sort((a: TourSchedule, b: TourSchedule) => a.startDate.localeCompare(b.startDate))
-      : [],
-    [tour?.schedules, today],
-  )
+  const upcomingSchedules = tour.schedules
+    .filter((schedule: TourSchedule) => schedule.startDate >= today)
+    .sort((a: TourSchedule, b: TourSchedule) => a.startDate.localeCompare(b.startDate))
 
-  const [selectedSchedule, setSelectedSchedule] = useState<TourSchedule | null>(
-    upcomingSchedules.find((schedule: TourSchedule) => schedule.maxCapacity - schedule.currentBooked > 0)
-    ?? upcomingSchedules[0]
-    ?? null,
-  )
+  const defaultSelectedSchedule = upcomingSchedules.find(
+    (schedule: TourSchedule) => schedule.maxCapacity - schedule.currentBooked > 0,
+  ) ?? upcomingSchedules[0] ?? null
+
+  const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(defaultSelectedSchedule?.id ?? null)
   const [selectedMonth, setSelectedMonth] = useState<string>('all')
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [availableSeatsData, setAvailableSeatsData] = useState<{ [key: number]: number | null }>({})
   const [pendingBookingMap, setPendingBookingMap] = useState<Map<number, number>>(new Map())
-  const [fetchKey, setFetchKey] = useState(0)
+  const [fetchKey, setFetchKey] = useState(1)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const selectedSchedule = upcomingSchedules.find((schedule) => schedule.id === selectedScheduleId) ?? defaultSelectedSchedule
 
   const availableMonths = useMemo(() => {
     const months = new Set<string>()
@@ -53,14 +49,6 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   }, [upcomingSchedules])
 
   useEffect(() => {
-    setSelectedSchedule(
-      upcomingSchedules.find((schedule: TourSchedule) => schedule.maxCapacity - schedule.currentBooked > 0)
-      ?? upcomingSchedules[0]
-      ?? null,
-    )
-  }, [tour.id, upcomingSchedules])
-
-  useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         setFetchKey((prev) => prev + 1)
@@ -68,7 +56,6 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
-    setFetchKey((prev) => prev + 1)
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
@@ -173,7 +160,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
           selectedMonth={selectedMonth}
           setSelectedMonth={setSelectedMonth}
           selectedSchedule={selectedSchedule}
-          setSelectedSchedule={setSelectedSchedule}
+          setSelectedSchedule={(schedule) => setSelectedScheduleId(schedule.id)}
           scrollRef={scrollRef}
           availableSeatsData={availableSeatsData}
         />
