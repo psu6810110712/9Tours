@@ -21,12 +21,15 @@ export interface DashboardData {
     totalBookings: number;
     totalViews: number;
     totalCustomers: number;
+    totalPendingApprovals: number;
   };
   topTours: {
     rank: number;
     name: string;
     province: string;
     reviewCount: number;
+    bookingCount: number;
+    viewCount: number;
     popularityPercent: number;
     revenue: number;
   }[];
@@ -67,6 +70,7 @@ export const EMPTY_DASHBOARD_DATA: DashboardData = {
     totalBookings: 0,
     totalViews: 0,
     totalCustomers: 0,
+    totalPendingApprovals: 0,
   },
   topTours: [],
   bookingsByStatus: {},
@@ -132,6 +136,7 @@ function normalizeDashboardData(data: unknown): DashboardData {
       totalBookings: toNumber(source.summaryCards?.totalBookings),
       totalViews: toNumber(source.summaryCards?.totalViews),
       totalCustomers: toNumber(source.summaryCards?.totalCustomers),
+      totalPendingApprovals: toNumber(source.summaryCards?.totalPendingApprovals),
     },
     topTours: Array.isArray(source.topTours)
       ? source.topTours.map((tour, index) => ({
@@ -139,6 +144,8 @@ function normalizeDashboardData(data: unknown): DashboardData {
         name: tour.name || '-',
         province: tour.province || '-',
         reviewCount: toNumber(tour.reviewCount),
+        bookingCount: toNumber((tour as { bookingCount?: unknown }).bookingCount ?? tour.reviewCount),
+        viewCount: toNumber((tour as { viewCount?: unknown }).viewCount),
         popularityPercent: toNumber(tour.popularityPercent),
         revenue: toNumber(tour.revenue),
       }))

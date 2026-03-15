@@ -23,11 +23,11 @@ import ThailandMap from '../../components/ThailandMap'
 const COLORS = ['#F5A623', '#3B82F6', '#10B981', '#EF4444', '#8B5CF6', '#EC4899']
 const PIE_COLORS = ['#F5A623', '#3B82F6', '#10B981', '#8B5CF6']
 const PROVINCE_METRIC_OPTIONS = [
-  { key: 'views', label: 'Views', emptyLabel: 'No view data yet' },
-  { key: 'bookings', label: 'Bookings', emptyLabel: 'No booking data yet' },
-  { key: 'revenue', label: 'Revenue', emptyLabel: 'No revenue data yet' },
-  { key: 'tourCount', label: 'Tour count', emptyLabel: 'No tours in this province yet' },
-  { key: 'conversionRate', label: 'Conversion rate', emptyLabel: 'No conversion data yet' },
+  { key: 'views', label: 'จำนวนวิว', emptyLabel: 'ยังไม่มีข้อมูลการเข้าชม' },
+  { key: 'bookings', label: 'จำนวนการจอง', emptyLabel: 'ยังไม่มีข้อมูลการจอง' },
+  { key: 'revenue', label: 'รายได้รวม', emptyLabel: 'ยังไม่มีข้อมูลรายได้' },
+  { key: 'tourCount', label: 'จำนวนทัวร์', emptyLabel: 'ยังไม่มีทัวร์ในจังหวัดนี้' },
+  { key: 'conversionRate', label: 'อัตราแปลงผล', emptyLabel: 'ยังไม่มีข้อมูลอัตราแปลงผล' },
 ] as const
 const REGION_OPTIONS = [
   { value: 'all', label: 'ทั้งหมด' },
@@ -49,9 +49,17 @@ function formatLocalDateInputValue(date: Date) {
 }
 
 function formatMetricValue(metric: ProvinceMetricKey, value: number) {
+  if (metric === 'views') return `${value.toLocaleString()} วิว`
+  if (metric === 'bookings') return `${value.toLocaleString()} รายการจอง`
   if (metric === 'revenue') return `฿${value.toLocaleString()}`
+  if (metric === 'tourCount') return `${value.toLocaleString()} ทัวร์`
   if (metric === 'conversionRate') return `${value.toFixed(1)}%`
   return value.toLocaleString()
+}
+
+function truncateTourName(name: string, maxLength = 32) {
+  if (name.length <= maxLength) return name
+  return `${name.slice(0, maxLength).trimEnd()}...`
 }
 
 function SummaryCard({ label, value, accent }: { label: string; value: string; accent: string }) {
@@ -108,10 +116,10 @@ export default function AdminDashboardPage() {
   const selectedProvinceStats = provinceMetricStats[selectedProvinceMetric] ?? []
 
   const statusChartData = [
-    { name: 'Pending', value: (bookingsByStatus.pending_payment || 0) + (bookingsByStatus.awaiting_approval || 0), color: '#3B82F6' },
-    { name: 'Paid', value: bookingsByStatus.success || 0, color: '#10B981' },
-    { name: 'Cancelled', value: bookingsByStatus.canceled || 0, color: '#EF4444' },
-    { name: 'Refund', value: (bookingsByStatus.refund_pending || 0) + (bookingsByStatus.refund_completed || 0), color: '#F5A623' },
+    { name: 'รอชำระ', value: (bookingsByStatus.pending_payment || 0) + (bookingsByStatus.awaiting_approval || 0), color: '#3B82F6' },
+    { name: 'ชำระแล้ว', value: bookingsByStatus.success || 0, color: '#10B981' },
+    { name: 'ยกเลิก', value: bookingsByStatus.canceled || 0, color: '#EF4444' },
+    { name: 'คืนเงิน', value: (bookingsByStatus.refund_pending || 0) + (bookingsByStatus.refund_completed || 0), color: '#F5A623' },
   ]
 
   const pendingApproval = bookingsByStatus.awaiting_approval || 0
@@ -130,7 +138,7 @@ export default function AdminDashboardPage() {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-5">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900">แดชบอร์ด</h1>
       </div>
 
       <div className="ui-surface mb-5 rounded-[1.5rem] border border-gray-100 bg-white p-4">
@@ -204,7 +212,7 @@ export default function AdminDashboardPage() {
         <>
           {loading && (
             <div className="mb-5 flex h-40 items-center justify-center rounded-[1.5rem] border border-gray-100 bg-white text-lg text-gray-400">
-              กำลังโหลด Dashboard...
+              กำลังโหลดแดชบอร์ด...
             </div>
           )}
 
@@ -223,9 +231,9 @@ export default function AdminDashboardPage() {
             <div className="space-y-5 lg:col-span-6">
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 <SummaryCard label="ยอดขายทั้งหมด" value={`฿${summaryCards.totalRevenue.toLocaleString()}`} accent="#F5A623" />
-                <SummaryCard label="คำสั่งซื้อ" value={summaryCards.totalBookings.toLocaleString()} accent="#3B82F6" />
+                <SummaryCard label="รายการจอง" value={summaryCards.totalBookings.toLocaleString()} accent="#3B82F6" />
                 <SummaryCard label="การดู" value={summaryCards.totalViews.toLocaleString()} accent="#10B981" />
-                <SummaryCard label="ลูกค้าใหม่" value={summaryCards.totalCustomers.toLocaleString()} accent="#EF4444" />
+                <SummaryCard label="รออนุมัติ" value={summaryCards.totalPendingApprovals.toLocaleString()} accent="#EF4444" />
               </div>
 
               <div className="ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-5">
@@ -234,10 +242,10 @@ export default function AdminDashboardPage() {
                   <p className="text-xs text-gray-400">ค้นหาแล้วเหลือ {filteredTopTours.length} รายการ</p>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="min-w-[680px] w-full text-sm">
+                  <table className="min-w-[600px] w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
-                        <th className="pb-3">#</th>
+                      <tr className="border-b border-gray-100 text-left text-md text-gray-500">
+                        <th className="w-10 pb-3">#</th>
                         <th className="pb-3">ชื่อทัวร์</th>
                         <th className="pb-3">ความนิยม</th>
                         <th className="pb-3 text-right">ยอดขาย</th>
@@ -247,19 +255,20 @@ export default function AdminDashboardPage() {
                       {filteredTopTours.map((tour) => (
                         <tr key={tour.rank} className="border-t border-gray-100">
                           <td className="py-3 font-mono text-gray-400">{String(tour.rank).padStart(2, '0')}</td>
-                          <td className="py-3">
-                            <p className="font-medium text-gray-800">{tour.name}</p>
+                          <td className="py-3 pr-3">
+                            <p className="max-w-[15rem] truncate font-medium text-gray-800">{truncateTourName(tour.name, 28)}</p>
                             <p className="text-xs text-gray-400">{tour.province}</p>
                           </td>
-                          <td className="py-3 w-56">
+                          <td className="py-3 w-36">
                             <div className="flex items-center gap-2">
-                              <div className="h-2 flex-1 rounded-full bg-gray-100">
-                                <div className="h-2 rounded-full" style={{ width: `${tour.popularityPercent}%`, background: 'linear-gradient(90deg, #F5A623, #F59E0B)' }} />
+                              <div className="h-2 w-20 rounded-full bg-gray-100">
+                                <div className="h-2 rounded-full bg-amber-400" style={{ width: `${Math.min(tour.popularityPercent, 100)}%` }} />
                               </div>
-                              <span className="w-10 text-right text-xs text-gray-500">{tour.popularityPercent}%</span>
+                              <span className="w-9 text-right text-xs text-gray-500">{tour.popularityPercent}%</span>
                             </div>
+                            <p className="mt-1 text-xs text-gray-400">{tour.bookingCount.toLocaleString()} จอง • {tour.viewCount.toLocaleString()} วิว</p>
                           </td>
-                          <td className="py-3 text-right text-gray-700">{tour.revenue.toLocaleString()}</td>
+                          <td className="py-3 text-right text-gray-700">{tour.revenue > 0 ? `฿${tour.revenue.toLocaleString()}` : 'ยังไม่มีรายได้'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -340,14 +349,14 @@ export default function AdminDashboardPage() {
 
                 <div className="space-y-5 md:col-span-2">
                   <div className="ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-5 text-center">
-                    <h2 className="mb-2 font-bold text-gray-900">Conversion Rate</h2>
+                    <h2 className="mb-2 font-bold text-gray-900">อัตราแปลงผล</h2>
                     <p className="text-4xl font-extrabold text-yellow-500">{conversionRate}%</p>
                     <p className="mt-1 text-xs text-gray-400">จากผู้เข้าชมสู่การชำระเงิน</p>
                   </div>
 
                   <div className="ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-5">
                     <div className="mb-3 flex items-center justify-between gap-3">
-                      <h2 className="text-sm font-bold text-gray-900">Province activity</h2>
+                      <h2 className="text-sm font-bold text-gray-900">ภาพรวมตามจังหวัด</h2>
                       <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600">
                         {selectedProvinceMetricOption.label}
                       </span>
@@ -395,8 +404,8 @@ export default function AdminDashboardPage() {
               <div className="ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-5">
                 <div className="mb-4 flex flex-col gap-3">
                   <div className="flex items-center justify-between gap-3">
-                    <h2 className="font-bold text-gray-900">Thailand by province</h2>
-                    <p className="text-xs text-gray-400">Switch the metric to compare provinces from different angles</p>
+                    <h2 className="font-bold text-gray-900">แผนที่ประเทศไทยแยกตามจังหวัด</h2>
+                    <p className="text-xs text-gray-400">สลับตัวชี้วัดเพื่อดูภาพจังหวัดในหลายมุมมอง</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {PROVINCE_METRIC_OPTIONS.map((option) => (
@@ -422,11 +431,12 @@ export default function AdminDashboardPage() {
                       metricLabel={selectedProvinceMetricOption.label}
                       emptyLabel={selectedProvinceMetricOption.emptyLabel}
                       valueFormatter={(value) => formatMetricValue(selectedProvinceMetric, value)}
+                      shareFormatter={(percent) => `สัดส่วนบนแผนที่ ${percent}%`}
                     />
                   </div>
                 ) : (
                   <div className="flex h-[440px] lg:h-[520px] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 text-sm text-gray-400">
-                    No province data available for this metric
+                    ยังไม่มีข้อมูลจังหวัดสำหรับตัวชี้วัดนี้
                   </div>
                 )}
               </div>

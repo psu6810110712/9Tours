@@ -89,6 +89,7 @@ interface ThailandMapProps {
   metricLabel: string
   emptyLabel: string
   valueFormatter?: (value: number) => string
+  shareFormatter?: (percent: number) => string | null
 }
 
 interface HoveredProvince {
@@ -102,6 +103,7 @@ export default function ThailandMap({
   metricLabel,
   emptyLabel,
   valueFormatter = (value) => value.toLocaleString(),
+  shareFormatter = (percent) => `สัดส่วนบนแผนที่ ${percent}%`,
 }: ThailandMapProps) {
   const [hoveredProvince, setHoveredProvince] = useState<HoveredProvince | null>(null)
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
@@ -190,11 +192,16 @@ export default function ThailandMap({
           }}
         >
           <p className="text-sm font-semibold text-slate-900">{hoveredProvince.name}</p>
-          <p className="mt-1 text-xs text-slate-500">
-            {hoveredProvince.value > 0
-              ? `${valueFormatter(hoveredProvince.value)} ${metricLabel} · ${hoveredProvince.percent}%`
-              : emptyLabel}
-          </p>
+          {hoveredProvince.value > 0 ? (
+            <>
+              <p className="mt-1 text-xs text-slate-500">{valueFormatter(hoveredProvince.value)}</p>
+              {shareFormatter?.(hoveredProvince.percent) ? (
+                <p className="mt-0.5 text-[11px] text-slate-400">{shareFormatter(hoveredProvince.percent)}</p>
+              ) : null}
+            </>
+          ) : (
+            <p className="mt-1 text-xs text-slate-500">{emptyLabel}</p>
+          )}
         </div>
       )}
 

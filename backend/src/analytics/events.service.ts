@@ -5,6 +5,7 @@ import { createHash } from 'crypto';
 import { Repository } from 'typeorm';
 import { TrackEventDto } from './dto/track-event.dto';
 import { BehaviorEvent } from './entities/behavior-event.entity';
+import { TourView } from './entities/tour-view.entity';
 
 const REDACTED = '[REDACTED]';
 const BLOCKED_METADATA_KEYS = new Set([
@@ -29,6 +30,8 @@ export class EventsService {
   constructor(
     @InjectRepository(BehaviorEvent)
     private readonly behaviorEventsRepo: Repository<BehaviorEvent>,
+    @InjectRepository(TourView)
+    private readonly tourViewsRepo: Repository<TourView>,
     private readonly configService: ConfigService,
   ) {}
 
@@ -53,6 +56,16 @@ export class EventsService {
     });
 
     await this.behaviorEventsRepo.save(event);
+
+    if (dto.eventType === 'page_view' && dto.tourId) {
+      const tourView = new TourView();
+      tourView.tourId = dto.tourId;
+      tourView.userId = null as never;
+      tourView.sessionId = dto.sessionId;
+      tourView.browserInfo = this.normalizeUserAgent(context.userAgent) ?? '';
+      await this.tourViewsRepo.save(tourView);
+    }
+
     return { accepted: true as const };
   }
 
