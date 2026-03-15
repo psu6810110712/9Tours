@@ -12,6 +12,16 @@ export default function AdminTourOverview() {
     const [selectedSchedule, setSelectedSchedule] = useState<{ schedule: TourScheduleOverview, tourName: string } | null>(null)
     const [scheduleBookings, setScheduleBookings] = useState<Booking[]>([])
     const [loadingBookings, setLoadingBookings] = useState(false)
+    const [expandedTours, setExpandedTours] = useState<Set<number>>(new Set())
+
+    const toggleTour = (tourId: number) => {
+        setExpandedTours(prev => {
+            const next = new Set(prev)
+            if (next.has(tourId)) next.delete(tourId)
+            else next.add(tourId)
+            return next
+        })
+    }
     useEffect(() => {
         const load = async () => {
             try {
@@ -162,9 +172,15 @@ export default function AdminTourOverview() {
                 <div className="space-y-4">
                     {filtered.map((tour) => (
                         <div key={tour.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                            {/* Tour Header */}
-                            <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-50">
-                                {tour.images[0] ? (
+                                {/* Tour Header */}
+                                <div
+                                    onClick={() => toggleTour(tour.id)}
+                                    className="flex items-center gap-4 px-6 py-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50/50 transition-colors"
+                                >
+                                    <div className={`transition-transform duration-300 ${expandedTours.has(tour.id) ? 'rotate-90' : ''}`}>
+                                        <span className="text-gray-400 text-lg">▶</span>
+                                    </div>
+                                    {tour.images[0] ? (
                                     <img
                                         src={tour.images[0]}
                                         alt={tour.name}
@@ -196,11 +212,12 @@ export default function AdminTourOverview() {
                             </div>
 
                             {/* Schedules */}
-                            {tour.schedules.length === 0 ? (
-                                <p className="text-center text-gray-400 text-sm py-4">ไม่มีรอบในระบบ</p>
-                            ) : (
-                                <div className="divide-y divide-gray-50">
-                                    {tour.schedules.map((sc) => {
+                            {expandedTours.has(tour.id) && (
+                                tour.schedules.length === 0 ? (
+                                    <p className="text-center text-gray-400 text-sm py-4">ไม่มีรอบในระบบ</p>
+                                ) : (
+                                    <div className="divide-y divide-gray-50 bg-gray-50/30">
+                                        {tour.schedules.map((sc) => {
                                         const colors = getOccupancyColor(sc.occupancyPercent)
                                         return (
                                             <div
@@ -244,7 +261,8 @@ export default function AdminTourOverview() {
                                             </div>
                                         )
                                     })}
-                                </div>
+                                    </div>
+                                )
                             )}
                         </div>
                     ))}
