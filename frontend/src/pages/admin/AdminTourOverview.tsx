@@ -240,20 +240,27 @@ export default function AdminTourOverview() {
                                     <div className="divide-y divide-gray-50 bg-gray-50/30">
                                         {displaySchedules.map((sc) => {
                                             const colors = getOccupancyColor(sc.occupancyPercent)
-                                        return (
-                                            <div
-                                                key={sc.id}
-                                                onClick={() => handleScheduleClick(sc, tour.name)}
-                                                className="px-6 py-3 flex items-center gap-4 cursor-pointer hover:bg-yellow-50/50 transition-colors"
+                                            const isPast = new Date(sc.endDate).setHours(23, 59, 59, 999) < now.getTime();
+                                            
+                                            return (
+                                                <div
+                                                    key={sc.id}
+                                                    onClick={() => handleScheduleClick(sc, tour.name)}
+                                                    className={`px-6 py-3 flex items-center gap-4 cursor-pointer hover:bg-yellow-50/50 transition-colors ${isPast ? 'opacity-60 grayscale-[0.2]' : ''}`}
                                                 >
-                                                <div className="w-44 flex-shrink-0">
-                                                    <p className="text-sm font-medium text-gray-700">{sc.roundName || `รอบ ${sc.id}`}</p>
-                                                    <p className="text-xs text-gray-400">
-                                                        {formatDate(sc.startDate)}
-                                                        {sc.startDate !== sc.endDate ? ` – ${formatDate(sc.endDate)}` : ''}
-                                                        {sc.timeSlot ? ` • ${sc.timeSlot}` : ''}
-                                                    </p>
-                                                </div>
+                                                    <div className="w-44 flex-shrink-0">
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-sm font-medium text-gray-700">{sc.roundName || `รอบ ${sc.id}`}</p>
+                                                            {isPast && (
+                                                                <span className="px-1.5 py-0.5 bg-gray-200 text-gray-600 text-[10px] font-bold rounded uppercase">🏁 จบแล้ว</span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-gray-400">
+                                                            {formatDate(sc.startDate)}
+                                                            {sc.startDate !== sc.endDate ? ` – ${formatDate(sc.endDate)}` : ''}
+                                                            {sc.timeSlot ? ` • ${sc.timeSlot}` : ''}
+                                                        </p>
+                                                    </div>
 
                                                 {/* Occupancy Bar */}
                                                 <div className="flex-1">
