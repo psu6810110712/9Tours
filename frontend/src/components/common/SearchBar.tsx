@@ -126,9 +126,6 @@ export default function SearchBar({
   const segmentClasses = transparent
     ? 'border-slate-200/80 bg-white/90 shadow-[inset_0_0_0_0.25px_rgba(226,232,240,0.8)]'
     : 'border-slate-200 bg-slate-50'
-  const activeSegmentClasses = transparent
-    ? 'bg-[var(--color-accent)]'
-    : 'bg-[var(--color-accent)] shadow-md'
   const fieldClasses = 'bg-white/90 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.8)]'
   const inputToneClasses = 'text-gray-800 placeholder:text-gray-400'
   const inactiveSegmentTextClasses = transparent
