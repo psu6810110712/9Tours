@@ -5,11 +5,13 @@ import {
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
+  Index,
 } from 'typeorm';
 import { Booking } from '../../bookings/entities/booking.entity';
 import type { PaymentVerificationStatus } from '../../easyslip/easyslip.service';
 
 @Entity('payments')
+@Index('IDX_payments_booking_id_unique', ['bookingId'], { unique: true })
 export class Payment {
   @PrimaryGeneratedColumn()
   id: number;
@@ -29,6 +31,15 @@ export class Payment {
 
   @Column({ name: 'payment_method', nullable: true })
   paymentMethod: string;
+
+  @Column({ name: 'uploaded_by_user_id', type: 'uuid', nullable: true })
+  uploadedByUserId: string | null;
+
+  @Column({ name: 'uploaded_from_ip', type: 'varchar', length: 64, nullable: true })
+  uploadedFromIp: string | null;
+
+  @Column({ name: 'uploaded_from_user_agent', type: 'varchar', length: 255, nullable: true })
+  uploadedFromUserAgent: string | null;
 
   @Column({ name: 'verification_status', type: 'varchar', length: 32, default: 'pending' })
   verificationStatus: PaymentVerificationStatus;

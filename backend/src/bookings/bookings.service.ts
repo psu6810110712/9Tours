@@ -3,6 +3,7 @@ import {
   BadRequestException,
   NotFoundException,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, In, Repository, LessThan } from 'typeorm';
@@ -18,6 +19,8 @@ import { NotificationType } from '../notifications/entities/notification.entity'
 
 @Injectable()
 export class BookingsService {
+  private readonly logger = new Logger(BookingsService.name);
+
   constructor(
     @InjectRepository(Booking)
     private bookingsRepository: Repository<Booking>,
@@ -276,7 +279,7 @@ export class BookingsService {
     });
   }
 
-  async updateStatus(bookingId: number, updateBookingStatusDto: UpdateBookingStatusDto, _userId: string) {
+  async updateStatus(bookingId: number, updateBookingStatusDto: UpdateBookingStatusDto, userId: string) {
     const booking = await this.bookingsRepository.findOne({
       where: { id: bookingId },
       relations: ['payments', 'user'],
@@ -316,7 +319,10 @@ export class BookingsService {
     }
 
     booking.status = newStatus;
+    booking.reviewedByUserId = userId;
+    booking.reviewedAt = new Date();
     await this.bookingsRepository.save(booking);
+    this.logger.log(`Admin ${userId} updated booking ${bookingId} from ${previousStatus} to ${newStatus}`);
 
     const updated = await this.bookingsRepository.findOne({
       where: { id: bookingId },

@@ -70,6 +70,12 @@ export class Booking {
     @Column({ name: 'admin_notes', type: 'text', nullable: true })
     adminNotes: string;
 
+    @Column({ name: 'reviewed_by_user_id', type: 'uuid', nullable: true })
+    reviewedByUserId: string | null;
+
+    @Column({ name: 'reviewed_at', type: 'timestamptz', nullable: true })
+    reviewedAt: Date | null;
+
     @Column({ name: 'special_request', type: 'text', nullable: true })
     specialRequest: string;
 

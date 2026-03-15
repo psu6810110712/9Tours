@@ -1,26 +1,34 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   UseGuards,
   Req,
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  Param,
+  Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
-import { ensureValidSlipImage } from './slip-file.utils';
+import { ensureValidSlipImage, safeDeleteFile } from './slip-file.utils';
+import { PaymentUploadRateLimitService } from './payment-upload-rate-limit.service';
 
 const MAX_SLIP_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
 @Controller('payments')
 export class PaymentsController {
-  constructor(private readonly paymentsService: PaymentsService) {}
+  constructor(
+    private readonly paymentsService: PaymentsService,
+    private readonly paymentUploadRateLimitService: PaymentUploadRateLimitService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -49,18 +57,44 @@ export class PaymentsController {
     @UploadedFile() slipFile: Express.Multer.File,
     @Req() req: any,
   ) {
-    if (!slipFile) {
-      throw new BadRequestException('A payment slip image is required (field: slip)');
+    try {
+      if (!slipFile) {
+        throw new BadRequestException('A payment slip image is required (field: slip)');
+      }
+
+      this.paymentUploadRateLimitService.assertUploadAllowed(req.user.id, req.ip ?? 'unknown');
+      await ensureValidSlipImage(slipFile);
+
+      const bookingId = parseInt(createPaymentDto.bookingId as any, 10);
+
+      return this.paymentsService.createPayment(
+        { ...createPaymentDto, bookingId },
+        slipFile,
+        req.user.id,
+        {
+          ipAddress: req.ip ?? null,
+          userAgent: typeof req.headers?.['user-agent'] === 'string' ? req.headers['user-agent'] : null,
+        },
+      );
+    } catch (error) {
+      await safeDeleteFile(slipFile?.path);
+      throw error;
     }
+  }
 
-    await ensureValidSlipImage(slipFile);
-
-    const bookingId = parseInt(createPaymentDto.bookingId as any, 10);
-
-    return this.paymentsService.createPayment(
-      { ...createPaymentDto, bookingId },
-      slipFile,
+  @UseGuards(JwtAuthGuard)
+  @Get(':paymentId/slip')
+  async getProtectedSlip(
+    @Param('paymentId') paymentId: string,
+    @Req() req: any,
+    @Res() res: Response,
+  ) {
+    const absolutePath = await this.paymentsService.getSlipFilePath(
+      Number(paymentId),
       req.user.id,
+      req.user.role === 'admin',
     );
+
+    return res.sendFile(absolutePath);
   }
 }

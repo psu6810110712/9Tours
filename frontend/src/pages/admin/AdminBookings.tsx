@@ -1,8 +1,8 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import Modal from '../../components/common/Modal'
-import { API_BASE_URL } from '../../services/apiBaseUrl'
 import { adminService } from '../../services/adminService'
+import { bookingService } from '../../services/bookingService'
 import type { Booking } from '../../types/booking'
 import { buildDisplayName } from '../../utils/profileValidation'
 
@@ -118,6 +118,7 @@ export default function AdminBookings() {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null)
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [selectedSlipPreviewUrl, setSelectedSlipPreviewUrl] = useState<string | null>(null)
 
   const fetchBookings = async () => {
     try {
@@ -135,6 +136,45 @@ export default function AdminBookings() {
   useEffect(() => {
     void fetchBookings()
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    let objectUrl: string | null = null
+
+    const paymentId = selectedBooking ? getPrimaryPayment(selectedBooking)?.id : null
+    if (!paymentId) {
+      setSelectedSlipPreviewUrl(null)
+      return () => {
+        if (objectUrl) {
+          URL.revokeObjectURL(objectUrl)
+        }
+      }
+    }
+
+    const loadProtectedSlip = async () => {
+      try {
+        const blob = await bookingService.getProtectedSlipBlob(paymentId)
+        if (cancelled) return
+        objectUrl = URL.createObjectURL(blob)
+        setSelectedSlipPreviewUrl(objectUrl)
+      } catch (error) {
+        console.error(error)
+        if (!cancelled) {
+          setSelectedSlipPreviewUrl(null)
+          toast.error('ไม่สามารถโหลดรูปสลิปได้')
+        }
+      }
+    }
+
+    void loadProtectedSlip()
+
+    return () => {
+      cancelled = true
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl)
+      }
+    }
+  }, [selectedBooking])
 
   const handleUpdateStatus = async (status: string) => {
     if (!selectedBooking) return
@@ -350,9 +390,7 @@ export default function AdminBookings() {
           const verifiedAmount = payment?.verifiedAmount !== null && payment?.verifiedAmount !== undefined
             ? Number(payment.verifiedAmount)
             : null
-          const slipImageUrl = payment?.slipUrl
-            ? new URL(payment.slipUrl, `${API_BASE_URL}/`).toString()
-            : null
+          const slipImageUrl = selectedSlipPreviewUrl
 
           return (
             <div>

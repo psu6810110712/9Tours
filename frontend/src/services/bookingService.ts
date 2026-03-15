@@ -35,4 +35,11 @@ export const bookingService = {
     })
     return response.data
   },
+
+  getProtectedSlipBlob: async (paymentId: number): Promise<Blob> => {
+    const response = await api.get(`/payments/${paymentId}/slip`, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
 }

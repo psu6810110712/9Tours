@@ -5,8 +5,12 @@ import { CUSTOMER_PREFIXES, type CustomerPrefix } from '../customer-profile.util
 
 export class CreateUserDto {
   @IsOptional()
+<<<<<<< HEAD
   @IsIn(CUSTOMER_PREFIXES, { message: 'Prefix must be one of the allowed values' })
   prefix?: CustomerPrefix;
+=======
+  prefix?: "นาย" | "นาง" | "นางสาว" | null;
+>>>>>>> 63ebce77a09ad42725797553798b1a337b004934
 
   @IsString()
   @IsNotEmpty({ message: 'กรุณาระบุชื่อ-นามสกุล' })

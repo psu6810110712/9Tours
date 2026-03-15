@@ -10,6 +10,7 @@ import { Booking } from '../bookings/entities/booking.entity';
 import { ToursModule } from '../tours/tours.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { EasySlipModule } from '../easyslip/easyslip.module';
+import { PaymentUploadRateLimitService } from './payment-upload-rate-limit.service';
 
 @Module({
   imports: [
@@ -29,6 +30,6 @@ import { EasySlipModule } from '../easyslip/easyslip.module';
     }),
   ],
   controllers: [PaymentsController],
-  providers: [PaymentsService],
+  providers: [PaymentsService, PaymentUploadRateLimitService],
 })
 export class PaymentsModule { }
