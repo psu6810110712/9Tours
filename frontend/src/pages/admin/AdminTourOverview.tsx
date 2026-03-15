@@ -13,6 +13,7 @@ export default function AdminTourOverview() {
     const [scheduleBookings, setScheduleBookings] = useState<Booking[]>([])
     const [loadingBookings, setLoadingBookings] = useState(false)
     const [expandedTours, setExpandedTours] = useState<Set<number>>(new Set())
+    const [showPastSchedules, setShowPastSchedules] = useState(false)
 
     const toggleTour = (tourId: number) => {
         setExpandedTours(prev => {
@@ -161,6 +162,15 @@ export default function AdminTourOverview() {
                         {f === 'all' ? 'ทั้งหมด' : f === 'available' ? '🟢 มีที่ว่าง' : '🔴 เต็มแล้ว'}
                     </button>
                 ))}
+                <button
+                    onClick={() => setShowPastSchedules(!showPastSchedules)}
+                    className={`ml-auto px-4 py-2 rounded-xl text-sm font-medium transition-colors border ${showPastSchedules 
+                        ? 'bg-gray-800 text-white border-gray-800' 
+                        : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                    }`}
+                >
+                    {showPastSchedules ? '👁️ แสดงรอบที่ผ่านไปแล้ว' : '🙈 ซ่อนรอบที่ผ่านไปแล้ว'}
+                </button>
             </div>
 
             {/* Tour Cards */}
@@ -212,19 +222,30 @@ export default function AdminTourOverview() {
                             </div>
 
                             {/* Schedules */}
-                            {expandedTours.has(tour.id) && (
-                                tour.schedules.length === 0 ? (
-                                    <p className="text-center text-gray-400 text-sm py-4">ไม่มีรอบในระบบ</p>
+                            {expandedTours.has(tour.id) && (() => {
+                                const now = new Date();
+                                const displaySchedules = tour.schedules.filter(s => {
+                                    if (showPastSchedules) return true;
+                                    const endDate = new Date(s.endDate);
+                                    // Set time to end of day for safer comparison
+                                    endDate.setHours(23, 59, 59, 999);
+                                    return endDate >= now;
+                                });
+
+                                return displaySchedules.length === 0 ? (
+                                    <p className="text-center text-gray-400 text-sm py-4 italic">
+                                        {showPastSchedules ? 'ไม่มีรอบในระบบ' : 'ไม่มีรอบที่กำลังจะมาถึง (กรุณากดแสดงรอบที่ผ่านไปแล้วเพื่อดูประวัติ)'}
+                                    </p>
                                 ) : (
                                     <div className="divide-y divide-gray-50 bg-gray-50/30">
-                                        {tour.schedules.map((sc) => {
-                                        const colors = getOccupancyColor(sc.occupancyPercent)
+                                        {displaySchedules.map((sc) => {
+                                            const colors = getOccupancyColor(sc.occupancyPercent)
                                         return (
                                             <div
                                                 key={sc.id}
                                                 onClick={() => handleScheduleClick(sc, tour.name)}
                                                 className="px-6 py-3 flex items-center gap-4 cursor-pointer hover:bg-yellow-50/50 transition-colors"
-                                            >
+                                                >
                                                 <div className="w-44 flex-shrink-0">
                                                     <p className="text-sm font-medium text-gray-700">{sc.roundName || `รอบ ${sc.id}`}</p>
                                                     <p className="text-xs text-gray-400">
@@ -263,7 +284,7 @@ export default function AdminTourOverview() {
                                     })}
                                     </div>
                                 )
-                            )}
+                            })()}
                         </div>
                     ))}
                 </div>
