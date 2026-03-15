@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { isAxiosError } from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
@@ -216,6 +216,7 @@ export default function AdminTourFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const isEditing = Boolean(id)
+  const hasAutoDisabledTourRef = useRef(false)
 
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
@@ -309,6 +310,14 @@ export default function AdminTourFormPage() {
             enabled: true,
           })),
         )
+
+        if (tour.isActive && !hasAutoDisabledTourRef.current) {
+          hasAutoDisabledTourRef.current = true
+          void tourService.update(Number(id), { isActive: false }).catch((statusError) => {
+            hasAutoDisabledTourRef.current = false
+            toast.error(getApiErrorMessage(statusError, 'ปิดสถานะทัวร์ชั่วคราวไม่สำเร็จ'))
+          })
+        }
       })
       .catch((loadError) => {
         setError(getApiErrorMessage(loadError, 'ไม่สามารถโหลดข้อมูลทัวร์ได้'))
@@ -522,7 +531,7 @@ export default function AdminTourFormPage() {
 
     try {
       if (isEditing) {
-        await tourService.update(Number(id), payload)
+        await tourService.update(Number(id), { ...payload, isActive: true })
       } else {
         await tourService.create(payload)
       }

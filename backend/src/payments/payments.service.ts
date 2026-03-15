@@ -3,11 +3,13 @@ import {
   NotFoundException,
   BadRequestException,
   Logger,
+  ServiceUnavailableException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { readdir, stat } from 'node:fs/promises';
+import { access, readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { Payment } from './entities/payment.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
@@ -16,6 +18,9 @@ import { ToursService } from '../tours/tours.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EasySlipService, type EasySlipVerificationResult } from '../easyslip/easyslip.service';
 import { safeDeleteFile } from './slip-file.utils';
+import { buildPromptPayPayload, getActivePaymentQrExpiry } from './promptpay.util';
+
+const PROMPTPAY_QR_RENDERER_BASE_URL = 'https://api.qrserver.com/v1/create-qr-code/';
 
 @Injectable()
 export class PaymentsService {
@@ -27,10 +32,51 @@ export class PaymentsService {
     private paymentsRepository: Repository<Payment>,
     @InjectRepository(Booking)
     private bookingsRepository: Repository<Booking>,
+    private configService: ConfigService,
     private toursService: ToursService,
     private notificationsService: NotificationsService,
     private easySlipService: EasySlipService,
   ) { }
+
+  async getPaymentQr(bookingId: number, userId: string) {
+    const booking = await this.bookingsRepository.findOne({
+      where: { id: bookingId, userId },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found or you do not have access to it');
+    }
+
+    if (booking.status !== BookingStatus.PENDING_PAYMENT) {
+      throw new BadRequestException('QR is only available while the booking is awaiting payment');
+    }
+
+    const expiresAt = getActivePaymentQrExpiry(new Date(booking.createdAt));
+    if (Date.now() >= expiresAt.getTime()) {
+      throw new BadRequestException('The QR payment window has expired for this booking');
+    }
+
+    const promptPayId = this.configService.get<string>('PROMPTPAY_ID')?.trim();
+    const accountName = this.configService.get<string>('PROMPTPAY_ACCOUNT_NAME')?.trim();
+
+    if (!promptPayId || !accountName) {
+      throw new ServiceUnavailableException(
+        'PromptPay QR is not configured yet. Please contact support or upload your slip after transferring manually.',
+      );
+    }
+
+    const amount = Number(booking.totalPrice);
+    const qrPayload = buildPromptPayPayload(promptPayId, amount);
+
+    return {
+      bookingId: booking.id,
+      amount,
+      accountName,
+      qrPayload,
+      qrImageUrl: this.buildQrImageUrl(qrPayload),
+      expiresAt: expiresAt.toISOString(),
+    };
+  }
 
   async createPayment(
     createPaymentDto: CreatePaymentDto,
@@ -42,6 +88,7 @@ export class PaymentsService {
     },
   ) {
     const { bookingId, paymentMethod } = createPaymentDto;
+    const normalizedSlipPath = slipFile.path.replace(/\\/g, '/');
 
     const booking = await this.bookingsRepository.findOne({
       where: { id: bookingId, userId },
@@ -57,9 +104,14 @@ export class PaymentsService {
       );
     }
 
-    if (booking.status !== BookingStatus.PENDING_PAYMENT) {
+    const canReplacePendingReview = (
+      booking.status === BookingStatus.AWAITING_APPROVAL
+      && !booking.reviewedAt
+    );
+
+    if (booking.status !== BookingStatus.PENDING_PAYMENT && !canReplacePendingReview) {
       throw new BadRequestException(
-        `Booking is not in pending_payment status (current status: ${booking.status})`,
+        `Booking is not in a replaceable payment state (current status: ${booking.status})`,
       );
     }
 
@@ -73,8 +125,10 @@ export class PaymentsService {
     });
 
     if (existingPayment) {
-      await safeDeleteFile(slipFile.path);
-      throw new BadRequestException('A payment slip has already been uploaded for this booking');
+      if (!canReplacePendingReview) {
+        await safeDeleteFile(slipFile.path);
+        throw new BadRequestException('A payment slip has already been uploaded for this booking');
+      }
     }
 
     const verificationResult = this.resolveVerificationAgainstBooking(
@@ -85,24 +139,49 @@ export class PaymentsService {
     let savedPayment: Payment;
 
     try {
-      const newPayment = this.paymentsRepository.create({
-        bookingId,
-        amountPaid: booking.totalPrice,
-        paymentMethod,
-        slipUrl: slipFile.path.replace(/\\/g, '/'),
-        uploadedByUserId: userId,
-        uploadedFromIp: auditContext?.ipAddress ?? null,
-        uploadedFromUserAgent: auditContext?.userAgent ?? null,
-        verificationStatus: verificationResult.status,
-        verifiedAmount: verificationResult.verifiedAmount,
-        verifiedTransRef: verificationResult.verifiedTransRef,
-        verifiedAt: verificationResult.verifiedAt,
-        verificationProvider: verificationResult.provider,
-        verificationMessage: verificationResult.message,
-        verificationRaw: verificationResult.raw,
-      });
+      if (existingPayment && canReplacePendingReview) {
+        const previousSlipPath = existingPayment.slipUrl;
 
-      savedPayment = await this.paymentsRepository.save(newPayment);
+        existingPayment.amountPaid = booking.totalPrice;
+        existingPayment.paymentMethod = paymentMethod;
+        existingPayment.slipUrl = normalizedSlipPath;
+        existingPayment.uploadedByUserId = userId;
+        existingPayment.uploadedFromIp = auditContext?.ipAddress ?? null;
+        existingPayment.uploadedFromUserAgent = auditContext?.userAgent ?? null;
+        existingPayment.verificationStatus = verificationResult.status;
+        existingPayment.verifiedAmount = verificationResult.verifiedAmount;
+        existingPayment.verifiedTransRef = verificationResult.verifiedTransRef;
+        existingPayment.verifiedAt = verificationResult.verifiedAt;
+        existingPayment.verificationProvider = verificationResult.provider;
+        existingPayment.verificationMessage = verificationResult.message;
+        existingPayment.verificationRaw = verificationResult.raw;
+        existingPayment.uploadedAt = new Date();
+
+        savedPayment = await this.paymentsRepository.save(existingPayment);
+
+        if (previousSlipPath && previousSlipPath !== normalizedSlipPath) {
+          await safeDeleteFile(previousSlipPath);
+        }
+      } else {
+        const newPayment = this.paymentsRepository.create({
+          bookingId,
+          amountPaid: booking.totalPrice,
+          paymentMethod,
+          slipUrl: normalizedSlipPath,
+          uploadedByUserId: userId,
+          uploadedFromIp: auditContext?.ipAddress ?? null,
+          uploadedFromUserAgent: auditContext?.userAgent ?? null,
+          verificationStatus: verificationResult.status,
+          verifiedAmount: verificationResult.verifiedAmount,
+          verifiedTransRef: verificationResult.verifiedTransRef,
+          verifiedAt: verificationResult.verifiedAt,
+          verificationProvider: verificationResult.provider,
+          verificationMessage: verificationResult.message,
+          verificationRaw: verificationResult.raw,
+        });
+
+        savedPayment = await this.paymentsRepository.save(newPayment);
+      }
 
       booking.status = BookingStatus.AWAITING_APPROVAL;
       await this.bookingsRepository.save(booking);
@@ -128,11 +207,13 @@ export class PaymentsService {
     }).catch((e) => console.error(e));
 
     this.logger.log(
-      `Slip uploaded for booking ${booking.id} by user ${userId} from ${auditContext?.ipAddress ?? 'unknown-ip'}`,
+      `${existingPayment && canReplacePendingReview ? 'Slip replaced' : 'Slip uploaded'} for booking ${booking.id} by user ${userId} from ${auditContext?.ipAddress ?? 'unknown-ip'}`,
     );
 
     return {
-      message: 'Payment slip uploaded successfully',
+      message: existingPayment && canReplacePendingReview
+        ? 'Payment slip replaced successfully'
+        : 'Payment slip uploaded successfully',
       payment: savedPayment,
       booking: {
         ...booking,
@@ -164,7 +245,31 @@ export class PaymentsService {
     }
 
     const absolutePath = resolve(process.cwd(), payment.slipUrl);
+    const uploadsRoot = resolve(this.slipUploadDirectory);
+
+    if (!absolutePath.startsWith(uploadsRoot)) {
+      this.logger.warn(`Blocked slip access outside upload directory for payment ${paymentId}`);
+      throw new NotFoundException('Payment slip not found');
+    }
+
+    try {
+      await access(absolutePath);
+    } catch {
+      throw new NotFoundException('Payment slip not found');
+    }
+
     return absolutePath;
+  }
+
+  private buildQrImageUrl(qrPayload: string) {
+    const params = new URLSearchParams({
+      size: '512x512',
+      format: 'png',
+      margin: '0',
+      data: qrPayload,
+    });
+
+    return `${PROMPTPAY_QR_RENDERER_BASE_URL}?${params.toString()}`;
   }
 
   private resolveVerificationAgainstBooking(
@@ -180,7 +285,7 @@ export class PaymentsService {
       return {
         ...verification,
         status: 'failed',
-        message: 'EasySlip verified the slip but did not return an amount',
+        message: 'Slip verification succeeded but did not return an amount',
         verifiedAt: null,
       };
     }

@@ -13,6 +13,8 @@ describe('validateEnv', () => {
     expect(result.GOOGLE_CLIENT_ID).toBeUndefined();
     expect(result.GOOGLE_CLIENT_SECRET).toBeUndefined();
     expect(result.GOOGLE_CALLBACK_URL).toBeUndefined();
+    expect(result.PROMPTPAY_ID).toBeUndefined();
+    expect(result.PROMPTPAY_ACCOUNT_NAME).toBeUndefined();
   });
 
   it('rejects partially configured Google OAuth variables', () => {

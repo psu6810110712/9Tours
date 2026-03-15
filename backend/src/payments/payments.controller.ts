@@ -83,6 +83,15 @@ export class PaymentsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('bookings/:bookingId/qr')
+  async getPaymentQr(
+    @Param('bookingId') bookingId: string,
+    @Req() req: any,
+  ) {
+    return this.paymentsService.getPaymentQr(Number(bookingId), req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':paymentId/slip')
   async getProtectedSlip(
     @Param('paymentId') paymentId: string,
@@ -94,6 +103,10 @@ export class PaymentsController {
       req.user.id,
       req.user.role === 'admin',
     );
+
+    res.setHeader('Cache-Control', 'private, no-store, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
 
     return res.sendFile(absolutePath);
   }

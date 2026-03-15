@@ -206,6 +206,8 @@ export default function HomePage() {
     ? tours.filter((tour) => tour.province === selectedPlace.province)
     : tours
 
+  const heroCategories = Array.from(new Set(tours.flatMap((tour) => tour.categories))).sort((a, b) => a.localeCompare(b, 'th'))
+
   const sectionTitle = selectedPlace.province
     ? `ทริปยอดนิยมใน${selectedPlace.name}`
     : 'ทริปยอดนิยมทั่วไทย'
@@ -233,7 +235,7 @@ export default function HomePage() {
             </div>
 
             <div className="mx-auto mt-4 flex max-w-4xl flex-wrap justify-center gap-3">
-              {CATEGORIES.map((category) => (
+              {(heroCategories.length > 0 ? heroCategories : CATEGORIES).map((category) => (
                 <button
                   key={category}
                   type="button"

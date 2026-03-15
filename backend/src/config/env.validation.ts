@@ -4,6 +4,7 @@ const DEFAULT_REMEMBER_ME_REFRESH_TTL_DAYS = 30;
 const DEFAULT_AUTH_COOKIE_NAME = 'refresh_token';
 const DEFAULT_FRONTEND_URL = 'http://localhost:5173';
 const DEFAULT_EASYSLIP_BASE_URL = 'https://developer.easyslip.com/api/v1';
+const DEFAULT_SLIP2GO_BASE_URL = 'https://connect.slip2go.com/api';
 
 function readString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
@@ -72,7 +73,11 @@ export function validateEnv(config: Record<string, unknown>) {
     GOOGLE_CLIENT_SECRET: googleClientSecret,
     GOOGLE_CALLBACK_URL: googleCallbackUrl,
     FRONTEND_URL: frontendUrl,
+    PROMPTPAY_ID: readString(config.PROMPTPAY_ID),
+    PROMPTPAY_ACCOUNT_NAME: readString(config.PROMPTPAY_ACCOUNT_NAME),
     EASYSLIP_API_KEY: readString(config.EASYSLIP_API_KEY),
     EASYSLIP_BASE_URL: readString(config.EASYSLIP_BASE_URL) ?? DEFAULT_EASYSLIP_BASE_URL,
+    SLIP2GO_API_SECRET: readString(config.SLIP2GO_API_SECRET),
+    SLIP2GO_BASE_URL: readString(config.SLIP2GO_BASE_URL) ?? DEFAULT_SLIP2GO_BASE_URL,
   };
 }
