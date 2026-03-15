@@ -239,36 +239,35 @@ export default function AdminDashboardPage() {
               <div className="ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-5">
                 <div className="mb-4 flex items-center justify-between gap-4">
                   <h2 className="font-bold text-gray-900">ทัวร์ที่ได้รับความนิยม</h2>
-                  <p className="text-xs text-gray-400">ค้นหาแล้วเหลือ {filteredTopTours.length} รายการ</p>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="min-w-[600px] w-full text-sm">
+                  <table className="min-w-[500px] w-full text-sm">
                     <thead>
                       <tr className="border-b border-gray-100 text-left text-md text-gray-500">
-                        <th className="w-10 pb-3">#</th>
+                        <th className="w-10 pb-3">ที่</th>
                         <th className="pb-3">ชื่อทัวร์</th>
                         <th className="pb-3">ความนิยม</th>
-                        <th className="pb-3 text-right">ยอดขาย</th>
+                        <th className="pb-3 text-left">ยอดขาย</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredTopTours.map((tour) => (
                         <tr key={tour.rank} className="border-t border-gray-100">
-                          <td className="py-3 font-mono text-gray-400">{String(tour.rank).padStart(2, '0')}</td>
-                          <td className="py-3 pr-3">
-                            <p className="max-w-[15rem] truncate font-medium text-gray-800">{truncateTourName(tour.name, 28)}</p>
-                            <p className="text-xs text-gray-400">{tour.province}</p>
+                          <td className="py-3 font-mono text-gray-600">{String(tour.rank).padStart(2, '0')}</td>
+                          <td className="py-3 pr-0">
+                            <p className="max-w-[10rem] truncate font-medium text-gray-800">{truncateTourName(tour.name)}</p>
+                            <p className="text-sm text-gray-500">{tour.province}</p>
                           </td>
-                          <td className="py-3 w-36">
+                          <td className="py-3 w-50">
                             <div className="flex items-center gap-2">
-                              <div className="h-2 w-20 rounded-full bg-gray-100">
-                                <div className="h-2 rounded-full bg-amber-400" style={{ width: `${Math.min(tour.popularityPercent, 100)}%` }} />
+                              <div className="h-2 w-14 rounded-full bg-gray-100">
+                                <div className="h-2 rounded-full bg-blue-400" style={{ width: `${Math.min(tour.popularityPercent, 100)}%` }} />
                               </div>
-                              <span className="w-9 text-right text-xs text-gray-500">{tour.popularityPercent}%</span>
+                              <span className="w-10 text-right text-sm text-gray-500">{tour.popularityPercent}%</span>
                             </div>
-                            <p className="mt-1 text-xs text-gray-400">{tour.bookingCount.toLocaleString()} จอง • {tour.viewCount.toLocaleString()} วิว</p>
+                            <p className="mt-1 text-sm text-gray-400">{tour.bookingCount.toLocaleString()} จอง • {tour.viewCount.toLocaleString()} วิว</p>
                           </td>
-                          <td className="py-3 text-right text-gray-700">{tour.revenue > 0 ? `฿${tour.revenue.toLocaleString()}` : 'ยังไม่มีรายได้'}</td>
+                          <td className="py-3 text-left text-gray-700">{tour.revenue > 0 ? `฿${tour.revenue.toLocaleString()}` : 'ยังไม่มีรายได้'}</td>
                         </tr>
                       ))}
                     </tbody>

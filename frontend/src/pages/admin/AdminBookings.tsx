@@ -1,8 +1,8 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import Modal from '../../components/common/Modal'
+import { API_BASE_URL } from '../../services/apiBaseUrl'
 import { adminService } from '../../services/adminService'
-import { bookingService } from '../../services/bookingService'
 import type { Booking } from '../../types/booking'
 import { buildDisplayName } from '../../utils/profileValidation'
 
@@ -15,8 +15,6 @@ const FILTER_TABS = [
 
 type FilterValue = (typeof FILTER_TABS)[number]['value']
 type VerificationTone = 'green' | 'yellow' | 'red' | 'gray'
-
-type RawRecord = Record<string, unknown>
 
 function getBookingContactName(booking: Booking) {
   return buildDisplayName(booking.contactPrefix ?? booking.user?.prefix ?? null, booking.contactName ?? booking.user?.name ?? null)
@@ -34,100 +32,6 @@ function getBookingContactPhone(booking: Booking) {
 
 function getPrimaryPayment(booking: Booking) {
   return booking.payments?.[0]
-}
-
-function getRawRecord(value: unknown): RawRecord | null {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return null
-  }
-
-  return value as RawRecord
-}
-
-function getRawString(value: unknown) {
-  return typeof value === 'string' && value.trim() ? value.trim() : null
-}
-
-function getRawNumber(value: unknown) {
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : null
-}
-
-function getEffectiveVerificationStatus(booking: Booking) {
-  const payment = getPrimaryPayment(booking)
-  const verifiedAmount = payment?.verifiedAmount !== null && payment?.verifiedAmount !== undefined
-    ? Number(payment.verifiedAmount)
-    : null
-
-  if (
-    payment?.verificationStatus === 'failed'
-    && verifiedAmount !== null
-    && Math.abs(verifiedAmount - Number(booking.totalPrice)) > 0.01
-  ) {
-    return 'amount_mismatch'
-  }
-
-  return payment?.verificationStatus
-}
-
-function getEffectiveVerificationMessage(booking: Booking) {
-  const payment = getPrimaryPayment(booking)
-  const effectiveStatus = getEffectiveVerificationStatus(booking)
-  const verifiedAmount = payment?.verifiedAmount !== null && payment?.verifiedAmount !== undefined
-    ? Number(payment.verifiedAmount)
-    : null
-
-  if (effectiveStatus === 'amount_mismatch' && verifiedAmount !== null) {
-    return `ยอดจากสลิป ฿${verifiedAmount.toLocaleString()} ไม่ตรงกับยอดที่ต้องชำระ ฿${Number(booking.totalPrice).toLocaleString()}`
-  }
-
-  return payment?.verificationMessage
-}
-
-function getVerificationDetails(raw?: Record<string, unknown> | null) {
-  const root = getRawRecord(raw)
-  const data = getRawRecord(root?.data)
-  const receiver = getRawRecord(data?.receiver)
-  const receiverAccount = getRawRecord(receiver?.account)
-  const receiverBankInfo = getRawRecord(receiverAccount?.bank)
-  const receiverProxy = getRawRecord(receiverAccount?.proxy)
-  const receiverBank = getRawRecord(receiver?.bank)
-  const sender = getRawRecord(data?.sender)
-  const senderAccount = getRawRecord(sender?.account)
-  const senderAccountBank = getRawRecord(senderAccount?.bank)
-  const senderBank = getRawRecord(sender?.bank)
-
-  return {
-    code: getRawString(root?.code),
-    message: getRawString(root?.message),
-    referenceId: getRawString(data?.referenceId),
-    decode: getRawString(data?.decode),
-    transRef: getRawString(data?.transRef),
-    dateTime: getRawString(data?.dateTime),
-    amount: getRawNumber(data?.amount),
-    ref1: getRawString(data?.ref1),
-    ref2: getRawString(data?.ref2),
-    ref3: getRawString(data?.ref3),
-    receiverName: getRawString(receiverAccount?.name),
-    receiverAccountNumber: getRawString(receiverBankInfo?.account),
-    receiverProxyType: getRawString(receiverProxy?.type),
-    receiverProxyAccount: getRawString(receiverProxy?.account),
-    receiverBankId: getRawString(receiverBank?.id),
-    receiverBankName: getRawString(receiverBank?.name),
-    senderName: getRawString(senderAccount?.name),
-    senderAccountNumber: getRawString(senderAccountBank?.account),
-    senderBankId: getRawString(senderBank?.id),
-    senderBankName: getRawString(senderBank?.name),
-  }
-}
-
-function DetailRow({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.04em] text-gray-500">{label}</p>
-      <p className="mt-1 break-words text-sm font-semibold text-gray-900">{value || '-'}</p>
-    </div>
-  )
 }
 
 function getVerificationTone(status?: string): VerificationTone {
@@ -173,7 +77,7 @@ function getVerificationClasses(tone: VerificationTone) {
     case 'green':
       return 'border-green-200 bg-green-50 text-green-700'
     case 'yellow':
-      return 'border-blue-200 bg-blue-50 text-blue-700'
+      return 'border-yellow-200 bg-yellow-50 text-yellow-700'
     case 'red':
       return 'border-red-200 bg-red-50 text-red-700'
     default:
@@ -181,50 +85,7 @@ function getVerificationClasses(tone: VerificationTone) {
   }
 }
 
-function getVerificationProviderLabel(provider?: string | null) {
-  if (!provider) return '-'
-  return 'ระบบ'
-}
-
-function getVerificationMessage(message?: string | null) {
-  if (!message) {
-    return 'ยังไม่มีผลตรวจสลิปอัตโนมัติสำหรับรายการนี้'
-  }
-
-  return message.replace(/EasySlip/gi, 'ระบบ').replace(/Slip2Go/gi, 'ระบบ')
-}
-
-function getSummaryVerificationMessage(booking: Booking) {
-  const payment = getPrimaryPayment(booking)
-  const effectiveStatus = getEffectiveVerificationStatus(booking)
-  const verifiedAmount = payment?.verifiedAmount !== null && payment?.verifiedAmount !== undefined
-    ? Number(payment.verifiedAmount)
-    : null
-
-  if (effectiveStatus === 'amount_mismatch' && verifiedAmount !== null) {
-    return `ยอดจากสลิป ฿${verifiedAmount.toLocaleString()} ไม่ตรงกับยอดที่ต้องชำระ`
-  }
-
-  if (effectiveStatus === 'verified') {
-    return 'ข้อมูลสลิปผ่านการตรวจสอบจากระบบ'
-  }
-
-  if (effectiveStatus === 'duplicate') {
-    return 'ระบบพบว่าสลิปนี้อาจถูกใช้งานซ้ำ'
-  }
-
-  if (effectiveStatus === 'unreadable') {
-    return 'ระบบอ่านข้อมูลจากสลิปใบนี้ไม่ได้'
-  }
-
-  if (effectiveStatus === 'unavailable') {
-    return 'ระบบตรวจสลิปไม่พร้อมใช้งานชั่วคราว'
-  }
-
-  return getVerificationMessage(getEffectiveVerificationMessage(booking))
-}
-
-function formatCompactDateTime(value?: string | null) {
+function formatCompactDateTime(value?: string) {
   if (!value) return '-'
 
   return new Date(value).toLocaleString('th-TH', {
@@ -236,16 +97,6 @@ function formatCompactDateTime(value?: string | null) {
   })
 }
 
-function formatFullDateTime(value?: string | null) {
-  if (!value) return '-'
-  return new Date(value).toLocaleString('th-TH')
-}
-
-function maskUserAgent(userAgent?: string | null) {
-  if (!userAgent) return '-'
-  return userAgent.length > 80 ? `${userAgent.slice(0, 80)}...` : userAgent
-}
-
 export default function AdminBookings() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
@@ -253,9 +104,7 @@ export default function AdminBookings() {
   const [search, setSearch] = useState('')
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null)
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
-  const [showAdvancedDetails, setShowAdvancedDetails] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
-  const [selectedSlipPreviewUrl, setSelectedSlipPreviewUrl] = useState<string | null>(null)
 
   const fetchBookings = async () => {
     try {
@@ -273,49 +122,6 @@ export default function AdminBookings() {
   useEffect(() => {
     void fetchBookings()
   }, [])
-
-  useEffect(() => {
-    setShowAdvancedDetails(false)
-  }, [selectedBooking])
-
-  useEffect(() => {
-    let cancelled = false
-    let objectUrl: string | null = null
-
-    const paymentId = selectedBooking ? getPrimaryPayment(selectedBooking)?.id : null
-    if (!paymentId) {
-      setSelectedSlipPreviewUrl(null)
-      return () => {
-        if (objectUrl) {
-          URL.revokeObjectURL(objectUrl)
-        }
-      }
-    }
-
-    const loadProtectedSlip = async () => {
-      try {
-        const blob = await bookingService.getProtectedSlipBlob(paymentId)
-        if (cancelled) return
-        objectUrl = URL.createObjectURL(blob)
-        setSelectedSlipPreviewUrl(objectUrl)
-      } catch (error) {
-        console.error(error)
-        if (!cancelled) {
-          setSelectedSlipPreviewUrl(null)
-          toast.error('ไม่สามารถโหลดรูปสลิปได้')
-        }
-      }
-    }
-
-    void loadProtectedSlip()
-
-    return () => {
-      cancelled = true
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl)
-      }
-    }
-  }, [selectedBooking])
 
   const handleUpdateStatus = async (status: string) => {
     if (!selectedBooking) return
@@ -346,20 +152,11 @@ export default function AdminBookings() {
         const contactEmail = getBookingContactEmail(booking).toLowerCase()
         const contactPhone = getBookingContactPhone(booking).toLowerCase()
         const tourCode = booking.schedule?.tour?.tourCode?.toLowerCase() || ''
-        const payment = getPrimaryPayment(booking)
-        const uploadedFromIp = payment?.uploadedFromIp?.toLowerCase() || ''
-        const uploadedByUserId = payment?.uploadedByUserId?.toLowerCase() || ''
-        const reviewedByUserId = booking.reviewedByUserId?.toLowerCase() || ''
-        const paymentId = payment?.id?.toString() || ''
         return contactName.includes(term)
           || contactEmail.includes(term)
           || contactPhone.includes(term)
           || tourCode.includes(term)
           || booking.id.toString() === term
-          || paymentId === term
-          || uploadedFromIp.includes(term)
-          || uploadedByUserId.includes(term)
-          || reviewedByUserId.includes(term)
       }
 
       return true
@@ -441,7 +238,6 @@ export default function AdminBookings() {
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">ตรวจสอบสลิปโอนเงิน</h1>
-          <p className="mt-2 text-sm text-gray-500">ตรวจสอบสลิปโอนเงิน ค้นหารายการ และอัปเดตสถานะการจองได้จากหน้านี้</p>
         </div>
 
         <div className="mb-5 flex flex-col gap-3 xl:flex-row xl:items-center">
@@ -535,16 +331,14 @@ export default function AdminBookings() {
       <Modal isOpen={selectedBooking !== null} onClose={() => setSelectedBooking(null)} width="max-w-[57rem]">
         {selectedBooking && (() => {
           const payment = getPrimaryPayment(selectedBooking)
-          const effectiveStatus = getEffectiveVerificationStatus(selectedBooking)
-          const tone = getVerificationTone(effectiveStatus)
+          const tone = getVerificationTone(payment?.verificationStatus)
           const classes = getVerificationClasses(tone)
           const verifiedAmount = payment?.verifiedAmount !== null && payment?.verifiedAmount !== undefined
             ? Number(payment.verifiedAmount)
             : null
-          const slipImageUrl = selectedSlipPreviewUrl
-          const verificationDetails = getVerificationDetails(payment?.verificationRaw)
-          const transferAtLabel = verificationDetails.dateTime ? formatCompactDateTime(verificationDetails.dateTime) : '-'
-          const uploadedAtLabel = payment?.uploadedAt ? formatCompactDateTime(payment.uploadedAt) : '-'
+          const slipImageUrl = payment?.slipUrl
+            ? new URL(payment.slipUrl, `${API_BASE_URL}/`).toString()
+            : null
 
           return (
             <div>
@@ -556,17 +350,15 @@ export default function AdminBookings() {
               </div>
 
               <div className="grid gap-5 xl:grid-cols-[minmax(0,0.9fr)_26rem]">
-                <section className="xl:sticky xl:top-0 xl:self-start">
+                <section>
                   {slipImageUrl ? (
                     <>
-                      <div className="w-[22rem] overflow-hidden rounded-[1.25rem] border border-gray-100 bg-slate-50">
-                        <div className="h-[31rem] overflow-hidden">
-                          <img
-                            src={slipImageUrl}
-                            alt="Payment Slip"
-                            className="h-full w-full object-cover object-top"
-                          />
-                        </div>
+                      <div className="flex items-start justify-start">
+                        <img
+                          src={slipImageUrl}
+                          alt="Payment Slip"
+                          className="max-h-[31rem] w-full max-w-[22rem] object-contain"
+                        />
                       </div>
 
                       <div className="mt-4 flex max-w-[22rem] gap-3">
@@ -616,11 +408,11 @@ export default function AdminBookings() {
                       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_11rem]">
                         <div className="min-w-0">
                           <p className="text-sm text-gray-500">ลูกค้า</p>
-                          <p className="mt-1 text-lg font-bold text-gray-900">{getBookingContactName(selectedBooking)}</p>
+                          <p className="mt-1 text-[1.02rem] font-bold text-gray-900">{getBookingContactName(selectedBooking)}</p>
                         </div>
                         <div className="xl:text-right">
-                          <p className="text-sm text-gray-500">ยอดที่ต้องชำระ</p>
-                          <p className="mt-1 text-[1.25rem] font-bold leading-none text-gray-900">฿{Number(selectedBooking.totalPrice).toLocaleString()}</p>
+                          <p className="px-11 text-sm text-gray-500">ยอดที่ต้องชำระ</p>
+                          <p className="px-11 mt-1 text-[1.15rem] font-bold leading-none text-gray-900">{Number(selectedBooking.totalPrice).toLocaleString()} บาท</p>
                         </div>
                       </div>
 
@@ -636,8 +428,8 @@ export default function AdminBookings() {
 
                       <div className="mt-4 grid gap-x-4 gap-y-2 border-t border-gray-200 pt-4 text-base text-gray-700 sm:grid-cols-2">
                         <p className="sm:col-span-2"><span className="font-semibold text-gray-900">ทัวร์:</span> {selectedBooking.schedule?.tour?.name || '-'}</p>
-                        <p><span className="font-semibold text-gray-900">รหัสทัวร์:</span> {selectedBooking.schedule?.tour?.tourCode || '-'}</p>
-                        <p><span className="font-semibold text-gray-900">จำนวนผู้เดินทาง:</span> {selectedBooking.paxCount} ท่าน</p>
+                        <p><span className="text-sm font-semibold text-gray-900">รหัสทัวร์:</span> {selectedBooking.schedule?.tour?.tourCode || '-'}</p>
+                        <p><span className="text-sm font-semibold text-gray-900">จำนวนผู้เดินทาง:</span> {selectedBooking.paxCount} ท่าน</p>
                       </div>
                     </div>
 
@@ -646,15 +438,15 @@ export default function AdminBookings() {
                         <div>
                           <p className="text-base font-bold">ผลตรวจสลิปจากระบบ</p>
                           <div className="mt-2 inline-flex rounded-full border px-3 py-1 text-sm font-bold">
-                            {getVerificationBadge(effectiveStatus)}
+                            {getVerificationBadge(payment?.verificationStatus)}
                           </div>
                         </div>
                         <div className="text-right text-sm font-semibold">
-                          {getVerificationProviderLabel(payment?.verificationProvider)}
+                          {payment?.verificationProvider || '-'}
                         </div>
                       </div>
-                      <p className="mt-3 text-sm font-semibold leading-6">
-                        {getSummaryVerificationMessage(selectedBooking)}
+                      <p className="mt-3 text-base leading-6">
+                        {payment?.verificationMessage || 'ยังไม่มีผลตรวจสลิปอัตโนมัติสำหรับรายการนี้'}
                       </p>
 
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -670,93 +462,16 @@ export default function AdminBookings() {
                         </div>
                       </div>
 
-                      <div className="mt-3 rounded-xl bg-white/70 px-4 py-3 text-sm text-gray-800">
-                        <div className="space-y-1">
-                          <p><span className="font-semibold">เวลาโอน:</span> {transferAtLabel}</p>
-                          <p><span className="font-semibold">อัปโหลดเมื่อ:</span> {uploadedAtLabel}</p>
-                        </div>
-                        <p className="mt-3"><span className="font-semibold">Ref:</span> {payment?.verifiedTransRef || '-'}</p>
+                      <div className="mt-3 grid gap-3 rounded-xl bg-white/70 px-4 py-3 text-sm text-gray-800 sm:grid-cols-2">
+                        <p><span className="font-semibold">เวลาตรวจ:</span> {payment?.verifiedAt ? new Date(payment.verifiedAt).toLocaleString('th-TH') : '-'}</p>
+                        <p><span className="font-semibold">Ref:</span> {payment?.verifiedTransRef || '-'}</p>
                       </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setShowAdvancedDetails((prev) => !prev)}
-                        className="mt-3 ui-focus-ring w-full rounded-xl border border-white/70 bg-white/70 px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:bg-white"
-                      >
-                        {showAdvancedDetails ? 'ซ่อนข้อมูลละเอียด' : 'ดูข้อมูลละเอียด'}
-                      </button>
                     </div>
 
-                    {showAdvancedDetails && (
-                      <div className="mt-4 grid gap-4">
-                        <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-                          <p className="text-base font-bold text-slate-900">ธุรกรรม</p>
-                          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                            <DetailRow label="Result Code" value={verificationDetails.code} />
-                            <DetailRow label="Reference ID" value={verificationDetails.referenceId} />
-                            <DetailRow label="Bank Ref" value={verificationDetails.transRef ?? payment?.verifiedTransRef ?? null} />
-                            <DetailRow label="Decoded QR" value={verificationDetails.decode} />
-                            <DetailRow
-                              label="เวลาตรวจ"
-                              value={payment?.verifiedAt ? formatFullDateTime(payment.verifiedAt) : null}
-                            />
-                            <DetailRow
-                              label="เวลาโอน"
-                              value={verificationDetails.dateTime ? formatFullDateTime(verificationDetails.dateTime) : null}
-                            />
-                            <DetailRow
-                              label="Amount From Slip"
-                              value={verificationDetails.amount !== null ? `฿${verificationDetails.amount.toLocaleString()}` : null}
-                            />
-                            <DetailRow label="Ref1" value={verificationDetails.ref1} />
-                            <DetailRow label="Ref2" value={verificationDetails.ref2} />
-                            <DetailRow label="Ref3" value={verificationDetails.ref3} />
-                            <div className="sm:col-span-2">
-                              <DetailRow label="Provider Message" value={verificationDetails.message} />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 p-4">
-                          <p className="text-base font-bold text-emerald-900">ผู้รับเงิน</p>
-                          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                            <DetailRow label="ชื่อผู้รับ" value={verificationDetails.receiverName} />
-                            <DetailRow label="เลขบัญชี" value={verificationDetails.receiverAccountNumber} />
-                            <DetailRow label="ธนาคาร" value={verificationDetails.receiverBankName} />
-                            <DetailRow label="รหัสธนาคาร" value={verificationDetails.receiverBankId} />
-                            <DetailRow label="Proxy Type" value={verificationDetails.receiverProxyType} />
-                            <DetailRow label="Proxy Account" value={verificationDetails.receiverProxyAccount} />
-                          </div>
-                        </div>
-
-                        <div className="rounded-[1.25rem] border border-cyan-200 bg-cyan-50 p-4">
-                          <p className="text-base font-bold text-cyan-900">ผู้โอนเงิน</p>
-                          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                            <DetailRow label="ชื่อผู้โอน" value={verificationDetails.senderName} />
-                            <DetailRow label="เลขบัญชี" value={verificationDetails.senderAccountNumber} />
-                            <DetailRow label="ธนาคาร" value={verificationDetails.senderBankName} />
-                            <DetailRow label="รหัสธนาคาร" value={verificationDetails.senderBankId} />
-                          </div>
-                        </div>
-
-                        <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-                          <p className="text-base font-bold text-slate-900">Audit</p>
-                          <div className="mt-3 grid gap-x-4 gap-y-2 text-sm text-slate-700 sm:grid-cols-2">
-                            <p><span className="font-semibold text-slate-900">Payment ID:</span> {payment?.id ?? '-'}</p>
-                            <p><span className="font-semibold text-slate-900">Uploader:</span> {payment?.uploadedByUserId || '-'}</p>
-                            <p><span className="font-semibold text-slate-900">Upload IP:</span> {payment?.uploadedFromIp || '-'}</p>
-                            <p><span className="font-semibold text-slate-900">Reviewer:</span> {selectedBooking.reviewedByUserId || '-'}</p>
-                            <p><span className="font-semibold text-slate-900">Reviewed:</span> {selectedBooking.reviewedAt ? formatCompactDateTime(selectedBooking.reviewedAt) : '-'}</p>
-                            <p className="sm:col-span-2"><span className="font-semibold text-slate-900">User Agent:</span> {maskUserAgent(payment?.uploadedFromUserAgent)}</p>
-                          </div>
-                        </div>
-
-                        {selectedBooking.specialRequest && (
-                          <div className="rounded-[1.25rem] border border-orange-100 bg-orange-50 p-4">
-                            <p className="mb-2 text-base font-bold text-orange-800">คำขอเพิ่มเติมจากลูกค้า</p>
-                            <p className="max-h-20 overflow-hidden whitespace-pre-wrap text-base leading-6 text-gray-700">{selectedBooking.specialRequest}</p>
-                          </div>
-                        )}
+                    {selectedBooking.specialRequest && (
+                      <div className="mt-4 rounded-[1.25rem] border border-orange-100 bg-orange-50 p-4">
+                        <p className="mb-2 text-base font-bold text-orange-800">คำขอเพิ่มเติมจากลูกค้า</p>
+                        <p className="max-h-20 overflow-hidden whitespace-pre-wrap text-base leading-6 text-gray-700">{selectedBooking.specialRequest}</p>
                       </div>
                     )}
                   </div>

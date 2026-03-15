@@ -22,7 +22,7 @@ const NAV_LINKS: NavLink[] = [
 const ADMIN_LINKS: NavLink[] = [
   { label: 'แดชบอร์ด', path: '/admin/dashboard', match: (pathname: string) => pathname === '/admin/dashboard' },
   { label: 'จัดการทัวร์', path: '/admin/tours', match: (pathname: string) => pathname === '/admin/tours' || pathname === '/admin/tours/new' || pathname.startsWith('/admin/tours/') },
-  { label: 'รอบการจอง', path: '/admin/tour-overview', match: (pathname: string) => pathname === '/admin/tour-overview' },
+  { label: 'ภาพรวมทัวร์', path: '/admin/tour-overview', match: (pathname: string) => pathname === '/admin/tour-overview' },
   { label: 'จัดการการจอง', path: '/admin/bookings', match: (pathname: string) => pathname.startsWith('/admin/bookings') },
 ]
 
