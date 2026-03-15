@@ -1,22 +1,22 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PaymentsController } from './payments.controller';
-import { PaymentsService } from './payments.service';
-import { Payment } from '../bookings/entities/payment.entity';
-import { Booking } from '../bookings/entities/booking.entity';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-
-import { ToursModule } from '../tours/tours.module'; // ✅ Import ToursModule
+import { PaymentsController } from './payments.controller';
+import { PaymentsService } from './payments.service';
+import { Payment } from './entities/payment.entity';
+import { Booking } from '../bookings/entities/booking.entity';
+import { ToursModule } from '../tours/tours.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { EasySlipModule } from '../easyslip/easyslip.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Payment, Booking]),
-    ToursModule, // ✅ เพิ่ม ToursModule
+    ToursModule,
     NotificationsModule,
-
+    EasySlipModule,
     MulterModule.register({
       storage: diskStorage({
         destination: './uploads/slips',

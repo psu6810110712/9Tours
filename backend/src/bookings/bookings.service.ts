@@ -279,6 +279,7 @@ export class BookingsService {
   async updateStatus(bookingId: number, updateBookingStatusDto: UpdateBookingStatusDto, _userId: string) {
     const booking = await this.bookingsRepository.findOne({
       where: { id: bookingId },
+      relations: ['payments', 'user'],
     });
 
     if (!booking) {
@@ -315,7 +316,16 @@ export class BookingsService {
     }
 
     booking.status = newStatus;
-    const updated = await this.bookingsRepository.save(booking);
+    await this.bookingsRepository.save(booking);
+
+    const updated = await this.bookingsRepository.findOne({
+      where: { id: bookingId },
+      relations: ['payments', 'user'],
+    });
+
+    if (!updated) {
+      throw new NotFoundException('à¹„à¸¡à¹ˆà¸žà¸š Booking à¸™à¸µà¹‰');
+    }
 
     // Fetch schedule data for the response and for the email
     const found = this.findScheduleInData(updated.scheduleId);
@@ -335,7 +345,8 @@ export class BookingsService {
           accommodation: found.tour.accommodation || null,
         },
       } : null,
-      user: booking.user,
+      user: updated.user,
+      payments: updated.payments,
     };
 
     // Send email notification silently, don't block the request if it fails

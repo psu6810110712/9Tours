@@ -14,6 +14,7 @@ const FILTER_TABS = [
 ] as const
 
 type FilterValue = (typeof FILTER_TABS)[number]['value']
+type VerificationTone = 'green' | 'yellow' | 'red' | 'gray'
 
 function getBookingContactName(booking: Booking) {
   return buildDisplayName(booking.contactPrefix ?? booking.user?.prefix ?? null, booking.contactName ?? booking.user?.name ?? null)
@@ -27,6 +28,86 @@ function getBookingContactEmail(booking: Booking) {
 
 function getBookingContactPhone(booking: Booking) {
   return booking.contactPhone ?? booking.user?.phone ?? '-'
+}
+
+function getPrimaryPayment(booking: Booking) {
+  return booking.payments?.[0]
+}
+
+function getVerificationTone(status?: string): VerificationTone {
+  switch (status) {
+    case 'verified':
+      return 'green'
+    case 'duplicate':
+    case 'amount_mismatch':
+    case 'unreadable':
+    case 'failed':
+      return 'red'
+    case 'pending':
+    case 'unavailable':
+      return 'yellow'
+    default:
+      return 'gray'
+  }
+}
+
+function getVerificationBadge(status?: string) {
+  switch (status) {
+    case 'verified':
+      return 'ตรวจผ่าน'
+    case 'duplicate':
+      return 'สลิปซ้ำ'
+    case 'amount_mismatch':
+      return 'ยอดไม่ตรง'
+    case 'unreadable':
+      return 'อ่านสลิปไม่ได้'
+    case 'failed':
+      return 'ตรวจไม่สำเร็จ'
+    case 'unavailable':
+      return 'บริการตรวจไม่พร้อม'
+    case 'pending':
+      return 'รอตรวจ'
+    default:
+      return 'ไม่มีข้อมูลตรวจ'
+  }
+}
+
+function getVerificationClasses(tone: VerificationTone) {
+  switch (tone) {
+    case 'green':
+      return 'border-green-200 bg-green-50 text-green-700'
+    case 'yellow':
+      return 'border-blue-200 bg-blue-50 text-blue-700'
+    case 'red':
+      return 'border-red-200 bg-red-50 text-red-700'
+    default:
+      return 'border-gray-200 bg-gray-50 text-gray-700'
+  }
+}
+
+function getVerificationProviderLabel(provider?: string) {
+  if (!provider) return '-'
+  return 'ระบบ'
+}
+
+function getVerificationMessage(message?: string) {
+  if (!message) {
+    return 'ยังไม่มีผลตรวจสลิปอัตโนมัติสำหรับรายการนี้'
+  }
+
+  return message.replace(/EasySlip/gi, 'ระบบ')
+}
+
+function formatCompactDateTime(value?: string) {
+  if (!value) return '-'
+
+  return new Date(value).toLocaleString('th-TH', {
+    day: 'numeric',
+    month: 'numeric',
+    year: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export default function AdminBookings() {
@@ -220,7 +301,8 @@ export default function AdminBookings() {
                 </thead>
                 <tbody>
                   {sortedBookings.map((booking) => {
-                    const hasSlip = Boolean(booking.payments?.[0]?.slipUrl)
+                    const payment = getPrimaryPayment(booking)
+                    const hasSlip = Boolean(payment?.slipUrl)
                     return (
                       <tr key={booking.id} className="border-t border-gray-100 transition-colors hover:bg-yellow-50/60">
                         <td className="whitespace-nowrap px-5 py-4 font-medium text-gray-800">#{booking.id}</td>
@@ -260,103 +342,158 @@ export default function AdminBookings() {
         )}
       </main>
 
-      <Modal isOpen={selectedBooking !== null} onClose={() => setSelectedBooking(null)} width="max-w-3xl">
-        {selectedBooking && (
-          <div>
-            <div className="mb-5 flex items-center justify-between border-b border-gray-100 pb-4">
-              <h2 className="text-xl font-bold text-gray-900">ตรวจสอบสลิปโอนเงิน (จอง #{selectedBooking.id})</h2>
-              <button type="button" onClick={() => setSelectedBooking(null)} className="ui-focus-ring flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700">✕</button>
-            </div>
+      <Modal isOpen={selectedBooking !== null} onClose={() => setSelectedBooking(null)} width="max-w-[57rem]">
+        {selectedBooking && (() => {
+          const payment = getPrimaryPayment(selectedBooking)
+          const tone = getVerificationTone(payment?.verificationStatus)
+          const classes = getVerificationClasses(tone)
+          const verifiedAmount = payment?.verifiedAmount !== null && payment?.verifiedAmount !== undefined
+            ? Number(payment.verifiedAmount)
+            : null
+          const slipImageUrl = payment?.slipUrl
+            ? new URL(payment.slipUrl, `${API_BASE_URL}/`).toString()
+            : null
 
-            <div className="grid gap-4 rounded-[1.25rem] bg-gray-50 p-4 text-sm md:grid-cols-2">
-              <div>
-                <p className="text-gray-500">ลูกค้า</p>
-                <p className="font-bold text-gray-900">{getBookingContactName(selectedBooking)}</p>
-                <p className="text-gray-600">{getBookingContactEmail(selectedBooking)}</p>
-                <p className="text-gray-600">{getBookingContactPhone(selectedBooking)}</p>
+          return (
+            <div>
+              <div className="mb-5 flex items-center justify-between border-b border-gray-100 pb-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">ตรวจสอบสลิปโอนเงิน (จอง #{selectedBooking.id})</h2>
+                </div>
+                <button type="button" onClick={() => setSelectedBooking(null)} className="ui-focus-ring flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700">✕</button>
               </div>
-              <div className="text-left md:text-right">
-                <p className="text-gray-500">ยอดที่ต้องชำระ</p>
-                <p className="text-lg font-bold text-gray-900">฿{Number(selectedBooking.totalPrice).toLocaleString()}</p>
-                <p className="text-gray-500">อัปโหลดสลิปเมื่อ</p>
-                <p className="font-medium text-gray-800">
-                  {selectedBooking.payments?.[0]?.uploadedAt
-                    ? new Date(selectedBooking.payments[0].uploadedAt).toLocaleString('th-TH')
-                    : '-'}
-                </p>
+
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,0.9fr)_26rem]">
+                <section>
+                  {slipImageUrl ? (
+                    <>
+                      <div className="flex items-start justify-start">
+                        <img
+                          src={slipImageUrl}
+                          alt="Payment Slip"
+                          className="max-h-[31rem] w-full max-w-[22rem] object-contain"
+                        />
+                      </div>
+
+                      <div className="mt-4 flex max-w-[22rem] gap-3">
+                        {selectedBooking.status === 'awaiting_approval' && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateStatus('canceled')}
+                              disabled={isProcessing}
+                              className="ui-focus-ring ui-pressable flex-1 rounded-xl bg-red-100 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-200 disabled:opacity-50"
+                            >
+                              ไม่อนุมัติ
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateStatus('confirmed')}
+                              disabled={isProcessing}
+                              className="ui-focus-ring ui-pressable flex-1 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-50"
+                            >
+                              อนุมัติ
+                            </button>
+                          </>
+                        )}
+
+                        {['confirmed', 'success', 'canceled'].includes(selectedBooking.status) && (
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateStatus('awaiting_approval')}
+                            disabled={isProcessing}
+                            className="ui-focus-ring ui-pressable w-full rounded-xl bg-yellow-100 px-4 py-2.5 text-sm font-semibold text-yellow-700 hover:bg-yellow-200 disabled:opacity-50"
+                          >
+                            เปลี่ยนสถานะกลับเป็น รอตรวจสอบ
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex min-h-[18rem] items-center justify-start text-base text-gray-500">
+                      ไม่พบรูปภาพสลิป
+                    </div>
+                  )}
+                </section>
+
+                  <aside>
+                  <div className="flex h-full flex-col rounded-[1.5rem] border border-gray-100 bg-white p-4">
+                    <div className="rounded-[1.25rem] bg-gray-50 p-4">
+                      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_11rem]">
+                        <div className="min-w-0">
+                          <p className="text-sm text-gray-500">ลูกค้า</p>
+                          <p className="mt-1 text-lg font-bold text-gray-900">{getBookingContactName(selectedBooking)}</p>
+                        </div>
+                        <div className="xl:text-right">
+                          <p className="text-sm text-gray-500">ยอดที่ต้องชำระ</p>
+                          <p className="mt-1 text-[1.25rem] font-bold leading-none text-gray-900">฿{Number(selectedBooking.totalPrice).toLocaleString()}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex min-w-0 items-center gap-2 text-sm text-gray-700">
+                        <span className="truncate">{getBookingContactEmail(selectedBooking)}</span>
+                        <span className="shrink-0 text-gray-300">|</span>
+                        <span className="shrink-0">{getBookingContactPhone(selectedBooking)}</span>
+                      </div>
+                      <p className="mt-1 text-left text-sm font-semibold leading-6 text-gray-800">
+                        <span className="mr-2 font-medium text-gray-500">อัปโหลดเมื่อ</span>
+                        {formatCompactDateTime(payment?.uploadedAt)}
+                      </p>
+
+                      <div className="mt-4 grid gap-x-4 gap-y-2 border-t border-gray-200 pt-4 text-base text-gray-700 sm:grid-cols-2">
+                        <p className="sm:col-span-2"><span className="font-semibold text-gray-900">ทัวร์:</span> {selectedBooking.schedule?.tour?.name || '-'}</p>
+                        <p><span className="font-semibold text-gray-900">รหัสทัวร์:</span> {selectedBooking.schedule?.tour?.tourCode || '-'}</p>
+                        <p><span className="font-semibold text-gray-900">จำนวนผู้เดินทาง:</span> {selectedBooking.paxCount} ท่าน</p>
+                      </div>
+                    </div>
+
+                    <div className={`mt-4 rounded-[1.5rem] border p-4 ${classes}`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-base font-bold">ผลตรวจสลิปจากระบบ</p>
+                          <div className="mt-2 inline-flex rounded-full border px-3 py-1 text-sm font-bold">
+                            {getVerificationBadge(payment?.verificationStatus)}
+                          </div>
+                        </div>
+                        <div className="text-right text-sm font-semibold">
+                          {getVerificationProviderLabel(payment?.verificationProvider)}
+                        </div>
+                      </div>
+                      <p className="mt-3 text-base leading-6">
+                        {getVerificationMessage(payment?.verificationMessage)}
+                      </p>
+
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-xl bg-white/80 px-4 py-3">
+                          <p className="text-sm text-gray-500">ยอดในระบบ</p>
+                          <p className="mt-1 text-lg font-bold text-gray-900">฿{Number(selectedBooking.totalPrice).toLocaleString()}</p>
+                        </div>
+                        <div className="rounded-xl bg-white/80 px-4 py-3">
+                          <p className="text-sm text-gray-500">ยอดจากระบบ</p>
+                          <p className="mt-1 text-lg font-bold text-gray-900">
+                            {verifiedAmount !== null ? `฿${verifiedAmount.toLocaleString()}` : '-'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid gap-3 rounded-xl bg-white/70 px-4 py-3 text-sm text-gray-800 sm:grid-cols-2">
+                        <p><span className="font-semibold">เวลาตรวจ:</span> {payment?.verifiedAt ? new Date(payment.verifiedAt).toLocaleString('th-TH') : '-'}</p>
+                        <p><span className="font-semibold">Ref:</span> {payment?.verifiedTransRef || '-'}</p>
+                      </div>
+                    </div>
+
+                    {selectedBooking.specialRequest && (
+                      <div className="mt-4 rounded-[1.25rem] border border-orange-100 bg-orange-50 p-4">
+                        <p className="mb-2 text-base font-bold text-orange-800">คำขอเพิ่มเติมจากลูกค้า</p>
+                        <p className="max-h-20 overflow-hidden whitespace-pre-wrap text-base leading-6 text-gray-700">{selectedBooking.specialRequest}</p>
+                      </div>
+                    )}
+                  </div>
+                </aside>
               </div>
             </div>
-
-            <div className="mt-4 rounded-[1.25rem] border border-gray-100 bg-slate-50 p-4 text-sm">
-              <p className="font-bold text-gray-800">ข้อมูลการจอง</p>
-              <p className="mt-2 text-gray-600">ทัวร์: {selectedBooking.schedule?.tour?.name || '-'}</p>
-              <p className="text-gray-600">รหัสทัวร์: {selectedBooking.schedule?.tour?.tourCode || '-'}</p>
-              <p className="text-gray-600">จำนวนผู้เดินทาง: {selectedBooking.paxCount} ท่าน</p>
-            </div>
-
-            {selectedBooking.payments?.[0]?.slipUrl ? (
-              <div className="mt-4 flex items-center justify-center overflow-hidden rounded-[1.25rem] border bg-gray-100 p-3">
-                <img
-                  src={new URL(selectedBooking.payments[0].slipUrl, `${API_BASE_URL}/`).toString()}
-                  alt="Payment Slip"
-                  className="max-h-[500px] rounded-lg object-contain"
-                />
-              </div>
-            ) : (
-              <p className="py-10 text-center text-gray-500">ไม่พบรูปภาพสลิป</p>
-            )}
-
-            {selectedBooking.specialRequest && (
-              <div className="mt-4 rounded-[1.25rem] border border-orange-100 bg-orange-50 p-4">
-                <p className="mb-1 text-sm font-bold text-orange-800">คำขอเพิ่มเติมจากลูกค้า:</p>
-                <p className="whitespace-pre-wrap text-sm text-gray-700">{selectedBooking.specialRequest}</p>
-              </div>
-            )}
-
-            <div className="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={() => setSelectedBooking(null)}
-                disabled={isProcessing}
-                className="ui-focus-ring ui-pressable rounded-xl px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-50"
-              >
-                ปิด
-              </button>
-
-              {selectedBooking.status === 'awaiting_approval' && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateStatus('canceled')}
-                    disabled={isProcessing}
-                    className="ui-focus-ring ui-pressable rounded-xl bg-red-100 px-5 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-200 disabled:opacity-50"
-                  >
-                    ไม่อนุมัติ/ยกเลิก
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateStatus('confirmed')}
-                    disabled={isProcessing}
-                    className="ui-focus-ring ui-pressable rounded-xl bg-green-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-50"
-                  >
-                    อนุมัติรายการ
-                  </button>
-                </>
-              )}
-
-              {['confirmed', 'success', 'canceled'].includes(selectedBooking.status) && (
-                <button
-                  type="button"
-                  onClick={() => handleUpdateStatus('awaiting_approval')}
-                  disabled={isProcessing}
-                  className="ui-focus-ring ui-pressable rounded-xl bg-yellow-100 px-5 py-2.5 text-sm font-semibold text-yellow-700 hover:bg-yellow-200 disabled:opacity-50"
-                >
-                  เปลี่ยนสถานะกลับเป็น รอตรวจสอบ
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+          )
+        })()}
       </Modal>
     </>
   )

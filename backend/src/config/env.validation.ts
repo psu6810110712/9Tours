@@ -3,6 +3,7 @@ const DEFAULT_REFRESH_TOKEN_TTL_DAYS = 7;
 const DEFAULT_REMEMBER_ME_REFRESH_TTL_DAYS = 30;
 const DEFAULT_AUTH_COOKIE_NAME = 'refresh_token';
 const DEFAULT_FRONTEND_URL = 'http://localhost:5173';
+const DEFAULT_EASYSLIP_BASE_URL = 'https://developer.easyslip.com/api/v1';
 
 function readString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
@@ -71,5 +72,7 @@ export function validateEnv(config: Record<string, unknown>) {
     GOOGLE_CLIENT_SECRET: googleClientSecret,
     GOOGLE_CALLBACK_URL: googleCallbackUrl,
     FRONTEND_URL: frontendUrl,
+    EASYSLIP_API_KEY: readString(config.EASYSLIP_API_KEY),
+    EASYSLIP_BASE_URL: readString(config.EASYSLIP_BASE_URL) ?? DEFAULT_EASYSLIP_BASE_URL,
   };
 }

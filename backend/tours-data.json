@@ -4060,7 +4060,7 @@
         "timeSlot": null,
         "roundName": null,
         "maxCapacity": 20,
-        "currentBooked": 10
+        "currentBooked": 0
       },
       {
         "id": 509,
@@ -4080,7 +4080,7 @@
         "timeSlot": null,
         "roundName": null,
         "maxCapacity": 20,
-        "currentBooked": 0
+        "currentBooked": 6
       },
       {
         "id": 511,

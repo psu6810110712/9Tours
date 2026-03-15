@@ -7,6 +7,13 @@ export interface Payment {
   slipUrl: string
   paymentMethod: string
   uploadedAt: string
+  verificationStatus?: 'pending' | 'verified' | 'duplicate' | 'amount_mismatch' | 'unreadable' | 'failed' | 'unavailable'
+  verifiedAmount?: number | null
+  verifiedTransRef?: string | null
+  verifiedAt?: string | null
+  verificationProvider?: string | null
+  verificationMessage?: string | null
+  verificationRaw?: Record<string, unknown> | null
 }
 
 export interface Tour {
