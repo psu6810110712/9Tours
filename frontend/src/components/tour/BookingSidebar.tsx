@@ -16,10 +16,16 @@ interface BookingSidebarProps {
   tour: Tour
 }
 
+function getLocalTodayIsoDate() {
+  const now = new Date()
+  const local = new Date(now.getTime() - (now.getTimezoneOffset() * 60 * 1000))
+  return local.toISOString().slice(0, 10)
+}
+
 export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const today = useRef(new Date().toISOString().slice(0, 10)).current
+  const today = useRef(getLocalTodayIsoDate()).current
 
   const upcomingSchedules = tour.schedules
     .filter((schedule: TourSchedule) => schedule.startDate >= today)

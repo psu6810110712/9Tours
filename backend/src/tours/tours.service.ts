@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -535,11 +535,26 @@ export class ToursService implements OnModuleInit {
   }
 
   async remove(id: number) {
-    const tour = await this.toursRepo.findOne({ where: { id } });
+    const tour = await this.toursRepo.findOne({
+      where: { id },
+      relations: ['schedules'],
+    });
     if (!tour) return null;
 
-    tour.isActive = false;
-    await this.toursRepo.save(tour);
+    const scheduleIds = Array.isArray(tour.schedules) ? tour.schedules.map((schedule) => schedule.id) : [];
+    if (scheduleIds.length > 0) {
+      const bookingCount = await this.bookingsRepo.count({
+        where: { scheduleId: In(scheduleIds) },
+      });
+
+      if (bookingCount > 0) {
+        throw new BadRequestException('ไม่สามารถลบทัวร์นี้ได้ เพราะมีประวัติการจองอยู่แล้ว กรุณาใช้การปิดใช้งานแทน');
+      }
+
+      await this.schedulesRepo.delete({ id: In(scheduleIds) });
+    }
+
+    await this.toursRepo.delete({ id: tour.id });
     await this.refreshCache();
     return { id, deleted: true };
   }

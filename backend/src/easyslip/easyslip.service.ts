@@ -48,7 +48,7 @@ export class EasySlipService {
       return {
         status: 'unavailable',
         provider: 'slip2go',
-        message: 'Slip2Go API secret is not configured',
+        message: 'ยังไม่ได้ตั้งค่า API ตรวจสลิป',
         verifiedAmount: null,
         verifiedTransRef: null,
         verifiedAt: null,
@@ -95,7 +95,7 @@ export class EasySlipService {
         return {
           status: 'verified',
           provider: 'slip2go',
-          message: responseMessage || 'Slip verified successfully',
+          message: 'ตรวจสลิปผ่าน',
           verifiedAmount: this.extractAmount(responsePayload.data.amount),
           verifiedTransRef:
             responsePayload.data.transRef
@@ -128,7 +128,7 @@ export class EasySlipService {
       return {
         status: 'unavailable',
         provider: 'slip2go',
-        message: 'Slip2Go verification is currently unavailable',
+        message: 'ระบบตรวจสลิปใช้งานไม่ได้ชั่วคราว',
         verifiedAmount: null,
         verifiedTransRef: null,
         verifiedAt: null,
@@ -254,7 +254,7 @@ export class EasySlipService {
       || normalizedMessage.includes('duplicate')
       || normalizedMessage.includes('already used')
     ) {
-      return 'Slip2Go detected this slip as a duplicate';
+      return 'สลิปซ้ำ';
     }
 
     if (
@@ -266,21 +266,21 @@ export class EasySlipService {
       || normalizedMessage.includes('qr not found')
       || normalizedMessage.includes('slip not found')
     ) {
-      return 'Slip2Go could not read this slip clearly';
+      return 'อ่านสลิปไม่ชัดเจน';
     }
 
     if (statusCode === 401 || statusCode === 403) {
-      return 'Slip2Go credentials are invalid or access was denied';
+      return 'สิทธิ์การเข้าถึงระบบตรวจสลิปไม่ถูกต้อง';
     }
 
     if (statusCode === 429) {
-      return 'Slip2Go quota was exceeded';
+      return 'เกินโควต้าการตรวจสลิป';
     }
 
     if (statusCode >= 500) {
-      return 'Slip2Go is temporarily unavailable';
+      return 'ระบบตรวจสลิปใช้งานไม่ได้ชั่วคราว';
     }
 
-    return message?.trim() || 'Slip2Go verification failed';
+    return message?.trim() || 'ตรวจสลิปไม่สำเร็จ';
   }
 }

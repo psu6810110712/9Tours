@@ -90,10 +90,10 @@ export default function AdminTourListPage() {
     try {
       await tourService.remove(tour.id)
       setTours((prev) => prev.filter((item) => item.id !== tour.id))
-      toast.success('ลบทัวร์สำเร็จ')
+      toast.success('ลบทัวร์ถาวรสำเร็จ')
       setDeleteModalTour(null)
     } catch (deleteError) {
-      toast.error(getApiErrorMessage(deleteError, 'ไม่สามารถลบทัวร์ได้ กรุณาลองใหม่อีกครั้ง'))
+      toast.error(getApiErrorMessage(deleteError, 'ไม่สามารถลบทัวร์ถาวรได้ กรุณาลองใหม่อีกครั้ง'))
       setDeleteModalTour(null)
     }
   }
@@ -315,7 +315,7 @@ export default function AdminTourListPage() {
                           onClick={() => setDeleteModalTour(tour)}
                           className="ui-focus-ring w-full rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
                         >
-                          ลบทัวร์
+                          ลบถาวร
                         </button>
                       </div>
                     </aside>
@@ -329,9 +329,9 @@ export default function AdminTourListPage() {
 
       <ConfirmModal
         isOpen={deleteModalTour !== null}
-        title="ยืนยันการลบทัวร์"
-        message={`คุณแน่ใจหรือไม่ว่าต้องการลบทัวร์ "${deleteModalTour?.name}"? การกระทำนี้ไม่สามารถย้อนกลับได้`}
-        confirmText="ยืนยันลบทัวร์"
+        title="ยืนยันการลบทัวร์ถาวร"
+        message={`คุณแน่ใจหรือไม่ว่าต้องการลบทัวร์ "${deleteModalTour?.name}" แบบถาวร? หากทัวร์นี้มีประวัติการจอง ระบบจะไม่อนุญาตให้ลบ`}
+        confirmText="ยืนยันลบถาวร"
         cancelText="ยกเลิก"
         confirmStyle="danger"
         onConfirm={() => deleteModalTour && handleDelete(deleteModalTour)}
