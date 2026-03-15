@@ -1,4 +1,5 @@
-﻿import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Modal from './common/Modal'
 import { normalizeLoginIdentifier, validateLoginIdentifier } from '../utils/profileValidation'
@@ -19,6 +20,7 @@ function inputClass(error?: string) {
 }
 
 export default function LoginModal({ onClose, onSwitchToRegister, initialError = '' }: LoginModalProps) {
+  const navigate = useNavigate()
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
@@ -42,8 +44,11 @@ export default function LoginModal({ onClose, onSwitchToRegister, initialError =
     setErrors({})
 
     try {
-      await login(normalizeLoginIdentifier(identifier), password, remember)
+      const user = await login(normalizeLoginIdentifier(identifier), password, remember)
       onClose()
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard', { replace: true })
+      }
     } catch (error) {
       const fieldErrors = extractApiFieldErrors(error, ['identifier', 'password'])
       setErrors({
@@ -162,4 +167,3 @@ export default function LoginModal({ onClose, onSwitchToRegister, initialError =
     </Modal>
   )
 }
-

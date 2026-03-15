@@ -9,6 +9,13 @@ export interface DashboardFilters {
 }
 
 export interface DashboardData {
+  provinceMetricStats: {
+    views: { name: string; value: number; percent: number }[];
+    bookings: { name: string; value: number; percent: number }[];
+    revenue: { name: string; value: number; percent: number }[];
+    tourCount: { name: string; value: number; percent: number }[];
+    conversionRate: { name: string; value: number; percent: number }[];
+  };
   summaryCards: {
     totalRevenue: number;
     totalBookings: number;
@@ -48,6 +55,13 @@ const REGION_ALIASES: Record<string, string> = {
 };
 
 export const EMPTY_DASHBOARD_DATA: DashboardData = {
+  provinceMetricStats: {
+    views: [],
+    bookings: [],
+    revenue: [],
+    tourCount: [],
+    conversionRate: [],
+  },
   summaryCards: {
     totalRevenue: 0,
     totalBookings: 0,
@@ -76,6 +90,43 @@ function normalizeDashboardData(data: unknown): DashboardData {
   const source = (typeof data === 'object' && data !== null ? data : {}) as Partial<DashboardData>;
 
   return {
+    provinceMetricStats: {
+      views: Array.isArray(source.provinceMetricStats?.views)
+        ? source.provinceMetricStats.views.map((item) => ({
+          name: item.name || '-',
+          value: toNumber(item.value),
+          percent: toNumber(item.percent),
+        }))
+        : [],
+      bookings: Array.isArray(source.provinceMetricStats?.bookings)
+        ? source.provinceMetricStats.bookings.map((item) => ({
+          name: item.name || '-',
+          value: toNumber(item.value),
+          percent: toNumber(item.percent),
+        }))
+        : [],
+      revenue: Array.isArray(source.provinceMetricStats?.revenue)
+        ? source.provinceMetricStats.revenue.map((item) => ({
+          name: item.name || '-',
+          value: toNumber(item.value),
+          percent: toNumber(item.percent),
+        }))
+        : [],
+      tourCount: Array.isArray(source.provinceMetricStats?.tourCount)
+        ? source.provinceMetricStats.tourCount.map((item) => ({
+          name: item.name || '-',
+          value: toNumber(item.value),
+          percent: toNumber(item.percent),
+        }))
+        : [],
+      conversionRate: Array.isArray(source.provinceMetricStats?.conversionRate)
+        ? source.provinceMetricStats.conversionRate.map((item) => ({
+          name: item.name || '-',
+          value: toNumber(item.value),
+          percent: toNumber(item.percent),
+        }))
+        : [],
+    },
     summaryCards: {
       totalRevenue: toNumber(source.summaryCards?.totalRevenue),
       totalBookings: toNumber(source.summaryCards?.totalBookings),

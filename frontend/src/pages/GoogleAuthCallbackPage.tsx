@@ -56,7 +56,7 @@ export default function GoogleAuthCallbackPage() {
           return
         }
 
-        navigate(returnTo || '/', { replace: true })
+        navigate(user.role === 'admin' ? '/admin/dashboard' : (returnTo || '/'), { replace: true })
       })
       .catch(() => {
         clearOAuthReturnTo()

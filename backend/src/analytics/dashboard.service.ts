@@ -14,6 +14,12 @@ export interface DashboardFilters {
   tourType?: string;
 }
 
+export interface ProvinceMetricStat {
+  name: string;
+  value: number;
+  percent: number;
+}
+
 const REGION_ALIASES: Record<string, string> = {
   all: 'all',
   north: 'ภาคเหนือ',
@@ -52,6 +58,7 @@ export class DashboardService {
       bookingsByStatus,
       regionStats,
       provinceStats,
+      provinceMetricStats,
       viewsOverTime,
       bookingsOverTime,
     ] = await Promise.all([
@@ -60,6 +67,7 @@ export class DashboardService {
       this.getBookingsByStatus(normalizedFilters),
       this.getRegionStats(normalizedFilters),
       this.getProvinceStats(normalizedFilters),
+      this.getProvinceMetricStats(normalizedFilters),
       this.getViewsOverTime(normalizedFilters),
       this.getBookingsOverTime(normalizedFilters),
     ]);
@@ -74,6 +82,7 @@ export class DashboardService {
       bookingsByStatus,
       regionStats,
       provinceStats,
+      provinceMetricStats,
       viewsOverTime,
       bookingsOverTime,
       conversionRate,
@@ -309,6 +318,126 @@ export class DashboardService {
         percent: Number(((Number(item.count || 0) / total) * 100).toFixed(1)),
       }))
       .sort((a, b) => b.count - a.count);
+  }
+
+  private toProvinceMetricStats(rows: Array<{ name: string; value: number }>): ProvinceMetricStat[] {
+    const total = rows.reduce((sum, item) => sum + item.value, 0);
+    const safeTotal = total > 0 ? total : 1;
+
+    return rows
+      .map((item) => ({
+        name: item.name || 'ไม่ระบุ',
+        value: Number(item.value || 0),
+        percent: Number((((item.value || 0) / safeTotal) * 100).toFixed(1)),
+      }))
+      .sort((left, right) => right.value - left.value);
+  }
+
+  private async getProvinceMetricStats(filters: DashboardFilters) {
+    const [views, bookings, revenue, tourCount] = await Promise.all([
+      this.getProvinceViewStats(filters),
+      this.getProvinceBookingStats(filters),
+      this.getProvinceRevenueStats(filters),
+      this.getProvinceTourCountStats(filters),
+    ]);
+
+    const viewsMap = new Map(views.map((item) => [item.name, item.value]));
+    const bookingsMap = new Map(bookings.map((item) => [item.name, item.value]));
+    const provinceNames = new Set<string>([
+      ...views.map((item) => item.name),
+      ...bookings.map((item) => item.name),
+      ...revenue.map((item) => item.name),
+      ...tourCount.map((item) => item.name),
+    ]);
+
+    const conversionRate = this.toProvinceMetricStats(
+      Array.from(provinceNames).map((name) => ({
+        name,
+        value: viewsMap.get(name)
+          ? Number((((bookingsMap.get(name) ?? 0) / (viewsMap.get(name) ?? 1)) * 100).toFixed(1))
+          : 0,
+      })),
+    );
+
+    return {
+      views,
+      bookings,
+      revenue,
+      tourCount,
+      conversionRate,
+    };
+  }
+
+  private async getProvinceViewStats(filters: DashboardFilters) {
+    const dateRange = this.getDateRange(filters);
+    const qb = this.tourViewsRepo
+      .createQueryBuilder('v')
+      .select('t.province', 'name')
+      .addSelect('COUNT(*)', 'value')
+      .innerJoin(Tour, 't', 't.id = v.tourId');
+
+    if (dateRange) {
+      qb.where('v.viewedAt BETWEEN :start AND :end', dateRange);
+    }
+
+    this.applyTourFilters(qb, filters, 't');
+
+    const raw = await qb.groupBy('t.province').getRawMany<{ name: string; value: string }>();
+    return this.toProvinceMetricStats(raw.map((item) => ({ name: item.name, value: Number(item.value || 0) })));
+  }
+
+  private async getProvinceBookingStats(filters: DashboardFilters) {
+    const dateRange = this.getDateRange(filters);
+    const qb = this.bookingsRepo
+      .createQueryBuilder('b')
+      .select('t.province', 'name')
+      .addSelect('COUNT(*)', 'value')
+      .innerJoin(TourSchedule, 's', 's.id = b.scheduleId')
+      .innerJoin(Tour, 't', 't.id = s.tourId');
+
+    if (dateRange) {
+      qb.where('b.createdAt BETWEEN :start AND :end', dateRange);
+    }
+
+    this.applyTourFilters(qb, filters, 't');
+
+    const raw = await qb.groupBy('t.province').getRawMany<{ name: string; value: string }>();
+    return this.toProvinceMetricStats(raw.map((item) => ({ name: item.name, value: Number(item.value || 0) })));
+  }
+
+  private async getProvinceRevenueStats(filters: DashboardFilters) {
+    const dateRange = this.getDateRange(filters);
+    const qb = this.bookingsRepo
+      .createQueryBuilder('b')
+      .select('t.province', 'name')
+      .addSelect('COALESCE(SUM(b.totalPrice), 0)', 'value')
+      .innerJoin(TourSchedule, 's', 's.id = b.scheduleId')
+      .innerJoin(Tour, 't', 't.id = s.tourId')
+      .where('b.status IN (:...statuses)', {
+        statuses: [BookingStatus.SUCCESS, BookingStatus.AWAITING_APPROVAL],
+      });
+
+    if (dateRange) {
+      qb.andWhere('b.createdAt BETWEEN :start AND :end', dateRange);
+    }
+
+    this.applyTourFilters(qb, filters, 't');
+
+    const raw = await qb.groupBy('t.province').getRawMany<{ name: string; value: string }>();
+    return this.toProvinceMetricStats(raw.map((item) => ({ name: item.name, value: Number(item.value || 0) })));
+  }
+
+  private async getProvinceTourCountStats(filters: DashboardFilters) {
+    const qb = this.toursRepo
+      .createQueryBuilder('t')
+      .select('t.province', 'name')
+      .addSelect('COUNT(*)', 'value')
+      .where('t.isActive = :active', { active: true });
+
+    this.applyTourFilters(qb, filters);
+
+    const raw = await qb.groupBy('t.province').getRawMany<{ name: string; value: string }>();
+    return this.toProvinceMetricStats(raw.map((item) => ({ name: item.name, value: Number(item.value || 0) })));
   }
 
   private async getViewsOverTime(filters: DashboardFilters) {
