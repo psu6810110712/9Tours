@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Repository } from 'typeorm';
+import { Repository, Not, In } from 'typeorm';
 import { BehaviorEvent } from '../analytics/entities/behavior-event.entity';
+import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
 import { parseToursData } from './tours-data.util';
@@ -77,6 +78,8 @@ export class ToursService {
   constructor(
     @InjectRepository(BehaviorEvent)
     private readonly behaviorEventsRepo: Repository<BehaviorEvent>,
+    @InjectRepository(Booking)
+    private readonly bookingsRepo: Repository<Booking>,
   ) {}
 
   create(dto: CreateTourDto) {
@@ -382,10 +385,34 @@ export class ToursService {
     }
   }
 
-  // ✅ สำหรับ Admin: ดูภาพรวมการจองของแต่ละทัวร์และรอบ
-  getAdminOverview() {
+  // ✅ สำหรับ Admin: ดูภาพรวมการจองของแต่ละทัวร์และรอบ (ดึงจำนวนจองจริงจาก DB)
+  async getAdminOverview() {
     reloadTours();
-    return DEMO_TOURS.map((tour: any) => ({
+
+    // ดึงจำนวนผู้จองจริงจาก DB (ไม่รวม canceled/refund)
+    const bookingCounts = await this.bookingsRepo
+      .createQueryBuilder('b')
+      .select('b.schedule_id', 'scheduleId')
+      .addSelect('SUM(b.pax_count)', 'totalPax')
+      .addSelect('COUNT(b.id)', 'bookingCount')
+      .where('b.status NOT IN (:...excluded)', {
+        excluded: [BookingStatus.CANCELED, BookingStatus.REFUND_COMPLETED],
+      })
+      .groupBy('b.schedule_id')
+      .getRawMany();
+
+    // สร้าง map: scheduleId -> { totalPax, bookingCount }
+    const countMap = new Map<number, { totalPax: number; bookingCount: number }>();
+    for (const row of bookingCounts) {
+      countMap.set(Number(row.scheduleId), {
+        totalPax: Number(row.totalPax) || 0,
+        bookingCount: Number(row.bookingCount) || 0,
+      });
+    }
+
+    return DEMO_TOURS
+      .filter((tour: any) => tour.isActive)
+      .map((tour: any) => ({
       id: tour.id,
       tourCode: tour.tourCode,
       name: tour.name,
@@ -395,19 +422,23 @@ export class ToursService {
       images: tour.images?.slice(0, 1) || [],
       isActive: tour.isActive,
       totalSchedules: (tour.schedules || []).length,
-      schedules: (tour.schedules || []).map((s: any) => ({
-        id: s.id,
-        startDate: s.startDate,
-        endDate: s.endDate,
-        roundName: s.roundName,
-        timeSlot: s.timeSlot,
-        maxCapacity: s.maxCapacity,
-        currentBooked: s.currentBooked || 0,
-        availableSeats: s.maxCapacity - (s.currentBooked || 0),
-        occupancyPercent: s.maxCapacity > 0
-          ? Math.min(100, Math.round(((s.currentBooked || 0) / s.maxCapacity) * 100))
-          : 0,
-      })),
+      schedules: (tour.schedules || []).map((s: any) => {
+        const dbCount = countMap.get(s.id);
+        const currentBooked = dbCount ? dbCount.totalPax : 0;
+        return {
+          id: s.id,
+          startDate: s.startDate,
+          endDate: s.endDate,
+          roundName: s.roundName,
+          timeSlot: s.timeSlot,
+          maxCapacity: s.maxCapacity,
+          currentBooked,
+          availableSeats: s.maxCapacity - currentBooked,
+          occupancyPercent: s.maxCapacity > 0
+            ? Math.min(100, Math.round((currentBooked / s.maxCapacity) * 100))
+            : 0,
+        };
+      }),
     }));
   }
 }
