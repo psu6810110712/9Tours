@@ -1,11 +1,12 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, IsIn } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { UserRole } from '../entities/user.entity';
+import { CUSTOMER_PREFIXES, type CustomerPrefix } from '../customer-profile.utils';
 
 export class CreateUserDto {
-  @IsString()
   @IsOptional()
-  prefix?: string;
+  @IsIn(CUSTOMER_PREFIXES, { message: 'Prefix must be one of the allowed values' })
+  prefix?: CustomerPrefix;
 
   @IsString()
   @IsNotEmpty({ message: 'กรุณาระบุชื่อ-นามสกุล' })
