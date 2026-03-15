@@ -9,11 +9,13 @@ import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ToursModule } from '../tours/tours.module'; // ✅ Import ToursModule
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Payment, Booking]),
     ToursModule, // ✅ เพิ่ม ToursModule
+    NotificationsModule,
 
     MulterModule.register({
       storage: diskStorage({

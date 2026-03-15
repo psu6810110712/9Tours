@@ -4,6 +4,10 @@ import { UserRole } from '../entities/user.entity';
 
 export class CreateUserDto {
   @IsString()
+  @IsOptional()
+  prefix?: string;
+
+  @IsString()
   @IsNotEmpty({ message: 'กรุณาระบุชื่อ-นามสกุล' })
   name: string;
 

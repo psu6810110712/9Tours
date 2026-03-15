@@ -5,6 +5,7 @@ import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
 import { buildDisplayName } from '../utils/profileValidation'
+import NotificationBell from './NotificationBell'
 
 const NAV_LINKS = [
   { label: 'หน้าแรก', path: '/' },
@@ -140,6 +141,14 @@ export default function Navbar() {
                   >
                     การจองของฉัน
                   </Link>
+                ) : null}
+
+                {user.role === 'customer' && user.profileCompleted ? (
+                  <NotificationBell />
+                ) : null}
+
+                {isAdmin ? (
+                  <NotificationBell />
                 ) : null}
 
                 {user.role === 'customer' && !user.profileCompleted ? (

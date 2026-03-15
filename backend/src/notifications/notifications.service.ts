@@ -1,12 +1,146 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Notification, NotificationType } from './entities/notification.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 
 @Injectable()
 export class NotificationsService {
     private readonly logger = new Logger(NotificationsService.name);
 
-    constructor(private readonly mailerService: MailerService) { }
+    constructor(
+        @InjectRepository(Notification)
+        private readonly notificationRepo: Repository<Notification>,
+        @InjectRepository(User)
+        private readonly userRepo: Repository<User>,
+        private readonly mailerService: MailerService,
+    ) { }
+
+    // ─── In-App Notification Methods ─────────────────────────────────
+
+    async createBookingNotification(
+        userId: string,
+        bookingId: number,
+        type: NotificationType,
+        tourName: string,
+    ) {
+        let title = '';
+        let message = '';
+
+        switch (type) {
+            case NotificationType.BOOKING_CONFIRMED:
+                title = 'การจองได้รับการยืนยัน';
+                message = `การจอง #${bookingId} สำหรับ "${tourName}" ได้รับการยืนยันเรียบร้อยแล้ว`;
+                break;
+            case NotificationType.BOOKING_SUCCESS:
+                title = 'การจองสำเร็จ';
+                message = `การจอง #${bookingId} สำหรับ "${tourName}" สำเร็จเรียบร้อยแล้ว เตรียมตัวเดินทางได้เลย!`;
+                break;
+            case NotificationType.BOOKING_CANCELED:
+                title = 'การจองถูกยกเลิก';
+                message = `การจอง #${bookingId} สำหรับ "${tourName}" ถูกยกเลิก กรุณาติดต่อแอดมินหากมีข้อสงสัย`;
+                break;
+        }
+
+        const notification = this.notificationRepo.create({
+            userId,
+            bookingId,
+            type,
+            title,
+            message,
+        });
+
+        return this.notificationRepo.save(notification);
+    }
+
+    async findAllForUser(userId: string) {
+        return this.notificationRepo.find({
+            where: { userId },
+            order: { createdAt: 'DESC' },
+            take: 50,
+        });
+    }
+
+    async countUnread(userId: string): Promise<number> {
+        return this.notificationRepo.count({
+            where: { userId, isRead: false },
+        });
+    }
+
+    async markAsRead(id: number, userId: string) {
+        await this.notificationRepo.update(
+            { id, userId },
+            { isRead: true },
+        );
+    }
+
+    async markAllAsRead(userId: string) {
+        await this.notificationRepo.update(
+            { userId, isRead: false },
+            { isRead: true },
+        );
+    }
+
+    // ─── Admin Notification Methods ──────────────────────────────────
+
+    async notifyAdminsNewBooking(details: {
+        bookingId: number;
+        tourName: string;
+        customerName: string;
+        paxCount: number;
+        totalPrice: number;
+        scheduleDate?: string;
+    }) {
+        const admins = await this.userRepo.find({ where: { role: UserRole.ADMIN } });
+        if (admins.length === 0) return;
+
+        const title = 'มีการจองใหม่';
+        const priceFmt = Number(details.totalPrice).toLocaleString();
+        const datePart = details.scheduleDate ? ` | วันเดินทาง: ${details.scheduleDate}` : '';
+        const message = `การจอง #${details.bookingId} — "${details.tourName}" โดย ${details.customerName} (${details.paxCount} ท่าน) ยอด ฿${priceFmt}${datePart}`;
+
+        const notifications = admins.map((admin) =>
+            this.notificationRepo.create({
+                userId: admin.id,
+                bookingId: details.bookingId,
+                type: NotificationType.NEW_BOOKING,
+                title,
+                message,
+            }),
+        );
+
+        await this.notificationRepo.save(notifications);
+    }
+
+    async notifyAdminsPaymentUploaded(details: {
+        bookingId: number;
+        tourName: string;
+        customerName: string;
+        amount: number;
+    }) {
+        const admins = await this.userRepo.find({ where: { role: UserRole.ADMIN } });
+        if (admins.length === 0) return;
+
+        const title = 'มีสลิปรอตรวจสอบ';
+        const amountFmt = Number(details.amount).toLocaleString();
+        const message = `การจอง #${details.bookingId} — "${details.tourName}" | ${details.customerName} อัปโหลดสลิป ฿${amountFmt} รอตรวจสอบ`;
+
+        const notifications = admins.map((admin) =>
+            this.notificationRepo.create({
+                userId: admin.id,
+                bookingId: details.bookingId,
+                type: NotificationType.PAYMENT_UPLOADED,
+                title,
+                message,
+            }),
+        );
+
+        await this.notificationRepo.save(notifications);
+    }
+
+    // ─── Email Notification (existing) ───────────────────────────────
 
     async sendBookingStatusEmail(booking: Booking, previousStatus: string, newStatus: string) {
         // Only send email when transitioning from awaiting_approval to confirmed or success
