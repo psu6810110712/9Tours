@@ -67,7 +67,7 @@ export class BookingsService {
         const { tour, schedule } = found;
         const isPrivate = !!tour.minPeople;
         const seatsToRelease = isPrivate ? schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+        await this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
       }
     }
   }
@@ -190,7 +190,7 @@ export class BookingsService {
       return bookingRepo.save(createdBooking);
     });
 
-    this.toursService.updateScheduleBookedCount(scheduleId, seatsToHold);
+    await this.toursService.updateScheduleBookedCount(scheduleId, seatsToHold);
 
     // Notify all admins about the new booking
     this.notificationsService.notifyAdminsNewBooking({
@@ -307,14 +307,14 @@ export class BookingsService {
       if (found) {
         const isPrivate = !!found.tour.minPeople;
         const seatsToRelease = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+        await this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
       }
     } else if (!wasActive && isNowActive) {
       const found = this.findScheduleInData(booking.scheduleId);
       if (found) {
         const isPrivate = !!found.tour.minPeople;
         const seatsToHold = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, seatsToHold);
+        await this.toursService.updateScheduleBookedCount(booking.scheduleId, seatsToHold);
       }
     }
 
@@ -436,7 +436,7 @@ export class BookingsService {
     if (foundForCancel) {
       const isPrivate = !!foundForCancel.tour.minPeople;
       const seatsToRelease = isPrivate ? foundForCancel.schedule.maxCapacity : booking.paxCount;
-      this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+      await this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
     }
 
     const found = this.findScheduleInData(updated.scheduleId);

@@ -31,7 +31,7 @@
     "accommodation": null,
     "rating": 4.3,
     "reviewCount": 19,
-    "isActive": false,
+    "isActive": true,
     "schedules": [
       {
         "id": 133,
@@ -1731,7 +1731,7 @@
         "timeSlot": null,
         "roundName": null,
         "maxCapacity": 20,
-        "currentBooked": 1
+        "currentBooked": -19
       },
       {
         "id": 304,
@@ -3811,7 +3811,7 @@
         "timeSlot": null,
         "roundName": null,
         "maxCapacity": 20,
-        "currentBooked": 0
+        "currentBooked": 20
       },
       {
         "id": 512,
@@ -4875,7 +4875,7 @@
       }
     ],
     "createdAt": "2026-03-01T05:05:17.105Z",
-    "updatedAt": "2026-03-15T14:26:08.799Z",
+    "updatedAt": "2026-03-15T14:48:22.278Z",
     "childPrice": null,
     "minPeople": 1,
     "maxPeople": 10
@@ -5135,8 +5135,8 @@
       "สายกิจกรรม",
       "สายธรรมชาติ"
     ],
-    "price": 1800,
-    "originalPrice": 2000,
+    "price": 1,
+    "originalPrice": 1,
     "images": [
       "http://localhost:3000/uploads/tour-1772341946989-783950595.png",
       "http://localhost:3000/uploads/tour-1773304824599-645235724.png",
@@ -5187,7 +5187,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": -2
+        "currentBooked": 0
       },
       {
         "id": 503,
@@ -5247,7 +5247,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": -4
+        "currentBooked": 0
       },
       {
         "id": 509,
@@ -5307,7 +5307,7 @@
         "timeSlot": "08:00-12:00",
         "roundName": "รอบเช้า",
         "maxCapacity": 10,
-        "currentBooked": -3
+        "currentBooked": 0
       },
       {
         "id": 515,
@@ -5341,7 +5341,7 @@
       }
     ],
     "createdAt": "2026-03-01T05:05:17.106Z",
-    "updatedAt": "2026-03-12T09:22:00.322Z",
+    "updatedAt": "2026-03-15T14:48:20.439Z",
     "childPrice": 450
   },
   {

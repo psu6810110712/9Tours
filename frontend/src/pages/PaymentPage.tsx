@@ -329,6 +329,9 @@ export default function PaymentPage() {
       ? `กรุณาอัปโหลดสลิปภายใน ${formatTime(timeLeft)} นาที`
       : `กรุณาชำระเงินภายใน ${formatTime(timeLeft)} นาที`
   const canShowQr = paymentPhase === 'active'
+  const qrExpiryLabel = paymentQr
+    ? new Date(paymentQr.expiresAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+    : null
 
   return (
     <div className="bg-[#F8FAFC]">
@@ -363,10 +366,10 @@ export default function PaymentPage() {
 
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_1.15fr_1fr]">
           <section className="ui-surface flex h-full flex-col overflow-hidden rounded-[1.65rem] border border-gray-100 bg-white">
-            <div className="flex min-h-[25rem] items-center justify-center bg-slate-50 px-5 py-5">
+            <div className="bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] px-5 py-5">
               {canShowQr ? (
                 qrLoading ? (
-                  <div className="flex flex-col items-center justify-center text-center text-gray-500">
+                  <div className="flex min-h-[25rem] flex-col items-center justify-center rounded-[1.6rem] border border-slate-200 bg-white/90 text-center text-gray-500 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
                     <svg className="h-8 w-8 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4Zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647Z" />
@@ -374,18 +377,36 @@ export default function PaymentPage() {
                     <p className="mt-3 text-base font-semibold">กำลังสร้าง QR ตามยอดชำระ</p>
                   </div>
                 ) : paymentQr ? (
-                  <div className="w-full text-center">
-                    <img
-                      src={paymentQr.qrImageUrl}
-                      alt={`PromptPay QR Code for ฿${paymentQr.amount.toLocaleString()}`}
-                      className="mx-auto w-full max-w-[22rem] rounded-[1.25rem] border border-slate-200 bg-white p-4 shadow-sm"
-                    />
-                    <div className="mt-4 rounded-[1.1rem] border border-slate-200 bg-white px-4 py-3 text-left">
-                      <p className="text-sm font-medium text-gray-500">ยอดที่ต้องชำระ</p>
-                      <p className="mt-1 text-2xl font-bold text-gray-900">฿{paymentQr.amount.toLocaleString()}</p>
-                      <p className="mt-2 text-sm text-gray-600">
-                        QR นี้ใช้ได้ถึง {new Date(paymentQr.expiresAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.
-                      </p>
+                  <div className="w-full">
+                    <div className="mx-auto max-w-[25rem] overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+                      <div className="px-5 pb-6 pt-5 text-center">
+                        <div className="mx-auto w-full max-w-[21rem]">
+                          <div className="overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                            <img
+                              src="/thai-qr-payment.png"
+                              alt="Thai QR Payment"
+                              className="h-auto w-full"
+                            />
+                            <div className="px-4 pb-5 pt-4 sm:px-5">
+                              <div className="mx-auto flex aspect-square w-full max-w-[15rem] items-center justify-center rounded-[0.9rem] border border-slate-200 bg-white p-3">
+                                <img
+                                  src={paymentQr.qrImageUrl}
+                                  alt={`PromptPay QR Code for ฿${paymentQr.amount.toLocaleString()}`}
+                                  className="aspect-square h-full w-full object-contain"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 rounded-[1.1rem] border border-slate-200 bg-[#f8fbff] px-4 py-3 text-left">
+                          <p className="text-sm font-medium text-gray-500">ยอดที่ต้องชำระ</p>
+                          <p className="mt-1 text-2xl font-bold text-gray-900">฿{paymentQr.amount.toLocaleString()}</p>
+                          <p className="mt-2 text-sm text-gray-600">
+                            QR นี้ใช้ได้ถึง {qrExpiryLabel} น.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ) : (

@@ -16,6 +16,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ensureDirectoryExistsSync, getSlipUploadDirectory } from '../common/upload-paths';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { ensureValidSlipImage, safeDeleteFile } from './slip-file.utils';
@@ -35,7 +36,9 @@ export class PaymentsController {
   @UseInterceptors(
     FileInterceptor('slip', {
       storage: diskStorage({
-        destination: './uploads/slips',
+        destination: (_req, _file, cb) => {
+          cb(null, ensureDirectoryExistsSync(getSlipUploadDirectory()));
+        },
         filename: (req, file, cb) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);

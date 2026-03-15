@@ -1,13 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import type { Request, Response } from 'express';
+import { ensureDirectoryExistsSync, getUploadsRoot } from './common/upload-paths';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const uploadsRoot = ensureDirectoryExistsSync(getUploadsRoot());
+
+  if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+  }
 
   app.use(cookieParser());
 
@@ -31,7 +36,7 @@ async function bootstrap() {
     res.status(403).json({ message: 'Direct slip access is disabled' });
   });
 
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  app.useStaticAssets(uploadsRoot, {
     prefix: '/uploads/',
   });
 

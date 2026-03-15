@@ -1,0 +1,18 @@
+[Unit]
+Description=9Tours Backend API
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/9tours/releases/current/backend
+EnvironmentFile=/var/www/9tours/shared/backend.env
+ExecStart=/usr/bin/node /var/www/9tours/releases/current/backend/dist/main.js
+Restart=always
+RestartSec=5
+KillSignal=SIGINT
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

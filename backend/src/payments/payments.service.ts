@@ -19,13 +19,20 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { EasySlipService, type EasySlipVerificationResult } from '../easyslip/easyslip.service';
 import { safeDeleteFile } from './slip-file.utils';
 import { buildPromptPayPayload, getActivePaymentQrExpiry } from './promptpay.util';
+import {
+  buildStoredUploadPath,
+  getSlipUploadDirectory,
+  getUploadsRoot,
+  resolveStoredUploadPath,
+} from '../common/upload-paths';
 
 const PROMPTPAY_QR_RENDERER_BASE_URL = 'https://api.qrserver.com/v1/create-qr-code/';
 
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
-  private readonly slipUploadDirectory = join(process.cwd(), 'uploads', 'slips');
+  private readonly slipUploadDirectory = getSlipUploadDirectory();
+  private readonly uploadsRoot = resolve(getUploadsRoot());
 
   constructor(
     @InjectRepository(Payment)
@@ -88,7 +95,7 @@ export class PaymentsService {
     },
   ) {
     const { bookingId, paymentMethod } = createPaymentDto;
-    const normalizedSlipPath = slipFile.path.replace(/\\/g, '/');
+    const normalizedSlipPath = buildStoredUploadPath('slips', slipFile.filename);
 
     const booking = await this.bookingsRepository.findOne({
       where: { id: bookingId, userId },
@@ -160,7 +167,7 @@ export class PaymentsService {
         savedPayment = await this.paymentsRepository.save(existingPayment);
 
         if (previousSlipPath && previousSlipPath !== normalizedSlipPath) {
-          await safeDeleteFile(previousSlipPath);
+          await safeDeleteFile(resolveStoredUploadPath(previousSlipPath));
         }
       } else {
         const newPayment = this.paymentsRepository.create({
@@ -244,10 +251,9 @@ export class PaymentsService {
       throw new NotFoundException('Payment slip not found');
     }
 
-    const absolutePath = resolve(process.cwd(), payment.slipUrl);
-    const uploadsRoot = resolve(this.slipUploadDirectory);
+    const absolutePath = resolveStoredUploadPath(payment.slipUrl);
 
-    if (!absolutePath.startsWith(uploadsRoot)) {
+    if (!absolutePath.startsWith(this.uploadsRoot)) {
       this.logger.warn(`Blocked slip access outside upload directory for payment ${paymentId}`);
       throw new NotFoundException('Payment slip not found');
     }

@@ -8,6 +8,7 @@ import { tourService } from '../services/tourService'
 import type { Tour } from '../types/tour'
 
 const CATEGORIES = ['สายธรรมชาติ', 'สายคาเฟ่', 'สายกิจกรรม', 'สายมู', 'สายชิล']
+const HERO_CATEGORY_LIMIT = 5
 
 const PLACES = [
   { name: 'ที่ไหนก็ได้', image: '/images/anywhere-2.png', province: null as string | null },
@@ -206,7 +207,24 @@ export default function HomePage() {
     ? tours.filter((tour) => tour.province === selectedPlace.province)
     : tours
 
-  const heroCategories = Array.from(new Set(tours.flatMap((tour) => tour.categories))).sort((a, b) => a.localeCompare(b, 'th'))
+  const heroCategoryCounts = tours.reduce((counts, tour) => {
+    tour.categories.forEach((category) => {
+      counts.set(category, (counts.get(category) ?? 0) + 1)
+    })
+    return counts
+  }, new Map<string, number>())
+
+  const heroCategories = (heroCategoryCounts.size > 0
+    ? [...heroCategoryCounts.entries()]
+      .filter(([category]) => category.startsWith('สาย'))
+      .sort((a, b) => {
+        if (b[1] !== a[1]) return b[1] - a[1]
+        return a[0].localeCompare(b[0], 'th')
+      })
+      .slice(0, HERO_CATEGORY_LIMIT)
+      .map(([category]) => category)
+    : CATEGORIES
+  )
 
   const sectionTitle = selectedPlace.province
     ? `ทริปยอดนิยมใน${selectedPlace.name}`
@@ -235,7 +253,7 @@ export default function HomePage() {
             </div>
 
             <div className="mx-auto mt-4 flex max-w-4xl flex-wrap justify-center gap-3">
-              {(heroCategories.length > 0 ? heroCategories : CATEGORIES).map((category) => (
+              {heroCategories.map((category) => (
                 <button
                   key={category}
                   type="button"

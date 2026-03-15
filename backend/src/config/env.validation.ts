@@ -3,6 +3,7 @@ const DEFAULT_REFRESH_TOKEN_TTL_DAYS = 7;
 const DEFAULT_REMEMBER_ME_REFRESH_TTL_DAYS = 30;
 const DEFAULT_AUTH_COOKIE_NAME = 'refresh_token';
 const DEFAULT_FRONTEND_URL = 'http://localhost:5173';
+const DEFAULT_BACKEND_PUBLIC_URL = 'http://localhost:3000';
 const DEFAULT_EASYSLIP_BASE_URL = 'https://developer.easyslip.com/api/v1';
 const DEFAULT_SLIP2GO_BASE_URL = 'https://connect.slip2go.com/api';
 
@@ -23,6 +24,28 @@ function readPositiveInteger(value: unknown, fallback: number, variableName: str
   return parsed;
 }
 
+function readBoolean(value: unknown, fallback: boolean): boolean {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(normalized)) {
+      return true;
+    }
+    if (['false', '0', 'no', 'off'].includes(normalized)) {
+      return false;
+    }
+  }
+
+  throw new Error('Boolean environment variables must be one of true/false, 1/0, yes/no, on/off');
+}
+
 export function validateEnv(config: Record<string, unknown>) {
   const nodeEnv = readString(config.NODE_ENV) ?? 'development';
   const jwtSecret = readString(config.JWT_SECRET);
@@ -31,6 +54,7 @@ export function validateEnv(config: Record<string, unknown>) {
   const googleClientSecret = readString(config.GOOGLE_CLIENT_SECRET);
   const googleCallbackUrl = readString(config.GOOGLE_CALLBACK_URL);
   const frontendUrl = readString(config.FRONTEND_URL) ?? DEFAULT_FRONTEND_URL;
+  const backendPublicUrl = readString(config.BACKEND_PUBLIC_URL) ?? DEFAULT_BACKEND_PUBLIC_URL;
   const configuredGoogleValues = [
     googleClientId,
     googleClientSecret,
@@ -49,6 +73,18 @@ export function validateEnv(config: Record<string, unknown>) {
 
   if (nodeEnv === 'production' && !corsOrigins) {
     throw new Error('CORS_ORIGINS environment variable is required in production');
+  }
+
+  if (nodeEnv === 'production' && !readString(config.FRONTEND_URL)) {
+    throw new Error('FRONTEND_URL environment variable is required in production');
+  }
+
+  if (nodeEnv === 'production' && !readString(config.BACKEND_PUBLIC_URL)) {
+    throw new Error('BACKEND_PUBLIC_URL environment variable is required in production');
+  }
+
+  if (nodeEnv === 'production' && !readString(config.UPLOADS_ROOT)) {
+    throw new Error('UPLOADS_ROOT environment variable is required in production');
   }
 
   return {
@@ -73,6 +109,11 @@ export function validateEnv(config: Record<string, unknown>) {
     GOOGLE_CLIENT_SECRET: googleClientSecret,
     GOOGLE_CALLBACK_URL: googleCallbackUrl,
     FRONTEND_URL: frontendUrl,
+    BACKEND_PUBLIC_URL: backendPublicUrl,
+    DB_SYNCHRONIZE: readBoolean(config.DB_SYNCHRONIZE, nodeEnv !== 'production'),
+    MAIL_ENABLED: readBoolean(config.MAIL_ENABLED, true),
+    ENABLE_TOUR_JSON_IMPORT: readBoolean(config.ENABLE_TOUR_JSON_IMPORT, nodeEnv !== 'production'),
+    UPLOADS_ROOT: readString(config.UPLOADS_ROOT),
     PROMPTPAY_ID: readString(config.PROMPTPAY_ID),
     PROMPTPAY_ACCOUNT_NAME: readString(config.PROMPTPAY_ACCOUNT_NAME),
     EASYSLIP_API_KEY: readString(config.EASYSLIP_API_KEY),

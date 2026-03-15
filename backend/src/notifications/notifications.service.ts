@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -16,6 +17,7 @@ export class NotificationsService {
         @InjectRepository(User)
         private readonly userRepo: Repository<User>,
         private readonly mailerService: MailerService,
+        private readonly configService: ConfigService,
     ) { }
 
     // ─── In-App Notification Methods ─────────────────────────────────
@@ -143,6 +145,11 @@ export class NotificationsService {
     // ─── Email Notification (existing) ───────────────────────────────
 
     async sendBookingStatusEmail(booking: Booking, previousStatus: string, newStatus: string) {
+        if (!this.configService.get<boolean>('MAIL_ENABLED')) {
+            this.logger.log(`Skipping booking status email for booking ${booking.id} because MAIL_ENABLED=false`);
+            return;
+        }
+
         // Only send email when transitioning from awaiting_approval to confirmed or success
         const validTransition = previousStatus === BookingStatus.AWAITING_APPROVAL &&
             (newStatus === BookingStatus.CONFIRMED || newStatus === BookingStatus.SUCCESS);

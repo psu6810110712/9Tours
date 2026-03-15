@@ -124,7 +124,7 @@ export class AuthController {
     return {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: 'lax',
       path: '/',
       ...(cookieDomain ? { domain: cookieDomain } : {}),
       ...(remember ? { maxAge: rememberMeDays * 24 * 60 * 60 * 1000 } : {}),
