@@ -76,16 +76,21 @@ export default function AdminDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [filterStartDate, setFilterStartDate] = useState(() => {
-    const date = new Date()
-    date.setDate(1)
-    return formatLocalDateInputValue(date)
-  })
-  const [filterEndDate, setFilterEndDate] = useState(() => formatLocalDateInputValue(new Date()))
+  const [filterStartDate, setFilterStartDate] = useState('')
+  const [filterEndDate, setFilterEndDate] = useState('')
   const [filterRegion, setFilterRegion] = useState('all')
   const [filterTourType, setFilterTourType] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedProvinceMetric, setSelectedProvinceMetric] = useState<ProvinceMetricKey>('views')
+
+  const buildFilters = useCallback((): DashboardFilters => {
+    const filters: DashboardFilters = {}
+    if (filterStartDate) filters.startDate = filterStartDate
+    if (filterEndDate) filters.endDate = filterEndDate
+    if (filterRegion && filterRegion !== 'all') filters.region = filterRegion
+    if (filterTourType && filterTourType !== 'all') filters.tourType = filterTourType
+    return filters
+  }, [filterStartDate, filterEndDate, filterRegion, filterTourType])
 
   const fetchData = useCallback(async (filters: DashboardFilters = {}) => {
     setLoading(true)
@@ -103,11 +108,11 @@ export default function AdminDashboardPage() {
   }, [])
 
   useEffect(() => {
-    void fetchData({ startDate: filterStartDate, endDate: filterEndDate, region: filterRegion, tourType: filterTourType })
-  }, [fetchData, filterEndDate, filterRegion, filterStartDate, filterTourType])
+    void fetchData(buildFilters())
+  }, [fetchData, buildFilters])
 
   const handleApplyFilters = () => {
-    void fetchData({ startDate: filterStartDate, endDate: filterEndDate, region: filterRegion, tourType: filterTourType })
+    void fetchData(buildFilters())
   }
 
   const safeData = data ?? EMPTY_DASHBOARD_DATA
@@ -146,11 +151,21 @@ export default function AdminDashboardPage() {
           <div className="grid flex-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <label className="text-sm">
               <span className="mb-2 block font-medium text-gray-500">ตั้งแต่</span>
-              <input type="date" value={filterStartDate} onChange={(event) => setFilterStartDate(event.target.value)} className="ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none focus:border-primary focus:bg-white" />
+              <div className="flex gap-2">
+                <input type="date" value={filterStartDate} onChange={(event) => setFilterStartDate(event.target.value)} className="ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none focus:border-primary focus:bg-white" />
+                {filterStartDate && (
+                  <button type="button" onClick={() => setFilterStartDate('')} className="rounded-2xl border border-gray-200 px-3 text-gray-400 hover:text-gray-600">✕</button>
+                )}
+              </div>
             </label>
             <label className="text-sm">
               <span className="mb-2 block font-medium text-gray-500">ถึง</span>
-              <input type="date" value={filterEndDate} onChange={(event) => setFilterEndDate(event.target.value)} className="ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none focus:border-primary focus:bg-white" />
+              <div className="flex gap-2">
+                <input type="date" value={filterEndDate} onChange={(event) => setFilterEndDate(event.target.value)} className="ui-focus-ring w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none focus:border-primary focus:bg-white" />
+                {filterEndDate && (
+                  <button type="button" onClick={() => setFilterEndDate('')} className="rounded-2xl border border-gray-200 px-3 text-gray-400 hover:text-gray-600">✕</button>
+                )}
+              </div>
             </label>
             <label className="text-sm">
               <span className="mb-2 block font-medium text-gray-500">ภูมิภาค</span>
