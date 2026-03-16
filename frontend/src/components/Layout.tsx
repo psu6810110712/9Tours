@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import { trackEvent, trackEventKeepalive } from '../services/trackingService'
 
 export default function Layout() {
+    const { isAdmin } = useAuth()
     const location = useLocation()
     const lastPathRef = useRef<string>('')
     const pageStartRef = useRef<number>(Date.now())
@@ -69,10 +71,10 @@ export default function Layout() {
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
             <Navbar />
-            <main className="flex-1">
+            <main className={`flex-1 ${isAdmin ? 'pt-[68px]' : ''}`.trim()}>
                 <Outlet />
             </main>
-            <Footer />
+            {!isAdmin && <Footer />}
         </div>
     )
 }

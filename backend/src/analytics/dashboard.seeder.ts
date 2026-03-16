@@ -26,6 +26,10 @@ export class DashboardSeederService implements OnModuleInit {
     ) { }
 
     async onModuleInit() {
+        if (String(process.env.ENABLE_DEMO_DASHBOARD_SEED ?? '').trim().toLowerCase() !== 'true') {
+            return;
+        }
+
         try {
             // ── เช็คว่ามี tour ใน DB แล้วหรือยัง ──
             const tourCount = await this.toursRepo.count();

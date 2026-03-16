@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import Layout from './components/Layout'
@@ -16,6 +16,21 @@ import BookingInfoPage from './pages/BookingInfoPage'
 import PaymentPage from './pages/PaymentPage'
 import GoogleAuthCallbackPage from './pages/GoogleAuthCallbackPage'
 import CompleteProfilePage from './pages/CompleteProfilePage'
+import { useAuth } from './context/AuthContext'
+
+function HomeRoute() {
+  const { user, isLoading } = useAuth()
+
+  if (isLoading) {
+    return <div className="flex min-h-screen items-center justify-center">Loading...</div>
+  }
+
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin/dashboard" replace />
+  }
+
+  return <HomePage />
+}
 
 function App() {
   return (
@@ -38,7 +53,7 @@ function App() {
           <Route path="/auth/google/callback" element={<GoogleAuthCallbackPage />} />
 
           <Route element={<Layout />}>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<HomeRoute />} />
             <Route path="/tours" element={<ToursPage />} />
             <Route path="/tours/:id" element={<TourDetailPage />} />
             <Route

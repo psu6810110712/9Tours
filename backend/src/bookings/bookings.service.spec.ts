@@ -89,6 +89,7 @@ describe('BookingsService', () => {
     const notificationsService = {
       sendBookingConfirmation: jest.fn(),
       sendStatusUpdate: jest.fn(),
+      notifyAdminsNewBooking: jest.fn().mockResolvedValue(undefined),
     }
 
     service = new BookingsService(bookingsRepository, usersRepository, toursService, notificationsService as any)
@@ -110,7 +111,7 @@ describe('BookingsService', () => {
     expect(userRepoInTransaction.save).toHaveBeenCalledWith(expect.objectContaining({
       prefix: 'นางสาว',
       name: 'Farn Patcharapon',
-      email: 'farn@example.com',
+      email: 'FARN@example.com',
       phone: '0812345678',
     }))
     expect(bookingRepoInTransaction.create).toHaveBeenCalledWith(expect.objectContaining({
@@ -119,11 +120,11 @@ describe('BookingsService', () => {
       paxCount: 2,
       contactPrefix: 'นางสาว',
       contactName: 'Farn Patcharapon',
-      contactEmail: 'farn@example.com',
+      contactEmail: 'FARN@example.com',
       contactPhone: '0812345678',
       status: BookingStatus.PENDING_PAYMENT,
     }))
-    expect(result.contactEmail).toBe('farn@example.com')
+    expect(result.contactEmail).toBe('FARN@example.com')
     expect(result.contactPhone).toBe('0812345678')
     expect(toursService.updateScheduleBookedCount).toHaveBeenCalledWith(77, 2)
   })

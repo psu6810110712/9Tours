@@ -1,10 +1,11 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import TourCard from '../components/TourCard'
 import TourGallery from '../components/tour/TourGallery'
 import TourInfo from '../components/tour/TourInfo'
 import TourItinerary from '../components/tour/TourItinerary'
 import BookingSidebar from '../components/tour/BookingSidebar'
+import { trackEvent } from '../services/trackingService'
 import { tourService } from '../services/tourService'
 import { useAuth } from '../context/AuthContext'
 import type { Tour } from '../types/tour'
@@ -15,6 +16,7 @@ export default function TourDetailPage() {
   const [related, setRelated] = useState<Tour[]>([])
   const navigate = useNavigate()
   const { isAdmin } = useAuth()
+  const trackedTourIdRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -28,6 +30,19 @@ export default function TourDetailPage() {
       })
       .catch(() => navigate('/tours'))
   }, [id, navigate])
+
+  useEffect(() => {
+    if (!tour?.id) return
+    if (trackedTourIdRef.current === tour.id) return
+
+    trackedTourIdRef.current = tour.id
+    void trackEvent({
+      eventType: 'page_view',
+      pagePath: `/tours/${tour.id}`,
+      tourId: tour.id,
+      metadata: { source: 'tour_detail_page' },
+    })
+  }, [tour?.id])
 
   if (!tour) {
     return (

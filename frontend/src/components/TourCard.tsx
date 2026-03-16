@@ -23,16 +23,6 @@ function CheckIcon() {
   )
 }
 
-function CrossIcon() {
-  return (
-    <svg className="h-4 w-4 flex-shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.1}>
-      <circle cx="12" cy="12" r="8.5" />
-      <path strokeLinecap="round" d="M9 9l6 6" />
-      <path strokeLinecap="round" d="M15 9l-6 6" />
-    </svg>
-  )
-}
-
 function StarIcon() {
   return (
     <svg className="h-7 w-7 flex-shrink-0 fill-current text-yellow-400" viewBox="0 0 20 23" aria-hidden="true">
@@ -50,16 +40,14 @@ function FeaturedBadge() {
 }
 
 interface DetailItemProps {
-  icon: 'clock' | 'check' | 'cross'
+  icon: 'clock' | 'check'
   text: string
 }
 
 function DetailItem({ icon, text }: DetailItemProps) {
   const iconNode = icon === 'clock'
     ? <ClockIcon />
-    : icon === 'cross'
-      ? <CrossIcon />
-      : <CheckIcon />
+    : <CheckIcon />
 
   return (
     <div className="flex items-center gap-2 text-[16px] font-medium leading-tight text-gray-600">
@@ -69,23 +57,17 @@ function DetailItem({ icon, text }: DetailItemProps) {
   )
 }
 
-function normalizeHighlight(text: string) {
-  if (text.includes('รถรับส่ง')) return 'บริการรถรับส่ง'
-  if (text.includes('อาหาร')) return 'รวมอาหารกลางวัน'
-  if (text.includes('ยกเลิก')) return 'สามารถยกเลิกได้'
-  if (text.includes('ไม่รวม')) return 'ไม่รวมค่าใช้จ่ายเพิ่มเติม'
-  if (text.includes('ไกด์')) return 'มีไกด์นำเที่ยว'
-  if (text.includes('ส่วนลด')) return 'มีส่วนลดสำหรับเด็ก'
-  if (text.includes('ส่วนตัว')) return 'เหมาะสำหรับทริปส่วนตัว'
-  if (text.includes('กลุ่ม')) return 'เหมาะสำหรับทริปกลุ่ม'
-  if (text.includes('กิจกรรม')) return 'มีกิจกรรมสนุกๆ'
-  if (text.includes('ธรรมชาติ')) return 'ชมธรรมชาติสวยงาม'
-  if (text.includes('วัฒนธรรม')) return 'สัมผัสวัฒนธรรมท้องถิ่น'
-  if (text.includes('ประวัติศาสตร์')) return 'เรียนรู้ประวัติศาสตร์'
-  if (text.includes('ผจญภัย')) return 'เหมาะสำหรับคนรักการผจญภัย'
-  if (text.includes('พักผ่อน')) return 'เหมาะสำหรับคนรักการพักผ่อน'
-  if (text.includes('ถ่ายรูป')) return 'มีจุดถ่ายรูปสวยๆ'
-  return text
+function getCardDetailItems(tour: Tour) {
+  const secondLine = tour.highlights[0]?.trim() || 'รายละเอียดเด่นของทัวร์'
+  const thirdLine = tour.tourType === 'package'
+    ? tour.accommodation?.trim() || 'มีที่พักรวมในแพ็กเกจ'
+    : tour.highlights[1]?.trim() || 'ไฮไลต์เพิ่มเติมของทริป'
+
+  return [
+    { icon: 'clock' as const, text: tour.duration },
+    { icon: 'check' as const, text: secondLine },
+    { icon: 'check' as const, text: thirdLine },
+  ]
 }
 
 export default function TourCard({ tour }: TourCardProps) {
@@ -95,14 +77,11 @@ export default function TourCard({ tour }: TourCardProps) {
   const discountPercent = hasDiscount
     ? Math.round((1 - tour.price / originalPrice) * 100)
     : null
-  const coverImage = tour.images[0] || 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=400'
+  const coverImage = tour.images.find((image) => typeof image === 'string' && image.trim().length > 0) || ''
+  const hasCoverImage = coverImage.length > 0
   const isPopular = tour.reviewCount > 50
 
-  const detailItems = [
-    { icon: 'clock' as const, text: tour.duration },
-    { icon: 'cross' as const, text: normalizeHighlight(tour.highlights.find((item) => item.includes('ยกเลิก')) || 'สามารถยกเลิกได้') },
-    { icon: 'check' as const, text: normalizeHighlight(tour.highlights.find((item) => !item.includes('ยกเลิก')) || 'รวมอาหารกลางวัน') },
-  ]
+  const detailItems = getCardDetailItems(tour)
 
   const metaText = isPopular ? 'ทัวร์ยอดนิยม' : 'แนะนำสำหรับคุณ'
 
@@ -129,20 +108,26 @@ export default function TourCard({ tour }: TourCardProps) {
       )}
 
       <div className="h-[180px] overflow-hidden border-b border-gray-100 bg-slate-100">
-        <img
-          src={coverImage}
-          alt={tour.name}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-        />
+        {hasCoverImage ? (
+          <img
+            src={coverImage}
+            alt={tour.name}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 px-6 text-center">
+            <p className="text-lg font-bold text-slate-600">ไม่มีภาพประกอบสำหรับทัวร์นี้</p>
+          </div>
+        )}
       </div>
 
       <div className="grid flex-1 grid-rows-[auto_auto_1fr_auto] px-3.5 pb-5 pt-3.5">
-        <h3 className="line-clamp-2 text-[1.25rem] font-bold leading-[1.5] text-gray-900">
+        <h3 className="mt-1 line-clamp-2 text-[1.125rem] font-bold leading-[1.4] text-gray-700">
           {tour.name}
         </h3>
 
-        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[16px] font-bold text-gray-600">
-          <span className="inline-flex items-center gap-1 leading-none text-gray-700">
+        <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[16px] font-extrabold text-gray-600">
+          <span className="inline-flex items-center gap-1 leading-none text-gray-600">
             <StarIcon />
             <span>{tour.rating.toFixed(1)}</span>
             <span className="text-gray-500">({tour.reviewCount.toLocaleString()} รีวิว)</span>
@@ -161,12 +146,12 @@ export default function TourCard({ tour }: TourCardProps) {
         <div className="-mx-2 -mb-8 mt-5 border-t border-gray-200">
           <div className="relative min-h-[6.25rem] px-3.5 py-2.5">
             <div>
-              <p className="text-[1.05rem] font-semibold text-gray-500">
+              <p className="text-[1.05rem] font-semibold text-gray-700">
                 {isPrivate ? 'ราคาเหมาส่วนตัว' : 'ราคาเริ่มต้น'}
               </p>
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-gray-900">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-gray-700">
                 <span className="mt-1 text-[1.7rem] font-extrabold leading-none">{Number(tour.price).toLocaleString()}</span>
-                <span className="text-[1rem] font-semibold text-gray-500">
+                <span className="text-[1rem] font-semibold text-gray-700">
                   {isPrivate ? 'บาท' : 'บาท / ท่าน'}
                 </span>
               </div>

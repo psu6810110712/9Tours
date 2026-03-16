@@ -3,6 +3,7 @@ import {
   BadRequestException,
   NotFoundException,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, In, Repository, LessThan } from 'typeorm';
@@ -14,9 +15,12 @@ import { ToursService } from '../tours/tours.service';
 import { User } from '../users/entities/user.entity';
 import { normalizeEmail, normalizeThaiPhoneInput, sanitizeCustomerName } from '../users/customer-profile.utils';
 import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/entities/notification.entity';
 
 @Injectable()
 export class BookingsService {
+  private readonly logger = new Logger(BookingsService.name);
+
   constructor(
     @InjectRepository(Booking)
     private bookingsRepository: Repository<Booking>,
@@ -63,7 +67,7 @@ export class BookingsService {
         const { tour, schedule } = found;
         const isPrivate = !!tour.minPeople;
         const seatsToRelease = isPrivate ? schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+        await this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
       }
     }
   }
@@ -186,7 +190,17 @@ export class BookingsService {
       return bookingRepo.save(createdBooking);
     });
 
-    this.toursService.updateScheduleBookedCount(scheduleId, seatsToHold);
+    await this.toursService.updateScheduleBookedCount(scheduleId, seatsToHold);
+
+    // Notify all admins about the new booking
+    this.notificationsService.notifyAdminsNewBooking({
+      bookingId: booking.id,
+      tourName: tour.name,
+      customerName: normalizedContactName,
+      paxCount,
+      totalPrice,
+      scheduleDate: schedule.startDate || undefined,
+    }).catch((e) => console.error(e));
 
     return {
       ...booking,
@@ -265,9 +279,10 @@ export class BookingsService {
     });
   }
 
-  async updateStatus(bookingId: number, updateBookingStatusDto: UpdateBookingStatusDto, _userId: string) {
+  async updateStatus(bookingId: number, updateBookingStatusDto: UpdateBookingStatusDto, userId: string) {
     const booking = await this.bookingsRepository.findOne({
       where: { id: bookingId },
+      relations: ['payments', 'user'],
     });
 
     if (!booking) {
@@ -292,19 +307,31 @@ export class BookingsService {
       if (found) {
         const isPrivate = !!found.tour.minPeople;
         const seatsToRelease = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+        await this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
       }
     } else if (!wasActive && isNowActive) {
       const found = this.findScheduleInData(booking.scheduleId);
       if (found) {
         const isPrivate = !!found.tour.minPeople;
         const seatsToHold = isPrivate ? found.schedule.maxCapacity : booking.paxCount;
-        this.toursService.updateScheduleBookedCount(booking.scheduleId, seatsToHold);
+        await this.toursService.updateScheduleBookedCount(booking.scheduleId, seatsToHold);
       }
     }
 
     booking.status = newStatus;
-    const updated = await this.bookingsRepository.save(booking);
+    booking.reviewedByUserId = userId;
+    booking.reviewedAt = new Date();
+    await this.bookingsRepository.save(booking);
+    this.logger.log(`Admin ${userId} updated booking ${bookingId} from ${previousStatus} to ${newStatus}`);
+
+    const updated = await this.bookingsRepository.findOne({
+      where: { id: bookingId },
+      relations: ['payments', 'user'],
+    });
+
+    if (!updated) {
+      throw new NotFoundException('à¹„à¸¡à¹ˆà¸žà¸š Booking à¸™à¸µà¹‰');
+    }
 
     // Fetch schedule data for the response and for the email
     const found = this.findScheduleInData(updated.scheduleId);
@@ -324,11 +351,26 @@ export class BookingsService {
           accommodation: found.tour.accommodation || null,
         },
       } : null,
-      user: booking.user,
+      user: updated.user,
+      payments: updated.payments,
     };
 
     // Send email notification silently, don't block the request if it fails
     this.notificationsService.sendBookingStatusEmail(emailResult as Booking, previousStatus, newStatus).catch(e => console.error(e));
+
+    // Create in-app notification for relevant status transitions
+    const tourName = found?.tour?.name || 'ทัวร์';
+    const isConfirmed = previousStatus === BookingStatus.AWAITING_APPROVAL && newStatus === BookingStatus.CONFIRMED;
+    const isSuccess = previousStatus === BookingStatus.AWAITING_APPROVAL && newStatus === BookingStatus.SUCCESS;
+    const wasRejected = previousStatus === BookingStatus.AWAITING_APPROVAL && newStatus === BookingStatus.CANCELED;
+
+    if (isConfirmed) {
+      this.notificationsService.createBookingNotification(booking.userId, booking.id, NotificationType.BOOKING_CONFIRMED, tourName).catch(e => console.error(e));
+    } else if (isSuccess) {
+      this.notificationsService.createBookingNotification(booking.userId, booking.id, NotificationType.BOOKING_SUCCESS, tourName).catch(e => console.error(e));
+    } else if (wasRejected) {
+      this.notificationsService.createBookingNotification(booking.userId, booking.id, NotificationType.BOOKING_CANCELED, tourName).catch(e => console.error(e));
+    }
 
     return emailResult;
   }
@@ -394,7 +436,7 @@ export class BookingsService {
     if (foundForCancel) {
       const isPrivate = !!foundForCancel.tour.minPeople;
       const seatsToRelease = isPrivate ? foundForCancel.schedule.maxCapacity : booking.paxCount;
-      this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
+      await this.toursService.updateScheduleBookedCount(booking.scheduleId, -seatsToRelease);
     }
 
     const found = this.findScheduleInData(updated.scheduleId);

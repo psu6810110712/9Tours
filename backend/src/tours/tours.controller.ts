@@ -1,26 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, BadRequestException, NotFoundException, UseGuards, Req } from '@nestjs/common';
-import { ToursService } from './tours.service';
-import { CreateTourDto } from './dto/create-tour.dto';
-import { UpdateTourDto } from './dto/update-tour.dto';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import {
+  buildPublicUploadUrl,
+  buildStoredUploadPath,
+  ensureDirectoryExistsSync,
+  getTourUploadDirectory,
+} from '../common/upload-paths';
 import { UserRole } from '../users/entities/user.entity';
+import { CreateTourDto } from './dto/create-tour.dto';
+import { UpdateTourDto } from './dto/update-tour.dto';
+import { ToursService } from './tours.service';
 
 @Controller('tours')
 export class ToursController {
   constructor(private readonly toursService: ToursService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: './uploads', // โฟลเดอร์สำหรับเก็บไฟล์
-        filename: (req, file, cb) => {
-          // สร้างชื่อไฟล์ใหม่ไม่ให้ซ้ำกัน (เช่น tour-1634567890.jpg)
+        destination: (_req, _file, cb) => {
+          cb(null, ensureDirectoryExistsSync(getTourUploadDirectory()));
+        },
+        filename: (_req, file, cb) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           cb(null, `tour-${uniqueSuffix}${ext}`);
@@ -30,11 +54,12 @@ export class ToursController {
   )
   uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('ไม่พบไฟล์ที่อัปโหลด');
+      throw new BadRequestException('No file was uploaded');
     }
-    // คืนค่า URL กลับไปให้ React นำไปแสดงผล
+
+    const storedPath = buildStoredUploadPath(file.filename);
     return {
-      url: `http://localhost:3000/uploads/${file.filename}`,
+      url: buildPublicUploadUrl(storedPath),
     };
   }
 
@@ -44,7 +69,7 @@ export class ToursController {
   }
 
   @Get()
-  findAll(@Query() query: any) {
+  findAll(@Query() query: Record<string, unknown>) {
     return this.toursService.findAll(query);
   }
 

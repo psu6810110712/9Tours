@@ -45,6 +45,7 @@ export default function ToursPage() {
   const [province, setProvince] = useState(searchParams.get('province') || '')
   const [tourType, setTourType] = useState(searchParams.get('tourType') || '')
   const [search, setSearch] = useState(searchParams.get('search') || '')
+  const [year, setYear] = useState(searchParams.get('year') || '')
   const [month, setMonth] = useState(searchParams.get('month') || '')
   const [categories, setCategories] = useState<string[]>(() => parseDelimitedParam(searchParams.get('categories')))
   const [minPrice, setMinPrice] = useState<number | undefined>(() => parseNumberParam(searchParams.get('minPrice')))
@@ -63,6 +64,7 @@ export default function ToursPage() {
     setProvince(searchParams.get('province') || '')
     setTourType(searchParams.get('tourType') || '')
     setSearch(searchParams.get('search') || '')
+    setYear(searchParams.get('year') || '')
     setMonth(searchParams.get('month') || '')
     setCategories(parseDelimitedParam(searchParams.get('categories')))
     setMinPrice(parseNumberParam(searchParams.get('minPrice')))
@@ -105,18 +107,37 @@ export default function ToursPage() {
         province: province || undefined,
         tourType: tourType || undefined,
         search: search || undefined,
-        month: month || undefined,
         categories: categories.length > 0 ? categories : undefined,
         minPrice,
         maxPrice,
       })
-      .then(setTours)
+      .then((items) => {
+        const filteredByDate = items.filter((tour) => {
+          if (!year && !month) return true
+
+          return tour.schedules.some((schedule) => {
+            const startDate = schedule.startDate
+            if (!startDate) return false
+
+            const scheduleYear = startDate.slice(0, 4)
+            const scheduleMonth = startDate.slice(5, 7)
+            const selectedMonth = month.includes('-') ? month.slice(5, 7) : month
+
+            const yearMatches = !year || scheduleYear === year
+            const monthMatches = !selectedMonth || scheduleMonth === selectedMonth
+
+            return yearMatches && monthMatches
+          })
+        })
+
+        setTours(filteredByDate)
+      })
       .catch((error) => {
         console.error(error)
         setTours([])
       })
       .finally(() => setLoading(false))
-  }, [categories, maxPrice, minPrice, month, province, region, search, tourType])
+  }, [categories, maxPrice, minPrice, month, province, region, search, tourType, year])
 
   useEffect(() => {
     if (typeof minPrice !== 'number' || typeof maxPrice !== 'number') return
@@ -126,12 +147,13 @@ export default function ToursPage() {
     if (province) params.set('province', province)
     if (tourType) params.set('tourType', tourType)
     if (search) params.set('search', search)
+    if (year) params.set('year', year)
     if (month) params.set('month', month)
     if (categories.length > 0) params.set('categories', categories.join(','))
     if (minPrice > priceBounds.min) params.set('minPrice', String(minPrice))
     if (maxPrice < priceBounds.max) params.set('maxPrice', String(maxPrice))
     setSearchParams(params, { replace: true })
-  }, [categories, maxPrice, minPrice, month, priceBounds.max, priceBounds.min, province, region, search, setSearchParams, tourType])
+  }, [categories, maxPrice, minPrice, month, priceBounds.max, priceBounds.min, province, region, search, setSearchParams, tourType, year])
 
   useEffect(() => {
     if (!sortMenuOpen) return
@@ -190,7 +212,8 @@ export default function ToursPage() {
     province,
     tourType,
     search.trim(),
-    month,
+    year ? 'year' : '',
+    month ? 'month' : '',
     categories.length > 0 ? 'categories' : '',
     typeof minPrice === 'number' && minPrice > priceBounds.min ? 'minPrice' : '',
     typeof maxPrice === 'number' && maxPrice < priceBounds.max ? 'maxPrice' : '',
@@ -206,11 +229,26 @@ export default function ToursPage() {
     ))
   }
 
+  const handleYearChange = (value: string) => {
+    setYear(value)
+    if (!value) {
+      setMonth((prev) => (prev.includes('-') ? prev.slice(5, 7) : prev))
+      return
+    }
+
+    setMonth((prev) => {
+      if (!prev) return ''
+      const monthNumber = prev.includes('-') ? prev.slice(5, 7) : prev
+      return `${value}-${monthNumber}`
+    })
+  }
+
   const clearFilters = () => {
     setRegion('')
     setProvince('')
     setTourType('')
     setSearch('')
+    setYear('')
     setMonth('')
     setCategories([])
     setMinPrice(priceBounds.min)
@@ -228,7 +266,7 @@ export default function ToursPage() {
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-        <div className="rounded-[2rem] px-4 py-6 sm:px-6">
+        <div className="rounded-[2rem] px-4 py-2 sm:px-6">
           <SearchBar
             search={search}
             setSearch={setSearch}
@@ -239,8 +277,8 @@ export default function ToursPage() {
           />
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">รวมทัวร์ทั้งหมด</h1>
-              <p className="mt-1 text-sm text-gray-500">ค้นหาทัวร์ตามจังหวัด ประเภท หมวดหมู่ เดือน และช่วงราคาที่ต้องการ</p>
+              <h1 className="mt-4 text-xl font-bold text-gray-900">รวมทัวร์ทั้งหมด</h1>
+              <p className="mt-2 text-md text-gray-500">ค้นหาทัวร์ตามจังหวัด ประเภท หมวดหมู่ เดือน และช่วงราคาที่ต้องการ</p>
             </div>
             <button
               type="button"
@@ -264,6 +302,7 @@ export default function ToursPage() {
             tourType={tourType}
             search={search}
             categories={categories}
+            year={year}
             month={month}
             minPrice={minPrice ?? priceBounds.min}
             maxPrice={maxPrice ?? priceBounds.max}
@@ -274,6 +313,7 @@ export default function ToursPage() {
             onProvinceChange={setProvince}
             onTourTypeChange={setTourType}
             onCategoryToggle={toggleCategory}
+            onYearChange={handleYearChange}
             onMonthChange={setMonth}
             onMinPriceChange={handleMinPriceChange}
             onMaxPriceChange={handleMaxPriceChange}
@@ -282,21 +322,11 @@ export default function ToursPage() {
         </div>
 
         <main className="min-w-0 flex-1">
-          <div className="mb-5 flex flex-col gap-3 rounded-[1.5rem] border border-gray-100 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-6 flex flex-col gap-3">
             <div>
-              <p className="text-sm font-semibold text-gray-700">
-                {loading ? 'กำลังโหลดรายการทัวร์...' : `พบทัวร์ ${sortedTours.length} รายการ`}
-              </p>
-              {activeFilterCount > 0 && !loading && (
-                <p className="mt-1 text-xs text-gray-400">กำลังแสดงผลตามตัวกรองที่เลือก</p>
-              )}
+              <p className="text-lg font-semibold text-gray-700"></p>
             </div>
             <div className="flex items-center gap-3">
-              {activeFilterCount > 0 && (
-                <button type="button" onClick={clearFilters} className="text-sm font-medium text-accent hover:underline">
-                  ล้างตัวกรอง
-                </button>
-              )}
               <div ref={sortMenuRef} className="relative">
                 <button
                   type="button"
@@ -312,7 +342,7 @@ export default function ToursPage() {
                 </button>
 
                 {sortMenuOpen && (
-                  <div className="ui-pop absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-[220px] rounded-[1.2rem] border border-gray-200 bg-white p-2 shadow-[0_20px_40px_rgba(15,23,42,0.14)]">
+                  <div className="ui-pop absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-[190px] rounded-[1.4rem] border border-gray-200 bg-white p-2 shadow-[0_20px_40px_rgba(15,23,42,0.14)]">
                     <div role="listbox" aria-label="เรียงลำดับทัวร์" className="space-y-1">
                       {SORT_OPTIONS.map((option) => (
                         <button
@@ -322,7 +352,7 @@ export default function ToursPage() {
                             setSortBy(option.value)
                             setSortMenuOpen(false)
                           }}
-                          className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-left text-sm font-medium transition-colors ${sortBy === option.value
+                          className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-left text-md font-medium transition-colors ${sortBy === option.value
                             ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                             }`}
@@ -372,6 +402,7 @@ export default function ToursPage() {
               tourType={tourType}
               search={search}
               categories={categories}
+              year={year}
               month={month}
               minPrice={minPrice ?? priceBounds.min}
               maxPrice={maxPrice ?? priceBounds.max}
@@ -382,6 +413,7 @@ export default function ToursPage() {
               onProvinceChange={setProvince}
               onTourTypeChange={setTourType}
               onCategoryToggle={toggleCategory}
+              onYearChange={handleYearChange}
               onMonthChange={setMonth}
               onMinPriceChange={handleMinPriceChange}
               onMaxPriceChange={handleMaxPriceChange}
