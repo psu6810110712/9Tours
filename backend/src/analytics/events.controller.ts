@@ -21,8 +21,11 @@ export class EventsController {
       ? xForwardedFor[0]
       : xForwardedFor?.split(',')[0]?.trim() || req.ip;
 
+    const anonymousId = req.headers['x-anonymous-id'] as string | undefined;
+
     return this.eventsService.trackEvent(dto, {
       userId: req.user?.id,
+      anonymousId: anonymousId || null,
       ip: clientIp,
       userAgent: Array.isArray(req.headers['user-agent'])
         ? req.headers['user-agent'][0]
