@@ -1,5 +1,5 @@
 import api from './api'
-import type { Booking, CreateBookingDto } from '../types/booking'
+import type { Booking, CreateBookingDto, PaymentQr } from '../types/booking'
 
 export const bookingService = {
   createBooking: async (data: CreateBookingDto): Promise<Booking> => {
@@ -14,6 +14,11 @@ export const bookingService = {
 
   getBookingById: async (id: string): Promise<Booking> => {
     const response = await api.get(`/bookings/${id}`)
+    return response.data
+  },
+
+  getPaymentQr: async (bookingId: number): Promise<PaymentQr> => {
+    const response = await api.get(`/payments/bookings/${bookingId}/qr`)
     return response.data
   },
 
@@ -32,6 +37,13 @@ export const bookingService = {
 
     const response = await api.post('/payments', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data
+  },
+
+  getProtectedSlipBlob: async (paymentId: number): Promise<Blob> => {
+    const response = await api.get(`/payments/${paymentId}/slip`, {
+      responseType: 'blob',
     })
     return response.data
   },

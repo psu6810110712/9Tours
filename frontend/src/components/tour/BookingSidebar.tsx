@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import type { Tour, TourSchedule } from '../../types/tour'
 import { useAuth } from '../../context/AuthContext'
-import { tourService } from '../../services/tourService'
 import { bookingService } from '../../services/bookingService'
 import { trackEvent } from '../../services/trackingService'
+import { tourService } from '../../services/tourService'
 import LoginModal from '../LoginModal'
 import BookingDateSelector from './booking-sidebar/BookingDateSelector'
 import BookingGuestSelector from './booking-sidebar/BookingGuestSelector'
@@ -15,33 +16,35 @@ interface BookingSidebarProps {
   tour: Tour
 }
 
+function getLocalTodayIsoDate() {
+  const now = new Date()
+  const local = new Date(now.getTime() - (now.getTimezoneOffset() * 60 * 1000))
+  return local.toISOString().slice(0, 10)
+}
+
 export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const today = new Date().toISOString().slice(0, 10)
+  const today = useRef(getLocalTodayIsoDate()).current
 
-  const upcomingSchedules = useMemo(
-    () => tour?.schedules
-      ? tour.schedules
-        .filter((schedule: TourSchedule) => schedule.startDate >= today)
-        .sort((a: TourSchedule, b: TourSchedule) => a.startDate.localeCompare(b.startDate))
-      : [],
-    [tour?.schedules, today],
-  )
+  const upcomingSchedules = tour.schedules
+    .filter((schedule: TourSchedule) => schedule.startDate >= today)
+    .sort((a: TourSchedule, b: TourSchedule) => a.startDate.localeCompare(b.startDate))
 
-  const [selectedSchedule, setSelectedSchedule] = useState<TourSchedule | null>(
-    upcomingSchedules.find((schedule: TourSchedule) => schedule.maxCapacity - schedule.currentBooked > 0)
-    ?? upcomingSchedules[0]
-    ?? null,
-  )
+  const defaultSelectedSchedule = upcomingSchedules.find(
+    (schedule: TourSchedule) => schedule.maxCapacity - schedule.currentBooked > 0,
+  ) ?? upcomingSchedules[0] ?? null
+
+  const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(defaultSelectedSchedule?.id ?? null)
   const [selectedMonth, setSelectedMonth] = useState<string>('all')
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [availableSeatsData, setAvailableSeatsData] = useState<{ [key: number]: number | null }>({})
   const [pendingBookingMap, setPendingBookingMap] = useState<Map<number, number>>(new Map())
-  const [fetchKey, setFetchKey] = useState(0)
+  const [fetchKey, setFetchKey] = useState(1)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const selectedSchedule = upcomingSchedules.find((schedule) => schedule.id === selectedScheduleId) ?? defaultSelectedSchedule
 
   const availableMonths = useMemo(() => {
     const months = new Set<string>()
@@ -53,14 +56,6 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   }, [upcomingSchedules])
 
   useEffect(() => {
-    setSelectedSchedule(
-      upcomingSchedules.find((schedule: TourSchedule) => schedule.maxCapacity - schedule.currentBooked > 0)
-      ?? upcomingSchedules[0]
-      ?? null,
-    )
-  }, [tour.id, upcomingSchedules])
-
-  useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         setFetchKey((prev) => prev + 1)
@@ -68,7 +63,6 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
-    setFetchKey((prev) => prev + 1)
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
@@ -122,12 +116,15 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
 
   const isSoldOut = selectedSchedule && seatsLeft <= 0
   const isExceedCapacity = !isPrivate && totalGuests > seatsLeft
+  const selectedSchedulePendingBookingId = selectedSchedule ? pendingBookingMap.get(selectedSchedule.id) : undefined
   const hasAnyPendingBooking = pendingBookingMap.size > 0
-  const anyPendingBookingId = hasAnyPendingBooking ? Array.from(pendingBookingMap.values())[0] : undefined
-  const isBookingDisabled = hasAnyPendingBooking ? false : (!upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity)
+  const hasSelectedSchedulePendingBooking = typeof selectedSchedulePendingBookingId === 'number'
+  const hasOtherPendingBooking = hasAnyPendingBooking && !hasSelectedSchedulePendingBooking
+  const isBookingDisabled = !hasAnyPendingBooking && (!upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity)
 
   let buttonText = 'จองเลย'
-  if (hasAnyPendingBooking) buttonText = 'มีรายการจองค้างชำระ'
+  if (hasSelectedSchedulePendingBooking) buttonText = 'ไปชำระรายการเดิม'
+  else if (hasOtherPendingBooking) buttonText = 'จัดการรายการค้างชำระ'
   else if (!upcomingSchedules.length || !selectedSchedule) buttonText = 'ไม่มีรอบเปิดรับ'
   else if (isSoldOut && isPrivate) buttonText = 'รอบนี้ถูกจองแล้ว'
   else if (isSoldOut) buttonText = 'รอบนี้เต็มแล้ว'
@@ -144,6 +141,8 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
         adults,
         children,
         hasPendingBooking: hasAnyPendingBooking,
+        hasSelectedSchedulePendingBooking,
+        hasOtherPendingBooking,
       },
     })
 
@@ -152,8 +151,14 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
       return
     }
 
-    if (hasAnyPendingBooking && anyPendingBookingId) {
-      navigate(`/payment/${anyPendingBookingId}`)
+    if (hasSelectedSchedulePendingBooking && selectedSchedulePendingBookingId) {
+      navigate(`/payment/${selectedSchedulePendingBookingId}`)
+      return
+    }
+
+    if (hasOtherPendingBooking) {
+      toast.error('คุณมีรายการรอชำระรายการอื่นอยู่ กรุณาชำระหรือยกเลิกรายการเดิมก่อนเริ่มการจองใหม่')
+      navigate('/my-bookings')
       return
     }
 
@@ -173,7 +178,7 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
           selectedMonth={selectedMonth}
           setSelectedMonth={setSelectedMonth}
           selectedSchedule={selectedSchedule}
-          setSelectedSchedule={setSelectedSchedule}
+          setSelectedSchedule={(schedule) => setSelectedScheduleId(schedule.id)}
           scrollRef={scrollRef}
           availableSeatsData={availableSeatsData}
         />
@@ -211,4 +216,3 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
     </>
   )
 }
-

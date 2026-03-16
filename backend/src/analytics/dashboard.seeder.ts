@@ -5,13 +5,18 @@ import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { User, UserRole } from '../users/entities/user.entity';
 import { TourView } from './entities/tour-view.entity';
 import { Tour, TourType } from '../tours/entities/tour.entity';
+import { TourSchedule } from '../tours/entities/tour-schedule.entity';
 import * as bcrypt from 'bcrypt';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class DashboardSeederService implements OnModuleInit {
     constructor(
         @InjectRepository(Tour)
         private toursRepo: Repository<Tour>,
+        @InjectRepository(TourSchedule)
+        private schedulesRepo: Repository<TourSchedule>,
         @InjectRepository(User)
         private usersRepo: Repository<User>,
         @InjectRepository(Booking)
@@ -21,6 +26,10 @@ export class DashboardSeederService implements OnModuleInit {
     ) { }
 
     async onModuleInit() {
+        if (String(process.env.ENABLE_DEMO_DASHBOARD_SEED ?? '').trim().toLowerCase() !== 'true') {
+            return;
+        }
+
         try {
             // ── เช็คว่ามี tour ใน DB แล้วหรือยัง ──
             const tourCount = await this.toursRepo.count();
@@ -29,152 +38,73 @@ export class DashboardSeederService implements OnModuleInit {
                 return;
             }
 
-            console.log('🌱 Dashboard seed: seeding sample data...');
+            console.log('🌱 Dashboard seed: seeding sample data from tours-data.json...');
 
-            // ──────── 1. สร้าง Tours ────────
-            const toursData: Partial<Tour>[] = [
-                {
-                    tourCode: '15012026001',
-                    name: 'เที่ยวภูเก็ต เมืองเก่า ถ่ายรูปคาเฟ่ทั้งวัน',
-                    description: 'เดินเล่นย่านเมืองเก่าภูเก็ต คาเฟ่สวย ๆ และแลนด์มาร์กยอดฮิตในวันเดียว',
-                    tourType: TourType.ONE_DAY,
-                    categories: ['สายคาเฟ่', 'สายชิล'],
-                    price: 2900,
-                    originalPrice: 3200,
-                    images: ['https://images.unsplash.com/photo-1541417904950-b855846fe074?w=800'],
-                    highlights: ['บริการรถรับส่ง', 'รวมอาหารกลางวัน'],
-                    itinerary: [],
-                    transportation: 'รถตู้ปรับอากาศ',
-                    duration: '8 ชั่วโมง',
-                    region: 'ภาคใต้',
-                    province: 'ภูเก็ต',
-                    rating: 4.3,
-                    reviewCount: 19,
-                    isActive: true,
-                },
-                {
-                    tourCode: '15012026002',
-                    name: 'ทัวร์เขื่อนเชี่ยวหลาน ล่องเรือ ชมหมอกตอนเช้า',
-                    description: 'ล่องเรือชมวิวเขื่อนเชี่ยวหลาน น้ำสีเขียวมรกต พร้อมกิจกรรมพายเรือคายัค',
-                    tourType: TourType.ONE_DAY,
-                    categories: ['สายธรรมชาติ', 'สายชิล'],
-                    price: 1800,
-                    originalPrice: 2100,
-                    images: ['https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800'],
-                    highlights: ['ล่องเรือชมวิว', 'พายเรือคายัค'],
-                    itinerary: [],
-                    transportation: 'เรือหางยาว + รถตู้',
-                    duration: '8 ชั่วโมง',
-                    region: 'ภาคใต้',
-                    province: 'สุราษฎร์ธานี',
-                    rating: 4.9,
-                    reviewCount: 95,
-                    isActive: true,
-                },
-                {
-                    tourCode: '20012026003',
-                    name: 'แพ็คเกจเชียงใหม่ 3 วัน 2 คืน ชมดอยอินทนนท์',
-                    description: 'เที่ยวเชียงใหม่ครบทั้งดอยวัดคาเฟ่ ที่พักสบายย่านนิมมาน',
-                    tourType: TourType.PACKAGE,
-                    categories: ['สายธรรมชาติ', 'สายชิล'],
-                    price: 6900,
-                    originalPrice: 7500,
-                    images: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800'],
-                    highlights: ['รวมที่พัก', 'รถรับส่งสนามบิน'],
-                    itinerary: [],
-                    transportation: 'รถตู้ส่วนตัว',
-                    duration: '3 วัน 2 คืน',
-                    region: 'ภาคเหนือ',
-                    province: 'เชียงใหม่',
-                    accommodation: 'โรงแรม 3 ดาว ย่านนิมมาน',
-                    rating: 4.7,
-                    reviewCount: 48,
-                    isActive: true,
-                },
-                {
-                    tourCode: '25012026004',
-                    name: 'เกาะพีพี ดำน้ำดูปะการัง เต็มวัน',
-                    description: 'นั่งสปีดโบ๊ทไปเกาะพีพี ดำน้ำ 2 จุด พร้อมอาหารกลางวันบุฟเฟ่ต์',
-                    tourType: TourType.ONE_DAY,
-                    categories: ['สายกิจกรรม', 'สายธรรมชาติ'],
-                    price: 2300,
-                    images: ['https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800'],
-                    highlights: ['ดำน้ำดูปะการัง', 'รวมอุปกรณ์ดำน้ำ'],
-                    itinerary: [],
-                    transportation: 'สปีดโบ๊ท',
-                    duration: '8 ชั่วโมง',
-                    region: 'ภาคใต้',
-                    province: 'กระบี่',
-                    rating: 4.5,
-                    reviewCount: 65,
-                    isActive: true,
-                },
-                {
-                    tourCode: 'ATV2026005',
-                    name: 'ขับ ATV ตะลุยป่า ภูเก็ต',
-                    description: 'ผจญภัยขับ ATV เส้นทางธรรมชาติ วิวทะเลและภูเขา',
-                    tourType: TourType.ONE_DAY,
-                    categories: ['สายลุย', 'สายกิจกรรม'],
-                    price: 1500,
-                    originalPrice: 1900,
-                    images: ['https://images.unsplash.com/photo-1616174783309-8f388da5362e?w=800'],
-                    highlights: ['ขับ ATV 1 ชั่วโมง', 'รวมอุปกรณ์ความปลอดภัย'],
-                    itinerary: [],
-                    transportation: 'รถรับส่งในโซน',
-                    duration: '4 ชั่วโมง',
-                    region: 'ภาคใต้',
-                    province: 'ภูเก็ต',
-                    rating: 4.8,
-                    reviewCount: 42,
-                    isActive: true,
-                },
-                {
-                    tourCode: 'CNX2026006',
-                    name: 'วันเดย์ทริป เชียงราย วัดร่องขุ่น บ้านดำ',
-                    description: 'เที่ยวเชียงรายแบบจัดเต็ม วัดร่องขุ่น บ้านดำ สิงห์ปาร์ค',
-                    tourType: TourType.ONE_DAY,
-                    categories: ['สายวัฒนธรรม'],
-                    price: 2200,
-                    images: ['https://images.unsplash.com/photo-1528181304800-259b08848526?w=800'],
-                    highlights: ['วัดร่องขุ่น', 'บ้านดำ', 'สิงห์ปาร์ค'],
-                    itinerary: [],
-                    transportation: 'รถตู้ปรับอากาศ',
-                    duration: '10 ชั่วโมง',
-                    region: 'ภาคเหนือ',
-                    province: 'เชียงราย',
-                    rating: 4.6,
-                    reviewCount: 33,
-                    isActive: true,
-                },
-                {
-                    tourCode: 'KAN2026007',
-                    name: 'แพ็คเกจกาญจนบุรี 2 วัน 1 คืน ล่องแพ',
-                    description: 'ล่องแพริมแม่น้ำแคว พักแพริมน้ำ กิจกรรมสนุกสนาน',
-                    tourType: TourType.PACKAGE,
-                    categories: ['สายธรรมชาติ', 'สายชิล'],
-                    price: 3500,
-                    originalPrice: 4200,
-                    images: ['https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800'],
-                    highlights: ['ล่องแพ', 'พักแพริมน้ำ'],
-                    itinerary: [],
-                    transportation: 'รถตู้ปรับอากาศ',
-                    duration: '2 วัน 1 คืน',
-                    region: 'ภาคตะวันตก',
-                    province: 'กาญจนบุรี',
-                    accommodation: 'แพริมน้ำแคว',
-                    rating: 4.4,
-                    reviewCount: 27,
-                    isActive: true,
-                },
-            ];
+            // ──────── 1. อ่านข้อมูลจาก JSON ────────
+            const dataPath = path.join(process.cwd(), 'tours-data.json');
+            if (!fs.existsSync(dataPath)) {
+                console.error('❌ Dashboard seed: tours-data.json not found!');
+                return;
+            }
 
-            const savedTours = await this.toursRepo.save(toursData);
-            console.log(`   ✅ Seeded ${savedTours.length} tours`);
+            const rawData = fs.readFileSync(dataPath, 'utf-8');
+            const toursList = JSON.parse(rawData);
 
-            // ──────── 2. สร้าง Users (customers) ────────
+            // ──────── 2. สร้าง Tours และ Schedules ตาม JSON ────────
+            const savedTours: Tour[] = [];
+            const allScheduleIds: number[] = [];
+
+            for (const t of toursList) {
+                // สร้าง Tour
+                const tour = this.toursRepo.create({
+                    id: t.id,
+                    tourCode: t.tourCode,
+                    name: t.name,
+                    description: t.description,
+                    tourType: t.tourType as TourType,
+                    categories: t.categories || [],
+                    price: t.price,
+                    childPrice: t.childPrice || null,
+                    originalPrice: t.originalPrice || null,
+                    images: t.images || [],
+                    highlights: t.highlights || [],
+                    itinerary: t.itinerary || [],
+                    transportation: t.transportation || '',
+                    duration: t.duration || '',
+                    region: t.region || '',
+                    province: t.province || '',
+                    accommodation: t.accommodation || null,
+                    rating: t.rating || 0,
+                    reviewCount: t.reviewCount || 0,
+                    isActive: t.isActive !== undefined ? t.isActive : true,
+                });
+
+                const savedTour = await this.toursRepo.save(tour);
+                savedTours.push(savedTour);
+
+                // สร้าง Schedules
+                if (t.schedules && Array.isArray(t.schedules)) {
+                    for (const s of t.schedules) {
+                        const schedule = this.schedulesRepo.create({
+                            id: s.id,
+                            tour: savedTour,
+                            startDate: s.startDate,
+                            endDate: s.endDate,
+                            timeSlot: s.timeSlot || null,
+                            roundName: s.roundName || null,
+                            maxCapacity: s.maxCapacity || 20,
+                            currentBooked: s.currentBooked || 0,
+                        });
+                        await this.schedulesRepo.save(schedule);
+                        allScheduleIds.push(s.id);
+                    }
+                }
+            }
+            console.log(`   ✅ Seeded ${savedTours.length} tours and ${allScheduleIds.length} schedules`);
+
+            // ──────── 3. สร้าง Users (customers) ────────
             const hashedPassword = await bcrypt.hash('password123', 10);
 
-            // เช็คว่ามี admin อยู่แล้วหรือยัง ถ้าไม่มีให้สร้าง
             let admin = await this.usersRepo.findOne({ where: { email: 'admin@9tours.com' } });
             if (!admin) {
                 admin = await this.usersRepo.save({
@@ -213,55 +143,54 @@ export class DashboardSeederService implements OnModuleInit {
             }
             console.log(`   ✅ Seeded ${savedCustomers.length} customers + admin`);
 
-            // ──────── 3. สร้าง Bookings ────────
+            // ──────── 4. สร้าง Bookings (ใช้ Schedule ID จริงจาก JSON) ────────
             const now = new Date();
-            const statuses = [
-                BookingStatus.SUCCESS,
-                BookingStatus.SUCCESS,
-                BookingStatus.SUCCESS,
-                BookingStatus.PENDING_PAYMENT,
-                BookingStatus.AWAITING_APPROVAL,
-                BookingStatus.CANCELED,
-                BookingStatus.REFUND_PENDING,
-                BookingStatus.SUCCESS,
-            ];
+            if (allScheduleIds.length > 0) {
+                const statuses = [
+                    BookingStatus.SUCCESS,
+                    BookingStatus.SUCCESS,
+                    BookingStatus.PENDING_PAYMENT,
+                    BookingStatus.AWAITING_APPROVAL,
+                    BookingStatus.CANCELED,
+                    BookingStatus.SUCCESS,
+                ];
 
-            const bookingsToSave: Partial<Booking>[] = [];
-            for (let i = 0; i < 30; i++) {
-                const customer = savedCustomers[i % savedCustomers.length];
-                const tour = savedTours[i % savedTours.length];
-                const status = statuses[i % statuses.length];
-                const adults = Math.floor(Math.random() * 3) + 1;
-                const children = Math.floor(Math.random() * 2);
+                const bookingsToSave: Partial<Booking>[] = [];
+                for (let i = 0; i < 40; i++) {
+                    const customer = savedCustomers[i % savedCustomers.length];
+                    // สุ่มเลือก schedule ที่มีอยู่จริง
+                    const scheduleId = allScheduleIds[i % allScheduleIds.length];
+                    const status = statuses[i % statuses.length];
+                    const adults = Math.floor(Math.random() * 3) + 1;
+                    const children = Math.floor(Math.random() * 2);
 
-                // สร้างวันที่กระจายใน 60 วันที่ผ่านมา
-                const daysAgo = Math.floor(Math.random() * 60);
-                const bookingDate = new Date(now);
-                bookingDate.setDate(bookingDate.getDate() - daysAgo);
+                    const daysAgo = Math.floor(Math.random() * 30);
+                    const bookingDate = new Date(now);
+                    bookingDate.setDate(bookingDate.getDate() - daysAgo);
 
-                bookingsToSave.push({
-                    userId: customer.id as any,
-                    scheduleId: tour.id * 100, // อ้างอิงไปที่ schedule
-                    paxCount: adults + children,
-                    adults,
-                    children,
-                    totalPrice: Number(tour.price) * adults + Number(tour.price) * 0.5 * children,
-                    status,
-                    createdAt: bookingDate,
-                });
+                    bookingsToSave.push({
+                        userId: customer.id as any,
+                        scheduleId: scheduleId,
+                        paxCount: adults + children,
+                        adults,
+                        children,
+                        totalPrice: 2000 * (adults + children), // ราคาตัวอย่าง
+                        status,
+                        createdAt: bookingDate,
+                    });
+                }
+
+                await this.bookingsRepo.save(bookingsToSave);
+                console.log(`   ✅ Seeded ${bookingsToSave.length} bookings attached to real schedules`);
             }
 
-            await this.bookingsRepo.save(bookingsToSave);
-            console.log(`   ✅ Seeded ${bookingsToSave.length} bookings`);
-
-            // ──────── 4. สร้าง TourViews ────────
+            // ──────── 5. สร้าง TourViews ────────
             const viewsToSave: Partial<TourView>[] = [];
-            for (let i = 0; i < 120; i++) {
+            for (let i = 0; i < 100; i++) {
                 const tour = savedTours[i % savedTours.length];
                 const customer = savedCustomers[i % savedCustomers.length];
 
-                // กระจายใน 6 เดือนที่ผ่านมา
-                const daysAgo = Math.floor(Math.random() * 180);
+                const daysAgo = Math.floor(Math.random() * 60);
                 const viewDate = new Date(now);
                 viewDate.setDate(viewDate.getDate() - daysAgo);
 

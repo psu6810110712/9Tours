@@ -158,7 +158,7 @@ describe('AuthService', () => {
         callback({ getRepository: () => refreshSessionRepo }),
     }
 
-    authService = new AuthService(usersService, jwtService, configService, refreshSessionRepo)
+    authService = new AuthService(usersService, jwtService, configService)
   })
 
   it('registers public users as customers even if a role is supplied', async () => {

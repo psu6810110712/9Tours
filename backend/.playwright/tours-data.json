@@ -1,0 +1,232 @@
+[
+  {
+    "id": 1,
+    "tourCode": "PW-001",
+    "name": "เที่ยวภูเก็ต เมืองเก่า คาเฟ่ฮอปปิง",
+    "description": "ตะลุยย่านเมืองเก่าภูเก็ต แวะคาเฟ่ชื่อดังและจุดถ่ายรูปยอดนิยมในวันเดียว",
+    "tourType": "one_day",
+    "categories": [
+      "สายคาเฟ่",
+      "สายชิล"
+    ],
+    "price": 2900,
+    "childPrice": 1900,
+    "originalPrice": 3200,
+    "images": [
+      "https://images.unsplash.com/photo-1541417904950-b855846fe074?w=800",
+      "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800"
+    ],
+    "highlights": [
+      "บริการรถรับส่ง",
+      "รวมอาหารกลางวัน"
+    ],
+    "itinerary": [],
+    "transportation": "รถตู้ปรับอากาศ",
+    "duration": "8 ชั่วโมง",
+    "region": "ภาคใต้",
+    "province": "ภูเก็ต",
+    "accommodation": null,
+    "rating": 4.7,
+    "reviewCount": 42,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 101,
+        "tourId": 1,
+        "startDate": "2027-01-10",
+        "endDate": "2027-01-10",
+        "timeSlot": "09:00-17:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 20,
+        "currentBooked": 5
+      },
+      {
+        "id": 102,
+        "tourId": 1,
+        "startDate": "2027-01-17",
+        "endDate": "2027-01-17",
+        "timeSlot": "09:00-17:00",
+        "roundName": "รอบปกติ",
+        "maxCapacity": 20,
+        "currentBooked": 0
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "tourCode": "PW-002",
+    "name": "เขื่อนเชี่ยวหลาน ล่องเรือชมธรรมชาติ",
+    "description": "ล่องเรือชมวิวเขื่อนเชี่ยวหลานพร้อมกิจกรรมเบา ๆ และมื้อกลางวัน",
+    "tourType": "one_day",
+    "categories": [
+      "สายธรรมชาติ",
+      "สายกิจกรรม"
+    ],
+    "price": 2100,
+    "childPrice": 1500,
+    "originalPrice": 2400,
+    "images": [
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800"
+    ],
+    "highlights": [
+      "ล่องเรือชมวิว",
+      "รวมอาหารกลางวัน"
+    ],
+    "itinerary": [],
+    "transportation": "รถตู้ + เรือ",
+    "duration": "8 ชั่วโมง",
+    "region": "ภาคใต้",
+    "province": "สุราษฎร์ธานี",
+    "accommodation": null,
+    "rating": 4.9,
+    "reviewCount": 88,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 201,
+        "tourId": 2,
+        "startDate": "2027-01-12",
+        "endDate": "2027-01-12",
+        "timeSlot": "08:00-16:00",
+        "roundName": "รอบธรรมชาติ",
+        "maxCapacity": 25,
+        "currentBooked": 6
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "tourCode": "PW-003",
+    "name": "แพ็กเกจเชียงใหม่ 3 วัน 2 คืน",
+    "description": "เที่ยวเชียงใหม่พร้อมที่พัก เดินทางสบาย เหมาะสำหรับครอบครัวหรือกลุ่มเพื่อน",
+    "tourType": "package",
+    "categories": [
+      "สายธรรมชาติ",
+      "สายชิล"
+    ],
+    "price": 6900,
+    "childPrice": 4900,
+    "originalPrice": 7500,
+    "images": [
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800"
+    ],
+    "highlights": [
+      "รวมที่พัก",
+      "รถรับส่งสนามบิน"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "time": "09:00",
+        "title": "เดินทางถึงเชียงใหม่",
+        "description": "เช็กอินและเริ่มต้นทริป"
+      }
+    ],
+    "transportation": "รถตู้ส่วนตัว",
+    "duration": "3 วัน 2 คืน",
+    "region": "ภาคเหนือ",
+    "province": "เชียงใหม่",
+    "accommodation": "โรงแรม 3 ดาว ย่านนิมมาน",
+    "minPeople": 4,
+    "maxPeople": 10,
+    "rating": 4.8,
+    "reviewCount": 51,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 301,
+        "tourId": 3,
+        "startDate": "2027-02-15",
+        "endDate": "2027-02-17",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "tourCode": "PW-004",
+    "name": "ทะเลกระบี่ ดำน้ำเกาะห้อง",
+    "description": "ทริปทะเลกระบี่แบบวันเดียว ดำน้ำ ดูปะการัง และแวะชายหาดยอดนิยม",
+    "tourType": "one_day",
+    "categories": [
+      "สายกิจกรรม",
+      "สายชิล"
+    ],
+    "price": 2500,
+    "childPrice": 1800,
+    "originalPrice": 2900,
+    "images": [
+      "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800"
+    ],
+    "highlights": [
+      "ดำน้ำดูปะการัง",
+      "รวมอุปกรณ์ดำน้ำ"
+    ],
+    "itinerary": [],
+    "transportation": "สปีดโบ๊ท",
+    "duration": "8 ชั่วโมง",
+    "region": "ภาคใต้",
+    "province": "กระบี่",
+    "accommodation": null,
+    "rating": 4.6,
+    "reviewCount": 37,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 401,
+        "tourId": 4,
+        "startDate": "2027-01-20",
+        "endDate": "2027-01-20",
+        "timeSlot": "07:30-16:30",
+        "roundName": "รอบทะเลเช้า",
+        "maxCapacity": 18,
+        "currentBooked": 3
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "tourCode": "PW-005",
+    "name": "เชียงใหม่ วัดดัง คาเฟ่ดัง",
+    "description": "ไหว้พระและแวะคาเฟ่บรรยากาศดีในเชียงใหม่ เหมาะกับสายมูและสายคาเฟ่",
+    "tourType": "one_day",
+    "categories": [
+      "สายมู",
+      "สายคาเฟ่"
+    ],
+    "price": 1800,
+    "childPrice": 1400,
+    "originalPrice": 2100,
+    "images": [
+      "https://images.unsplash.com/photo-1528181304800-259b08848526?w=800"
+    ],
+    "highlights": [
+      "มีไกด์นำเที่ยว",
+      "จุดถ่ายรูปสวย"
+    ],
+    "itinerary": [],
+    "transportation": "รถตู้ปรับอากาศ",
+    "duration": "1 วัน",
+    "region": "ภาคเหนือ",
+    "province": "เชียงใหม่",
+    "accommodation": null,
+    "rating": 4.5,
+    "reviewCount": 26,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 501,
+        "tourId": 5,
+        "startDate": "2027-01-25",
+        "endDate": "2027-01-25",
+        "timeSlot": "09:00-18:00",
+        "roundName": "รอบคาเฟ่",
+        "maxCapacity": 16,
+        "currentBooked": 5
+      }
+    ]
+  }
+]

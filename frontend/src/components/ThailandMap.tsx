@@ -1,11 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps'
-import { scaleLinear } from 'd3-scale'
+import { scalePow } from 'd3-scale'
 
-// The URL of the Thailand GeoJSON file (make sure it exists in public folder)
 const geoUrl = '/maps/thailand.json'
 
-// Mapping from English province names (found in the GeoJSON) to Thai province names
 const PROVINCE_MAP: Record<string, string> = {
   'Amnat Charoen': 'อำนาจเจริญ',
   'Ang Thong': 'อ่างทอง',
@@ -15,146 +13,204 @@ const PROVINCE_MAP: Record<string, string> = {
   'Chachoengsao': 'ฉะเชิงเทรา',
   'Chai Nat': 'ชัยนาท',
   'Chaiyaphum': 'ชัยภูมิ',
-  'Chanthaburi': 'จันทบุรี',
+  Chanthaburi: 'จันทบุรี',
   'Chiang Mai': 'เชียงใหม่',
   'Chiang Rai': 'เชียงราย',
   'Chon Buri': 'ชลบุรี',
-  'Chumphon': 'ชุมพร',
-  'Kalasin': 'กาฬสินธุ์',
+  Chumphon: 'ชุมพร',
+  Kalasin: 'กาฬสินธุ์',
   'Kamphaeng Phet': 'กำแพงเพชร',
-  'Kanchanaburi': 'กาญจนบุรี',
+  Kanchanaburi: 'กาญจนบุรี',
   'Khon Kaen': 'ขอนแก่น',
-  'Krabi': 'กระบี่',
-  'Lampang': 'ลำปาง',
-  'Lamphun': 'ลำพูน',
-  'Loei': 'เลย',
+  Krabi: 'กระบี่',
+  Lampang: 'ลำปาง',
+  Lamphun: 'ลำพูน',
+  Loei: 'เลย',
   'Lop Buri': 'ลพบุรี',
   'Mae Hong Son': 'แม่ฮ่องสอน',
   'Maha Sarakham': 'มหาสารคาม',
-  'Mukdahan': 'มุกดาหาร',
+  Mukdahan: 'มุกดาหาร',
   'Nakhon Nayok': 'นครนายก',
   'Nakhon Pathom': 'นครปฐม',
   'Nakhon Phanom': 'นครพนม',
   'Nakhon Ratchasima': 'นครราชสีมา',
   'Nakhon Sawan': 'นครสวรรค์',
   'Nakhon Si Thammarat': 'นครศรีธรรมราช',
-  'Nan': 'น่าน',
-  'Narathiwat': 'นราธิวาส',
+  Nan: 'น่าน',
+  Narathiwat: 'นราธิวาส',
   'Nong Bua Lam Phu': 'หนองบัวลำภู',
   'Nong Khai': 'หนองคาย',
-  'Nonthaburi': 'นนทบุรี',
+  Nonthaburi: 'นนทบุรี',
   'Pathum Thani': 'ปทุมธานี',
-  'Pattani': 'ปัตตานี',
-  'Phangnga': 'พังงา',
-  'Phatthalung': 'พัทลุง',
-  'Phayao': 'พะเยา',
-  'Phetchabun': 'เพชรบูรณ์',
-  'Phetchaburi': 'เพชรบุรี',
-  'Phichit': 'พิจิตร',
-  'Phitsanulok': 'พิษณุโลก',
+  Pattani: 'ปัตตานี',
+  Phangnga: 'พังงา',
+  Phatthalung: 'พัทลุง',
+  Phayao: 'พะเยา',
+  Phetchabun: 'เพชรบูรณ์',
+  Phetchaburi: 'เพชรบุรี',
+  Phichit: 'พิจิตร',
+  Phitsanulok: 'พิษณุโลก',
   'Phra Nakhon Si Ayutthaya': 'พระนครศรีอยุธยา',
-  'Phrae': 'แพร่',
-  'Phuket': 'ภูเก็ต',
+  Phrae: 'แพร่',
+  Phuket: 'ภูเก็ต',
   'Prachin Buri': 'ปราจีนบุรี',
   'Prachuap Khiri Khan': 'ประจวบคีรีขันธ์',
-  'Ranong': 'ระนอง',
-  'Ratchaburi': 'ราชบุรี',
-  'Rayong': 'ระยอง',
+  Ranong: 'ระนอง',
+  Ratchaburi: 'ราชบุรี',
+  Rayong: 'ระยอง',
   'Roi Et': 'ร้อยเอ็ด',
   'Sa Kaeo': 'สระแก้ว',
   'Sakon Nakhon': 'สกลนคร',
   'Samut Prakan': 'สมุทรปราการ',
   'Samut Sakhon': 'สมุทรสาคร',
   'Samut Songkhram': 'สมุทรสงคราม',
-  'Saraburi': 'สระบุรี',
-  'Satun': 'สตูล',
+  Saraburi: 'สระบุรี',
+  Satun: 'สตูล',
   'Sing Buri': 'สิงห์บุรี',
   'Si Sa Ket': 'ศรีสะเกษ',
-  'Songkhla': 'สงขลา',
-  'Sukhothai': 'สุโขทัย',
+  Songkhla: 'สงขลา',
+  Sukhothai: 'สุโขทัย',
   'Suphan Buri': 'สุพรรณบุรี',
   'Surat Thani': 'สุราษฎร์ธานี',
-  'Surin': 'สุรินทร์',
-  'Tak': 'ตาก',
-  'Trang': 'ตรัง',
-  'Trat': 'ตราด',
+  Surin: 'สุรินทร์',
+  Tak: 'ตาก',
+  Trang: 'ตรัง',
+  Trat: 'ตราด',
   'Ubon Ratchathani': 'อุบลราชธานี',
   'Udon Thani': 'อุดรธานี',
   'Uthai Thani': 'อุทัยธานี',
-  'Uttaradit': 'อุตรดิตถ์',
-  'Yala': 'ยะลา',
-  'Yasothon': 'ยโสธร'
-}
-
-interface RegionData {
-  name: string
-  count: number
-  percent: number
+  Uttaradit: 'อุตรดิตถ์',
+  Yala: 'ยะลา',
+  Yasothon: 'ยโสธร',
 }
 
 interface ThailandMapProps {
-  regionStats: RegionData[]
-  provinceStats: { name: string; count: number; percent: number }[]
+  provinceStats: { name: string; value: number; percent: number }[]
+  metricLabel: string
+  emptyLabel: string
+  valueFormatter?: (value: number) => string
+  shareFormatter?: (percent: number) => string | null
 }
 
-export default function ThailandMap({ provinceStats }: ThailandMapProps) {
-  // สร้าง Scale สี (ยอดจำนวน count น้อยเป็นสีส้มอ่อน -> มากเป็นสีส้มเข้ม/แดง)
+interface HoveredProvince {
+  name: string
+  value: number
+  percent: number
+}
+
+export default function ThailandMap({
+  provinceStats,
+  metricLabel,
+  emptyLabel,
+  valueFormatter = (value) => value.toLocaleString(),
+  shareFormatter = (percent) => `สัดส่วนบนแผนที่ ${percent}%`,
+}: ThailandMapProps) {
+  const [hoveredProvince, setHoveredProvince] = useState<HoveredProvince | null>(null)
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
+
+  const provinceLookup = useMemo(() => {
+    return new Map(provinceStats.map((province) => [province.name, province]))
+  }, [provinceStats])
+
+  const maxValue = Math.max(...provinceStats.map((province) => province.value), 1)
+
   const colorScale = useMemo(() => {
-    const maxCount = Math.max(...provinceStats.map(d => d.count), 1);
-    return scaleLinear<string>()
-      .domain([0, maxCount / 2, maxCount])
-      .range(["#FEF3C7", "#F59E0B", "#B45309"]); // Light Yellow -> Amber -> Dark Amber
-  }, [provinceStats]);
+    return scalePow<string>()
+      .exponent(0.55)
+      .domain([0, maxValue])
+      .range(['#FFF3D6', '#C96A12'])
+  }, [maxValue])
 
   return (
-    <div className="w-full h-full rounded-xl overflow-hidden bg-slate-50 border border-gray-100 flex flex-col items-center justify-center relative min-h-[300px]">
-      {/* React Simple Maps component */}
+    <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl bg-slate-50">
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
-          center: [101, 13.2], // ปรับศูนย์กลางแผนที่
-          scale: 1800 // ปรับลดขนาดแผนที่ให้ไม่ล้น
+          center: [101, 13.2],
+          scale: 2550,
         }}
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: '100%', height: '100%' }}
       >
         <Geographies geography={geoUrl}>
           {({ geographies }: { geographies: any[] }) =>
             geographies.map((geo: any) => {
-              const enName = geo.properties.name || geo.properties.NAME_1;
-              const thName = PROVINCE_MAP[enName] || enName;
-
-              // ค้นหาข้อมูลจังหวัดจาก Stats
-              const foundData = provinceStats.find(d => d.name === thName);
-              const count = foundData ? foundData.count : 0;
+              const englishName = geo.properties.name || geo.properties.NAME_1
+              const provinceName = PROVINCE_MAP[englishName] || englishName
+              const provinceData = provinceLookup.get(provinceName)
+              const value = provinceData?.value ?? 0
 
               return (
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill={count > 0 ? colorScale(count) : "#F3F4F6"} // เทาสำหรับจังหวัดที่ไม่มีข้อมูล
+                  fill={value > 0 ? colorScale(value) : '#EEF2F7'}
                   stroke="#FFFFFF"
-                  strokeWidth={0.5}
-                  style={{
-                    default: { outline: "none" },
-                    hover: { fill: "#EF4444", outline: "none", cursor: "pointer" }, // เปลี่ยนเป็นสีแดงสดเมื่อ Hover
-                    pressed: { outline: "none" },
+                  strokeWidth={0.7}
+                  onMouseEnter={(event) => {
+                    setHoveredProvince({
+                      name: provinceName,
+                      value,
+                      percent: provinceData?.percent ?? 0,
+                    })
+                    setTooltipPosition({
+                      x: event.clientX,
+                      y: event.clientY,
+                    })
                   }}
-                >
-                  <title>{thName}: {count > 0 ? `${count} วิว` : 'ไม่มีข้อมูล'}</title>
-                </Geography>
-              );
+                  onMouseMove={(event) => {
+                    setTooltipPosition({
+                      x: event.clientX,
+                      y: event.clientY,
+                    })
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredProvince(null)
+                  }}
+                  style={{
+                    default: { outline: 'none' },
+                    hover: {
+                      fill: value > 0 ? '#E4572E' : '#DCE4EE',
+                      outline: 'none',
+                      cursor: 'pointer',
+                    },
+                    pressed: { outline: 'none' },
+                  }}
+                />
+              )
             })
           }
         </Geographies>
       </ComposableMap>
 
-      {/* Legend เล็กๆ ด้านล่างขวา */}
-      <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg text-[10px] border border-gray-100 shadow-sm pointer-events-none z-10">
-        <p className="text-gray-500 font-medium mb-1 tracking-wide">จำนวนวิว</p>
-        <div className="flex items-center gap-1.5 h-2">
-          <span className="text-[9px] text-gray-400">น้อย</span>
-          <div className="w-16 h-1.5 rounded-full" style={{ background: 'linear-gradient(90deg, #FEF3C7, #F59E0B, #B45309)' }}></div>
-          <span className="text-[9px] text-gray-400">มาก</span>
+      {hoveredProvince && (
+        <div
+          className="pointer-events-none fixed z-[70] min-w-[148px] rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm"
+          style={{
+            left: tooltipPosition.x + 14,
+            top: tooltipPosition.y - 10,
+            transform: 'translateY(-100%)',
+          }}
+        >
+          <p className="text-sm font-semibold text-slate-900">{hoveredProvince.name}</p>
+          {hoveredProvince.value > 0 ? (
+            <>
+              <p className="mt-1 text-xs text-slate-500">{valueFormatter(hoveredProvince.value)}</p>
+              {shareFormatter?.(hoveredProvince.percent) ? (
+                <p className="mt-0.5 text-[11px] text-slate-400">{shareFormatter(hoveredProvince.percent)}</p>
+              ) : null}
+            </>
+          ) : (
+            <p className="mt-1 text-xs text-slate-500">{emptyLabel}</p>
+          )}
+        </div>
+      )}
+
+      <div className="pointer-events-none absolute bottom-4 right-4 rounded-xl border border-white/80 bg-white/92 px-3 py-2 text-[10px] text-slate-500">
+        <p className="mb-1 font-semibold tracking-wide text-slate-600">{metricLabel}</p>
+        <div className="flex items-center gap-2">
+          <span>น้อย</span>
+          <div className="h-1.5 w-20 rounded-full bg-[linear-gradient(90deg,#FFF3D6_0%,#F2A233_45%,#C96A12_100%)]" />
+          <span>มาก</span>
         </div>
       </div>
     </div>

@@ -82,7 +82,7 @@ export default function BookingDateSelector({
             <select
               value={selectedMonth}
               onChange={(event) => setSelectedMonth(event.target.value)}
-              className="ui-focus-ring rounded-xl border border-gray-200 bg-gray-50 px-3 py-10 text-xs font-bold text-gray-700 outline-none focus:border-[var(--color-primary)] focus:bg-white"
+              className="ui-focus-ring rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-bold text-gray-700 outline-none focus:border-[var(--color-primary)] focus:bg-white"
             >
               <option value="all">ทุกช่วงเวลา</option>
               {availableMonths.map((month) => (

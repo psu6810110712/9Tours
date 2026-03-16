@@ -7,6 +7,25 @@ export interface Payment {
   slipUrl: string
   paymentMethod: string
   uploadedAt: string
+  uploadedByUserId?: string | null
+  uploadedFromIp?: string | null
+  uploadedFromUserAgent?: string | null
+  verificationStatus?: 'pending' | 'verified' | 'duplicate' | 'amount_mismatch' | 'unreadable' | 'failed' | 'unavailable'
+  verifiedAmount?: number | null
+  verifiedTransRef?: string | null
+  verifiedAt?: string | null
+  verificationProvider?: string | null
+  verificationMessage?: string | null
+  verificationRaw?: Record<string, unknown> | null
+}
+
+export interface PaymentQr {
+  bookingId: number
+  amount: number
+  accountName: string
+  qrPayload: string
+  qrImageUrl: string
+  expiresAt: string
 }
 
 export interface Tour {
@@ -53,6 +72,8 @@ export interface Booking {
   contactName?: string | null
   contactEmail?: string | null
   contactPhone?: string | null
+  reviewedByUserId?: string | null
+  reviewedAt?: string | null
 }
 
 export interface CreateBookingDto {

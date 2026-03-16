@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 export interface SearchBarProps {
@@ -126,9 +126,6 @@ export default function SearchBar({
   const segmentClasses = transparent
     ? 'border-slate-200/80 bg-white/90 shadow-[inset_0_0_0_0.25px_rgba(226,232,240,0.8)]'
     : 'border-slate-200 bg-slate-50'
-  const activeSegmentClasses = transparent
-    ? 'bg-[var(--color-accent)]'
-    : 'bg-[var(--color-accent)] shadow-md'
   const fieldClasses = 'bg-white/90 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.8)]'
   const inputToneClasses = 'text-gray-800 placeholder:text-gray-400'
   const inactiveSegmentTextClasses = transparent
@@ -268,38 +265,40 @@ export default function SearchBar({
         <div className={`flex flex-col ${layoutGapClasses} lg:flex-row lg:items-stretch`.trim()}>
           {hasTourTypePicker && (
             <div className="lg:flex-shrink-0">
-              <div className={`relative inline-grid w-full grid-cols-2 border sm:w-auto ${segmentWrapperClasses} ${segmentClasses}`.trim()}>
-                <div
-                  className={`absolute inset-y-1.5 rounded-[1rem] transition-all duration-200 ease-[cubic-bezier(.4,0,.2,1)] ${activeSegmentClasses}`.trim()}
-                  style={{
-                    width: 'calc(50% - 8px)',
-                    left: tourType === 'package' ? 'calc(50% + 3px)' : '5.5px',
-                    opacity: tourType ? 1 : 0,
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setTourType(tourType === 'one_day' ? '' : 'one_day')}
-                  className={`relative z-10 flex min-h-[14px] items-center justify-left gap-2 rounded-[0.95rem] font-semibold transition-colors ${segmentButtonClasses} ${tourType === 'one_day' ? 'text-white' : inactiveSegmentTextClasses}`}
-                >
-                  <svg className={`${transparent ? 'h-5 w-5' : 'h-6 w-6'} flex-shrink-0`} fill="none" viewBox="0 0 24 27" stroke="currentColor" strokeWidth={1.5}>
-                    <rect x="2" y="7" width="20" height="14" rx="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 14l1.5 1.5L14 12" />
-                  </svg>
-                  วันเดย์ทริป
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTourType(tourType === 'package' ? '' : 'package')}
-                  className={`relative z-10 flex min-h-[14px] items-center justify-center gap-2 rounded-[0.95rem] font-semibold transition-colors ${segmentButtonClasses} ${tourType === 'package' ? 'text-white' : inactiveSegmentTextClasses}`}
-                >
-                  <svg className={`${transparent ? 'h-5 w-5' : 'h-6 w-6'} flex-shrink-0`} fill="none" viewBox="0 0 24 27" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0 7-7 7 7M5 10v10a1 1 0 001 1h3m10-11 2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                  แพ็กเกจพร้อมที่พัก
-                </button>
-              </div>
+              {(() => {
+                const options: { value: '' | 'one_day' | 'package'; label: string }[] = [
+                  { value: '', label: 'ทั้งหมด' },
+                  { value: 'one_day', label: 'วันเดย์ทริป' },
+                  { value: 'package', label: 'แพ็กเกจ' },
+                ]
+                const activeIdx = options.findIndex((o) => o.value === tourType)
+                const count = options.length
+
+                return (
+                  <div className={`relative inline-flex w-full border sm:w-auto ${segmentWrapperClasses} ${segmentClasses}`.trim()}>
+                    {/* Sliding indicator */}
+                    <div
+                      className="absolute top-1 bottom-1 rounded-[1rem] transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)]"
+                      style={{
+                        width: `calc(${100 / count}% - 4px)`,
+                        left: `calc(${(activeIdx < 0 ? 0 : activeIdx) * (100 / count)}% + 2px)`,
+                        background: 'var(--color-primary)',
+                        boxShadow: '0 2px 8px rgba(37,99,235,0.25)',
+                      }}
+                    />
+                    {options.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setTourType!(option.value)}
+                        className={`relative z-10 flex-1 rounded-[0.95rem] font-semibold transition-colors duration-300 ${segmentButtonClasses} ${tourType === option.value ? 'text-white' : inactiveSegmentTextClasses}`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )
+              })()}
             </div>
           )}
 

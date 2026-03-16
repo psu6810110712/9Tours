@@ -5,7 +5,17 @@ function getDefaultApiBaseUrl() {
 
   const protocol = window.location.protocol
   const hostname = window.location.hostname || 'localhost'
-  return `${protocol}//${hostname}:3000`
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+
+  if (isLocalhost) {
+    return `${protocol}//${hostname}:3000`
+  }
+
+  return `${window.location.origin}/api`
 }
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || getDefaultApiBaseUrl()
+function trimTrailingSlash(value: string) {
+  return value.replace(/\/+$/, '')
+}
+
+export const API_BASE_URL = trimTrailingSlash(import.meta.env.VITE_API_URL || getDefaultApiBaseUrl())

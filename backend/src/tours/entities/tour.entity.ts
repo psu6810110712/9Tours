@@ -1,16 +1,16 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  OneToMany,
-  ManyToOne,
-  JoinColumn,
   CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { TourSchedule } from './tour-schedule.entity';
-import { TourCategory } from './tour-category.entity';
 import { Festival } from '../../festivals/entities/festival.entity';
+import { TourCategory } from './tour-category.entity';
+import { TourSchedule } from './tour-schedule.entity';
 
 export enum TourType {
   ONE_DAY = 'one_day',
@@ -22,7 +22,6 @@ export class Tour {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // รหัสทัวร์แบบ DDMMYYYY + ลำดับ 3 หลัก เช่น 19022026001
   @Column({ unique: true })
   tourCode: string;
 
@@ -44,7 +43,12 @@ export class Tour {
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   childPrice: number | null;
 
-  // ราคาเดิมก่อนลด - ถ้า null แสดงว่าไม่มีส่วนลด
+  @Column('int', { nullable: true })
+  minPeople: number | null;
+
+  @Column('int', { nullable: true })
+  maxPeople: number | null;
+
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   originalPrice: number | null;
 
@@ -54,9 +58,8 @@ export class Tour {
   @Column({ type: 'jsonb', default: [] })
   highlights: string[];
 
-  // กำหนดการแบบ [{time, title, description}]
   @Column({ type: 'jsonb', default: [] })
-  itinerary: { time: string; title: string; description: string }[];
+  itinerary: { time: string; title: string; description: string; day?: number }[];
 
   @Column({ nullable: true })
   transportation: string;
@@ -70,7 +73,6 @@ export class Tour {
   @Column()
   province: string;
 
-  // เฉพาะทัวร์แบบ package ที่มีที่พัก
   @Column({ type: 'varchar', nullable: true })
   accommodation: string | null;
 
@@ -80,7 +82,6 @@ export class Tour {
   @Column({ default: 0 })
   reviewCount: number;
 
-  // false = ซ่อนจากรายการ (soft delete)
   @Column({ default: true })
   isActive: boolean;
 
@@ -92,9 +93,7 @@ export class Tour {
   @JoinColumn({ name: 'festival_id' })
   festival: Festival;
 
-  @OneToMany(() => TourSchedule, (schedule) => schedule.tour, {
-    cascade: true,
-  })
+  @OneToMany(() => TourSchedule, (schedule) => schedule.tour, { cascade: true })
   schedules: TourSchedule[];
 
   @CreateDateColumn()
