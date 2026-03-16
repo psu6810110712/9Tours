@@ -1,16 +1,87 @@
 services:
   db:
-    image: postgres:18-alpine
-    container_name: Project_9tours_db
-    restart: always
+    image: postgres:15-alpine
+    container_name: 9tours-db
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USERNAME:-user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_USER: ${DB_USERNAME:-init}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change-me}
       POSTGRES_DB: ${DB_DATABASE:-9tours_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "${DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-init} -d ${DB_DATABASE:-9tours_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: 9tours-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-init}
+      DB_PASSWORD: ${DB_PASSWORD:-change-me}
+      DB_DATABASE: ${DB_DATABASE:-9tours_db}
+      DB_SYNCHRONIZE: ${DB_SYNCHRONIZE:-false}
+      JWT_SECRET: ${JWT_SECRET:-replace-with-a-strong-random-secret}
+      ACCESS_TOKEN_TTL: ${ACCESS_TOKEN_TTL:-15m}
+      REFRESH_TOKEN_TTL_DAYS: ${REFRESH_TOKEN_TTL_DAYS:-7}
+      REMEMBER_ME_REFRESH_TTL_DAYS: ${REMEMBER_ME_REFRESH_TTL_DAYS:-30}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME:-refresh_token}
+      AUTH_COOKIE_DOMAIN: ${AUTH_COOKIE_DOMAIN:-}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://127.0.0.1}
+      BACKEND_PUBLIC_URL: ${BACKEND_PUBLIC_URL:-http://localhost/api}
+      UPLOADS_ROOT: /app/uploads
+      MAIL_ENABLED: ${MAIL_ENABLED:-false}
+      ENABLE_TOUR_JSON_IMPORT: ${ENABLE_TOUR_JSON_IMPORT:-false}
+      ENABLE_DEMO_DASHBOARD_SEED: ${ENABLE_DEMO_DASHBOARD_SEED:-false}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      PROMPTPAY_ID: ${PROMPTPAY_ID:-}
+      PROMPTPAY_ACCOUNT_NAME: ${PROMPTPAY_ACCOUNT_NAME:-}
+      SLIP2GO_API_SECRET: ${SLIP2GO_API_SECRET:-}
+      SLIP2GO_BASE_URL: ${SLIP2GO_BASE_URL:-https://connect.slip2go.com/api}
+      EASYSLIP_API_KEY: ${EASYSLIP_API_KEY:-}
+      EASYSLIP_BASE_URL: ${EASYSLIP_BASE_URL:-https://developer.easyslip.com/api/v1}
+    volumes:
+      - backend_uploads:/app/uploads
+    expose:
+      - "3000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_TRACKING_ENABLED: ${VITE_TRACKING_ENABLED:-true}
+    container_name: 9tours-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${APP_PORT:-80}:80"
+
 volumes:
   postgres_data:
+  backend_uploads:
