@@ -1,20 +1,50 @@
 import api from './api'
-import type { Booking, CreateBookingDto } from '../types/booking'
+import type { Booking, CreateBookingDto, PaymentQr } from '../types/booking'
 
 export const bookingService = {
-  create: (data: CreateBookingDto) =>
-    api.post<Booking>('/bookings', data).then((r) => r.data),
+  createBooking: async (data: CreateBookingDto): Promise<Booking> => {
+    const response = await api.post('/bookings', data)
+    return response.data
+  },
 
-  getMy: () =>
-    api.get<Booking[]>('/bookings/my').then((r) => r.data),
+  getMyBookings: async (): Promise<Booking[]> => {
+    const response = await api.get('/bookings/my')
+    return response.data
+  },
 
-  cancel: (bookingCode: string) =>
-    api.patch(`/bookings/${bookingCode}/cancel`).then((r) => r.data),
+  getBookingById: async (id: string): Promise<Booking> => {
+    const response = await api.get(`/bookings/${id}`)
+    return response.data
+  },
 
-  // admin
-  getAll: () =>
-    api.get<Booking[]>('/bookings').then((r) => r.data),
+  getPaymentQr: async (bookingId: number): Promise<PaymentQr> => {
+    const response = await api.get(`/payments/bookings/${bookingId}/qr`)
+    return response.data
+  },
 
-  updateStatus: (bookingCode: string, status: string) =>
-    api.patch(`/bookings/${bookingCode}/status`, { status }).then((r) => r.data),
+  cancelBooking: async (id: string): Promise<Booking> => {
+    const response = await api.patch(`/bookings/${id}/cancel`)
+    return response.data
+  },
+
+  // ฟังก์ชันสำหรับอัปโหลดสลิปการชำระเงิน
+  uploadPaymentSlip: async (bookingId: number, amount: number, slipFile: File, paymentMethod: string = 'BANK_TRANSFER'): Promise<any> => {
+    const formData = new FormData()
+    formData.append('bookingId', bookingId.toString())
+    formData.append('amount', amount.toString())
+    formData.append('slip', slipFile)
+    formData.append('paymentMethod', paymentMethod)
+
+    const response = await api.post('/payments', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data
+  },
+
+  getProtectedSlipBlob: async (paymentId: number): Promise<Blob> => {
+    const response = await api.get(`/payments/${paymentId}/slip`, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
 }

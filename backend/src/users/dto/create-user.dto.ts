@@ -1,7 +1,13 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { CUSTOMER_PREFIXES, type CustomerPrefix } from '../customer-profile.utils';
 import { UserRole } from '../entities/user.entity';
 
 export class CreateUserDto {
+  @IsOptional()
+  @IsIn(CUSTOMER_PREFIXES, { message: 'Prefix must be one of the allowed values' })
+  prefix?: CustomerPrefix;
+
   @IsString()
   @IsNotEmpty({ message: 'กรุณาระบุชื่อ-นามสกุล' })
   name: string;
@@ -19,7 +25,8 @@ export class CreateUserDto {
   @IsOptional()
   phone?: string;
 
-  @IsEnum(UserRole, { message: 'Role ต้องเป็น admin หรือ customer เท่านั้น' })
   @IsOptional()
+  @IsIn(['admin', 'customer'], { message: 'Role ต้องเป็น admin หรือ customer' })
+  @Transform(({ value }) => value as UserRole | undefined)
   role?: UserRole;
 }

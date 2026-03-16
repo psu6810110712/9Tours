@@ -1,117 +1,218 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
 import type { Tour, TourSchedule } from '../../types/tour'
+import { useAuth } from '../../context/AuthContext'
+import { bookingService } from '../../services/bookingService'
+import { trackEvent } from '../../services/trackingService'
+import { tourService } from '../../services/tourService'
+import LoginModal from '../LoginModal'
+import BookingDateSelector from './booking-sidebar/BookingDateSelector'
+import BookingGuestSelector from './booking-sidebar/BookingGuestSelector'
+import BookingPriceHeader from './booking-sidebar/BookingPriceHeader'
+import BookingSummary from './booking-sidebar/BookingSummary'
 
 interface BookingSidebarProps {
   tour: Tour
 }
 
+function getLocalTodayIsoDate() {
+  const now = new Date()
+  const local = new Date(now.getTime() - (now.getTimezoneOffset() * 60 * 1000))
+  return local.toISOString().slice(0, 10)
+}
+
 export default function BookingSidebar({ tour }: BookingSidebarProps) {
-  const [selectedSchedule, setSelectedSchedule] = useState<TourSchedule | null>(
-    tour.schedules[0] ?? null
-  )
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const today = useRef(getLocalTodayIsoDate()).current
+
+  const upcomingSchedules = tour.schedules
+    .filter((schedule: TourSchedule) => schedule.startDate >= today)
+    .sort((a: TourSchedule, b: TourSchedule) => a.startDate.localeCompare(b.startDate))
+
+  const defaultSelectedSchedule = upcomingSchedules.find(
+    (schedule: TourSchedule) => schedule.maxCapacity - schedule.currentBooked > 0,
+  ) ?? upcomingSchedules[0] ?? null
+
+  const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(defaultSelectedSchedule?.id ?? null)
+  const [selectedMonth, setSelectedMonth] = useState<string>('all')
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
-  const { user } = useAuth()
-  const navigate = useNavigate()
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [availableSeatsData, setAvailableSeatsData] = useState<{ [key: number]: number | null }>({})
+  const [pendingBookingMap, setPendingBookingMap] = useState<Map<number, number>>(new Map())
+  const [fetchKey, setFetchKey] = useState(1)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const selectedSchedule = upcomingSchedules.find((schedule) => schedule.id === selectedScheduleId) ?? defaultSelectedSchedule
 
-  const hasSchedule = tour.schedules.length > 0
+  const availableMonths = useMemo(() => {
+    const months = new Set<string>()
+    upcomingSchedules.forEach((schedule: TourSchedule) => {
+      const parts = schedule.startDate.split('-')
+      if (parts.length >= 2) months.add(`${parts[0]}-${parts[1]}`)
+    })
+    return Array.from(months).sort()
+  }, [upcomingSchedules])
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        setFetchKey((prev) => prev + 1)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
+  useEffect(() => {
+    if (!user) return
+
+    bookingService.getMyBookings()
+      .then((bookings) => {
+        const map = new Map<number, number>()
+        bookings
+          .filter((booking) => booking.status === 'pending_payment')
+          .forEach((booking) => map.set(booking.scheduleId, booking.id))
+        setPendingBookingMap(map)
+      })
+      .catch(() => undefined)
+  }, [user, fetchKey])
+
+  useEffect(() => {
+    if (!tour?.id || upcomingSchedules.length === 0) return
+
+    const fetchAllSeats = async () => {
+      const results: { [key: number]: number | null } = {}
+      await Promise.all(
+        upcomingSchedules.map(async (schedule: TourSchedule) => {
+          try {
+            const data = await tourService.getAvailableSeats(tour.id, schedule.id)
+            results[schedule.id] = Math.max(0, data.availableSeats)
+          } catch {
+            results[schedule.id] = Math.max(0, schedule.maxCapacity - schedule.currentBooked)
+          }
+        }),
+      )
+      setAvailableSeatsData(results)
+    }
+
+    void fetchAllSeats()
+  }, [tour?.id, upcomingSchedules, fetchKey])
+
   const seatsLeft = selectedSchedule
-    ? selectedSchedule.maxCapacity - selectedSchedule.currentBooked
+    ? Math.max(0, availableSeatsData[selectedSchedule.id] ?? (selectedSchedule.maxCapacity - selectedSchedule.currentBooked))
     : 0
   const totalGuests = adults + children
-  const totalPrice = Number(tour.price) * totalGuests
+  const isPrivate = !!tour?.minPeople
+  const totalPrice = isPrivate
+    ? Number(tour?.price || 0)
+    : Number(tour?.price || 1500) * adults + Number(tour?.childPrice || 1000) * children
 
-  const handleBooking = () => {
-    if (!user) { navigate('/'); return }
-    if (!selectedSchedule) return
-    navigate(`/booking/${tour.id}?scheduleId=${selectedSchedule.id}&adults=${adults}&children=${children}`)
+  const isMaxReached = isPrivate
+    ? (tour?.maxPeople ? totalGuests >= tour.maxPeople : false)
+    : (totalGuests >= seatsLeft)
+
+  const isSoldOut = selectedSchedule && seatsLeft <= 0
+  const isExceedCapacity = !isPrivate && totalGuests > seatsLeft
+  const selectedSchedulePendingBookingId = selectedSchedule ? pendingBookingMap.get(selectedSchedule.id) : undefined
+  const hasAnyPendingBooking = pendingBookingMap.size > 0
+  const hasSelectedSchedulePendingBooking = typeof selectedSchedulePendingBookingId === 'number'
+  const hasOtherPendingBooking = hasAnyPendingBooking && !hasSelectedSchedulePendingBooking
+  const isBookingDisabled = !hasAnyPendingBooking && (!upcomingSchedules.length || !selectedSchedule || isSoldOut || isExceedCapacity)
+
+  let buttonText = 'จองเลย'
+  if (hasSelectedSchedulePendingBooking) buttonText = 'ไปชำระรายการเดิม'
+  else if (hasOtherPendingBooking) buttonText = 'จัดการรายการค้างชำระ'
+  else if (!upcomingSchedules.length || !selectedSchedule) buttonText = 'ไม่มีรอบเปิดรับ'
+  else if (isSoldOut && isPrivate) buttonText = 'รอบนี้ถูกจองแล้ว'
+  else if (isSoldOut) buttonText = 'รอบนี้เต็มแล้ว'
+  else if (isExceedCapacity) buttonText = 'ที่นั่งไม่พอ'
+
+  const handleBookingClick = () => {
+    trackEvent({
+      eventType: 'cta_click',
+      pagePath: window.location.pathname + window.location.search,
+      tourId: tour.id,
+      elementId: 'booking_sidebar_primary_button',
+      metadata: {
+        selectedScheduleId: selectedSchedule?.id ?? null,
+        adults,
+        children,
+        hasPendingBooking: hasAnyPendingBooking,
+        hasSelectedSchedulePendingBooking,
+        hasOtherPendingBooking,
+      },
+    })
+
+    if (!user) {
+      setShowLoginModal(true)
+      return
+    }
+
+    if (hasSelectedSchedulePendingBooking && selectedSchedulePendingBookingId) {
+      navigate(`/payment/${selectedSchedulePendingBookingId}`)
+      return
+    }
+
+    if (hasOtherPendingBooking) {
+      toast.error('คุณมีรายการรอชำระรายการอื่นอยู่ กรุณาชำระหรือยกเลิกรายการเดิมก่อนเริ่มการจองใหม่')
+      navigate('/my-bookings')
+      return
+    }
+
+    const targetScheduleId = selectedSchedule ? selectedSchedule.id : '-'
+    navigate(`/booking/${tour.id}?scheduleId=${targetScheduleId}&adults=${adults}&children=${children}`)
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sticky top-20">
-      {/* ราคา */}
-      <div className="mb-3">
-        {tour.originalPrice && (
-          <p className="text-xs text-gray-400 line-through">
-            ฿{Number(tour.originalPrice).toLocaleString()}
-          </p>
-        )}
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-[30px] leading-none font-bold text-[#111827]">
-            ฿{Number(tour.price).toLocaleString()}
-          </span>
-          <span className="text-sm text-gray-500">บาท</span>
-        </div>
+    <>
+      <div className="ui-surface rounded-[1.75rem] border border-gray-100 bg-white p-5 lg:sticky lg:top-24">
+        <BookingPriceHeader tour={tour} />
+
+        <BookingDateSelector
+          tour={tour}
+          upcomingSchedules={upcomingSchedules}
+          availableMonths={availableMonths}
+          selectedMonth={selectedMonth}
+          setSelectedMonth={setSelectedMonth}
+          selectedSchedule={selectedSchedule}
+          setSelectedSchedule={(schedule) => setSelectedScheduleId(schedule.id)}
+          scrollRef={scrollRef}
+          availableSeatsData={availableSeatsData}
+        />
+
+        <BookingGuestSelector
+          tour={tour}
+          adults={adults}
+          setAdults={setAdults}
+          children={children}
+          setChildren={setChildren}
+          isMaxReached={isMaxReached}
+          hasSelectedSchedule={!!selectedSchedule}
+        />
+
+        <BookingSummary
+          tour={tour}
+          adults={adults}
+          children={children}
+          totalPrice={totalPrice}
+          isBookingDisabled={isBookingDisabled}
+          buttonText={buttonText}
+          onBookingClick={handleBookingClick}
+        />
       </div>
 
-      {/* เลือก schedule */}
-      {tour.schedules.length > 0 && (
-        <div className="mb-3">
-          <label className="text-xs font-semibold text-gray-500 mb-1 block">เลือกวันที่</label>
-          <select
-            value={selectedSchedule?.id || ''}
-            onChange={(e) => {
-              const s = tour.schedules.find((x) => x.id === Number(e.target.value))
-              setSelectedSchedule(s ?? null)
-            }}
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none bg-white"
-          >
-            {tour.schedules.map((s) => {
-              const left = s.maxCapacity - s.currentBooked
-              return (
-                <option key={s.id} value={s.id} disabled={left === 0}>
-                  {s.startDate}{s.startDate !== s.endDate ? ` - ${s.endDate}` : ''}
-                  {s.roundName ? ` (${s.roundName})` : ''}
-                  {left === 0 ? ' - เต็มแล้ว' : ''}
-                </option>
-              )
-            })}
-          </select>
-          {selectedSchedule && <p className="text-xs text-gray-400 mt-1">เหลือ {seatsLeft}/{selectedSchedule.maxCapacity} ที่นั่ง</p>}
-        </div>
+      {showLoginModal && (
+        <LoginModal
+          onClose={() => setShowLoginModal(false)}
+          onSwitchToRegister={() => {
+            setShowLoginModal(false)
+            navigate('/')
+          }}
+        />
       )}
-
-      {/* จำนวนคน */}
-      <div className="mb-3">
-        <label className="text-xs font-semibold text-gray-500 mb-1 block">จำนวนผู้เดินทาง</label>
-        <div className="grid grid-cols-2 gap-2">
-        {[
-          { label: 'ผู้ใหญ่', value: adults, min: 1, set: setAdults },
-          { label: 'เด็ก', value: children, min: 0, set: setChildren },
-        ].map(({ label, value, min, set }) => (
-          <div key={label}>
-            <label className="text-xs text-gray-500 mb-1 block">{label}</label>
-            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-              <button onClick={() => set(Math.max(min, value - 1))} className="px-3 py-1.5 text-gray-500 hover:bg-gray-50">-</button>
-              <span className="flex-1 text-center text-sm font-medium">{value}</span>
-              <button onClick={() => set(value + 1)} className="px-3 py-1.5 text-gray-500 hover:bg-gray-50">+</button>
-            </div>
-          </div>
-        ))}
-        </div>
-      </div>
-
-      {/* ราคารวม */}
-      <div className="border-t border-gray-100 pt-3 mb-3">
-        <div className="flex justify-between text-sm text-gray-500 mb-1">
-          <span>฿{Number(tour.price).toLocaleString()} × {totalGuests} คน</span>
-        </div>
-        <div className="flex justify-between font-bold text-gray-800">
-          <span>รวมทั้งหมด</span>
-          <span className="text-[#F5A623]">฿{totalPrice.toLocaleString()}</span>
-        </div>
-      </div>
-
-      <button
-        onClick={handleBooking}
-        disabled={!selectedSchedule || seatsLeft === 0}
-        className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold py-2.5 rounded-xl transition-colors"
-      >
-        {!hasSchedule ? 'ยังไม่มีรอบให้จอง' : seatsLeft === 0 ? 'เต็มแล้ว' : 'จองเลย'}
-      </button>
-      <p className="text-xs text-center text-gray-400 mt-2">ยกเลิกได้ภายใน 24 ชั่วโมง</p>
-    </div>
+    </>
   )
 }

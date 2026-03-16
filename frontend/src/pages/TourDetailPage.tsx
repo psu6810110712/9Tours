@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import TourCard from '../components/TourCard'
 import TourGallery from '../components/tour/TourGallery'
 import TourInfo from '../components/tour/TourInfo'
 import TourItinerary from '../components/tour/TourItinerary'
 import BookingSidebar from '../components/tour/BookingSidebar'
+import { trackEvent } from '../services/trackingService'
 import { tourService } from '../services/tourService'
+import { useAuth } from '../context/AuthContext'
 import type { Tour } from '../types/tour'
 
 export default function TourDetailPage() {
@@ -15,69 +15,91 @@ export default function TourDetailPage() {
   const [tour, setTour] = useState<Tour | null>(null)
   const [related, setRelated] = useState<Tour[]>([])
   const navigate = useNavigate()
+  const { isAdmin } = useAuth()
+  const trackedTourIdRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (!id) return
-    tourService.getOne(Number(id)).then((t) => {
-      setTour(t)
-      tourService.getAll({ province: t.province }).then((list) => {
-        setRelated(list.filter((x) => x.id !== t.id).slice(0, 4))
+
+    tourService.getOne(Number(id))
+      .then((item) => {
+        setTour(item)
+        return tourService.getAll({ province: item.province }).then((list) => {
+          setRelated(list.filter((candidate) => candidate.id !== item.id).slice(0, 4))
+        })
       })
-    }).catch(() => navigate('/tours'))
-  }, [id])
+      .catch(() => navigate('/tours'))
+  }, [id, navigate])
+
+  useEffect(() => {
+    if (!tour?.id) return
+    if (trackedTourIdRef.current === tour.id) return
+
+    trackedTourIdRef.current = tour.id
+    void trackEvent({
+      eventType: 'page_view',
+      pagePath: `/tours/${tour.id}`,
+      tourId: tour.id,
+      metadata: { source: 'tour_detail_page' },
+    })
+  }, [tour?.id])
 
   if (!tour) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="flex items-center justify-center h-96 text-gray-400">กำลังโหลด...</div>
-      </div>
+      <div className="flex h-96 items-center justify-center text-gray-400">กำลังโหลด...</div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Breadcrumb */}
-        <nav className="text-xs text-gray-400 mb-4 flex gap-2">
-          <Link to="/" className="hover:text-[#F5A623]">หน้าแรก</Link>
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <nav className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-400">
+          <Link to="/" className="transition-colors hover:text-accent">หน้าแรก</Link>
           <span>/</span>
-          <Link to={`/tours?province=${tour.province}`} className="hover:text-[#F5A623]">{tour.province}</Link>
+          <Link to={`/tours?province=${tour.province}`} className="transition-colors hover:text-accent">{tour.province}</Link>
           <span>/</span>
-          <span className="text-gray-600 line-clamp-1">{tour.name}</span>
+          <span className="line-clamp-1 text-gray-600">{tour.name}</span>
         </nav>
-
-        {/* แถวบน: รูป + thumbnail เต็มความกว้างคอนเทนต์ */}
-        <div className="mb-6">
-          <TourGallery images={tour.images} name={tour.name} />
-        </div>
-
-        {/* แถวล่าง: ซ้ายข้อมูล / ขวาจอง */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-8 min-w-0">
-            <TourInfo tour={tour} />
-            <TourItinerary items={tour.itinerary} />
-          </div>
-
-          <aside className="lg:col-span-4 lg:pl-3 lg:border-l lg:border-gray-200/80">
-            <BookingSidebar tour={tour} />
-          </aside>
-        </div>
-
-        {/* ทัวร์แนะนำ */}
-        {related.length > 0 && (
-          <section className="mt-10">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">ทัวร์แนะนำใน{tour.province}</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {related.map((t) => <TourCard key={t.id} tour={t} />)}
-            </div>
-          </section>
+        {isAdmin && (
+          <Link
+            to={`/admin/tours/${tour.id}/edit`}
+            className="ui-pressable inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-bold text-amber-700 hover:bg-amber-100"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232 18.768 8.768M16.732 3.732a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            แก้ไขทัวร์
+          </Link>
         )}
       </div>
 
-      <Footer />
+      <div className="mb-6">
+        <TourGallery images={tour.images} name={tour.name} />
+      </div>
+
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+        <div className="min-w-0 lg:col-span-8">
+          <TourInfo tour={tour} />
+          <TourItinerary items={tour.itinerary} />
+        </div>
+
+        <aside className="lg:col-span-4">
+          <BookingSidebar tour={tour} />
+        </aside>
+      </div>
+
+      {related.length > 0 && (
+        <section className="mt-12">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">ทริปอื่นใน{tour.province}</h2>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {related.map((item) => <TourCard key={item.id} tour={item} />)}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

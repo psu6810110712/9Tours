@@ -1,38 +1,232 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
-:root {
-  /* Primary Blue — CTA buttons, active nav, auth, links */
-  --color-primary:       #2563EB;
-  --color-primary-dark:  #1D4ED8;
+@theme {
+  /* Primary Blue */
+  --color-primary: #2563EB;
+  --color-primary-dark: #1D4ED8;
   --color-primary-light: #EFF6FF;
 
-  /* Accent Orange — ราคา, badge, tour highlight (ใช้เป็น text เฉพาะตัวใหญ่/bold) */
-  --color-accent:        #F5A623;
-  --color-accent-dark:   #E09415;
-  --color-accent-light:  rgba(245, 166, 35, 0.10);
+  /* Accent Orange */
+  --color-accent: #F5A623;
+  --color-accent-dark: #E09415;
+  --color-accent-light: rgba(245, 166, 35, 0.10);
 
-  /* Neutrals — Clean White theme */
-  --color-text:          #1F2937;   /* gray-800 */
-  --color-text-muted:    #6B7280;   /* gray-500 */
-  --color-text-faint:    #9CA3AF;   /* gray-400 */
-  --color-bg:            #FFFFFF;
-  --color-surface:       #F9FAFB;   /* gray-50 */
-  --color-border:        #E5E7EB;   /* gray-200 */
+  /* Neutrals */
+  --color-text: #1F2937;
+  --color-text-muted: #6B7280;
+  --color-text-faint: #9CA3AF;
+  --color-bg: #FFFFFF;
+  --color-surface: #F9FAFB;
+  --color-border: #E5E7EB;
 
-  /* Semantic */
-  --color-success:       #16A34A;
-  --color-error:         #EF4444;
-  --color-warning:       #F59E0B;
+  /* UI tokens */
+  --z-navbar: 40;
+  --z-dropdown: 48;
+  --z-drawer: 56;
+  --z-modal: 72;
+  --overlay-soft: rgba(15, 23, 42, 0.42);
+  --overlay-strong: rgba(15, 23, 42, 0.62);
+  --focus-ring-color: rgba(37, 99, 235, 0.2);
+  --motion-fast: 180ms;
+  --motion-base: 260ms;
+  --motion-slow: 360ms;
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --surface-shadow-soft: 0 16px 38px rgba(15, 23, 42, 0.08);
+  --surface-shadow-strong: 0 24px 58px rgba(15, 23, 42, 0.16);
 }
 
-/* ซ่อน scrollbar แต่ยังเลื่อนได้ — ใช้กับ horizontal scroll sections */
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+@layer base {
+  html,
+  body {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    overflow-y: scroll;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 500;
+  }
 
-/* IBM Plex Sans Thai Medium เป็น default ทั้งเว็บ */
-body {
-  font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif;
-  font-weight: 500;
-  color: var(--color-text);
-  background-color: var(--color-bg);
+  html {
+    scroll-behavior: smooth;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  a,
+  input,
+  textarea,
+  select,
+  button,
+  label,
+  span,
+  li,
+  th,
+  td {
+    font-family: inherit;
+    font-weight: inherit;
+  }
+
+  body.ui-scroll-lock {
+    overflow: hidden;
+    touch-action: none;
+  }
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.ui-focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring-color);
+}
+
+.ui-overlay {
+  background: var(--overlay-soft);
+  backdrop-filter: blur(12px);
+  animation: ui-fade-in var(--motion-fast) var(--ease-standard);
+}
+
+.ui-overlay-strong {
+  background: var(--overlay-strong);
+  backdrop-filter: blur(14px);
+  animation: ui-fade-in var(--motion-fast) var(--ease-standard);
+}
+
+.ui-surface {
+  background: var(--color-bg);
+  border: 1px solid rgba(229, 231, 235, 0.92);
+  border-radius: 1.5rem;
+  box-shadow: var(--surface-shadow-soft);
+}
+
+.ui-surface-strong {
+  background: var(--color-bg);
+  border: 1px solid rgba(229, 231, 235, 0.92);
+  border-radius: 2rem;
+  box-shadow: var(--surface-shadow-strong);
+}
+
+.ui-pop {
+  animation: ui-pop-in var(--motion-base) var(--ease-standard);
+  will-change: transform, opacity;
+}
+
+.ui-pressable {
+  transition:
+    transform var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard);
+}
+
+.ui-pressable:hover {
+  transform: translateY(-1px);
+}
+
+.ui-arrow-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  border: 1px solid #38bdf8;
+  background: #38bdf8;
+  color: #ffffff;
+}
+
+.ui-arrow-button:hover:not(:disabled) {
+  background: #38bdf8;
+  color: #ffffff;
+  border-color: #38bdf8;
+  transform: none;
+}
+
+.ui-arrow-button.ui-arrow-button-gallery {
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.ui-arrow-button.ui-arrow-button-gallery:hover:not(:disabled) {
+  background: transparent;
+  color: #ffffff;
+  border-color: transparent;
+  transform: none;
+}
+
+.ui-rail-fade-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 5.5rem;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(248, 250, 252, 0), rgba(248, 250, 252, 0.94) 65%, rgba(248, 250, 252, 1));
+}
+
+.ui-rail-fade-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4rem;
+  pointer-events: none;
+  background: linear-gradient(270deg, rgba(248, 250, 252, 0), rgba(248, 250, 252, 0.9) 65%, rgba(248, 250, 252, 1));
+}
+
+@keyframes ui-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ui-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .ui-overlay,
+  .ui-overlay-strong,
+  .ui-pop,
+  .ui-pressable {
+    animation: none;
+    transition-duration: 0ms;
+  }
+
+  .ui-pressable:hover {
+    transform: none;
+  }
+}
+

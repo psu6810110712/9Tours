@@ -1,64 +1,168 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { User } from '../types/user'
 import { authService } from '../services/authService'
+import { bookingService } from '../services/bookingService'
+import { setAccessToken } from '../services/api'
+import { toast } from 'react-hot-toast'
+import type { CustomerPrefix } from '../utils/profileValidation'
 
 interface AuthContextType {
   user: User | null
   token: string | null
   isLoading: boolean
-  login: (email: string, password: string) => Promise<User>
-  register: (name: string, email: string, phone: string, password: string) => Promise<User>
-  logout: () => void
+  login: (identifier: string, password: string, remember?: boolean) => Promise<User>
+  register: (prefix: CustomerPrefix, name: string, email: string, phone: string, password: string) => Promise<User>
+  updateOwnProfile: (prefix: CustomerPrefix, name: string, email: string, phone: string) => Promise<User>
+  refreshCurrentUser: () => Promise<User>
+  loginWithGoogle: (returnTo?: string) => void
+  completeGoogleLogin: () => Promise<User>
+  logout: () => Promise<void>
   isAdmin: boolean
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
+const AUTH_SESSION_HINT_KEY = 'auth_session_active'
+
+function setSessionHint(active: boolean) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  if (active) {
+    window.localStorage.setItem(AUTH_SESSION_HINT_KEY, 'true')
+    return
+  }
+
+  window.localStorage.removeItem(AUTH_SESSION_HINT_KEY)
+}
+
+function shouldAttemptSessionRestore() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  return (
+    window.location.pathname === '/auth/google/callback'
+    || window.localStorage.getItem(AUTH_SESSION_HINT_KEY) === 'true'
+  )
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // โหลดข้อมูล user จาก localStorage ตอนเปิดแอปครั้งแรก
-  useEffect(() => {
-    const savedToken = localStorage.getItem('token')
-    const savedUser = localStorage.getItem('user')
-    if (savedToken && savedUser) {
-      setToken(savedToken)
-      setUser(JSON.parse(savedUser))
+  const applyUser = (nextUser: User) => {
+    setUser(nextUser)
+  }
+
+  const applySession = (nextToken: string, nextUser: User) => {
+    setToken(nextToken)
+    setAccessToken(nextToken)
+    applyUser(nextUser)
+    setSessionHint(true)
+  }
+
+  const clearSession = () => {
+    setToken(null)
+    setAccessToken(null)
+    setUser(null)
+    setSessionHint(false)
+  }
+
+  const checkPendingBookings = async () => {
+    try {
+      const bookings = await bookingService.getMyBookings()
+      const pending = bookings.filter(b => b.status === 'pending_payment')
+      if (pending.length > 0) {
+        toast('คุณมีรายการจองที่ยังไม่ได้ชำระเงิน กรุณาดำเนินการชำระเงินให้เสร็จสิ้น', {
+          duration: 6000,
+          icon: '⚠️',
+        })
+      }
+    } catch {
+      // Ignore pending-booking checks when the session is not available.
     }
-    setIsLoading(false)
+  }
+
+  useEffect(() => {
+    if (!shouldAttemptSessionRestore()) {
+      setIsLoading(false)
+      return
+    }
+
+    authService.refresh({ silent: true })
+      .then((data) => {
+        applySession(data.access_token, data.user)
+        setTimeout(() => void checkPendingBookings(), 500)
+      })
+      .catch(() => {
+        clearSession()
+      })
+      .finally(() => setIsLoading(false))
   }, [])
 
-  const login = async (email: string, password: string) => {
-    const data = await authService.login({ email, password })
-    setToken(data.access_token)
-    setUser(data.user)
-    localStorage.setItem('token', data.access_token)
-    localStorage.setItem('user', JSON.stringify(data.user))
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      clearSession()
+    }
+
+    window.addEventListener('auth:expired', handleAuthExpired)
+    return () => {
+      window.removeEventListener('auth:expired', handleAuthExpired)
+    }
+  }, [])
+
+  const refreshCurrentUser = async () => {
+    const currentUser = await authService.getMe()
+    applyUser(currentUser)
+    return currentUser
+  }
+
+  const login = async (identifier: string, password: string, remember: boolean = false) => {
+    const data = await authService.login({ identifier, password, rememberMe: remember })
+    applySession(data.access_token, data.user)
+    setTimeout(() => void checkPendingBookings(), 500)
     return data.user
   }
 
-  const register = async (name: string, email: string, phone: string, password: string) => {
-    const data = await authService.register({ name, email, phone, password })
-    setToken(data.access_token)
-    setUser(data.user)
-    localStorage.setItem('token', data.access_token)
-    localStorage.setItem('user', JSON.stringify(data.user))
+  const register = async (prefix: CustomerPrefix, name: string, email: string, phone: string, password: string) => {
+    const data = await authService.register({ prefix, name, email, phone, password })
+    applySession(data.access_token, data.user)
     return data.user
   }
 
-  const logout = () => {
-    setToken(null)
-    setUser(null)
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+  const updateOwnProfile = async (prefix: CustomerPrefix, name: string, email: string, phone: string) => {
+    const nextUser = await authService.updateOwnProfile({ prefix, name, email, phone })
+    applyUser(nextUser)
+    return nextUser
+  }
+
+  const loginWithGoogle = (returnTo?: string) => {
+    authService.loginWithGoogle(returnTo)
+  }
+
+  const completeGoogleLogin = async () => {
+    const data = await authService.refresh({ silent: true })
+    applySession(data.access_token, data.user)
+    setTimeout(() => void checkPendingBookings(), 500)
+    return data.user
+  }
+
+  const logout = async () => {
+    clearSession()
+    try {
+      await authService.logout()
+    } catch {
+      // Ignore network errors during logout; the client session is already cleared.
+    }
   }
 
   return (
     <AuthContext.Provider value={{
       user, token, isLoading,
-      login, register, logout,
+      login, register, updateOwnProfile, refreshCurrentUser,
+      loginWithGoogle, completeGoogleLogin, logout,
       isAdmin: user?.role === 'admin',
     }}>
       {children}

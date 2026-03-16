@@ -1,74 +1,104 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
-  JoinColumn,
-  CreateDateColumn,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
+import { Festival } from '../../festivals/entities/festival.entity';
 import { TourCategory } from './tour-category.entity';
 import { TourSchedule } from './tour-schedule.entity';
-import { Region } from '../../regions/entities/region.entity';
-import { Province } from '../../regions/entities/province.entity';
-import { Festival } from '../../festivals/entities/festival.entity';
+
+export enum TourType {
+  ONE_DAY = 'one_day',
+  PACKAGE = 'package',
+}
 
 @Entity('tours')
 export class Tour {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'tour_code', unique: true, nullable: true })
+  @Column({ unique: true })
   tourCode: string;
 
   @Column()
-  title: string;
+  name: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column('text')
   description: string;
 
-  @Column({ name: 'price_per_person', type: 'decimal', precision: 10, scale: 2, nullable: true })
-  pricePerPerson: number;
+  @Column({ type: 'enum', enum: TourType })
+  tourType: TourType;
 
-  @Column({ name: 'image_url', nullable: true })
-  imageUrl: string;
+  @Column({ type: 'jsonb', default: [] })
+  categories: string[];
 
-  @Column({ name: 'is_visible', default: true })
-  isVisible: boolean;
+  @Column('decimal', { precision: 10, scale: 2 })
+  price: number;
 
-  // --- Relations ---
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  childPrice: number | null;
 
-  @ManyToOne(() => TourCategory, (category) => category.tours, { nullable: true, onDelete: 'SET NULL' })
+  @Column('int', { nullable: true })
+  minPeople: number | null;
+
+  @Column('int', { nullable: true })
+  maxPeople: number | null;
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  originalPrice: number | null;
+
+  @Column({ type: 'jsonb', default: [] })
+  images: string[];
+
+  @Column({ type: 'jsonb', default: [] })
+  highlights: string[];
+
+  @Column({ type: 'jsonb', default: [] })
+  itinerary: { time: string; title: string; description: string; day?: number }[];
+
+  @Column({ nullable: true })
+  transportation: string;
+
+  @Column()
+  duration: string;
+
+  @Column()
+  region: string;
+
+  @Column()
+  province: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  accommodation: string | null;
+
+  @Column('float', { default: 0 })
+  rating: number;
+
+  @Column({ default: 0 })
+  reviewCount: number;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  @ManyToOne(() => TourCategory, (cat) => cat.tours, { nullable: true })
   @JoinColumn({ name: 'category_id' })
   category: TourCategory;
 
-  @Column({ name: 'category_id', nullable: true })
-  categoryId: number;
-
-  @ManyToOne(() => Region, (region) => region.tours, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'region_id' })
-  region: Region;
-
-  @Column({ name: 'region_id', nullable: true })
-  regionId: number;
-
-  @ManyToOne(() => Province, (province) => province.tours, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'province_id' })
-  province: Province;
-
-  @Column({ name: 'province_id', nullable: true })
-  provinceId: number;
-
-  @ManyToOne(() => Festival, (festival) => festival.tours, { nullable: true, onDelete: 'SET NULL' })
+  @ManyToOne(() => Festival, (fest) => fest.tours, { nullable: true })
   @JoinColumn({ name: 'festival_id' })
   festival: Festival;
-
-  @Column({ name: 'festival_id', nullable: true })
-  festivalId: number;
 
   @OneToMany(() => TourSchedule, (schedule) => schedule.tour, { cascade: true })
   schedules: TourSchedule[];
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

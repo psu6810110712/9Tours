@@ -1,154 +1,264 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+﻿import { useState, type FormEvent } from 'react'
 import { useAuth } from '../context/AuthContext'
+import Modal from './common/Modal'
+import {
+  normalizeEmail,
+  normalizeThaiPhoneInput,
+  PREFIX_OPTIONS,
+  sanitizeCustomerName,
+  validateCustomerProfile,
+  type CustomerPrefix,
+} from '../utils/profileValidation'
+import { extractApiErrorMessage, extractApiFieldErrors } from '../utils/apiErrors'
 
 interface RegisterModalProps {
   onClose: () => void
   onSwitchToLogin: () => void
 }
 
-export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModalProps) {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [password, setPassword] = useState('')
-  const [agree, setAgree] = useState(false)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { register } = useAuth()
-  const navigate = useNavigate()
+interface RegisterFormState {
+  prefix: CustomerPrefix
+  name: string
+  email: string
+  phone: string
+  password: string
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    // ตรวจสอบว่ากดยอมรับข้อตกลงก่อนส่งฟอร์ม
-    if (!agree) {
-      setError('กรุณายอมรับข้อตกลงก่อน')
+interface RegisterFormErrors {
+  prefix?: string
+  name?: string
+  email?: string
+  phone?: string
+  password?: string
+  agree?: string
+  form?: string
+}
+
+const INITIAL_FORM: RegisterFormState = {
+  prefix: 'นาย',
+  name: '',
+  email: '',
+  phone: '',
+  password: '',
+}
+
+function inputClass(error?: string) {
+  return `ui-focus-ring w-full rounded-2xl border px-4 py-3 text-sm outline-none transition-all ${
+    error
+      ? 'border-red-200 bg-red-50/80 text-red-900 placeholder:text-red-300 focus:border-red-300'
+      : 'border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 focus:border-[var(--color-primary)] focus:bg-white'
+  }`
+}
+
+export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModalProps) {
+  const [form, setForm] = useState<RegisterFormState>(INITIAL_FORM)
+  const [agree, setAgree] = useState(false)
+  const [errors, setErrors] = useState<RegisterFormErrors>({})
+  const [loading, setLoading] = useState(false)
+  const { register, loginWithGoogle } = useAuth()
+
+  const setField = <TField extends keyof RegisterFormState>(field: TField, value: RegisterFormState[TField]) => {
+    setForm((prev) => ({ ...prev, [field]: value }))
+    setErrors((prev) => ({ ...prev, [field]: undefined, form: undefined }))
+  }
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const profileErrors = validateCustomerProfile({
+      prefix: form.prefix,
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+    })
+
+    const nextErrors: RegisterFormErrors = {
+      ...profileErrors,
+      password: form.password.trim().length >= 8 ? undefined : 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร',
+      agree: agree ? undefined : 'กรุณายอมรับข้อกำหนดและนโยบายก่อนสมัครสมาชิก',
+    }
+
+    if (Object.values(nextErrors).some(Boolean)) {
+      setErrors(nextErrors)
       return
     }
-    setError('')
+
     setLoading(true)
+    setErrors({})
+
     try {
-      const userData = await register(name, email, phone, password)
+      await register(
+        form.prefix,
+        sanitizeCustomerName(form.name),
+        normalizeEmail(form.email),
+        normalizeThaiPhoneInput(form.phone) ?? form.phone,
+        form.password,
+      )
       onClose()
-      // Redirect admin to admin page
-      if (userData?.role === 'admin') {
-        navigate('/admin/tours')
-      }
-    } catch {
-      setError('ไม่สามารถสมัครสมาชิกได้ อีเมลอาจถูกใช้งานแล้ว')
+    } catch (error) {
+      const fieldErrors = extractApiFieldErrors(error, ['prefix', 'name', 'email', 'phone', 'password'])
+      setErrors({
+        ...fieldErrors,
+        form: extractApiErrorMessage(error, 'ไม่สามารถสมัครสมาชิกได้ กรุณาตรวจสอบข้อมูลแล้วลองใหม่อีกครั้ง'),
+      })
     } finally {
       setLoading(false)
     }
   }
 
+  const handleGoogleSignIn = () => {
+    setErrors({})
+    loginWithGoogle()
+  }
+
   return (
-    // พื้นหลังสีดำโปร่งแสง — คลิกนอก modal เพื่อปิด
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="bg-white rounded-2xl w-full max-w-sm p-8 shadow-xl relative">
+    <Modal isOpen={true} onClose={onClose} width="max-w-md">
+      <button
+        type="button"
+        onClick={onClose}
+        className="ui-focus-ring absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+      >
+        ✕
+      </button>
 
-        {/* ปุ่มปิด — วางด้านบนขวาของ modal */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:text-gray-800 hover:border-gray-400 transition-colors"
-        >
-          ✕
-        </button>
+      <div className="mb-5 flex flex-col items-center text-center">
+        <img src="/logo.png" alt="9Tours" className="mb-3 h-20 w-auto" />
+        <h2 className="text-2xl font-bold text-gray-900">สมัครสมาชิก</h2>
+        <p className="mt-2 text-sm text-gray-500">สร้างบัญชีเพื่อจองทริปและติดตามสถานะได้สะดวกขึ้น</p>
+      </div>
 
-        {/* โลโก้และหัวข้อ */}
-        <div className="flex flex-col items-center mb-4">
-          <img src="/logo.png" alt="9Tours" className="h-20 w-auto mb-3" />
-          <h2 className="text-2xl font-bold text-gray-800">สมัครสมาชิก</h2>
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        className="ui-focus-ring ui-pressable flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+      >
+        <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#EA4335" d="M12 10.2v3.9h5.4c-.2 1.2-.9 2.2-1.9 2.9l3.1 2.4c1.8-1.7 2.9-4.2 2.9-7.2 0-.7-.1-1.4-.2-2H12z" />
+          <path fill="#34A853" d="M12 21c2.6 0 4.9-.9 6.6-2.5l-3.1-2.4c-.9.6-2 .9-3.5.9-2.7 0-5-1.8-5.8-4.3l-3.2 2.5C4.7 18.7 8 21 12 21z" />
+          <path fill="#4A90E2" d="M6.2 12.7c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2L3 6.2C2.4 7.5 2 9 2 10.7s.4 3.2 1 4.5l3.2-2.5z" />
+          <path fill="#FBBC05" d="M12 4.4c1.5 0 2.8.5 3.8 1.5l2.8-2.8C16.9 1.5 14.6.4 12 .4 8 0 4.7 2.3 3 5.9l3.2 2.5C7 6.2 9.3 4.4 12 4.4z" />
+        </svg>
+        สมัครด้วย Google
+      </button>
+
+      <div className="relative my-5">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-200" />
         </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-3 text-gray-400">หรือ</span>
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-3.5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[9rem_minmax(0,1fr)]">
           <div>
-            <label className="text-base font-bold text-gray-800 mb-1 block">ชื่อผู้ใช้</label>
+            <label className="mb-2 block text-sm font-semibold text-gray-800">คำนำหน้า</label>
+            <select
+              value={form.prefix}
+              onChange={(event) => setField('prefix', event.target.value as CustomerPrefix)}
+              className={inputClass(errors.prefix)}
+            >
+              {PREFIX_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            {errors.prefix && <p className="mt-1.5 text-xs text-red-500">{errors.prefix}</p>}
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-gray-800">ชื่อ-นามสกุล</label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="natee"
+              value={form.name}
+              onChange={(event) => setField('name', event.target.value)}
+              placeholder="farn patcharapon"
               required
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-400 transition-colors"
+              className={inputClass(errors.name)}
             />
+            <p className="mt-1.5 text-xs text-gray-400">ตามที่ปรากฏบนบัตรประชาชน โดยไม่ต้องมีคำนำหน้าหรืออักษรพิเศษ</p>
+            {errors.name && <p className="mt-1.5 text-xs text-red-500">{errors.name}</p>}
           </div>
+        </div>
 
-          <div>
-            <label className="text-base font-bold text-gray-800 mb-1 block">อีเมล</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="natee@example.com"
-              required
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-400 transition-colors"
-            />
-          </div>
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-gray-800">อีเมล</label>
+          <input
+            type="email"
+            value={form.email}
+            onChange={(event) => setField('email', event.target.value)}
+            placeholder="name@example.com"
+            required
+            className={inputClass(errors.email)}
+          />
+          {errors.email && <p className="mt-1.5 text-xs text-red-500">{errors.email}</p>}
+        </div>
 
-          <div>
-            <label className="text-base font-bold text-gray-800 mb-1 block">หมายเลขโทรศัพท์</label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="095xxxxxxx"
-              required
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-400 transition-colors"
-            />
-          </div>
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-gray-800">หมายเลขโทรศัพท์</label>
+          <input
+            type="tel"
+            value={form.phone}
+            onChange={(event) => setField('phone', event.target.value)}
+            placeholder="0812345678 หรือ +66812345678"
+            required
+            className={inputClass(errors.phone)}
+          />
+          <p className="mt-1.5 text-xs text-gray-400">ระบบจะบันทึกเป็นรูปแบบ 0XXXXXXXXX และใช้สำหรับล็อกอินได้</p>
+          {errors.phone && <p className="mt-1.5 text-xs text-red-500">{errors.phone}</p>}
+        </div>
 
-          <div>
-            <label className="text-base font-bold text-gray-800 mb-1 block">รหัสผ่าน</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="ความยาว 8 ตัวอักษรขึ้นไป"
-              required
-              minLength={8}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-400 transition-colors"
-            />
-          </div>
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-gray-800">รหัสผ่าน</label>
+          <input
+            type="password"
+            value={form.password}
+            onChange={(event) => setField('password', event.target.value)}
+            placeholder="อย่างน้อย 8 ตัวอักษร"
+            required
+            minLength={8}
+            className={inputClass(errors.password)}
+          />
+          {errors.password && <p className="mt-1.5 text-xs text-red-500">{errors.password}</p>}
+        </div>
 
-          <label className="flex items-start gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={agree}
-              onChange={(e) => setAgree(e.target.checked)}
-              className="accent-blue-500 mt-0.5"
-            />
-            <span className="text-sm text-gray-600">
-              ฉันยอมรับ{' '}
-              <span className="text-[#F5A623] cursor-pointer hover:underline">ข้อกำหนดและเงื่อนไข</span>
-              {' '}และ{' '}
-              <span className="text-[#F5A623] cursor-pointer hover:underline">นโยบายความเป็นส่วนตัว</span>
-            </span>
-          </label>
+        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-4 py-3">
+          <input
+            type="checkbox"
+            checked={agree}
+            onChange={(event) => {
+              setAgree(event.target.checked)
+              setErrors((prev) => ({ ...prev, agree: undefined, form: undefined }))
+            }}
+            className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-blue-500"
+          />
+          <span className="text-sm text-gray-600">
+            ฉันยอมรับ <span className="cursor-pointer text-accent hover:underline">ข้อกำหนดและเงื่อนไข</span> และ{' '}
+            <span className="cursor-pointer text-accent hover:underline">นโยบายความเป็นส่วนตัว</span>
+          </span>
+        </label>
+        {errors.agree && <p className="text-xs text-red-500">{errors.agree}</p>}
 
-          {/* แสดงข้อความผิดพลาดเมื่อสมัครไม่สำเร็จ */}
-          {error && (
-            <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
-          )}
+        {errors.form && <p className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">{errors.form}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-semibold py-3 rounded-full transition-colors"
-          >
-            {loading ? 'กำลังสมัคร...' : 'ยืนยัน'}
-          </button>
-        </form>
+        <button
+          type="submit"
+          disabled={loading}
+          className="ui-focus-ring ui-pressable w-full rounded-2xl bg-primary py-3 text-sm font-semibold text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:transform-none"
+        >
+          {loading ? 'กำลังสมัคร...' : 'ยืนยัน'}
+        </button>
+      </form>
 
-        <p className="text-sm text-center text-gray-500 mt-4">
-          หากมีบัญชีแล้ว{' '}
-          <button onClick={onSwitchToLogin} className="text-[#F5A623] font-medium hover:underline">
-            เข้าสู่ระบบที่นี่
-          </button>
-        </p>
-      </div>
-    </div>
+      <p className="mt-5 text-center text-sm text-gray-500">
+        หากมีบัญชีแล้ว{' '}
+        <button type="button" onClick={onSwitchToLogin} className="font-medium text-accent hover:underline">
+          เข้าสู่ระบบที่นี่
+        </button>
+      </p>
+    </Modal>
   )
 }
+

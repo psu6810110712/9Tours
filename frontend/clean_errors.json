@@ -1,0 +1,4 @@
+{
+  "stdout": "src/components/common/SearchBar.tsx(1,1): error TS6133: 'React' is declared but its value is never read.\r\nsrc/pages/MyBookingsPage.tsx(76,44): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.\r\nsrc/pages/PaymentPage.tsx(63,24): error TS2345: Argument of type '{ id: string; tourCode: string; tourName: string; date: string; price: number; adults: number; children: number; status: string; image: string; }' is not assignable to parameter of type 'SetStateAction<PaymentPageData | null>'.\r\n  Type '{ id: string; tourCode: string; tourName: string; date: string; price: number; adults: number; children: number; status: string; image: string; }' is missing the following properties from type 'PaymentPageData': adultPrice, childPrice\r\n",
+  "stderr": ""
+}

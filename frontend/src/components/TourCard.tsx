@@ -1,76 +1,162 @@
-import { Link } from 'react-router-dom'
+﻿import { Link } from 'react-router-dom'
+import { trackEvent } from '../services/trackingService'
 import type { Tour } from '../types/tour'
 
 interface TourCardProps {
   tour: Tour
 }
 
-export default function TourCard({ tour }: TourCardProps) {
-  const discountPercent = tour.originalPrice
-    ? Math.round((1 - tour.price / tour.originalPrice) * 100)
-    : null
+function ClockIcon() {
+  return (
+    <svg className="h-4 w-4 flex-shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.9}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5v5l3 2" />
+    </svg>
+  )
+}
 
-  const coverImage = tour.images[0] || 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=400'
+function CheckIcon() {
+  return (
+    <svg className="h-4 w-4 flex-shrink-0 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.3}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+  )
+}
+
+function StarIcon() {
+  return (
+    <svg className="h-7 w-7 flex-shrink-0 fill-current text-yellow-400" viewBox="0 0 20 23" aria-hidden="true">
+      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+  )
+}
+
+function FeaturedBadge() {
+  return (
+    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-yellow-400 px-1.5 text-[12px] font-extrabold leading-none text-white">
+      1
+    </span>
+  )
+}
+
+interface DetailItemProps {
+  icon: 'clock' | 'check'
+  text: string
+}
+
+function DetailItem({ icon, text }: DetailItemProps) {
+  const iconNode = icon === 'clock'
+    ? <ClockIcon />
+    : <CheckIcon />
 
   return (
-    <Link to={`/tours/${tour.id}`} className="group block bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-      {/* รูปภาพ */}
-      <div className="relative h-44 overflow-hidden">
-        <img
-          src={coverImage}
-          alt={tour.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        {/* badge ส่วนลด */}
-        {discountPercent && (
-          <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-            -{discountPercent}%
-          </span>
+    <div className="flex items-center gap-2 text-[16px] font-medium leading-tight text-gray-600">
+      {iconNode}
+      <span className="line-clamp-1">{text}</span>
+    </div>
+  )
+}
+
+function getCardDetailItems(tour: Tour) {
+  const secondLine = tour.highlights[0]?.trim() || 'รายละเอียดเด่นของทัวร์'
+  const thirdLine = tour.tourType === 'package'
+    ? tour.accommodation?.trim() || 'มีที่พักรวมในแพ็กเกจ'
+    : tour.highlights[1]?.trim() || 'ไฮไลต์เพิ่มเติมของทริป'
+
+  return [
+    { icon: 'clock' as const, text: tour.duration },
+    { icon: 'check' as const, text: secondLine },
+    { icon: 'check' as const, text: thirdLine },
+  ]
+}
+
+export default function TourCard({ tour }: TourCardProps) {
+  const isPrivate = !!tour.minPeople
+  const originalPrice = tour.originalPrice
+  const hasDiscount = typeof originalPrice === 'number' && originalPrice > tour.price
+  const discountPercent = hasDiscount
+    ? Math.round((1 - tour.price / originalPrice) * 100)
+    : null
+  const coverImage = tour.images.find((image) => typeof image === 'string' && image.trim().length > 0) || ''
+  const hasCoverImage = coverImage.length > 0
+  const isPopular = tour.reviewCount > 50
+
+  const detailItems = getCardDetailItems(tour)
+
+  const metaText = isPopular ? 'ทัวร์ยอดนิยม' : 'แนะนำสำหรับคุณ'
+
+  return (
+    <Link
+      to={`/tours/${tour.id}`}
+      className="group relative flex h-full flex-col overflow-hidden rounded-[1.15rem] border border-gray-200 bg-white shadow-[0_3px_10px_rgba(15,23,42,0.05)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(15,23,42,0.10)]"
+      onClick={() => {
+        trackEvent({
+          eventType: 'cta_click',
+          pagePath: window.location.pathname + window.location.search,
+          tourId: tour.id,
+          elementId: 'tour_card_click',
+          metadata: { province: tour.province, tourType: tour.tourType },
+        })
+      }}
+    >
+      {hasDiscount && (
+        <div className="absolute right-0 top-0 z-10 flex min-h-[1rem] min-w-[2rem] flex-col items-center justify-center rounded-bl-[1.15rem] rounded-tr-[0.25rem] bg-red-500 px-4 py-2.5 text-right text-white">
+          <p className="text-[1rem] font-black leading-none">ลด {discountPercent}%</p>
+          <p className=" text-[1rem] font-semibold leading-none text-white/80 line-through">
+          </p>
+        </div>
+      )}
+
+      <div className="h-[180px] overflow-hidden border-b border-gray-100 bg-slate-100">
+        {hasCoverImage ? (
+          <img
+            src={coverImage}
+            alt={tour.name}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 px-6 text-center">
+            <p className="text-lg font-bold text-slate-600">ไม่มีภาพประกอบสำหรับทัวร์นี้</p>
+          </div>
         )}
-        {/* badge ประเภท */}
-        <span className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
-          {tour.tourType === 'one_day' ? 'วันเดย์ทริป' : 'แพ็คเกจ'}
-        </span>
       </div>
 
-      {/* เนื้อหา */}
-      <div className="p-3">
-        {/* ชื่อทัวร์ */}
-        <h3 className="font-semibold text-gray-800 text-sm truncate mb-1">
+      <div className="grid flex-1 grid-rows-[auto_auto_1fr_auto] px-3.5 pb-5 pt-3.5">
+        <h3 className="mt-1 line-clamp-2 text-[1.125rem] font-bold leading-[1.4] text-gray-700">
           {tour.name}
         </h3>
 
-        {/* จังหวัด + ระยะเวลา */}
-        <p className="text-xs text-gray-400 mb-2">
-          📍 {tour.province} · {tour.duration}
-        </p>
-
-        {/* คะแนน */}
-        <div className="flex items-center gap-1 mb-2">
-          <span className="text-yellow-400 text-xs">★</span>
-          <span className="text-xs font-medium text-gray-700">{tour.rating.toFixed(1)}</span>
-          <span className="text-xs text-gray-400">({tour.reviewCount} รีวิว)</span>
+        <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[16px] font-extrabold text-gray-600">
+          <span className="inline-flex items-center gap-1 leading-none text-gray-600">
+            <StarIcon />
+            <span>{tour.rating.toFixed(1)}</span>
+            <span className="text-gray-500">({tour.reviewCount.toLocaleString()} รีวิว)</span>
+          </span>
+          <span className="text-gray-300">|</span>
+          <span className="text-gray-500">{metaText}</span>
+          {isPopular && <FeaturedBadge />}
         </div>
 
-        {/* highlights 2 รายการแรก */}
-        {tour.highlights.slice(0, 2).map((h, i) => (
-          <div key={i} className="flex items-center gap-1 text-xs text-gray-500 mb-1">
-            <span className="text-green-500">✓</span>
-            <span>{h}</span>
-          </div>
-        ))}
+        <div className="mt-2 grid gap-1.5">
+          {detailItems.map((item, index) => (
+            <DetailItem key={`${item.text}-${index}`} icon={item.icon} text={item.text} />
+          ))}
+        </div>
 
-        {/* ราคา */}
-        <div className="mt-2 flex items-end gap-2">
-          {tour.originalPrice && (
-            <span className="text-xs text-gray-400 line-through">
-              ฿{tour.originalPrice.toLocaleString()}
-            </span>
-          )}
-          <span className="text-base font-bold text-[#F5A623]">
-            ฿{Number(tour.price).toLocaleString()}
-          </span>
-          <span className="text-xs text-gray-400">/ คน</span>
+        <div className="-mx-2 -mb-8 mt-5 border-t border-gray-200">
+          <div className="relative min-h-[6.25rem] px-3.5 py-2.5">
+            <div>
+              <p className="text-[1.05rem] font-semibold text-gray-700">
+                {isPrivate ? 'ราคาเหมาส่วนตัว' : 'ราคาเริ่มต้น'}
+              </p>
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-gray-700">
+                <span className="mt-1 text-[1.7rem] font-extrabold leading-none">{Number(tour.price).toLocaleString()}</span>
+                <span className="text-[1rem] font-semibold text-gray-700">
+                  {isPrivate ? 'บาท' : 'บาท / ท่าน'}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </Link>

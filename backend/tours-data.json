@@ -1,0 +1,5602 @@
+[
+  {
+    "id": 1,
+    "tourCode": "15012026001",
+    "name": "เที่ยวภูเก็ต เมืองเก่า ถ่ายรูปคาเฟ่ทั้งวัน",
+    "description": "เดินเล่นย่านเมืองเก่าภูเก็ต คาเฟ่สวย ๆ และแลนด์มาร์กยอดฮิตในวันเดียว",
+    "tourType": "one_day",
+    "categories": [
+      "สายชิล",
+      "สายกิจกรรม",
+      "สายคาเฟ่"
+    ],
+    "price": 1,
+    "originalPrice": null,
+    "images": [
+      "https://images.unsplash.com/photo-1541417904950-b855846fe074?w=800",
+      "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800",
+      "https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=800",
+      "https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=800",
+      "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=800"
+    ],
+    "highlights": [
+      "บริการรถรับส่ง",
+      "แวะจุดไฮไลต์ครบ"
+    ],
+    "itinerary": [],
+    "transportation": "รถตู้ปรับอากาศ",
+    "duration": "8 ชั่วโมง",
+    "region": "ภาคใต้",
+    "province": "ภูเก็ต",
+    "accommodation": null,
+    "rating": 4.3,
+    "reviewCount": 19,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 133,
+        "tourId": 1,
+        "startDate": "2026-04-01",
+        "endDate": "2026-04-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 134,
+        "tourId": 1,
+        "startDate": "2026-04-02",
+        "endDate": "2026-04-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 135,
+        "tourId": 1,
+        "startDate": "2026-04-03",
+        "endDate": "2026-04-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 136,
+        "tourId": 1,
+        "startDate": "2026-04-04",
+        "endDate": "2026-04-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 137,
+        "tourId": 1,
+        "startDate": "2026-04-05",
+        "endDate": "2026-04-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 138,
+        "tourId": 1,
+        "startDate": "2026-04-06",
+        "endDate": "2026-04-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 139,
+        "tourId": 1,
+        "startDate": "2026-04-07",
+        "endDate": "2026-04-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 140,
+        "tourId": 1,
+        "startDate": "2026-04-08",
+        "endDate": "2026-04-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 141,
+        "tourId": 1,
+        "startDate": "2026-04-09",
+        "endDate": "2026-04-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 142,
+        "tourId": 1,
+        "startDate": "2026-04-10",
+        "endDate": "2026-04-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 143,
+        "tourId": 1,
+        "startDate": "2026-04-11",
+        "endDate": "2026-04-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 144,
+        "tourId": 1,
+        "startDate": "2026-04-12",
+        "endDate": "2026-04-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 145,
+        "tourId": 1,
+        "startDate": "2026-04-13",
+        "endDate": "2026-04-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 146,
+        "tourId": 1,
+        "startDate": "2026-04-14",
+        "endDate": "2026-04-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 147,
+        "tourId": 1,
+        "startDate": "2026-04-15",
+        "endDate": "2026-04-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 148,
+        "tourId": 1,
+        "startDate": "2026-04-16",
+        "endDate": "2026-04-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 149,
+        "tourId": 1,
+        "startDate": "2026-04-17",
+        "endDate": "2026-04-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 150,
+        "tourId": 1,
+        "startDate": "2026-04-18",
+        "endDate": "2026-04-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 151,
+        "tourId": 1,
+        "startDate": "2026-04-19",
+        "endDate": "2026-04-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 152,
+        "tourId": 1,
+        "startDate": "2026-04-20",
+        "endDate": "2026-04-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 153,
+        "tourId": 1,
+        "startDate": "2026-04-21",
+        "endDate": "2026-04-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 154,
+        "tourId": 1,
+        "startDate": "2026-04-22",
+        "endDate": "2026-04-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 155,
+        "tourId": 1,
+        "startDate": "2026-04-23",
+        "endDate": "2026-04-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 156,
+        "tourId": 1,
+        "startDate": "2026-04-24",
+        "endDate": "2026-04-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 157,
+        "tourId": 1,
+        "startDate": "2026-04-25",
+        "endDate": "2026-04-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 158,
+        "tourId": 1,
+        "startDate": "2026-04-26",
+        "endDate": "2026-04-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 159,
+        "tourId": 1,
+        "startDate": "2026-04-27",
+        "endDate": "2026-04-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 160,
+        "tourId": 1,
+        "startDate": "2026-04-28",
+        "endDate": "2026-04-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 161,
+        "tourId": 1,
+        "startDate": "2026-04-29",
+        "endDate": "2026-04-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 162,
+        "tourId": 1,
+        "startDate": "2026-04-30",
+        "endDate": "2026-04-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 163,
+        "tourId": 1,
+        "startDate": "2026-05-01",
+        "endDate": "2026-05-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 164,
+        "tourId": 1,
+        "startDate": "2026-05-02",
+        "endDate": "2026-05-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 165,
+        "tourId": 1,
+        "startDate": "2026-05-03",
+        "endDate": "2026-05-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 166,
+        "tourId": 1,
+        "startDate": "2026-05-04",
+        "endDate": "2026-05-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 167,
+        "tourId": 1,
+        "startDate": "2026-05-05",
+        "endDate": "2026-05-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 168,
+        "tourId": 1,
+        "startDate": "2026-05-06",
+        "endDate": "2026-05-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 169,
+        "tourId": 1,
+        "startDate": "2026-05-07",
+        "endDate": "2026-05-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 170,
+        "tourId": 1,
+        "startDate": "2026-05-08",
+        "endDate": "2026-05-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 171,
+        "tourId": 1,
+        "startDate": "2026-05-09",
+        "endDate": "2026-05-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 172,
+        "tourId": 1,
+        "startDate": "2026-05-10",
+        "endDate": "2026-05-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 173,
+        "tourId": 1,
+        "startDate": "2026-05-11",
+        "endDate": "2026-05-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 174,
+        "tourId": 1,
+        "startDate": "2026-05-12",
+        "endDate": "2026-05-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 175,
+        "tourId": 1,
+        "startDate": "2026-05-13",
+        "endDate": "2026-05-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 176,
+        "tourId": 1,
+        "startDate": "2026-05-14",
+        "endDate": "2026-05-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 177,
+        "tourId": 1,
+        "startDate": "2026-05-15",
+        "endDate": "2026-05-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 178,
+        "tourId": 1,
+        "startDate": "2026-05-16",
+        "endDate": "2026-05-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 179,
+        "tourId": 1,
+        "startDate": "2026-05-17",
+        "endDate": "2026-05-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 180,
+        "tourId": 1,
+        "startDate": "2026-05-18",
+        "endDate": "2026-05-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 181,
+        "tourId": 1,
+        "startDate": "2026-05-19",
+        "endDate": "2026-05-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 182,
+        "tourId": 1,
+        "startDate": "2026-05-20",
+        "endDate": "2026-05-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 183,
+        "tourId": 1,
+        "startDate": "2026-05-21",
+        "endDate": "2026-05-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 184,
+        "tourId": 1,
+        "startDate": "2026-05-22",
+        "endDate": "2026-05-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 185,
+        "tourId": 1,
+        "startDate": "2026-05-23",
+        "endDate": "2026-05-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 186,
+        "tourId": 1,
+        "startDate": "2026-05-24",
+        "endDate": "2026-05-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 187,
+        "tourId": 1,
+        "startDate": "2026-05-25",
+        "endDate": "2026-05-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 188,
+        "tourId": 1,
+        "startDate": "2026-05-26",
+        "endDate": "2026-05-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 189,
+        "tourId": 1,
+        "startDate": "2026-05-27",
+        "endDate": "2026-05-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 190,
+        "tourId": 1,
+        "startDate": "2026-05-28",
+        "endDate": "2026-05-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 191,
+        "tourId": 1,
+        "startDate": "2026-05-29",
+        "endDate": "2026-05-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 192,
+        "tourId": 1,
+        "startDate": "2026-05-30",
+        "endDate": "2026-05-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 193,
+        "tourId": 1,
+        "startDate": "2026-05-31",
+        "endDate": "2026-05-31",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 194,
+        "tourId": 1,
+        "startDate": "2026-06-01",
+        "endDate": "2026-06-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 195,
+        "tourId": 1,
+        "startDate": "2026-06-02",
+        "endDate": "2026-06-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 196,
+        "tourId": 1,
+        "startDate": "2026-06-03",
+        "endDate": "2026-06-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 197,
+        "tourId": 1,
+        "startDate": "2026-06-04",
+        "endDate": "2026-06-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 198,
+        "tourId": 1,
+        "startDate": "2026-06-05",
+        "endDate": "2026-06-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 199,
+        "tourId": 1,
+        "startDate": "2026-06-06",
+        "endDate": "2026-06-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 200,
+        "tourId": 1,
+        "startDate": "2026-06-07",
+        "endDate": "2026-06-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 201,
+        "tourId": 1,
+        "startDate": "2026-06-08",
+        "endDate": "2026-06-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 202,
+        "tourId": 1,
+        "startDate": "2026-06-09",
+        "endDate": "2026-06-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 203,
+        "tourId": 1,
+        "startDate": "2026-06-10",
+        "endDate": "2026-06-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 204,
+        "tourId": 1,
+        "startDate": "2026-06-11",
+        "endDate": "2026-06-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 205,
+        "tourId": 1,
+        "startDate": "2026-06-12",
+        "endDate": "2026-06-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 206,
+        "tourId": 1,
+        "startDate": "2026-06-13",
+        "endDate": "2026-06-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 207,
+        "tourId": 1,
+        "startDate": "2026-06-14",
+        "endDate": "2026-06-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 208,
+        "tourId": 1,
+        "startDate": "2026-06-15",
+        "endDate": "2026-06-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 209,
+        "tourId": 1,
+        "startDate": "2026-06-16",
+        "endDate": "2026-06-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 210,
+        "tourId": 1,
+        "startDate": "2026-06-17",
+        "endDate": "2026-06-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 211,
+        "tourId": 1,
+        "startDate": "2026-06-18",
+        "endDate": "2026-06-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 212,
+        "tourId": 1,
+        "startDate": "2026-06-19",
+        "endDate": "2026-06-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 213,
+        "tourId": 1,
+        "startDate": "2026-06-20",
+        "endDate": "2026-06-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 214,
+        "tourId": 1,
+        "startDate": "2026-06-21",
+        "endDate": "2026-06-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 215,
+        "tourId": 1,
+        "startDate": "2026-06-22",
+        "endDate": "2026-06-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 216,
+        "tourId": 1,
+        "startDate": "2026-06-23",
+        "endDate": "2026-06-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 217,
+        "tourId": 1,
+        "startDate": "2026-06-24",
+        "endDate": "2026-06-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 218,
+        "tourId": 1,
+        "startDate": "2026-06-25",
+        "endDate": "2026-06-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 219,
+        "tourId": 1,
+        "startDate": "2026-06-26",
+        "endDate": "2026-06-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 220,
+        "tourId": 1,
+        "startDate": "2026-06-27",
+        "endDate": "2026-06-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 221,
+        "tourId": 1,
+        "startDate": "2026-06-28",
+        "endDate": "2026-06-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 222,
+        "tourId": 1,
+        "startDate": "2026-06-29",
+        "endDate": "2026-06-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 223,
+        "tourId": 1,
+        "startDate": "2026-06-30",
+        "endDate": "2026-06-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 225,
+        "tourId": 1,
+        "startDate": "2026-07-02",
+        "endDate": "2026-07-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 226,
+        "tourId": 1,
+        "startDate": "2026-07-03",
+        "endDate": "2026-07-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 227,
+        "tourId": 1,
+        "startDate": "2026-07-04",
+        "endDate": "2026-07-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 228,
+        "tourId": 1,
+        "startDate": "2026-07-05",
+        "endDate": "2026-07-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 229,
+        "tourId": 1,
+        "startDate": "2026-07-06",
+        "endDate": "2026-07-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 230,
+        "tourId": 1,
+        "startDate": "2026-07-07",
+        "endDate": "2026-07-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 231,
+        "tourId": 1,
+        "startDate": "2026-07-08",
+        "endDate": "2026-07-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 232,
+        "tourId": 1,
+        "startDate": "2026-07-09",
+        "endDate": "2026-07-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 233,
+        "tourId": 1,
+        "startDate": "2026-07-10",
+        "endDate": "2026-07-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 234,
+        "tourId": 1,
+        "startDate": "2026-07-11",
+        "endDate": "2026-07-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 235,
+        "tourId": 1,
+        "startDate": "2026-07-12",
+        "endDate": "2026-07-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 236,
+        "tourId": 1,
+        "startDate": "2026-07-13",
+        "endDate": "2026-07-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 237,
+        "tourId": 1,
+        "startDate": "2026-07-14",
+        "endDate": "2026-07-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 238,
+        "tourId": 1,
+        "startDate": "2026-07-15",
+        "endDate": "2026-07-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 239,
+        "tourId": 1,
+        "startDate": "2026-07-16",
+        "endDate": "2026-07-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 240,
+        "tourId": 1,
+        "startDate": "2026-07-17",
+        "endDate": "2026-07-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 241,
+        "tourId": 1,
+        "startDate": "2026-07-18",
+        "endDate": "2026-07-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 242,
+        "tourId": 1,
+        "startDate": "2026-07-19",
+        "endDate": "2026-07-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 243,
+        "tourId": 1,
+        "startDate": "2026-07-20",
+        "endDate": "2026-07-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 244,
+        "tourId": 1,
+        "startDate": "2026-07-21",
+        "endDate": "2026-07-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 245,
+        "tourId": 1,
+        "startDate": "2026-07-22",
+        "endDate": "2026-07-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 246,
+        "tourId": 1,
+        "startDate": "2026-07-23",
+        "endDate": "2026-07-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 247,
+        "tourId": 1,
+        "startDate": "2026-07-24",
+        "endDate": "2026-07-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 248,
+        "tourId": 1,
+        "startDate": "2026-07-25",
+        "endDate": "2026-07-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 249,
+        "tourId": 1,
+        "startDate": "2026-07-26",
+        "endDate": "2026-07-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 250,
+        "tourId": 1,
+        "startDate": "2026-07-27",
+        "endDate": "2026-07-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 251,
+        "tourId": 1,
+        "startDate": "2026-07-28",
+        "endDate": "2026-07-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 252,
+        "tourId": 1,
+        "startDate": "2026-07-29",
+        "endDate": "2026-07-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 253,
+        "tourId": 1,
+        "startDate": "2026-07-30",
+        "endDate": "2026-07-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 254,
+        "tourId": 1,
+        "startDate": "2026-07-31",
+        "endDate": "2026-07-31",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 255,
+        "tourId": 1,
+        "startDate": "2026-08-01",
+        "endDate": "2026-08-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 256,
+        "tourId": 1,
+        "startDate": "2026-08-02",
+        "endDate": "2026-08-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 257,
+        "tourId": 1,
+        "startDate": "2026-08-03",
+        "endDate": "2026-08-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 258,
+        "tourId": 1,
+        "startDate": "2026-08-04",
+        "endDate": "2026-08-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 259,
+        "tourId": 1,
+        "startDate": "2026-08-05",
+        "endDate": "2026-08-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 260,
+        "tourId": 1,
+        "startDate": "2026-08-06",
+        "endDate": "2026-08-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 261,
+        "tourId": 1,
+        "startDate": "2026-08-07",
+        "endDate": "2026-08-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 262,
+        "tourId": 1,
+        "startDate": "2026-08-08",
+        "endDate": "2026-08-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 263,
+        "tourId": 1,
+        "startDate": "2026-08-09",
+        "endDate": "2026-08-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 264,
+        "tourId": 1,
+        "startDate": "2026-08-10",
+        "endDate": "2026-08-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 265,
+        "tourId": 1,
+        "startDate": "2026-08-11",
+        "endDate": "2026-08-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 266,
+        "tourId": 1,
+        "startDate": "2026-08-12",
+        "endDate": "2026-08-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 267,
+        "tourId": 1,
+        "startDate": "2026-08-13",
+        "endDate": "2026-08-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 268,
+        "tourId": 1,
+        "startDate": "2026-08-14",
+        "endDate": "2026-08-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 269,
+        "tourId": 1,
+        "startDate": "2026-08-15",
+        "endDate": "2026-08-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 270,
+        "tourId": 1,
+        "startDate": "2026-08-16",
+        "endDate": "2026-08-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 271,
+        "tourId": 1,
+        "startDate": "2026-08-17",
+        "endDate": "2026-08-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 272,
+        "tourId": 1,
+        "startDate": "2026-08-18",
+        "endDate": "2026-08-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 273,
+        "tourId": 1,
+        "startDate": "2026-08-19",
+        "endDate": "2026-08-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 274,
+        "tourId": 1,
+        "startDate": "2026-08-20",
+        "endDate": "2026-08-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 275,
+        "tourId": 1,
+        "startDate": "2026-08-21",
+        "endDate": "2026-08-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 276,
+        "tourId": 1,
+        "startDate": "2026-08-22",
+        "endDate": "2026-08-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 277,
+        "tourId": 1,
+        "startDate": "2026-08-23",
+        "endDate": "2026-08-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 278,
+        "tourId": 1,
+        "startDate": "2026-08-24",
+        "endDate": "2026-08-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 279,
+        "tourId": 1,
+        "startDate": "2026-08-25",
+        "endDate": "2026-08-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 280,
+        "tourId": 1,
+        "startDate": "2026-08-26",
+        "endDate": "2026-08-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 281,
+        "tourId": 1,
+        "startDate": "2026-08-27",
+        "endDate": "2026-08-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 282,
+        "tourId": 1,
+        "startDate": "2026-08-28",
+        "endDate": "2026-08-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 283,
+        "tourId": 1,
+        "startDate": "2026-08-29",
+        "endDate": "2026-08-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 284,
+        "tourId": 1,
+        "startDate": "2026-08-30",
+        "endDate": "2026-08-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 285,
+        "tourId": 1,
+        "startDate": "2026-08-31",
+        "endDate": "2026-08-31",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 286,
+        "tourId": 1,
+        "startDate": "2026-09-01",
+        "endDate": "2026-09-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 287,
+        "tourId": 1,
+        "startDate": "2026-09-02",
+        "endDate": "2026-09-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 288,
+        "tourId": 1,
+        "startDate": "2026-09-03",
+        "endDate": "2026-09-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 289,
+        "tourId": 1,
+        "startDate": "2026-09-04",
+        "endDate": "2026-09-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 290,
+        "tourId": 1,
+        "startDate": "2026-09-05",
+        "endDate": "2026-09-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 291,
+        "tourId": 1,
+        "startDate": "2026-09-06",
+        "endDate": "2026-09-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 292,
+        "tourId": 1,
+        "startDate": "2026-09-07",
+        "endDate": "2026-09-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 293,
+        "tourId": 1,
+        "startDate": "2026-09-08",
+        "endDate": "2026-09-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 294,
+        "tourId": 1,
+        "startDate": "2026-09-09",
+        "endDate": "2026-09-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 295,
+        "tourId": 1,
+        "startDate": "2026-09-10",
+        "endDate": "2026-09-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 296,
+        "tourId": 1,
+        "startDate": "2026-09-11",
+        "endDate": "2026-09-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 297,
+        "tourId": 1,
+        "startDate": "2026-09-12",
+        "endDate": "2026-09-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 298,
+        "tourId": 1,
+        "startDate": "2026-09-13",
+        "endDate": "2026-09-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 299,
+        "tourId": 1,
+        "startDate": "2026-09-14",
+        "endDate": "2026-09-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 300,
+        "tourId": 1,
+        "startDate": "2026-09-15",
+        "endDate": "2026-09-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 301,
+        "tourId": 1,
+        "startDate": "2026-09-16",
+        "endDate": "2026-09-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 302,
+        "tourId": 1,
+        "startDate": "2026-09-17",
+        "endDate": "2026-09-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 303,
+        "tourId": 1,
+        "startDate": "2026-09-18",
+        "endDate": "2026-09-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": -19
+      },
+      {
+        "id": 304,
+        "tourId": 1,
+        "startDate": "2026-09-19",
+        "endDate": "2026-09-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 20
+      },
+      {
+        "id": 305,
+        "tourId": 1,
+        "startDate": "2026-09-20",
+        "endDate": "2026-09-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 306,
+        "tourId": 1,
+        "startDate": "2026-09-21",
+        "endDate": "2026-09-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 307,
+        "tourId": 1,
+        "startDate": "2026-09-22",
+        "endDate": "2026-09-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 308,
+        "tourId": 1,
+        "startDate": "2026-09-23",
+        "endDate": "2026-09-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 309,
+        "tourId": 1,
+        "startDate": "2026-09-24",
+        "endDate": "2026-09-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 310,
+        "tourId": 1,
+        "startDate": "2026-09-25",
+        "endDate": "2026-09-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 311,
+        "tourId": 1,
+        "startDate": "2026-09-26",
+        "endDate": "2026-09-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 312,
+        "tourId": 1,
+        "startDate": "2026-09-27",
+        "endDate": "2026-09-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 313,
+        "tourId": 1,
+        "startDate": "2026-09-28",
+        "endDate": "2026-09-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 314,
+        "tourId": 1,
+        "startDate": "2026-09-29",
+        "endDate": "2026-09-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 315,
+        "tourId": 1,
+        "startDate": "2026-09-30",
+        "endDate": "2026-09-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 316,
+        "tourId": 1,
+        "startDate": "2026-10-01",
+        "endDate": "2026-10-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 317,
+        "tourId": 1,
+        "startDate": "2026-10-02",
+        "endDate": "2026-10-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 318,
+        "tourId": 1,
+        "startDate": "2026-10-03",
+        "endDate": "2026-10-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 319,
+        "tourId": 1,
+        "startDate": "2026-10-04",
+        "endDate": "2026-10-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 320,
+        "tourId": 1,
+        "startDate": "2026-10-05",
+        "endDate": "2026-10-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 321,
+        "tourId": 1,
+        "startDate": "2026-10-06",
+        "endDate": "2026-10-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 322,
+        "tourId": 1,
+        "startDate": "2026-10-07",
+        "endDate": "2026-10-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 323,
+        "tourId": 1,
+        "startDate": "2026-10-08",
+        "endDate": "2026-10-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 324,
+        "tourId": 1,
+        "startDate": "2026-10-09",
+        "endDate": "2026-10-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 325,
+        "tourId": 1,
+        "startDate": "2026-10-10",
+        "endDate": "2026-10-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 326,
+        "tourId": 1,
+        "startDate": "2026-10-11",
+        "endDate": "2026-10-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 327,
+        "tourId": 1,
+        "startDate": "2026-10-12",
+        "endDate": "2026-10-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 328,
+        "tourId": 1,
+        "startDate": "2026-10-13",
+        "endDate": "2026-10-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 329,
+        "tourId": 1,
+        "startDate": "2026-10-14",
+        "endDate": "2026-10-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 330,
+        "tourId": 1,
+        "startDate": "2026-10-15",
+        "endDate": "2026-10-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 331,
+        "tourId": 1,
+        "startDate": "2026-10-16",
+        "endDate": "2026-10-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 332,
+        "tourId": 1,
+        "startDate": "2026-10-17",
+        "endDate": "2026-10-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 333,
+        "tourId": 1,
+        "startDate": "2026-10-18",
+        "endDate": "2026-10-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 334,
+        "tourId": 1,
+        "startDate": "2026-10-19",
+        "endDate": "2026-10-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 335,
+        "tourId": 1,
+        "startDate": "2026-10-20",
+        "endDate": "2026-10-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 336,
+        "tourId": 1,
+        "startDate": "2026-10-21",
+        "endDate": "2026-10-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 337,
+        "tourId": 1,
+        "startDate": "2026-10-22",
+        "endDate": "2026-10-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 338,
+        "tourId": 1,
+        "startDate": "2026-10-23",
+        "endDate": "2026-10-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 339,
+        "tourId": 1,
+        "startDate": "2026-10-24",
+        "endDate": "2026-10-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 340,
+        "tourId": 1,
+        "startDate": "2026-10-25",
+        "endDate": "2026-10-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 341,
+        "tourId": 1,
+        "startDate": "2026-10-26",
+        "endDate": "2026-10-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 342,
+        "tourId": 1,
+        "startDate": "2026-10-27",
+        "endDate": "2026-10-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 343,
+        "tourId": 1,
+        "startDate": "2026-10-28",
+        "endDate": "2026-10-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 344,
+        "tourId": 1,
+        "startDate": "2026-10-29",
+        "endDate": "2026-10-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 345,
+        "tourId": 1,
+        "startDate": "2026-10-30",
+        "endDate": "2026-10-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 346,
+        "tourId": 1,
+        "startDate": "2026-10-31",
+        "endDate": "2026-10-31",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 347,
+        "tourId": 1,
+        "startDate": "2026-11-01",
+        "endDate": "2026-11-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 348,
+        "tourId": 1,
+        "startDate": "2026-11-02",
+        "endDate": "2026-11-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 349,
+        "tourId": 1,
+        "startDate": "2026-11-03",
+        "endDate": "2026-11-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 350,
+        "tourId": 1,
+        "startDate": "2026-11-04",
+        "endDate": "2026-11-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 351,
+        "tourId": 1,
+        "startDate": "2026-11-05",
+        "endDate": "2026-11-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 352,
+        "tourId": 1,
+        "startDate": "2026-11-06",
+        "endDate": "2026-11-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 353,
+        "tourId": 1,
+        "startDate": "2026-11-07",
+        "endDate": "2026-11-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 354,
+        "tourId": 1,
+        "startDate": "2026-11-08",
+        "endDate": "2026-11-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 355,
+        "tourId": 1,
+        "startDate": "2026-11-09",
+        "endDate": "2026-11-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 356,
+        "tourId": 1,
+        "startDate": "2026-11-10",
+        "endDate": "2026-11-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 357,
+        "tourId": 1,
+        "startDate": "2026-11-11",
+        "endDate": "2026-11-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 358,
+        "tourId": 1,
+        "startDate": "2026-11-12",
+        "endDate": "2026-11-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 359,
+        "tourId": 1,
+        "startDate": "2026-11-13",
+        "endDate": "2026-11-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 360,
+        "tourId": 1,
+        "startDate": "2026-11-14",
+        "endDate": "2026-11-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 361,
+        "tourId": 1,
+        "startDate": "2026-11-15",
+        "endDate": "2026-11-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 362,
+        "tourId": 1,
+        "startDate": "2026-11-16",
+        "endDate": "2026-11-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 363,
+        "tourId": 1,
+        "startDate": "2026-11-17",
+        "endDate": "2026-11-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 364,
+        "tourId": 1,
+        "startDate": "2026-11-18",
+        "endDate": "2026-11-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 365,
+        "tourId": 1,
+        "startDate": "2026-11-19",
+        "endDate": "2026-11-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 366,
+        "tourId": 1,
+        "startDate": "2026-11-20",
+        "endDate": "2026-11-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 367,
+        "tourId": 1,
+        "startDate": "2026-11-21",
+        "endDate": "2026-11-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 368,
+        "tourId": 1,
+        "startDate": "2026-11-22",
+        "endDate": "2026-11-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 369,
+        "tourId": 1,
+        "startDate": "2026-11-23",
+        "endDate": "2026-11-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 370,
+        "tourId": 1,
+        "startDate": "2026-11-24",
+        "endDate": "2026-11-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 371,
+        "tourId": 1,
+        "startDate": "2026-11-25",
+        "endDate": "2026-11-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 372,
+        "tourId": 1,
+        "startDate": "2026-11-26",
+        "endDate": "2026-11-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 373,
+        "tourId": 1,
+        "startDate": "2026-11-27",
+        "endDate": "2026-11-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 374,
+        "tourId": 1,
+        "startDate": "2026-11-28",
+        "endDate": "2026-11-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 375,
+        "tourId": 1,
+        "startDate": "2026-11-29",
+        "endDate": "2026-11-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 376,
+        "tourId": 1,
+        "startDate": "2026-11-30",
+        "endDate": "2026-11-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 377,
+        "tourId": 1,
+        "startDate": "2026-12-01",
+        "endDate": "2026-12-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 378,
+        "tourId": 1,
+        "startDate": "2026-12-02",
+        "endDate": "2026-12-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 379,
+        "tourId": 1,
+        "startDate": "2026-12-03",
+        "endDate": "2026-12-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 380,
+        "tourId": 1,
+        "startDate": "2026-12-04",
+        "endDate": "2026-12-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 381,
+        "tourId": 1,
+        "startDate": "2026-12-05",
+        "endDate": "2026-12-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 382,
+        "tourId": 1,
+        "startDate": "2026-12-06",
+        "endDate": "2026-12-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 383,
+        "tourId": 1,
+        "startDate": "2026-12-07",
+        "endDate": "2026-12-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 384,
+        "tourId": 1,
+        "startDate": "2026-12-08",
+        "endDate": "2026-12-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 385,
+        "tourId": 1,
+        "startDate": "2026-12-09",
+        "endDate": "2026-12-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 386,
+        "tourId": 1,
+        "startDate": "2026-12-10",
+        "endDate": "2026-12-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 387,
+        "tourId": 1,
+        "startDate": "2026-12-11",
+        "endDate": "2026-12-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 388,
+        "tourId": 1,
+        "startDate": "2026-12-12",
+        "endDate": "2026-12-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 389,
+        "tourId": 1,
+        "startDate": "2026-12-13",
+        "endDate": "2026-12-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 390,
+        "tourId": 1,
+        "startDate": "2026-12-14",
+        "endDate": "2026-12-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 391,
+        "tourId": 1,
+        "startDate": "2026-12-15",
+        "endDate": "2026-12-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 392,
+        "tourId": 1,
+        "startDate": "2026-12-16",
+        "endDate": "2026-12-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 393,
+        "tourId": 1,
+        "startDate": "2026-12-17",
+        "endDate": "2026-12-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 394,
+        "tourId": 1,
+        "startDate": "2026-12-18",
+        "endDate": "2026-12-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 395,
+        "tourId": 1,
+        "startDate": "2026-12-19",
+        "endDate": "2026-12-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 396,
+        "tourId": 1,
+        "startDate": "2026-12-20",
+        "endDate": "2026-12-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 397,
+        "tourId": 1,
+        "startDate": "2026-12-21",
+        "endDate": "2026-12-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 398,
+        "tourId": 1,
+        "startDate": "2026-12-22",
+        "endDate": "2026-12-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 399,
+        "tourId": 1,
+        "startDate": "2026-12-23",
+        "endDate": "2026-12-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 400,
+        "tourId": 1,
+        "startDate": "2026-12-24",
+        "endDate": "2026-12-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 401,
+        "tourId": 1,
+        "startDate": "2026-12-25",
+        "endDate": "2026-12-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 402,
+        "tourId": 1,
+        "startDate": "2026-12-26",
+        "endDate": "2026-12-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 403,
+        "tourId": 1,
+        "startDate": "2026-12-27",
+        "endDate": "2026-12-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 404,
+        "tourId": 1,
+        "startDate": "2026-12-28",
+        "endDate": "2026-12-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 405,
+        "tourId": 1,
+        "startDate": "2026-12-29",
+        "endDate": "2026-12-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 406,
+        "tourId": 1,
+        "startDate": "2026-12-30",
+        "endDate": "2026-12-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 407,
+        "tourId": 1,
+        "startDate": "2026-12-31",
+        "endDate": "2026-12-31",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 408,
+        "tourId": 1,
+        "startDate": "2027-01-01",
+        "endDate": "2027-01-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 409,
+        "tourId": 1,
+        "startDate": "2027-01-02",
+        "endDate": "2027-01-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 410,
+        "tourId": 1,
+        "startDate": "2027-01-03",
+        "endDate": "2027-01-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 411,
+        "tourId": 1,
+        "startDate": "2027-01-04",
+        "endDate": "2027-01-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 412,
+        "tourId": 1,
+        "startDate": "2027-01-05",
+        "endDate": "2027-01-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 413,
+        "tourId": 1,
+        "startDate": "2027-01-06",
+        "endDate": "2027-01-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 414,
+        "tourId": 1,
+        "startDate": "2027-01-07",
+        "endDate": "2027-01-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 415,
+        "tourId": 1,
+        "startDate": "2027-01-08",
+        "endDate": "2027-01-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 416,
+        "tourId": 1,
+        "startDate": "2027-01-09",
+        "endDate": "2027-01-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 417,
+        "tourId": 1,
+        "startDate": "2027-01-10",
+        "endDate": "2027-01-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 418,
+        "tourId": 1,
+        "startDate": "2027-01-11",
+        "endDate": "2027-01-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 419,
+        "tourId": 1,
+        "startDate": "2027-01-12",
+        "endDate": "2027-01-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 420,
+        "tourId": 1,
+        "startDate": "2027-01-13",
+        "endDate": "2027-01-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 421,
+        "tourId": 1,
+        "startDate": "2027-01-14",
+        "endDate": "2027-01-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 422,
+        "tourId": 1,
+        "startDate": "2027-01-15",
+        "endDate": "2027-01-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 423,
+        "tourId": 1,
+        "startDate": "2027-01-16",
+        "endDate": "2027-01-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 424,
+        "tourId": 1,
+        "startDate": "2027-01-17",
+        "endDate": "2027-01-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 425,
+        "tourId": 1,
+        "startDate": "2027-01-18",
+        "endDate": "2027-01-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 426,
+        "tourId": 1,
+        "startDate": "2027-01-19",
+        "endDate": "2027-01-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 427,
+        "tourId": 1,
+        "startDate": "2027-01-20",
+        "endDate": "2027-01-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 428,
+        "tourId": 1,
+        "startDate": "2027-01-21",
+        "endDate": "2027-01-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 429,
+        "tourId": 1,
+        "startDate": "2027-01-22",
+        "endDate": "2027-01-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 430,
+        "tourId": 1,
+        "startDate": "2027-01-23",
+        "endDate": "2027-01-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 431,
+        "tourId": 1,
+        "startDate": "2027-01-24",
+        "endDate": "2027-01-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 432,
+        "tourId": 1,
+        "startDate": "2027-01-25",
+        "endDate": "2027-01-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 433,
+        "tourId": 1,
+        "startDate": "2027-01-26",
+        "endDate": "2027-01-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 434,
+        "tourId": 1,
+        "startDate": "2027-01-27",
+        "endDate": "2027-01-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 435,
+        "tourId": 1,
+        "startDate": "2027-01-28",
+        "endDate": "2027-01-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 436,
+        "tourId": 1,
+        "startDate": "2027-01-29",
+        "endDate": "2027-01-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 437,
+        "tourId": 1,
+        "startDate": "2027-01-30",
+        "endDate": "2027-01-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 438,
+        "tourId": 1,
+        "startDate": "2027-01-31",
+        "endDate": "2027-01-31",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 439,
+        "tourId": 1,
+        "startDate": "2027-02-01",
+        "endDate": "2027-02-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 440,
+        "tourId": 1,
+        "startDate": "2027-02-02",
+        "endDate": "2027-02-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 441,
+        "tourId": 1,
+        "startDate": "2027-02-03",
+        "endDate": "2027-02-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 442,
+        "tourId": 1,
+        "startDate": "2027-02-04",
+        "endDate": "2027-02-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 443,
+        "tourId": 1,
+        "startDate": "2027-02-05",
+        "endDate": "2027-02-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 444,
+        "tourId": 1,
+        "startDate": "2027-02-06",
+        "endDate": "2027-02-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 445,
+        "tourId": 1,
+        "startDate": "2027-02-07",
+        "endDate": "2027-02-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 446,
+        "tourId": 1,
+        "startDate": "2027-02-08",
+        "endDate": "2027-02-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 447,
+        "tourId": 1,
+        "startDate": "2027-02-09",
+        "endDate": "2027-02-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 448,
+        "tourId": 1,
+        "startDate": "2027-02-10",
+        "endDate": "2027-02-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 449,
+        "tourId": 1,
+        "startDate": "2027-02-11",
+        "endDate": "2027-02-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 450,
+        "tourId": 1,
+        "startDate": "2027-02-12",
+        "endDate": "2027-02-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 451,
+        "tourId": 1,
+        "startDate": "2027-02-13",
+        "endDate": "2027-02-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 452,
+        "tourId": 1,
+        "startDate": "2027-02-14",
+        "endDate": "2027-02-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 453,
+        "tourId": 1,
+        "startDate": "2027-02-15",
+        "endDate": "2027-02-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 454,
+        "tourId": 1,
+        "startDate": "2027-02-16",
+        "endDate": "2027-02-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 455,
+        "tourId": 1,
+        "startDate": "2027-02-17",
+        "endDate": "2027-02-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 456,
+        "tourId": 1,
+        "startDate": "2027-02-18",
+        "endDate": "2027-02-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 457,
+        "tourId": 1,
+        "startDate": "2027-02-19",
+        "endDate": "2027-02-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 458,
+        "tourId": 1,
+        "startDate": "2027-02-20",
+        "endDate": "2027-02-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 459,
+        "tourId": 1,
+        "startDate": "2027-02-21",
+        "endDate": "2027-02-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 460,
+        "tourId": 1,
+        "startDate": "2027-02-22",
+        "endDate": "2027-02-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 461,
+        "tourId": 1,
+        "startDate": "2027-02-23",
+        "endDate": "2027-02-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 462,
+        "tourId": 1,
+        "startDate": "2027-02-24",
+        "endDate": "2027-02-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 463,
+        "tourId": 1,
+        "startDate": "2027-02-25",
+        "endDate": "2027-02-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 464,
+        "tourId": 1,
+        "startDate": "2027-02-26",
+        "endDate": "2027-02-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 465,
+        "tourId": 1,
+        "startDate": "2027-02-27",
+        "endDate": "2027-02-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 466,
+        "tourId": 1,
+        "startDate": "2027-02-28",
+        "endDate": "2027-02-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 467,
+        "tourId": 1,
+        "startDate": "2027-03-01",
+        "endDate": "2027-03-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 468,
+        "tourId": 1,
+        "startDate": "2027-03-02",
+        "endDate": "2027-03-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 469,
+        "tourId": 1,
+        "startDate": "2027-03-03",
+        "endDate": "2027-03-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 470,
+        "tourId": 1,
+        "startDate": "2027-03-04",
+        "endDate": "2027-03-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 471,
+        "tourId": 1,
+        "startDate": "2027-03-05",
+        "endDate": "2027-03-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 472,
+        "tourId": 1,
+        "startDate": "2027-03-06",
+        "endDate": "2027-03-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 473,
+        "tourId": 1,
+        "startDate": "2027-03-07",
+        "endDate": "2027-03-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 474,
+        "tourId": 1,
+        "startDate": "2027-03-08",
+        "endDate": "2027-03-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 475,
+        "tourId": 1,
+        "startDate": "2027-03-09",
+        "endDate": "2027-03-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 476,
+        "tourId": 1,
+        "startDate": "2027-03-10",
+        "endDate": "2027-03-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 477,
+        "tourId": 1,
+        "startDate": "2027-03-11",
+        "endDate": "2027-03-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 478,
+        "tourId": 1,
+        "startDate": "2027-03-12",
+        "endDate": "2027-03-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 479,
+        "tourId": 1,
+        "startDate": "2027-03-13",
+        "endDate": "2027-03-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 480,
+        "tourId": 1,
+        "startDate": "2027-03-14",
+        "endDate": "2027-03-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 481,
+        "tourId": 1,
+        "startDate": "2027-03-15",
+        "endDate": "2027-03-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 482,
+        "tourId": 1,
+        "startDate": "2027-03-16",
+        "endDate": "2027-03-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 483,
+        "tourId": 1,
+        "startDate": "2027-03-17",
+        "endDate": "2027-03-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 484,
+        "tourId": 1,
+        "startDate": "2027-03-18",
+        "endDate": "2027-03-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 485,
+        "tourId": 1,
+        "startDate": "2027-03-19",
+        "endDate": "2027-03-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 486,
+        "tourId": 1,
+        "startDate": "2027-03-20",
+        "endDate": "2027-03-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 487,
+        "tourId": 1,
+        "startDate": "2027-03-21",
+        "endDate": "2027-03-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 488,
+        "tourId": 1,
+        "startDate": "2027-03-22",
+        "endDate": "2027-03-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 489,
+        "tourId": 1,
+        "startDate": "2027-03-23",
+        "endDate": "2027-03-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 490,
+        "tourId": 1,
+        "startDate": "2027-03-24",
+        "endDate": "2027-03-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 491,
+        "tourId": 1,
+        "startDate": "2027-03-25",
+        "endDate": "2027-03-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 492,
+        "tourId": 1,
+        "startDate": "2027-03-26",
+        "endDate": "2027-03-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 493,
+        "tourId": 1,
+        "startDate": "2027-03-27",
+        "endDate": "2027-03-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 494,
+        "tourId": 1,
+        "startDate": "2027-03-28",
+        "endDate": "2027-03-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 495,
+        "tourId": 1,
+        "startDate": "2027-03-29",
+        "endDate": "2027-03-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 496,
+        "tourId": 1,
+        "startDate": "2027-03-30",
+        "endDate": "2027-03-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 497,
+        "tourId": 1,
+        "startDate": "2027-03-31",
+        "endDate": "2027-03-31",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 498,
+        "tourId": 1,
+        "startDate": "2027-04-01",
+        "endDate": "2027-04-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 499,
+        "tourId": 1,
+        "startDate": "2027-04-02",
+        "endDate": "2027-04-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 500,
+        "tourId": 1,
+        "startDate": "2027-04-03",
+        "endDate": "2027-04-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 501,
+        "tourId": 1,
+        "startDate": "2027-04-04",
+        "endDate": "2027-04-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 502,
+        "tourId": 1,
+        "startDate": "2027-04-05",
+        "endDate": "2027-04-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 503,
+        "tourId": 1,
+        "startDate": "2027-04-06",
+        "endDate": "2027-04-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 504,
+        "tourId": 1,
+        "startDate": "2027-04-07",
+        "endDate": "2027-04-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 505,
+        "tourId": 1,
+        "startDate": "2027-04-08",
+        "endDate": "2027-04-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 506,
+        "tourId": 1,
+        "startDate": "2027-04-09",
+        "endDate": "2027-04-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 507,
+        "tourId": 1,
+        "startDate": "2027-04-10",
+        "endDate": "2027-04-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 508,
+        "tourId": 1,
+        "startDate": "2027-04-11",
+        "endDate": "2027-04-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 20
+      },
+      {
+        "id": 509,
+        "tourId": 1,
+        "startDate": "2027-04-12",
+        "endDate": "2027-04-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 510,
+        "tourId": 1,
+        "startDate": "2027-04-13",
+        "endDate": "2027-04-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 6
+      },
+      {
+        "id": 511,
+        "tourId": 1,
+        "startDate": "2027-04-14",
+        "endDate": "2027-04-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 20
+      },
+      {
+        "id": 512,
+        "tourId": 1,
+        "startDate": "2027-04-15",
+        "endDate": "2027-04-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 513,
+        "tourId": 1,
+        "startDate": "2027-04-16",
+        "endDate": "2027-04-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 514,
+        "tourId": 1,
+        "startDate": "2027-04-17",
+        "endDate": "2027-04-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 515,
+        "tourId": 1,
+        "startDate": "2027-04-18",
+        "endDate": "2027-04-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 516,
+        "tourId": 1,
+        "startDate": "2027-04-19",
+        "endDate": "2027-04-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 517,
+        "tourId": 1,
+        "startDate": "2027-04-20",
+        "endDate": "2027-04-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 518,
+        "tourId": 1,
+        "startDate": "2027-04-21",
+        "endDate": "2027-04-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 519,
+        "tourId": 1,
+        "startDate": "2027-04-22",
+        "endDate": "2027-04-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 520,
+        "tourId": 1,
+        "startDate": "2027-04-23",
+        "endDate": "2027-04-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 521,
+        "tourId": 1,
+        "startDate": "2027-04-24",
+        "endDate": "2027-04-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 522,
+        "tourId": 1,
+        "startDate": "2027-04-25",
+        "endDate": "2027-04-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 523,
+        "tourId": 1,
+        "startDate": "2027-04-26",
+        "endDate": "2027-04-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 524,
+        "tourId": 1,
+        "startDate": "2027-04-27",
+        "endDate": "2027-04-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 525,
+        "tourId": 1,
+        "startDate": "2027-04-28",
+        "endDate": "2027-04-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 526,
+        "tourId": 1,
+        "startDate": "2027-04-29",
+        "endDate": "2027-04-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 527,
+        "tourId": 1,
+        "startDate": "2027-04-30",
+        "endDate": "2027-04-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 530,
+        "tourId": 1,
+        "startDate": "2027-05-03",
+        "endDate": "2027-05-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 531,
+        "tourId": 1,
+        "startDate": "2027-05-04",
+        "endDate": "2027-05-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 532,
+        "tourId": 1,
+        "startDate": "2027-05-05",
+        "endDate": "2027-05-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 533,
+        "tourId": 1,
+        "startDate": "2027-05-06",
+        "endDate": "2027-05-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 534,
+        "tourId": 1,
+        "startDate": "2027-05-07",
+        "endDate": "2027-05-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 535,
+        "tourId": 1,
+        "startDate": "2027-05-08",
+        "endDate": "2027-05-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 536,
+        "tourId": 1,
+        "startDate": "2027-05-09",
+        "endDate": "2027-05-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 537,
+        "tourId": 1,
+        "startDate": "2027-05-10",
+        "endDate": "2027-05-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 538,
+        "tourId": 1,
+        "startDate": "2027-05-11",
+        "endDate": "2027-05-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 539,
+        "tourId": 1,
+        "startDate": "2027-05-12",
+        "endDate": "2027-05-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 540,
+        "tourId": 1,
+        "startDate": "2027-05-13",
+        "endDate": "2027-05-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 541,
+        "tourId": 1,
+        "startDate": "2027-05-14",
+        "endDate": "2027-05-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 542,
+        "tourId": 1,
+        "startDate": "2027-05-15",
+        "endDate": "2027-05-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 543,
+        "tourId": 1,
+        "startDate": "2027-05-16",
+        "endDate": "2027-05-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 544,
+        "tourId": 1,
+        "startDate": "2027-05-17",
+        "endDate": "2027-05-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 545,
+        "tourId": 1,
+        "startDate": "2027-05-18",
+        "endDate": "2027-05-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 546,
+        "tourId": 1,
+        "startDate": "2027-05-19",
+        "endDate": "2027-05-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 547,
+        "tourId": 1,
+        "startDate": "2027-05-20",
+        "endDate": "2027-05-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 548,
+        "tourId": 1,
+        "startDate": "2027-05-21",
+        "endDate": "2027-05-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 549,
+        "tourId": 1,
+        "startDate": "2027-05-22",
+        "endDate": "2027-05-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 550,
+        "tourId": 1,
+        "startDate": "2027-05-23",
+        "endDate": "2027-05-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 551,
+        "tourId": 1,
+        "startDate": "2027-05-24",
+        "endDate": "2027-05-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 552,
+        "tourId": 1,
+        "startDate": "2027-05-25",
+        "endDate": "2027-05-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 553,
+        "tourId": 1,
+        "startDate": "2027-05-26",
+        "endDate": "2027-05-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 554,
+        "tourId": 1,
+        "startDate": "2027-05-27",
+        "endDate": "2027-05-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 555,
+        "tourId": 1,
+        "startDate": "2027-05-28",
+        "endDate": "2027-05-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 556,
+        "tourId": 1,
+        "startDate": "2027-05-29",
+        "endDate": "2027-05-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 557,
+        "tourId": 1,
+        "startDate": "2027-05-30",
+        "endDate": "2027-05-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 558,
+        "tourId": 1,
+        "startDate": "2027-05-31",
+        "endDate": "2027-05-31",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 559,
+        "tourId": 1,
+        "startDate": "2027-06-01",
+        "endDate": "2027-06-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 560,
+        "tourId": 1,
+        "startDate": "2027-06-02",
+        "endDate": "2027-06-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 561,
+        "tourId": 1,
+        "startDate": "2027-06-03",
+        "endDate": "2027-06-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 562,
+        "tourId": 1,
+        "startDate": "2027-06-04",
+        "endDate": "2027-06-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 563,
+        "tourId": 1,
+        "startDate": "2027-06-05",
+        "endDate": "2027-06-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 564,
+        "tourId": 1,
+        "startDate": "2027-06-06",
+        "endDate": "2027-06-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 565,
+        "tourId": 1,
+        "startDate": "2027-06-07",
+        "endDate": "2027-06-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 566,
+        "tourId": 1,
+        "startDate": "2027-06-08",
+        "endDate": "2027-06-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 567,
+        "tourId": 1,
+        "startDate": "2027-06-09",
+        "endDate": "2027-06-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 568,
+        "tourId": 1,
+        "startDate": "2027-06-10",
+        "endDate": "2027-06-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 569,
+        "tourId": 1,
+        "startDate": "2027-06-11",
+        "endDate": "2027-06-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 570,
+        "tourId": 1,
+        "startDate": "2027-06-12",
+        "endDate": "2027-06-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 571,
+        "tourId": 1,
+        "startDate": "2027-06-13",
+        "endDate": "2027-06-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 572,
+        "tourId": 1,
+        "startDate": "2027-06-14",
+        "endDate": "2027-06-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 573,
+        "tourId": 1,
+        "startDate": "2027-06-15",
+        "endDate": "2027-06-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 574,
+        "tourId": 1,
+        "startDate": "2027-06-16",
+        "endDate": "2027-06-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 575,
+        "tourId": 1,
+        "startDate": "2027-06-17",
+        "endDate": "2027-06-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 576,
+        "tourId": 1,
+        "startDate": "2027-06-18",
+        "endDate": "2027-06-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 577,
+        "tourId": 1,
+        "startDate": "2027-06-19",
+        "endDate": "2027-06-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 578,
+        "tourId": 1,
+        "startDate": "2027-06-20",
+        "endDate": "2027-06-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 579,
+        "tourId": 1,
+        "startDate": "2027-06-21",
+        "endDate": "2027-06-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 580,
+        "tourId": 1,
+        "startDate": "2027-06-22",
+        "endDate": "2027-06-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 581,
+        "tourId": 1,
+        "startDate": "2027-06-23",
+        "endDate": "2027-06-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 582,
+        "tourId": 1,
+        "startDate": "2027-06-24",
+        "endDate": "2027-06-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 583,
+        "tourId": 1,
+        "startDate": "2027-06-25",
+        "endDate": "2027-06-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 584,
+        "tourId": 1,
+        "startDate": "2027-06-26",
+        "endDate": "2027-06-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 585,
+        "tourId": 1,
+        "startDate": "2027-06-27",
+        "endDate": "2027-06-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 586,
+        "tourId": 1,
+        "startDate": "2027-06-28",
+        "endDate": "2027-06-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 587,
+        "tourId": 1,
+        "startDate": "2027-06-29",
+        "endDate": "2027-06-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 588,
+        "tourId": 1,
+        "startDate": "2027-06-30",
+        "endDate": "2027-06-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 589,
+        "tourId": 1,
+        "startDate": "2026-03-01",
+        "endDate": "2026-03-01",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 590,
+        "tourId": 1,
+        "startDate": "2026-03-02",
+        "endDate": "2026-03-02",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 591,
+        "tourId": 1,
+        "startDate": "2026-03-03",
+        "endDate": "2026-03-03",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 592,
+        "tourId": 1,
+        "startDate": "2026-03-04",
+        "endDate": "2026-03-04",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 106,
+        "tourId": 1,
+        "startDate": "2026-03-05",
+        "endDate": "2026-03-05",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 107,
+        "tourId": 1,
+        "startDate": "2026-03-06",
+        "endDate": "2026-03-06",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 108,
+        "tourId": 1,
+        "startDate": "2026-03-07",
+        "endDate": "2026-03-07",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 109,
+        "tourId": 1,
+        "startDate": "2026-03-08",
+        "endDate": "2026-03-08",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 110,
+        "tourId": 1,
+        "startDate": "2026-03-09",
+        "endDate": "2026-03-09",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 111,
+        "tourId": 1,
+        "startDate": "2026-03-10",
+        "endDate": "2026-03-10",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 112,
+        "tourId": 1,
+        "startDate": "2026-03-11",
+        "endDate": "2026-03-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 113,
+        "tourId": 1,
+        "startDate": "2026-03-12",
+        "endDate": "2026-03-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 114,
+        "tourId": 1,
+        "startDate": "2026-03-13",
+        "endDate": "2026-03-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 115,
+        "tourId": 1,
+        "startDate": "2026-03-14",
+        "endDate": "2026-03-14",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 116,
+        "tourId": 1,
+        "startDate": "2026-03-15",
+        "endDate": "2026-03-15",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 117,
+        "tourId": 1,
+        "startDate": "2026-03-16",
+        "endDate": "2026-03-16",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 118,
+        "tourId": 1,
+        "startDate": "2026-03-17",
+        "endDate": "2026-03-17",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 119,
+        "tourId": 1,
+        "startDate": "2026-03-18",
+        "endDate": "2026-03-18",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 120,
+        "tourId": 1,
+        "startDate": "2026-03-19",
+        "endDate": "2026-03-19",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 121,
+        "tourId": 1,
+        "startDate": "2026-03-20",
+        "endDate": "2026-03-20",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 122,
+        "tourId": 1,
+        "startDate": "2026-03-21",
+        "endDate": "2026-03-21",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 123,
+        "tourId": 1,
+        "startDate": "2026-03-22",
+        "endDate": "2026-03-22",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 124,
+        "tourId": 1,
+        "startDate": "2026-03-23",
+        "endDate": "2026-03-23",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 125,
+        "tourId": 1,
+        "startDate": "2026-03-24",
+        "endDate": "2026-03-24",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 126,
+        "tourId": 1,
+        "startDate": "2026-03-25",
+        "endDate": "2026-03-25",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 127,
+        "tourId": 1,
+        "startDate": "2026-03-26",
+        "endDate": "2026-03-26",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 128,
+        "tourId": 1,
+        "startDate": "2026-03-27",
+        "endDate": "2026-03-27",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 129,
+        "tourId": 1,
+        "startDate": "2026-03-28",
+        "endDate": "2026-03-28",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 130,
+        "tourId": 1,
+        "startDate": "2026-03-29",
+        "endDate": "2026-03-29",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 131,
+        "tourId": 1,
+        "startDate": "2026-03-30",
+        "endDate": "2026-03-30",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 132,
+        "tourId": 1,
+        "startDate": "2026-03-31",
+        "endDate": "2026-03-31",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 10,
+        "currentBooked": 0
+      }
+    ],
+    "createdAt": "2026-03-01T05:05:17.105Z",
+    "updatedAt": "2026-03-15T14:48:22.278Z",
+    "childPrice": null,
+    "minPeople": 1,
+    "maxPeople": 10
+  },
+  {
+    "id": 2,
+    "tourCode": "15012026002",
+    "name": "ทัวร์เขื่อนเชี่ยวหลาน ล่องเรือ ชมหมอกตอนเช้า",
+    "description": "ล่องเรือชมวิวเขื่อนเชี่ยวหลาน น้ำสีเขียวมรกต พร้อมกิจกรรมพายเรือคายัค",
+    "tourType": "one_day",
+    "categories": [
+      "สายธรรมชาติ",
+      "สายชิล"
+    ],
+    "price": 1800,
+    "originalPrice": 2100,
+    "images": [
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+      "https://images.unsplash.com/photo-1504699894957-93f02c251aaa?w=800",
+      "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800",
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800",
+      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800"
+    ],
+    "highlights": [
+      "ล่องเรือชมวิว",
+      "พายเรือคายัค"
+    ],
+    "itinerary": [],
+    "transportation": "เรือหางยาว + รถตู้",
+    "duration": "8 ชั่วโมง",
+    "region": "ภาคใต้",
+    "province": "สุราษฎร์ธานี",
+    "accommodation": null,
+    "rating": 4.9,
+    "reviewCount": 95,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 201,
+        "tourId": 2,
+        "startDate": "2026-02-22",
+        "endDate": "2026-02-22",
+        "timeSlot": "08:00-16:00",
+        "roundName": "รอบปกติ",
+        "maxCapacity": 25,
+        "currentBooked": 11
+      }
+    ],
+    "createdAt": "2026-03-01T05:05:17.105Z",
+    "updatedAt": "2026-03-01T05:05:17.105Z"
+  },
+  {
+    "id": 3,
+    "tourCode": "20012026003",
+    "name": "แพ็คเกจเชียงใหม่ 3 วัน 2 คืน ชมดอยอินทนนท์",
+    "description": "เที่ยวเชียงใหม่ครบทั้งดอยวัดคาเฟ่ ที่พักสบายย่านนิมมาน",
+    "tourType": "package",
+    "categories": [
+      "สายธรรมชาติ",
+      "สายชิล"
+    ],
+    "price": 3900,
+    "originalPrice": 7500,
+    "images": [
+      "http://localhost:3000/uploads/tour-1772344317892-951047197.png",
+      "http://localhost:3000/uploads/tour-1772344320311-277579752.png",
+      "http://localhost:3000/uploads/tour-1772344329079-484288789.png",
+      "http://localhost:3000/uploads/tour-1772344331863-21477368.png",
+      "http://localhost:3000/uploads/tour-1772344334862-481150391.png"
+    ],
+    "highlights": [
+      "รวมที่พัก",
+      "รถรับส่งสนามบิน"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "time": "09:00-10:30",
+        "title": "เดินทางถึงเชียงใหม่และเติมพลังมื้อแรก",
+        "description": "รับรถเช่าหรือเดินทางเข้าตัวเมือง แวะทาน \"ข้าวซอยแม่สาย\" หรือ \"กาดมณี\" สัมผัสรสชาติอาหารเหนือต้นตำรับ"
+      },
+      {
+        "day": 1,
+        "time": "11:00-13:00",
+        "title": "เสพงานดีไซน์ที่ One Nimman (ย่านนิมมานเหมินท์)",
+        "description": "เดินชมโครงการที่มีสถาปัตยกรรมแบบก่ออิฐสีส้ม สไตล์ยุโรปผสมล้านนา มีจังหวะของโครงสร้างที่สวยงาม (Rhythm & Pattern) เหมาะกับการถ่ายภาพแนวสตรีทและสถาปัตยกรรม"
+      },
+      {
+        "time": "13:30-15:30",
+        "title": "พักผ่อนที่ คาเฟ่ Pluto (ย่านแม่โจ้)",
+        "description": "คาเฟ่ที่มีการออกแบบในธีมดาวเคราะห์ลึกลับ เน้นโทนสีเทาดำ การเล่นกับแสงธรรมชาติและเงา (Light & Shadow) เหมาะมากสำหรับการถ่ายภาพแนว Minimal หรือ Liminal Space ที่ดูแปลกตา",
+        "day": 1
+      }
+    ],
+    "transportation": "รถตู้ส่วนตัว",
+    "duration": "3 วัน 2 คืน",
+    "region": "ภาคเหนือ",
+    "province": "เชียงใหม่",
+    "accommodation": "โรงแรม 3 ดาว ย่านนิมมาน",
+    "rating": 4.7,
+    "reviewCount": 48,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 300,
+        "tourId": 3,
+        "startDate": "2026-03-07",
+        "endDate": "2026-03-09",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": -6
+      },
+      {
+        "id": 301,
+        "tourId": 3,
+        "startDate": "2026-03-08",
+        "endDate": "2026-03-10",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
+        "id": 302,
+        "tourId": 3,
+        "startDate": "2026-03-14",
+        "endDate": "2026-03-16",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
+        "id": 303,
+        "tourId": 3,
+        "startDate": "2026-03-15",
+        "endDate": "2026-03-17",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
+        "id": 304,
+        "tourId": 3,
+        "startDate": "2026-03-21",
+        "endDate": "2026-03-23",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
+        "id": 305,
+        "tourId": 3,
+        "startDate": "2026-03-22",
+        "endDate": "2026-03-24",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
+        "id": 306,
+        "tourId": 3,
+        "startDate": "2026-03-28",
+        "endDate": "2026-03-30",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      },
+      {
+        "id": 307,
+        "tourId": 3,
+        "startDate": "2026-03-29",
+        "endDate": "2026-03-31",
+        "timeSlot": "",
+        "roundName": "Private Group",
+        "maxCapacity": 6,
+        "currentBooked": 0
+      }
+    ],
+    "createdAt": "2026-03-01T05:05:17.105Z",
+    "updatedAt": "2026-03-02T06:59:31.629Z",
+    "childPrice": null,
+    "minPeople": 4,
+    "maxPeople": 6
+  },
+  {
+    "id": 4,
+    "tourCode": "25012026004",
+    "name": "เกาะพีพี ดำน้ำดูปะการัง เต็มวัน",
+    "description": "นั่งสปีดโบ๊ทไปเกาะพีพี ดำน้ำ 2 จุด พร้อมอาหารกลางวันบุฟเฟ่ต์",
+    "tourType": "one_day",
+    "categories": [
+      "สายกิจกรรม",
+      "สายธรรมชาติ"
+    ],
+    "price": 1200,
+    "originalPrice": null,
+    "images": [
+      "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800",
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
+      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800",
+      "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800",
+      "https://images.unsplash.com/photo-1518990034670-3eb04d6ea23b?w=800"
+    ],
+    "highlights": [
+      "ดำน้ำดูปะการัง",
+      "รวมอุปกรณ์ดำน้ำ"
+    ],
+    "itinerary": [],
+    "transportation": "สปีดโบ๊ท",
+    "duration": "8 ชั่วโมง",
+    "region": "ภาคใต้",
+    "province": "ภูเก็ต",
+    "accommodation": null,
+    "rating": 4.5,
+    "reviewCount": 65,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 400,
+        "tourId": 4,
+        "startDate": "2026-02-23",
+        "endDate": "2026-02-23",
+        "timeSlot": "10:00-18:00",
+        "roundName": "รอบทะเลสวย",
+        "maxCapacity": 18,
+        "currentBooked": 0
+      },
+      {
+        "id": 401,
+        "tourId": 4,
+        "startDate": "2026-02-25",
+        "endDate": "2026-02-25",
+        "timeSlot": "10:00-18:00",
+        "roundName": "รอบพิเศษ",
+        "maxCapacity": 18,
+        "currentBooked": 0
+      }
+    ],
+    "createdAt": "2026-03-01T05:05:17.105Z",
+    "updatedAt": "2026-03-02T07:48:03.846Z",
+    "childPrice": null
+  },
+  {
+    "id": 5,
+    "tourCode": "ATV2026005",
+    "name": "ขับ ATV ตะลุยป่า ภูเก็ต",
+    "description": "ตลอดเส้นทางคุณจะได้สัมผัสความสวยงามที่ลงตัวระหว่างวิวท้องทะเลอันกว้างไกลและทิวเขาที่สลับซับซ้อน ให้คุณได้สูดอากาศบริสุทธิ์พร้อมความตื่นเต้นท้าทายในทุกโค้ง ไม่ว่าคุณจะเป็นมือใหม่หรือนักขับมือโปรก็สนุกได้อย่างมั่นใจ เพราะเรามีทีมครูฝึกผู้เชี่ยวชาญคอยดูแลอย่างใกล้ชิด ตั้งแต่การสอนใช้งานเบื้องต้นไปจนถึงการนำทางตลอดทริป เพื่อความปลอดภัยและประสบการณ์ที่ดีที่สุดของคุณ",
+    "tourType": "one_day",
+    "categories": [
+      "สายลุย",
+      "สายกิจกรรม",
+      "สายธรรมชาติ"
+    ],
+    "price": 1,
+    "originalPrice": 1,
+    "images": [
+      "http://localhost:3000/uploads/tour-1772341946989-783950595.png",
+      "http://localhost:3000/uploads/tour-1773304824599-645235724.png",
+      "http://localhost:3000/uploads/tour-1773304844762-236399908.png",
+      "http://localhost:3000/uploads/tour-1773304894669-433904524.png",
+      "http://localhost:3000/uploads/tour-1773304899510-835156623.png"
+    ],
+    "highlights": [
+      "ขับ ATV 1 ชั่วโมง",
+      "รวมอุปกรณ์ความปลอดภัย",
+      "ครูฝึกมืออาชีพ"
+    ],
+    "itinerary": [],
+    "transportation": "รถรับส่งในโซน",
+    "duration": "4 ชั่วโมง",
+    "region": "ภาคใต้",
+    "province": "ภูเก็ต",
+    "accommodation": null,
+    "rating": 4.8,
+    "reviewCount": 42,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 500,
+        "tourId": 5,
+        "startDate": "2026-03-01",
+        "endDate": "2026-03-01",
+        "timeSlot": "08:00-12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 501,
+        "tourId": 5,
+        "startDate": "2026-03-01",
+        "endDate": "2026-03-01",
+        "timeSlot": "13:00-17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 502,
+        "tourId": 5,
+        "startDate": "2026-03-07",
+        "endDate": "2026-03-07",
+        "timeSlot": "08:00-12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 503,
+        "tourId": 5,
+        "startDate": "2026-03-07",
+        "endDate": "2026-03-07",
+        "timeSlot": "13:00-17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 504,
+        "tourId": 5,
+        "startDate": "2026-03-08",
+        "endDate": "2026-03-08",
+        "timeSlot": "08:00-12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 2
+      },
+      {
+        "id": 505,
+        "tourId": 5,
+        "startDate": "2026-03-08",
+        "endDate": "2026-03-08",
+        "timeSlot": "13:00-17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 506,
+        "tourId": 5,
+        "startDate": "2026-03-14",
+        "endDate": "2026-03-14",
+        "timeSlot": "08:00-12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 10
+      },
+      {
+        "id": 507,
+        "tourId": 5,
+        "startDate": "2026-03-14",
+        "endDate": "2026-03-14",
+        "timeSlot": "13:00-17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 8
+      },
+      {
+        "id": 508,
+        "tourId": 5,
+        "startDate": "2026-03-15",
+        "endDate": "2026-03-15",
+        "timeSlot": "08:00-12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 509,
+        "tourId": 5,
+        "startDate": "2026-03-15",
+        "endDate": "2026-03-15",
+        "timeSlot": "13:00-17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 10
+      },
+      {
+        "id": 510,
+        "tourId": 5,
+        "startDate": "2026-03-21",
+        "endDate": "2026-03-21",
+        "timeSlot": "08:00-12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 511,
+        "tourId": 5,
+        "startDate": "2026-03-21",
+        "endDate": "2026-03-21",
+        "timeSlot": "13:00-17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 512,
+        "tourId": 5,
+        "startDate": "2026-03-22",
+        "endDate": "2026-03-22",
+        "timeSlot": "08:00-12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 513,
+        "tourId": 5,
+        "startDate": "2026-03-22",
+        "endDate": "2026-03-22",
+        "timeSlot": "13:00-17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 514,
+        "tourId": 5,
+        "startDate": "2026-03-28",
+        "endDate": "2026-03-28",
+        "timeSlot": "08:00-12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 515,
+        "tourId": 5,
+        "startDate": "2026-03-28",
+        "endDate": "2026-03-28",
+        "timeSlot": "13:00-17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 516,
+        "tourId": 5,
+        "startDate": "2026-03-29",
+        "endDate": "2026-03-29",
+        "timeSlot": "08:00-12:00",
+        "roundName": "รอบเช้า",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 517,
+        "tourId": 5,
+        "startDate": "2026-03-29",
+        "endDate": "2026-03-29",
+        "timeSlot": "13:00-17:00",
+        "roundName": "รอบบ่าย",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      }
+    ],
+    "createdAt": "2026-03-01T05:05:17.106Z",
+    "updatedAt": "2026-03-15T14:48:20.439Z",
+    "childPrice": 450
+  },
+  {
+    "id": 100,
+    "tourCode": "05032026006",
+    "name": "1",
+    "description": "1\n",
+    "tourType": "one_day",
+    "categories": [],
+    "price": 900,
+    "originalPrice": 1000,
+    "images": [],
+    "highlights": [],
+    "itinerary": [],
+    "transportation": "",
+    "duration": "1",
+    "region": "ภาคใต้",
+    "province": "1",
+    "accommodation": null,
+    "rating": 0,
+    "reviewCount": 0,
+    "isActive": true,
+    "schedules": [],
+    "createdAt": "2026-03-05T13:13:49.988Z",
+    "updatedAt": "2026-03-13T03:06:42.993Z",
+    "childPrice": null
+  },
+  {
+    "id": 101,
+    "tourCode": "05032026007",
+    "name": "1",
+    "description": "1",
+    "tourType": "package",
+    "categories": [],
+    "price": 1,
+    "originalPrice": null,
+    "images": [],
+    "highlights": [],
+    "itinerary": [],
+    "transportation": "",
+    "duration": "1",
+    "region": "ภาคใต้",
+    "province": "1",
+    "accommodation": "1\n",
+    "rating": 0,
+    "reviewCount": 0,
+    "isActive": true,
+    "schedules": [],
+    "createdAt": "2026-03-05T13:14:16.449Z",
+    "updatedAt": "2026-03-13T03:06:43.954Z",
+    "childPrice": null,
+    "minPeople": 1
+  },
+  {
+    "id": 102,
+    "tourCode": "11032026008",
+    "name": "ทัวร์หนุมาน",
+    "description": ".",
+    "tourType": "one_day",
+    "categories": [
+      "สายชิล",
+      "สายกิจกรรม",
+      "สายธรรมชาติ"
+    ],
+    "price": 255,
+    "childPrice": 128,
+    "minPeople": null,
+    "maxPeople": null,
+    "originalPrice": 300,
+    "images": [],
+    "highlights": [
+      "ยกเลิกฟรี",
+      "รวมที่พัก",
+      "มีรถรับส่ง",
+      "รถรับส่งสนามบิน",
+      "อาหารกลางวัน",
+      "เที่ยวเต็มวัน",
+      "มีไกด์นำเที่ยว"
+    ],
+    "itinerary": [],
+    "transportation": "",
+    "duration": "2 ชั่วโมง",
+    "region": "ภาคใต้",
+    "province": "สงขลา",
+    "accommodation": null,
+    "rating": 0,
+    "reviewCount": 0,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 10201,
+        "tourId": 102,
+        "startDate": "2026-03-11",
+        "endDate": "2026-03-11",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 10202,
+        "tourId": 102,
+        "startDate": "2026-03-12",
+        "endDate": "2026-03-12",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": 0
+      },
+      {
+        "id": 10203,
+        "tourId": 102,
+        "startDate": "2026-03-13",
+        "endDate": "2026-03-13",
+        "timeSlot": null,
+        "roundName": null,
+        "maxCapacity": 20,
+        "currentBooked": -2
+      }
+    ],
+    "createdAt": "2026-03-11T03:42:10.746Z",
+    "updatedAt": "2026-03-13T03:06:46.256Z"
+  },
+  {
+    "id": 103,
+    "tourCode": "11032026009",
+    "name": "ss",
+    "description": "ss",
+    "tourType": "package",
+    "categories": [
+      "สายธรรมชาติ"
+    ],
+    "price": 180,
+    "childPrice": null,
+    "minPeople": 4,
+    "maxPeople": 6,
+    "originalPrice": 200,
+    "images": [
+      "http://localhost:3000/uploads/tour-1773201330124-390049083.png"
+    ],
+    "highlights": [
+      "ยกเลิกฟรี"
+    ],
+    "itinerary": [],
+    "transportation": "",
+    "duration": "4 ชั่วโมง",
+    "region": "ภาคใต้",
+    "province": "สงขลา",
+    "accommodation": "โรงแรม",
+    "rating": 0,
+    "reviewCount": 0,
+    "isActive": true,
+    "schedules": [
+      {
+        "id": 10301,
+        "tourId": 103,
+        "startDate": "2026-04-01",
+        "endDate": "2026-04-03",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10302,
+        "tourId": 103,
+        "startDate": "2026-04-02",
+        "endDate": "2026-04-04",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10303,
+        "tourId": 103,
+        "startDate": "2026-04-03",
+        "endDate": "2026-04-05",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10304,
+        "tourId": 103,
+        "startDate": "2026-04-04",
+        "endDate": "2026-04-06",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10305,
+        "tourId": 103,
+        "startDate": "2026-04-05",
+        "endDate": "2026-04-07",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10306,
+        "tourId": 103,
+        "startDate": "2026-04-06",
+        "endDate": "2026-04-08",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": -10
+      },
+      {
+        "id": 10307,
+        "tourId": 103,
+        "startDate": "2026-04-07",
+        "endDate": "2026-04-09",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10308,
+        "tourId": 103,
+        "startDate": "2026-04-08",
+        "endDate": "2026-04-10",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10309,
+        "tourId": 103,
+        "startDate": "2026-04-09",
+        "endDate": "2026-04-11",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      },
+      {
+        "id": 10310,
+        "tourId": 103,
+        "startDate": "2026-04-10",
+        "endDate": "2026-04-12",
+        "timeSlot": null,
+        "roundName": "Private Group",
+        "maxCapacity": 10,
+        "currentBooked": 0
+      }
+    ],
+    "createdAt": "2026-03-11T03:58:18.293Z",
+    "updatedAt": "2026-03-13T03:06:45.395Z"
+  }
+]
