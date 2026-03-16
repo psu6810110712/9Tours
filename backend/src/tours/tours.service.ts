@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
-import { In, Repository } from 'typeorm';
+import { In, QueryFailedError, Repository } from 'typeorm';
 import { BehaviorEvent } from '../analytics/entities/behavior-event.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { CreateTourDto } from './dto/create-tour.dto';
@@ -67,6 +67,15 @@ export class ToursService implements OnModuleInit {
     await this.refreshCache();
   }
 
+  private isMissingSchemaError(error: unknown) {
+    if (!(error instanceof QueryFailedError)) {
+      return false;
+    }
+
+    const driverError = error.driverError as { code?: string } | undefined;
+    return driverError?.code === '42P01';
+  }
+
   private isJsonImportEnabled() {
     return String(process.env.ENABLE_TOUR_JSON_IMPORT ?? '').trim().toLowerCase() === 'true';
   }
@@ -81,10 +90,18 @@ export class ToursService implements OnModuleInit {
   }
 
   private async refreshCache() {
-    const tours = await this.toursRepo.find({
-      relations: ['schedules'],
-      order: { id: 'ASC' },
-    });
+    let tours: Tour[] = [];
+
+    try {
+      tours = await this.toursRepo.find({
+        relations: ['schedules'],
+        order: { id: 'ASC' },
+      });
+    } catch (error) {
+      if (!this.isMissingSchemaError(error)) {
+        throw error;
+      }
+    }
 
     this.cachedTours = tours.map((tour) => this.toTourRecord(tour));
   }
