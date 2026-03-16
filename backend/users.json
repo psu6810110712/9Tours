@@ -1,0 +1,56 @@
+[
+  {
+    "id": "21960fe9-73b3-4c16-927a-73f00b8575f0",
+    "email": "admin@9tours.com",
+    "role": "admin",
+    "name": "Admin 9Tours"
+  },
+  {
+    "id": "454b6036-3689-4623-bdbf-babbe2a2402d",
+    "email": "somchai@test.com",
+    "role": "customer",
+    "name": "สมชาย ใจดี"
+  },
+  {
+    "id": "5027cc32-e1da-47bf-acfe-c2f0567a67ff",
+    "email": "somying@test.com",
+    "role": "customer",
+    "name": "สมหญิง จริงใจ"
+  },
+  {
+    "id": "d998cf16-640d-408e-bef9-62ae4a33a7aa",
+    "email": "wichai@test.com",
+    "role": "customer",
+    "name": "วิชัย มีสุข"
+  },
+  {
+    "id": "818ec559-8c21-48b8-b29a-41686524e115",
+    "email": "napa@test.com",
+    "role": "customer",
+    "name": "นภา สวัสดิ์"
+  },
+  {
+    "id": "49522422-49d0-4d9e-b9f9-b5b2e936109a",
+    "email": "tana@test.com",
+    "role": "customer",
+    "name": "ธนา พัฒนา"
+  },
+  {
+    "id": "81a8b9a4-7eb0-45a8-8308-52e2f1fea9ae",
+    "email": "manee@test.com",
+    "role": "customer",
+    "name": "มณี รักษ์"
+  },
+  {
+    "id": "0edeb01d-712d-4f6c-ad02-1131e5d4b23b",
+    "email": "prasert@test.com",
+    "role": "customer",
+    "name": "ประเสริฐ ศรีสุข"
+  },
+  {
+    "id": "c5a37c03-aa40-4321-952b-fc1c85e12d1e",
+    "email": "kanya@test.com",
+    "role": "customer",
+    "name": "กัญญา ดี"
+  }
+]

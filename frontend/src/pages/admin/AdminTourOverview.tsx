@@ -12,6 +12,17 @@ export default function AdminTourOverview() {
     const [selectedSchedule, setSelectedSchedule] = useState<{ schedule: TourScheduleOverview, tourName: string } | null>(null)
     const [scheduleBookings, setScheduleBookings] = useState<Booking[]>([])
     const [loadingBookings, setLoadingBookings] = useState(false)
+    const [expandedTours, setExpandedTours] = useState<Set<number>>(new Set())
+    const [showPastSchedules, setShowPastSchedules] = useState(false)
+
+    const toggleTour = (tourId: number) => {
+        setExpandedTours(prev => {
+            const next = new Set(prev)
+            if (next.has(tourId)) next.delete(tourId)
+            else next.add(tourId)
+            return next
+        })
+    }
     useEffect(() => {
         const load = async () => {
             try {
@@ -151,6 +162,15 @@ export default function AdminTourOverview() {
                         {f === 'all' ? 'ทั้งหมด' : f === 'available' ? '🟢 มีที่ว่าง' : '🔴 เต็มแล้ว'}
                     </button>
                 ))}
+                <button
+                    onClick={() => setShowPastSchedules(!showPastSchedules)}
+                    className={`ml-auto px-4 py-2 rounded-xl text-sm font-medium transition-colors border ${showPastSchedules 
+                        ? 'bg-gray-800 text-white border-gray-800' 
+                        : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                    }`}
+                >
+                    {showPastSchedules ? '👁️ แสดงรอบที่ผ่านไปแล้ว' : '🙈 ซ่อนรอบที่ผ่านไปแล้ว'}
+                </button>
             </div>
 
             {/* Tour Cards */}
@@ -162,9 +182,15 @@ export default function AdminTourOverview() {
                 <div className="space-y-4">
                     {filtered.map((tour) => (
                         <div key={tour.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                            {/* Tour Header */}
-                            <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-50">
-                                {tour.images[0] ? (
+                                {/* Tour Header */}
+                                <div
+                                    onClick={() => toggleTour(tour.id)}
+                                    className="flex items-center gap-4 px-6 py-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50/50 transition-colors"
+                                >
+                                    <div className={`transition-transform duration-300 ${expandedTours.has(tour.id) ? 'rotate-90' : ''}`}>
+                                        <span className="text-gray-400 text-lg">▶</span>
+                                    </div>
+                                    {tour.images[0] ? (
                                     <img
                                         src={tour.images[0]}
                                         alt={tour.name}
@@ -196,26 +222,45 @@ export default function AdminTourOverview() {
                             </div>
 
                             {/* Schedules */}
-                            {tour.schedules.length === 0 ? (
-                                <p className="text-center text-gray-400 text-sm py-4">ไม่มีรอบในระบบ</p>
-                            ) : (
-                                <div className="divide-y divide-gray-50">
-                                    {tour.schedules.map((sc) => {
-                                        const colors = getOccupancyColor(sc.occupancyPercent)
-                                        return (
-                                            <div
-                                                key={sc.id}
-                                                onClick={() => handleScheduleClick(sc, tour.name)}
-                                                className="px-6 py-3 flex items-center gap-4 cursor-pointer hover:bg-yellow-50/50 transition-colors"
-                                            >
-                                                <div className="w-44 flex-shrink-0">
-                                                    <p className="text-sm font-medium text-gray-700">{sc.roundName || `รอบ ${sc.id}`}</p>
-                                                    <p className="text-xs text-gray-400">
-                                                        {formatDate(sc.startDate)}
-                                                        {sc.startDate !== sc.endDate ? ` – ${formatDate(sc.endDate)}` : ''}
-                                                        {sc.timeSlot ? ` • ${sc.timeSlot}` : ''}
-                                                    </p>
-                                                </div>
+                            {expandedTours.has(tour.id) && (() => {
+                                const now = new Date();
+                                const displaySchedules = tour.schedules.filter(s => {
+                                    if (showPastSchedules) return true;
+                                    const endDate = new Date(s.endDate);
+                                    // Set time to end of day for safer comparison
+                                    endDate.setHours(23, 59, 59, 999);
+                                    return endDate >= now;
+                                });
+
+                                return displaySchedules.length === 0 ? (
+                                    <p className="text-center text-gray-400 text-sm py-4 italic">
+                                        {showPastSchedules ? 'ไม่มีรอบในระบบ' : 'ไม่มีรอบที่กำลังจะมาถึง (กรุณากดแสดงรอบที่ผ่านไปแล้วเพื่อดูประวัติ)'}
+                                    </p>
+                                ) : (
+                                    <div className="divide-y divide-gray-50 bg-gray-50/30">
+                                        {displaySchedules.map((sc) => {
+                                            const colors = getOccupancyColor(sc.occupancyPercent)
+                                            const isPast = new Date(sc.endDate).setHours(23, 59, 59, 999) < now.getTime();
+                                            
+                                            return (
+                                                <div
+                                                    key={sc.id}
+                                                    onClick={() => handleScheduleClick(sc, tour.name)}
+                                                    className={`px-6 py-3 flex items-center gap-4 cursor-pointer hover:bg-yellow-50/50 transition-colors ${isPast ? 'opacity-60 grayscale-[0.2]' : ''}`}
+                                                >
+                                                    <div className="w-44 flex-shrink-0">
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-sm font-medium text-gray-700">{sc.roundName || `รอบ ${sc.id}`}</p>
+                                                            {isPast && (
+                                                                <span className="px-1.5 py-0.5 bg-gray-200 text-gray-600 text-[10px] font-bold rounded uppercase">🏁 จบแล้ว</span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-gray-400">
+                                                            {formatDate(sc.startDate)}
+                                                            {sc.startDate !== sc.endDate ? ` – ${formatDate(sc.endDate)}` : ''}
+                                                            {sc.timeSlot ? ` • ${sc.timeSlot}` : ''}
+                                                        </p>
+                                                    </div>
 
                                                 {/* Occupancy Bar */}
                                                 <div className="flex-1">
@@ -244,8 +289,9 @@ export default function AdminTourOverview() {
                                             </div>
                                         )
                                     })}
-                                </div>
-                            )}
+                                    </div>
+                                )
+                            })()}
                         </div>
                     ))}
                 </div>

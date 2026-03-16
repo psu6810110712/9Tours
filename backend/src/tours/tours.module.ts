@@ -6,9 +6,10 @@ import { Tour } from './entities/tour.entity';
 import { TourSchedule } from './entities/tour-schedule.entity';
 import { ToursSeederService } from './tours.seeder';
 import { BehaviorEvent } from '../analytics/entities/behavior-event.entity';
+import { Booking } from '../bookings/entities/booking.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Tour, TourSchedule, BehaviorEvent])],
+  imports: [TypeOrmModule.forFeature([Tour, TourSchedule, BehaviorEvent, Booking])],
   controllers: [ToursController],
   providers: [ToursService, ToursSeederService],
   exports: [ToursService], // ✅ เพิ่มเพื่อให้อนุญาตให้ Module อื่นเรียกใช้ ToursService ได้
