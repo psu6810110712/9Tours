@@ -41,13 +41,6 @@ const REGION_OPTIONS = [
 
 type ProvinceMetricKey = typeof PROVINCE_METRIC_OPTIONS[number]['key']
 
-function formatLocalDateInputValue(date: Date) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
 function formatMetricValue(metric: ProvinceMetricKey, value: number) {
   if (metric === 'views') return `${value.toLocaleString()} วิว`
   if (metric === 'bookings') return `${value.toLocaleString()} รายการจอง`
