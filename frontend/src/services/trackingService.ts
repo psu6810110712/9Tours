@@ -16,7 +16,6 @@ interface TrackingPayload {
 
 const TRACKING_SESSION_KEY = 'tracking_session_id'
 const ANONYMOUS_ID_KEY = 'anonymous_id'
-const TRACKING_CONSENT_KEY = 'pdpa_analytics_consent'
 const TRACKING_ENABLED = import.meta.env.VITE_TRACKING_ENABLED !== 'false'
 const TRACKING_ENDPOINT = `${API_BASE_URL}/analytics/events`
 
