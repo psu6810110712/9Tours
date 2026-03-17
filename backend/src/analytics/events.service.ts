@@ -21,6 +21,7 @@ const BLOCKED_METADATA_KEYS = new Set([
 
 interface EventRequestContext {
   userId?: string;
+  anonymousId?: string | null;
   ip?: string | null;
   userAgent?: string | null;
 }
@@ -60,13 +61,30 @@ export class EventsService {
     if (dto.eventType === 'page_view' && dto.tourId) {
       const tourView = new TourView();
       tourView.tourId = dto.tourId;
-      tourView.userId = null as never;
+      const parsedUserId = context.userId ? parseInt(context.userId, 10) : null;
+      tourView.userId = Number.isNaN(parsedUserId) ? null : parsedUserId;
+      tourView.anonymousId = context.anonymousId || null;
       tourView.sessionId = dto.sessionId;
       tourView.browserInfo = this.normalizeUserAgent(context.userAgent) ?? '';
       await this.tourViewsRepo.save(tourView);
     }
 
     return { accepted: true as const };
+  }
+
+  async stitchAnonymousViews(userId: number, anonymousId: string): Promise<number> {
+    const result = await this.tourViewsRepo
+      .createQueryBuilder()
+      .update(TourView)
+      .set({
+        userId: userId,
+        anonymousId: null,
+      })
+      .where('anonymous_id = :anonymousId', { anonymousId })
+      .andWhere('user_id IS NULL')
+      .execute();
+
+    return result.affected || 0;
   }
 
   // PDPA: เก็บเฉพาะข้อมูลที่จำเป็น และตัดข้อมูลส่วนบุคคลที่ไม่ควรบันทึกออก
