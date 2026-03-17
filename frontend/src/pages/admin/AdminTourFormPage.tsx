@@ -263,7 +263,7 @@ export default function AdminTourFormPage() {
   const [festivalId, setFestivalId] = useState<number | null>(null)
 
   useEffect(() => {
-    festivalService.getAll().then(setFestivals).catch(() => {})
+    festivalService.getAll().then(setFestivals).catch(() => { })
   }, [])
 
   useEffect(() => {
