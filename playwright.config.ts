@@ -7,10 +7,10 @@ export default defineConfig({
   use: {
     trace: 'on-first-retry',
   },
-  webServer: [
+  webServer: process.env.CI ? undefined : [
     {
       command: 'npm --prefix backend run start:dev',
-      url: 'http://127.0.0.1:3000/',
+      url: 'http://127.0.0.1:3000/tours',
       reuseExistingServer: process.env.CI,
       timeout: 120_000,
     },
