@@ -207,11 +207,11 @@ async function seedReviews(dataSource: DataSource) {
         .getRawOne<{ avg: string; count: string }>();
 
       const avgRating = parseFloat(parseFloat(stats?.avg ?? '0').toFixed(2));
-      const reviewCount = parseInt(stats?.count ?? '0', 10);
+      const totalReviewCount = parseInt(stats?.count ?? '0', 10);
 
       await queryRunner.manager.update(Tour, tour.id, {
         rating: avgRating,
-        reviewCount,
+        reviewCount: totalReviewCount,
       });
 
       console.log(`✅ Tour ${tour.id}: ${tourReviewsCreated} reviews created, avg rating: ${avgRating}`);
