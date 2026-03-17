@@ -22,6 +22,7 @@ interface RegisterFormState {
   email: string
   phone: string
   password: string
+  confirmPassword: string
 }
 
 interface RegisterFormErrors {
@@ -30,6 +31,7 @@ interface RegisterFormErrors {
   email?: string
   phone?: string
   password?: string
+  confirmPassword?: string
   agree?: string
   form?: string
 }
@@ -40,6 +42,7 @@ const INITIAL_FORM: RegisterFormState = {
   email: '',
   phone: '',
   password: '',
+  confirmPassword: '',
 }
 
 function inputClass(error?: string) {
@@ -52,6 +55,8 @@ function inputClass(error?: string) {
 
 export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModalProps) {
   const [form, setForm] = useState<RegisterFormState>(INITIAL_FORM)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [agree, setAgree] = useState(false)
   const [errors, setErrors] = useState<RegisterFormErrors>({})
   const [loading, setLoading] = useState(false)
@@ -75,6 +80,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
     const nextErrors: RegisterFormErrors = {
       ...profileErrors,
       password: form.password.trim().length >= 8 ? undefined : 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร',
+      confirmPassword: form.password !== form.confirmPassword ? 'รหัสผ่านไม่ตรงกัน' : undefined,
       agree: agree ? undefined : 'กรุณายอมรับข้อกำหนดและนโยบายก่อนสมัครสมาชิก',
     }
 
@@ -212,16 +218,68 @@ export default function RegisterModal({ onClose, onSwitchToLogin }: RegisterModa
 
         <div>
           <label className="mb-2 block text-sm font-semibold text-gray-800">รหัสผ่าน</label>
-          <input
-            type="password"
-            value={form.password}
-            onChange={(event) => setField('password', event.target.value)}
-            placeholder="อย่างน้อย 8 ตัวอักษร"
-            required
-            minLength={8}
-            className={inputClass(errors.password)}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={form.password}
+              onChange={(event) => setField('password', event.target.value)}
+              placeholder="อย่างน้อย 8 ตัวอักษร"
+              required
+              minLength={8}
+              className={inputClass(errors.password)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+              aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+            >
+              {showPassword ? (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-4.803m5.596-3.856a3.375 3.375 0 11-4.753 4.753m4.753-4.753L3.596 3.596m16.807 16.807L3.596 3.596M9.172 9.172L21 21m-12-12l12 12" />
+                </svg>
+              )}
+            </button>
+          </div>
           {errors.password && <p className="mt-1.5 text-xs text-red-500">{errors.password}</p>}
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-gray-800">ยืนยันรหัสผ่าน</label>
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={form.confirmPassword}
+              onChange={(event) => setField('confirmPassword', event.target.value)}
+              placeholder="ระบุรหัสผ่านอีกครั้ง"
+              required
+              minLength={8}
+              className={inputClass(errors.confirmPassword)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+              aria-label={showConfirmPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+            >
+              {showConfirmPassword ? (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-4.803m5.596-3.856a3.375 3.375 0 11-4.753 4.753m4.753-4.753L3.596 3.596m16.807 16.807L3.596 3.596M9.172 9.172L21 21m-12-12l12 12" />
+                </svg>
+              )}
+            </button>
+          </div>
+          {errors.confirmPassword && <p className="mt-1.5 text-xs text-red-500">{errors.confirmPassword}</p>}
         </div>
 
         <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-100 bg-gray-50/80 px-4 py-3">
