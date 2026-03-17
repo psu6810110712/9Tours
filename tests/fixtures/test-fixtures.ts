@@ -1,12 +1,10 @@
 import { test as base } from '@playwright/test';
 import { LoginPage } from '../page-objects/LoginPage';
 import { DashboardPage } from '../page-objects/DashboardPage';
-import { TrackingPage } from '../page-objects/TrackingPage';
 
 type MyFixtures = {
   loginPage: LoginPage;
   dashboardPage: DashboardPage;
-  trackingPage: TrackingPage;
   authenticatedPage: void;
 };
 
@@ -16,9 +14,6 @@ export const test = base.extend<MyFixtures>({
   },
   dashboardPage: async ({ page }, use) => {
     await use(new DashboardPage(page));
-  },
-  trackingPage: async ({ page }, use) => {
-    await use(new TrackingPage(page));
   },
   authenticatedPage: async ({ page, request }, use) => {
     // Example of setting up auth state
