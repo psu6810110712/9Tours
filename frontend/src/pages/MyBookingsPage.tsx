@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import Modal from '../components/common/Modal'
+import ReviewModal from '../components/reviews/ReviewModal'
 import { bookingService } from '../services/bookingService'
 import { buildDisplayName } from '../utils/profileValidation'
 
@@ -37,6 +38,8 @@ interface MyBookingItem {
   isRefundRequested: boolean
   cancellationReason: string
   travelersInfo: { name: string; isLeadTraveler?: boolean }[]
+  hasReview: boolean
+  rawStatus: string
 }
 
 const tabs = ['ทั้งหมด', 'รอชำระเงิน', 'รอตรวจสอบ', 'สำเร็จ', 'รอคืนเงิน', 'ยกเลิกแล้ว']
@@ -50,6 +53,7 @@ export default function MyBookingPage() {
   const [loading, setLoading] = useState(true)
   const [cancelModalId, setCancelModalId] = useState<string | null>(null)
   const [cancelReason, setCancelReason] = useState('')
+  const [reviewBooking, setReviewBooking] = useState<MyBookingItem | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -124,6 +128,8 @@ export default function MyBookingPage() {
           isRefundRequested: booking.isRefundRequested ?? false,
           cancellationReason: booking.cancellationReason ?? '',
           travelersInfo: booking.travelersInfo ?? [],
+          hasReview: booking.hasReview ?? false,
+          rawStatus: booking.status,
         }
       })
 
@@ -350,6 +356,23 @@ export default function MyBookingPage() {
                           >
                             ชำระเงิน
                           </button>
+                        )}
+
+                        {(booking.rawStatus === 'success' || booking.rawStatus === 'confirmed') && (
+                          booking.hasReview ? (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-bold text-amber-700">
+                              <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                              รีวิวแล้ว
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setReviewBooking(booking)}
+                              className="ui-focus-ring ui-pressable rounded-full border border-green-200 bg-white px-5 py-2.5 text-sm font-bold text-green-600 hover:bg-green-50"
+                            >
+                              เขียนรีวิว
+                            </button>
+                          )
                         )}
 
                         {canCancel && (
@@ -668,6 +691,16 @@ export default function MyBookingPage() {
           </div>
         </div>
       </Modal>
+
+      {reviewBooking && (
+        <ReviewModal
+          isOpen={reviewBooking !== null}
+          onClose={() => setReviewBooking(null)}
+          bookingId={reviewBooking.id}
+          tourName={reviewBooking.tourName}
+          onSuccess={() => void loadBookings()}
+        />
+      )}
     </div>
   )
 }

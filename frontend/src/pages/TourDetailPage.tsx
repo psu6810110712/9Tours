@@ -5,6 +5,7 @@ import TourGallery from '../components/tour/TourGallery'
 import TourInfo from '../components/tour/TourInfo'
 import TourItinerary from '../components/tour/TourItinerary'
 import BookingSidebar from '../components/tour/BookingSidebar'
+import ReviewList from '../components/reviews/ReviewList'
 import { trackEvent } from '../services/trackingService'
 import { tourService } from '../services/tourService'
 import { useAuth } from '../context/AuthContext'
@@ -83,6 +84,7 @@ export default function TourDetailPage() {
         <div className="min-w-0 lg:col-span-8">
           <TourInfo tour={tour} />
           <TourItinerary items={tour.itinerary} />
+          <ReviewList tourId={tour.id} />
         </div>
 
         <aside className="lg:col-span-4">

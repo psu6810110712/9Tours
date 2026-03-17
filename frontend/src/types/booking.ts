@@ -77,6 +77,7 @@ export interface Booking {
   travelersInfo?: { name: string; isLeadTraveler?: boolean }[] | null
   cancellationReason?: string | null
   isRefundRequested?: boolean
+  hasReview?: boolean
 }
 
 export interface CreateBookingDto {

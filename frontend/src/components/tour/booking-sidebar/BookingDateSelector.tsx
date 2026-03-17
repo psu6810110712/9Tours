@@ -243,7 +243,7 @@ export default function BookingDateSelector({
                             disabled={isFull}
                             onClick={() => setSelectedSchedule(schedule)}
                             className={`w-full rounded-[1.25rem] border px-4 py-3 text-left transition-all ${isActiveRound
-                              ? 'border-amber-300 bg-amber-50'
+                              ? 'border-blue-300 bg-blue-50'
                               : isFull
                                 ? 'cursor-not-allowed border-gray-100 bg-gray-50 opacity-60'
                                 : 'border-gray-200 bg-white hover:border-gray-300'
@@ -263,7 +263,7 @@ export default function BookingDateSelector({
                                   )}
                                 </div>
                               </div>
-                              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isFull ? 'bg-red-50 text-red-500' : seatsLeft <= 5 ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isFull ? 'bg-red-50 text-red-500' : seatsLeft <= 5 ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}>
                                 {isFull ? 'เต็มแล้ว' : `เหลือ ${seatsLeft} ที่`}
                               </span>
                             </div>

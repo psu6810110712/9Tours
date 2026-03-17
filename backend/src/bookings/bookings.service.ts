@@ -16,6 +16,7 @@ import { User } from '../users/entities/user.entity';
 import { normalizeEmail, normalizeThaiPhoneInput, sanitizeCustomerName } from '../users/customer-profile.utils';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/entities/notification.entity';
+import { Review } from '../reviews/entities/review.entity';
 
 @Injectable()
 export class BookingsService {
@@ -26,6 +27,8 @@ export class BookingsService {
     private bookingsRepository: Repository<Booking>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Review)
+    private reviewsRepository: Repository<Review>,
     private toursService: ToursService,
     private notificationsService: NotificationsService,
   ) { }
@@ -254,10 +257,19 @@ export class BookingsService {
       relations: ['payments'],
     });
 
+    const bookingIds = bookings.map((b) => b.id);
+    const reviewedSet = bookingIds.length > 0
+      ? await this.reviewsRepository.find({
+          where: { bookingId: In(bookingIds) },
+          select: ['bookingId'],
+        }).then((reviews) => new Set(reviews.map((r) => r.bookingId)))
+      : new Set<number>();
+
     return bookings.map((booking) => {
       const found = this.findScheduleInData(booking.scheduleId);
       return {
         ...booking,
+        hasReview: reviewedSet.has(booking.id),
         schedule: found
           ? {
             ...found.schedule,

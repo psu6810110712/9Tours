@@ -3,6 +3,10 @@ import { BookingsService } from './bookings.service'
 import { Booking, BookingStatus } from './entities/booking.entity'
 import { User, UserRole, AuthProvider } from '../users/entities/user.entity'
 
+const mockReviewsRepository = {
+  find: jest.fn().mockResolvedValue([]),
+}
+
 describe('BookingsService', () => {
   let service: BookingsService
   let bookingsRepository: any
@@ -93,7 +97,7 @@ describe('BookingsService', () => {
       notifyAdminsNewBooking: jest.fn().mockResolvedValue(undefined),
     }
 
-    service = new BookingsService(bookingsRepository, usersRepository, toursService, notificationsService as any)
+    service = new BookingsService(bookingsRepository, usersRepository, mockReviewsRepository as any, toursService, notificationsService as any)
   })
 
   it('stores booking contact snapshot and syncs the customer profile in one transaction', async () => {

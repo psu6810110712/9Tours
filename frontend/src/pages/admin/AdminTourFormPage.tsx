@@ -131,6 +131,8 @@ function buildPreviewTour({
   province,
   price,
   discountPercent,
+  discountStartDate,
+  discountEndDate,
   images,
   transportation,
   duration,
@@ -151,6 +153,8 @@ function buildPreviewTour({
   province: string
   price: string
   discountPercent: string
+  discountStartDate: string
+  discountEndDate: string
   images: string[]
   transportation: string
   duration: string
@@ -178,6 +182,8 @@ function buildPreviewTour({
     price: finalPrice,
     childPrice: null,
     originalPrice: hasDiscount && basePrice > 0 ? basePrice : null,
+    discountStartDate: discountStartDate || null,
+    discountEndDate: discountEndDate || null,
     images,
     highlights: [
       highlights[0]?.trim() || 'ไฮไลต์หลักของทัวร์',
@@ -587,6 +593,8 @@ export default function AdminTourFormPage() {
     province,
     price,
     discountPercent,
+    discountStartDate,
+    discountEndDate,
     images,
     transportation,
     duration,
