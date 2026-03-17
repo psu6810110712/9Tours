@@ -1,4 +1,4 @@
-import { useEffect, useState, type RefObject } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import ScrollerArrowButton from '../../common/ScrollerArrowButton'
 import type { Tour, TourSchedule } from '../../../types/tour'
 
@@ -37,6 +37,7 @@ export default function BookingDateSelector({
 }: BookingDateSelectorProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const monthScrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const element = scrollRef.current
@@ -61,39 +62,77 @@ export default function BookingDateSelector({
     }
   }, [scrollRef, upcomingSchedules, selectedMonth])
 
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' })
+    }
+  }, [selectedMonth, scrollRef])
+
+  useEffect(() => {
+    if (!monthScrollRef.current) return
+    const activeBtn = monthScrollRef.current.querySelector('[data-active-month="true"]') as HTMLElement | null
+    if (activeBtn) {
+      const container = monthScrollRef.current
+      const scrollLeft = activeBtn.offsetLeft - container.clientWidth / 2 + activeBtn.clientWidth / 2
+      container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' })
+    }
+  }, [selectedMonth])
+
   const scrollDates = (amount: number) => {
     scrollRef.current?.scrollBy({ left: amount, behavior: 'smooth' })
   }
 
+  const handleMonthClick = (month: string) => {
+    setSelectedMonth(month)
+  }
+
+  const showMonthPills = upcomingSchedules.length > 0 && availableMonths.length > 1
+
   return (
     <div className="mb-5 border-b border-gray-200 pb-5">
-      <div className="mb-0 flex items-start justify-between gap-3">
-        <div>
-          <label className="block text-lg font-bold text-gray-700">เลือกวันที่เดินทาง</label>
-        </div>
-        <div className="flex items-center gap-2">
-          {(canScrollLeft || canScrollRight) && (
-            <div className="hidden items-center gap-2 sm:flex">
-              <ScrollerArrowButton direction="left" onClick={() => scrollDates(-220)} disabled={!canScrollLeft} className="h-10 w-10" />
-              <ScrollerArrowButton direction="right" onClick={() => scrollDates(220)} disabled={!canScrollRight} className="h-10 w-10" />
-            </div>
-          )}
-          {upcomingSchedules.length > 0 && availableMonths.length > 1 && (
-            <select
-              value={selectedMonth}
-              onChange={(event) => setSelectedMonth(event.target.value)}
-              className="ui-focus-ring rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-bold text-gray-700 outline-none focus:border-[var(--color-primary)] focus:bg-white"
-            >
-              <option value="all">ทุกช่วงเวลา</option>
-              {availableMonths.map((month) => (
-                <option key={month} value={month}>
-                  {new Date(`${month}-01`).toLocaleString('th-TH', { month: 'long', year: 'numeric' })}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
+      <div className="mb-3">
+        <label className="block text-lg font-bold whitespace-nowrap text-slate-800">เลือกวันที่เดินทาง</label>
       </div>
+
+      {showMonthPills && (
+        <div className="relative mb-3">
+          <div
+            ref={monthScrollRef}
+            className="scrollbar-hide flex gap-1.5 overflow-x-auto pb-1 scroll-smooth"
+          >
+            <button
+              type="button"
+              data-active-month={selectedMonth === 'all'}
+              onClick={() => handleMonthClick('all')}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all whitespace-nowrap ${selectedMonth === 'all'
+                ? 'bg-[var(--color-primary)] text-white shadow-sm'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
+              }`}
+            >
+              ทั้งหมด
+            </button>
+            {availableMonths.map((month) => {
+              const isActive = selectedMonth === month
+              const monthLabel = new Date(`${month}-01`).toLocaleString('th-TH', { month: 'short' })
+              const yearLabel = (new Date(`${month}-01`).getFullYear() + 543).toString().slice(-2)
+              return (
+                <button
+                  key={month}
+                  type="button"
+                  data-active-month={isActive}
+                  onClick={() => handleMonthClick(month)}
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all whitespace-nowrap ${isActive
+                    ? 'bg-[var(--color-primary)] text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-700'
+                  }`}
+                >
+                  {monthLabel} {yearLabel}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {upcomingSchedules.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-4 text-center text-sm text-gray-400">
@@ -101,7 +140,11 @@ export default function BookingDateSelector({
         </div>
       ) : (
         <>
-          <div className="relative">
+          <div className="flex items-center gap-1.5">
+            {(canScrollLeft || canScrollRight) && (
+              <ScrollerArrowButton direction="left" onClick={() => scrollDates(-220)} disabled={!canScrollLeft} className="h-8 w-8 shrink-0" />
+            )}
+            <div className="relative min-w-0 flex-1">
             <div
               ref={scrollRef}
               className="scrollbar-hide flex gap-2 overflow-x-auto px-1 pb-1 scroll-smooth"
@@ -112,6 +155,8 @@ export default function BookingDateSelector({
 
                 if (selectedMonth !== 'all') {
                   datesList = datesList.filter((date) => date.startsWith(selectedMonth))
+                } else {
+                  datesList = datesList.slice(0, 30)
                 }
 
                 const resultList = datesList.map((dateStr: string) => {
@@ -168,12 +213,9 @@ export default function BookingDateSelector({
 
             {canScrollLeft && <div className="ui-rail-fade-left" />}
             {canScrollRight && <div className="ui-rail-fade-right" />}
-
+            </div>
             {(canScrollLeft || canScrollRight) && (
-              <div className="mt-3 flex items-center justify-end gap-2 sm:hidden">
-                <ScrollerArrowButton direction="left" onClick={() => scrollDates(-220)} disabled={!canScrollLeft} className="h-10 w-10" />
-                <ScrollerArrowButton direction="right" onClick={() => scrollDates(220)} disabled={!canScrollRight} className="h-10 w-10" />
-              </div>
+              <ScrollerArrowButton direction="right" onClick={() => scrollDates(220)} disabled={!canScrollRight} className="h-8 w-8 shrink-0" />
             )}
           </div>
 
@@ -185,7 +227,7 @@ export default function BookingDateSelector({
 
                 return (
                   <div className="space-y-2.5">
-                    <label className="block text-lg font-bold text-gray-600">
+                    <label className="block text-lg font-bold text-slate-800">
                       {hasMultipleRounds ? 'เลือกรอบเวลา (Join Trip)' : 'รายละเอียดรอบ / จำนวนที่นั่งว่าง (Join Trip)'}
                     </label>
                     <div className="grid gap-2">
@@ -236,17 +278,17 @@ export default function BookingDateSelector({
           )}
 
           {selectedSchedule && (tour.tourType === 'package' || !!tour.minPeople) && (
-            <div className="mt-4 rounded-[1.5rem] border border-blue-200 bg-blue-50 px-4 py-4">
-              <label className="mb-2 block text-md font-semibold text-blue-800">วันที่ท่านเลือกคือ</label>
-              <div className="flex items-center gap-4">
-                <div className="flex h-5 w-5 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <rect x="3" y="4" width="18" height="18" rx="2" />
-                    <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-[14px] font-semibold text-blue-900">
+            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-sm font-semibold whitespace-nowrap text-slate-600">วันที่ท่านเลือก</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center text-slate-400">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-bold text-slate-800">
                     {(() => {
                       const start = parseDate(selectedSchedule.startDate)
                       let dateText = ''

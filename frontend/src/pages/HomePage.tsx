@@ -348,7 +348,7 @@ export default function HomePage() {
               showFade
             >
               {displayedTours.map((tour) => (
-                <div key={tour.id} className="w-[292px] flex-shrink-0">
+                <div key={tour.id} className="w-[260px] flex-shrink-0 sm:w-[280px]">
                   <TourCard tour={tour} />
                 </div>
               ))}
@@ -375,7 +375,7 @@ export default function HomePage() {
                 showFade
               >
                 {recommendedTours.map((tour) => (
-                  <div key={tour.id} className="w-[292px] flex-shrink-0">
+                  <div key={tour.id} className="w-[260px] flex-shrink-0 sm:w-[280px]">
                     <TourCard tour={tour} />
                   </div>
                 ))}

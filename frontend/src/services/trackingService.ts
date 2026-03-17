@@ -14,18 +14,17 @@ interface TrackingPayload {
   metadata?: Record<string, unknown>
 }
 
-const TRACKING_CONSENT_KEY = 'pdpa_analytics_consent'
 const TRACKING_SESSION_KEY = 'tracking_session_id'
+const ANONYMOUS_ID_KEY = 'anonymous_id'
 const TRACKING_ENABLED = import.meta.env.VITE_TRACKING_ENABLED !== 'false'
 const TRACKING_ENDPOINT = `${API_BASE_URL}/analytics/events`
 
-// หมายเหตุ PDPA: ระบบจะส่งข้อมูลพฤติกรรมก็ต่อเมื่อผู้ใช้ให้ consent แล้วเท่านั้น
-export function hasTrackingConsent(): boolean {
-  return localStorage.getItem(TRACKING_CONSENT_KEY) === 'granted'
-}
-
-export function setTrackingConsent(granted: boolean) {
-  localStorage.setItem(TRACKING_CONSENT_KEY, granted ? 'granted' : 'denied')
+export function getAnonymousId(): string {
+  const existing = localStorage.getItem(ANONYMOUS_ID_KEY)
+  if (existing) return existing
+  const generated = `anon_${crypto.randomUUID().replace(/-/g, '')}`
+  localStorage.setItem(ANONYMOUS_ID_KEY, generated)
+  return generated
 }
 
 export function getTrackingSessionId(): string {
@@ -39,21 +38,25 @@ export function getTrackingSessionId(): string {
 export async function trackEvent(
   payload: Omit<TrackingPayload, 'sessionId' | 'occurredAt'>,
 ) {
-  if (!TRACKING_ENABLED || !hasTrackingConsent()) return
+  if (!TRACKING_ENABLED) return
 
   const body: TrackingPayload = {
     ...payload,
     sessionId: getTrackingSessionId(),
     occurredAt: new Date().toISOString(),
   }
-  await api.post('/analytics/events', body).catch(() => undefined)
+  await api.post('/analytics/events', body, {
+    headers: {
+      'x-anonymous-id': getAnonymousId(),
+    },
+  }).catch(() => undefined)
 }
 
 // สำหรับ event ตอนออกจากหน้า ใช้ keepalive เพื่อลดโอกาส request หล่น
 export function trackEventKeepalive(
   payload: Omit<TrackingPayload, 'sessionId' | 'occurredAt'>,
 ) {
-  if (!TRACKING_ENABLED || !hasTrackingConsent()) return
+  if (!TRACKING_ENABLED) return
 
   const body: TrackingPayload = {
     ...payload,
@@ -68,6 +71,7 @@ export function trackEventKeepalive(
     keepalive: true,
     headers: {
       'Content-Type': 'application/json',
+      'x-anonymous-id': getAnonymousId(),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify(body),

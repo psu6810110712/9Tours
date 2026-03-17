@@ -10,6 +10,7 @@ const FILTER_TABS = [
   { label: 'ทั้งหมด', value: 'all' },
   { label: 'รอตรวจสอบสลิป', value: 'awaiting_approval' },
   { label: 'ยืนยันแล้ว', value: 'confirmed' },
+  { label: 'รอคืนเงิน', value: 'refund_requested' },
   { label: 'ยกเลิกแล้ว', value: 'canceled' },
 ] as const
 
@@ -363,18 +364,18 @@ export default function AdminBookings() {
     setShowVerificationRaw(false)
   }, [selectedBooking])
 
-  const handleUpdateStatus = async (status: string) => {
+  const handleUpdateStatus = async (status: string, refundAction?: 'approve' | 'reject') => {
     if (!selectedBooking) return
 
     try {
       setIsProcessing(true)
-      const updatedBooking = await adminService.updateBookingStatus(selectedBooking.id, status)
-      toast.success('อัปเดตสถานะสำเร็จ')
+      const updatedBooking = await adminService.updateBookingStatus(selectedBooking.id, status, refundAction)
+      toast.success(refundAction ? 'ดำเนินการคำขอคืนเงินสำเร็จ' : 'อัปเดตสถานะสำเร็จ')
       setBookings((prev) => prev.map((booking) => (booking.id === updatedBooking.id ? updatedBooking : booking)))
       setSelectedBooking(null)
     } catch (error) {
       console.error(error)
-      toast.error('ไม่สามารถอัปเดตสถานะได้')
+      toast.error(refundAction ? 'ไม่สามารถดำเนินการคำขอคืนเงินได้' : 'ไม่สามารถอัปเดตสถานะได้')
     } finally {
       setIsProcessing(false)
     }
@@ -384,6 +385,7 @@ export default function AdminBookings() {
     return bookings.filter((booking) => {
       if (filter === 'awaiting_approval' && booking.status !== 'awaiting_approval') return false
       if (filter === 'confirmed' && !['confirmed', 'success'].includes(booking.status)) return false
+      if (filter === 'refund_requested' && !booking.isRefundRequested) return false
       if (filter === 'canceled' && booking.status !== 'canceled') return false
 
       if (!search.trim()) return true
@@ -443,6 +445,7 @@ export default function AdminBookings() {
     total: bookings.length,
     awaitingApproval: bookings.filter((booking) => booking.status === 'awaiting_approval').length,
     confirmed: bookings.filter((booking) => ['confirmed', 'success'].includes(booking.status)).length,
+    refundRequested: bookings.filter((booking) => booking.isRefundRequested).length,
     canceled: bookings.filter((booking) => booking.status === 'canceled').length,
   }), [bookings])
 
@@ -468,8 +471,8 @@ export default function AdminBookings() {
             <p className="mt-2 text-2xl font-bold text-emerald-600">{stats.confirmed}</p>
           </div>
           <div className="rounded-2xl border border-gray-100 bg-white p-4">
-            <p className="text-sm text-gray-500">ยกเลิกแล้ว</p>
-            <p className="mt-2 text-2xl font-bold text-rose-600">{stats.canceled}</p>
+            <p className="text-sm text-gray-500">รอคืนเงิน</p>
+            <p className="mt-2 text-2xl font-bold text-purple-600">{stats.refundRequested}</p>
           </div>
         </div>
 
@@ -543,6 +546,11 @@ export default function AdminBookings() {
                         <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${verificationClasses}`}>
                           {getVerificationBadge(payment?.verificationStatus)}
                         </span>
+                        {booking.isRefundRequested && (
+                          <span className="rounded-full bg-purple-100 px-2.5 py-1 text-xs font-semibold text-purple-700">
+                            รอคืนเงิน
+                          </span>
+                        )}
                       </div>
 
                       <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
@@ -655,7 +663,7 @@ export default function AdminBookings() {
                           </>
                         )}
 
-                        {['confirmed', 'success', 'canceled'].includes(selectedBooking.status) && (
+                        {['confirmed', 'success', 'canceled'].includes(selectedBooking.status) && !selectedBooking.isRefundRequested && (
                           <button
                             type="button"
                             onClick={() => handleUpdateStatus('awaiting_approval')}
@@ -782,6 +790,37 @@ export default function AdminBookings() {
                       <div className="mt-4 rounded-[1.25rem] border border-orange-100 bg-orange-50 p-4">
                         <p className="mb-2 text-base font-bold text-orange-800">คำขอเพิ่มเติมจากลูกค้า</p>
                         <p className="whitespace-pre-wrap text-sm leading-6 text-gray-700">{selectedBooking.specialRequest}</p>
+                      </div>
+                    )}
+
+                    {selectedBooking.isRefundRequested && (
+                      <div className="mt-4 rounded-[1.25rem] border border-purple-100 bg-purple-50 p-4">
+                        <p className="mb-2 text-base font-bold text-purple-800">คำขอคืนเงิน</p>
+                        {selectedBooking.cancellationReason ? (
+                          <p className="whitespace-pre-wrap text-sm leading-6 text-gray-700">
+                            <span className="font-semibold">เหตุผล:</span> {selectedBooking.cancellationReason}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-gray-500">ลูกค้าไม่ได้ระบุเหตุผล</p>
+                        )}
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateStatus(selectedBooking.status, 'approve')}
+                            disabled={isProcessing}
+                            className="ui-focus-ring ui-pressable rounded-xl bg-green-500 px-4 py-2 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-50"
+                          >
+                            อนุมัติคืนเงิน
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateStatus(selectedBooking.status, 'reject')}
+                            disabled={isProcessing}
+                            className="ui-focus-ring ui-pressable rounded-xl bg-red-100 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-200 disabled:opacity-50"
+                          >
+                            ปฏิเสธคืนเงิน
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

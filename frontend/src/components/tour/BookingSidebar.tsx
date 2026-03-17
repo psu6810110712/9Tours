@@ -27,13 +27,17 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   const { user } = useAuth()
   const today = useRef(getLocalTodayIsoDate()).current
 
-  const upcomingSchedules = tour.schedules
-    .filter((schedule: TourSchedule) => schedule.startDate >= today)
-    .sort((a: TourSchedule, b: TourSchedule) => a.startDate.localeCompare(b.startDate))
+  const upcomingSchedules = useMemo(() => {
+    return [...tour.schedules]
+      .filter((schedule: TourSchedule) => schedule.startDate >= today)
+      .sort((a: TourSchedule, b: TourSchedule) => a.startDate.localeCompare(b.startDate))
+  }, [tour.schedules, today])
 
-  const defaultSelectedSchedule = upcomingSchedules.find(
-    (schedule: TourSchedule) => schedule.maxCapacity - schedule.currentBooked > 0,
-  ) ?? upcomingSchedules[0] ?? null
+  const defaultSelectedSchedule = useMemo(() => {
+    return upcomingSchedules.find(
+      (schedule: TourSchedule) => schedule.maxCapacity - schedule.currentBooked > 0,
+    ) ?? upcomingSchedules[0] ?? null
+  }, [upcomingSchedules])
 
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(defaultSelectedSchedule?.id ?? null)
   const [selectedMonth, setSelectedMonth] = useState<string>('all')
@@ -83,10 +87,18 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
   useEffect(() => {
     if (!tour?.id || upcomingSchedules.length === 0) return
 
-    const fetchAllSeats = async () => {
+    const visibleSchedules = selectedMonth === 'all'
+      ? upcomingSchedules.slice(0, 30)
+      : upcomingSchedules.filter((s) => s.startDate.startsWith(selectedMonth))
+
+    const schedulesToFetch = visibleSchedules.filter((s) => availableSeatsData[s.id] == null)
+    if (schedulesToFetch.length === 0) return
+
+    let cancelled = false
+    const fetchVisibleSeats = async () => {
       const results: { [key: number]: number | null } = {}
       await Promise.all(
-        upcomingSchedules.map(async (schedule: TourSchedule) => {
+        schedulesToFetch.map(async (schedule: TourSchedule) => {
           try {
             const data = await tourService.getAvailableSeats(tour.id, schedule.id)
             results[schedule.id] = Math.max(0, data.availableSeats)
@@ -95,11 +107,14 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
           }
         }),
       )
-      setAvailableSeatsData(results)
+      if (!cancelled) {
+        setAvailableSeatsData((prev) => ({ ...prev, ...results }))
+      }
     }
 
-    void fetchAllSeats()
-  }, [tour?.id, upcomingSchedules, fetchKey])
+    void fetchVisibleSeats()
+    return () => { cancelled = true }
+  }, [tour?.id, selectedMonth, upcomingSchedules, fetchKey])
 
   const seatsLeft = selectedSchedule
     ? Math.max(0, availableSeatsData[selectedSchedule.id] ?? (selectedSchedule.maxCapacity - selectedSchedule.currentBooked))

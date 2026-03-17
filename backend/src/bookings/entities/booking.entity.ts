@@ -79,6 +79,15 @@ export class Booking {
     @Column({ name: 'special_request', type: 'text', nullable: true })
     specialRequest: string;
 
+    @Column({ name: 'travelers_info', type: 'jsonb', nullable: true, default: null })
+    travelersInfo: { name: string; isLeadTraveler?: boolean }[] | null;
+
+    @Column({ name: 'cancellation_reason', type: 'text', nullable: true, default: null })
+    cancellationReason: string | null;
+
+    @Column({ name: 'is_refund_requested', type: 'boolean', default: false })
+    isRefundRequested: boolean;
+
     @OneToMany(() => Payment, (payment) => payment.booking)
     payments: Payment[];
 

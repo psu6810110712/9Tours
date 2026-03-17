@@ -106,12 +106,6 @@ export default function Navbar() {
       ? 'rounded-full bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white shadow-sm'
       : 'rounded-full px-4 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900'
 
-  const mobileNavLinkClass = (path: string) =>
-    `rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors ${isActive(path)
-      ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary)]'
-      : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
-    }`
-
   const navShellClass = isAdmin
     ? 'fixed inset-x-0 top-0 z-[var(--z-navbar)] border-b border-slate-800/80 bg-slate-800 text-white'
     : 'sticky top-0 z-[var(--z-navbar)] border-b border-gray-200/90 bg-white/95 backdrop-blur'
@@ -266,60 +260,94 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[var(--z-drawer)] md:hidden">
-          <button
-            type="button"
-            aria-label="ปิดเมนูนำทาง"
-            className="ui-overlay absolute inset-0 top-[68px]"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          <div className="ui-surface ui-pop absolute inset-x-4 top-[80px] max-h-[calc(100vh-6rem)] overflow-y-auto rounded-[1.75rem] border border-gray-100 bg-white p-4 shadow-[0_18px_44px_rgba(15,23,42,0.14)]">
-            <div className="space-y-2">
+      <div
+        className={`fixed inset-0 z-[var(--z-drawer)] md:hidden transition-opacity duration-300 ${mobileMenuOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
+      >
+        <button
+          type="button"
+          aria-label="ปิดเมนูนำทาง"
+          className="absolute inset-0 bg-black/30"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+        <aside
+          className={`absolute right-0 top-0 flex h-full w-[min(20rem,85vw)] flex-col border-l border-gray-200 bg-white shadow-[-8px_0_30px_rgba(15,23,42,0.12)] transition-transform duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        >
+          <div className="flex h-[68px] items-center justify-between border-b border-gray-100 px-5">
+            <span className="text-base font-bold text-gray-900">เมนู</span>
+            <button
+              type="button"
+              aria-label="ปิดเมนูนำทาง"
+              onClick={() => setMobileMenuOpen(false)}
+              className="ui-pressable flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <nav className="flex-1 overflow-y-auto px-4 py-5">
+            <div className="space-y-1.5">
               {mobileLinks.map(({ label, path, match }) => (
                 <Link
                   key={path}
                   to={path}
                   className={typeof match === 'function'
-                    ? `rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors ${match(pathname)
-                      ? 'border-amber-300 bg-amber-50 text-amber-800'
-                      : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                    ? `block rounded-2xl px-4 py-3 text-[15px] font-semibold transition-colors ${match(pathname)
+                      ? 'bg-amber-50 text-amber-800'
+                      : 'text-gray-700 hover:bg-gray-50'
                     }`
-                    : mobileNavLinkClass(path)}
+                    : `block rounded-2xl px-4 py-3 text-[15px] font-semibold transition-colors ${isActive(path)
+                      ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]'
+                      : 'text-gray-700 hover:bg-gray-50'
+                    }`}
                 >
                   {label}
                 </Link>
               ))}
             </div>
 
-            {user ? (
-              <div className="mt-4 rounded-[1.5rem] border border-gray-100 bg-gray-50/80 p-4">
-                <p className="text-sm font-semibold text-gray-800">{displayName}</p>
-                <p className="mt-1 text-xs text-gray-500">{user.email}</p>
+            {user && user.role === 'customer' && user.profileCompleted && (
+              <div className="mt-3 border-t border-gray-100 pt-3">
+                <Link
+                  to="/my-bookings"
+                  className={`block rounded-2xl px-4 py-3 text-[15px] font-semibold transition-colors ${pathname === '/my-bookings' ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  การจองของฉัน
+                </Link>
+              </div>
+            )}
 
-                <div className="mt-4 space-y-2">
-                  {user.role === 'customer' && user.profileCompleted && (
-                    <Link to="/my-bookings" className="block rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
-                      การจองของฉัน
-                    </Link>
-                  )}
-                  {user.role === 'customer' && !user.profileCompleted && (
-                    <Link to="/auth/complete-profile" className="block rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-100">
-                      กรอกข้อมูลให้ครบ
-                    </Link>
-                  )}
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="w-full rounded-2xl border border-red-200 bg-white px-4 py-3 text-left text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
-                  >
-                    ออกจากระบบ
-                  </button>
+            {user && user.role === 'customer' && !user.profileCompleted && (
+              <div className="mt-3 border-t border-gray-100 pt-3">
+                <Link
+                  to="/auth/complete-profile"
+                  className="block rounded-2xl bg-amber-50 px-4 py-3 text-[15px] font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+                >
+                  กรอกข้อมูลให้ครบ
+                </Link>
+              </div>
+            )}
+          </nav>
+
+          <div className="border-t border-gray-100 px-4 py-4">
+            {user ? (
+              <div className="space-y-3">
+                <div className="px-1">
+                  <p className="truncate text-sm font-semibold text-gray-800">{displayName}</p>
+                  <p className="truncate text-xs text-gray-500">{user.email}</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="ui-pressable w-full rounded-2xl border border-red-200 bg-white px-4 py-3 text-center text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+                >
+                  ออกจากระบบ
+                </button>
               </div>
             ) : (
-              <div className="mt-4 rounded-[1.5rem] border border-gray-100 bg-gray-50/80 p-4">
-                <p className="text-sm text-gray-600">เข้าสู่ระบบเพื่อดูการจองและรับคำแนะนำทริปส่วนตัว</p>
+              <div className="space-y-3">
+                <p className="px-1 text-sm text-gray-500">เข้าสู่ระบบเพื่อดูการจองและรับคำแนะนำทริป</p>
                 <button
                   type="button"
                   onClick={() => {
@@ -327,15 +355,15 @@ export default function Navbar() {
                     setModalError('')
                     setModal('login')
                   }}
-                  className="ui-focus-ring ui-pressable mt-3 w-full rounded-2xl bg-[var(--color-primary)] px-4 py-3 text-sm font-semibold text-white hover:bg-[var(--color-primary-dark)]"
+                  className="ui-focus-ring ui-pressable w-full rounded-2xl bg-[var(--color-primary)] px-4 py-3 text-sm font-semibold text-white hover:bg-[var(--color-primary-dark)]"
                 >
                   เข้าสู่ระบบ
                 </button>
               </div>
             )}
           </div>
-        </div>
-      )}
+        </aside>
+      </div>
 
       {modal === 'login' && (
         <LoginModal

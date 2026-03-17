@@ -4,8 +4,9 @@ import TourCard from '../components/TourCard'
 import SearchBar from '../components/common/SearchBar'
 import FilterSidebar from '../components/tour/FilterSidebar'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { festivalService } from '../services/festivalService'
 import { tourService } from '../services/tourService'
-import type { Tour } from '../types/tour'
+import type { Festival, Tour } from '../types/tour'
 
 const SORT_OPTIONS = [
   { value: 'default', label: 'เรียงตาม: ค่าเริ่มต้น' },
@@ -50,6 +51,11 @@ export default function ToursPage() {
   const [categories, setCategories] = useState<string[]>(() => parseDelimitedParam(searchParams.get('categories')))
   const [minPrice, setMinPrice] = useState<number | undefined>(() => parseNumberParam(searchParams.get('minPrice')))
   const [maxPrice, setMaxPrice] = useState<number | undefined>(() => parseNumberParam(searchParams.get('maxPrice')))
+  const [festivals, setFestivals] = useState<Festival[]>([])
+  const [festivalId, setFestivalId] = useState<number | null>(() => {
+    const raw = searchParams.get('festivalId')
+    return raw ? Number(raw) : null
+  })
 
   useBodyScrollLock(mobileFiltersOpen)
 
@@ -57,6 +63,7 @@ export default function ToursPage() {
     tourService.getAll()
       .then(setAllTours)
       .catch(() => setAllTours([]))
+    festivalService.getAll().then(setFestivals).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -69,6 +76,7 @@ export default function ToursPage() {
     setCategories(parseDelimitedParam(searchParams.get('categories')))
     setMinPrice(parseNumberParam(searchParams.get('minPrice')))
     setMaxPrice(parseNumberParam(searchParams.get('maxPrice')))
+    setFestivalId(searchParams.get('festivalId') ? Number(searchParams.get('festivalId')) : null)
   }, [searchParams])
 
   const priceBounds = useMemo(() => {
@@ -110,6 +118,7 @@ export default function ToursPage() {
         categories: categories.length > 0 ? categories : undefined,
         minPrice,
         maxPrice,
+        festivalId: festivalId || undefined,
       })
       .then((items) => {
         const filteredByDate = items.filter((tour) => {
@@ -137,7 +146,7 @@ export default function ToursPage() {
         setTours([])
       })
       .finally(() => setLoading(false))
-  }, [categories, maxPrice, minPrice, month, province, region, search, tourType, year])
+  }, [categories, festivalId, maxPrice, minPrice, month, province, region, search, tourType, year])
 
   useEffect(() => {
     if (typeof minPrice !== 'number' || typeof maxPrice !== 'number') return
@@ -152,8 +161,9 @@ export default function ToursPage() {
     if (categories.length > 0) params.set('categories', categories.join(','))
     if (minPrice > priceBounds.min) params.set('minPrice', String(minPrice))
     if (maxPrice < priceBounds.max) params.set('maxPrice', String(maxPrice))
+    if (festivalId) params.set('festivalId', String(festivalId))
     setSearchParams(params, { replace: true })
-  }, [categories, maxPrice, minPrice, month, priceBounds.max, priceBounds.min, province, region, search, setSearchParams, tourType, year])
+  }, [categories, festivalId, maxPrice, minPrice, month, priceBounds.max, priceBounds.min, province, region, search, setSearchParams, tourType, year])
 
   useEffect(() => {
     if (!sortMenuOpen) return
@@ -215,6 +225,7 @@ export default function ToursPage() {
     year ? 'year' : '',
     month ? 'month' : '',
     categories.length > 0 ? 'categories' : '',
+    festivalId ? 'festival' : '',
     typeof minPrice === 'number' && minPrice > priceBounds.min ? 'minPrice' : '',
     typeof maxPrice === 'number' && maxPrice < priceBounds.max ? 'maxPrice' : '',
   ].filter(Boolean).length
@@ -253,6 +264,7 @@ export default function ToursPage() {
     setCategories([])
     setMinPrice(priceBounds.min)
     setMaxPrice(priceBounds.max)
+    setFestivalId(null)
   }
 
   const handleMinPriceChange = (value: number) => {
@@ -317,6 +329,9 @@ export default function ToursPage() {
             onMonthChange={setMonth}
             onMinPriceChange={handleMinPriceChange}
             onMaxPriceChange={handleMaxPriceChange}
+            festivals={festivals}
+            festivalId={festivalId}
+            onFestivalChange={setFestivalId}
             onClear={clearFilters}
           />
         </div>
@@ -417,6 +432,9 @@ export default function ToursPage() {
               onMonthChange={setMonth}
               onMinPriceChange={handleMinPriceChange}
               onMaxPriceChange={handleMaxPriceChange}
+              festivals={festivals}
+              festivalId={festivalId}
+              onFestivalChange={setFestivalId}
               onClear={clearFilters}
               mode="drawer"
               onClose={() => setMobileFiltersOpen(false)}

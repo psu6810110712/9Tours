@@ -12,6 +12,7 @@ import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminBookings from './pages/admin/AdminBookings'
 import AdminTourOverview from './pages/admin/AdminTourOverview'
 import ProtectedRoute from './components/ProtectedRoute'
+import ScrollToTop from './components/common/ScrollToTop'
 import BookingInfoPage from './pages/BookingInfoPage'
 import PaymentPage from './pages/PaymentPage'
 import GoogleAuthCallbackPage from './pages/GoogleAuthCallbackPage'
@@ -49,6 +50,7 @@ function App() {
         }}
       />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/auth/google/callback" element={<GoogleAuthCallbackPage />} />
 

@@ -54,13 +54,13 @@ export default function PaymentPage() {
       <main className="max-w-6xl mx-auto px-4 py-8">
         
         {/* --- Header & Progress Bar --- */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 relative">
-          <button onClick={() => navigate(-1)} className="text-blue-500 font-medium hover:underline flex items-center gap-1 mb-4 md:mb-0 z-10">
+        <div className="mb-10">
+          <button onClick={() => navigate(-1)} className="text-blue-500 font-medium hover:underline flex items-center gap-1 mb-6">
             ← ย้อนกลับ
           </button>
 
           {/* Progress Bar */}
-          <div className="flex-1 flex justify-center w-full absolute left-0">
+          <div className="flex justify-center w-full">
             <div className="flex items-start gap-0 w-full max-w-2xl mx-auto">
               <div className="flex flex-col items-center relative flex-1">
                 <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-sm z-10">✓</div>
@@ -85,10 +85,10 @@ export default function PaymentPage() {
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-8 mt-16 md:mt-0 text-center">สแกนเพื่อชำระเงิน</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-8 text-center">สแกนเพื่อชำระเงิน</h1>
 
         {/* --- 3 Columns Layout --- */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 items-start max-w-5xl mx-auto">
           
           {/* คอลัมน์ 1: QR Code */}
           <div className="bg-white p-6 rounded-[1.5rem] border border-gray-200 shadow-sm flex flex-col items-center">
@@ -96,7 +96,7 @@ export default function PaymentPage() {
               THAI QR PAYMENT
             </div>
             <div className="bg-[#113566] w-full pb-4 px-4 rounded-b-lg flex flex-col items-center">
-               <div className="bg-white p-4 rounded-lg mt-2 w-48 h-48 flex items-center justify-center">
+               <div className="bg-white p-4 rounded-lg mt-2 w-36 h-36 sm:w-48 sm:h-48 flex items-center justify-center">
                  {/* แทนที่ด้วยรูป QR ของจริง */}
                  <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QR Code" className="w-full h-full opacity-80" />
                </div>
@@ -150,7 +150,7 @@ export default function PaymentPage() {
         <div className="flex justify-center mt-10">
           <button 
             onClick={handleConfirmPayment}
-            className="bg-[#3b82f6] text-white font-bold py-3.5 px-16 rounded-full hover:bg-blue-600 transition-all text-lg shadow-md"
+            className="bg-[#3b82f6] text-white font-bold py-3.5 px-8 sm:px-16 rounded-full hover:bg-blue-600 transition-all text-base sm:text-lg shadow-md w-full sm:w-auto"
           >
             ยืนยันการชำระเงิน
           </button>

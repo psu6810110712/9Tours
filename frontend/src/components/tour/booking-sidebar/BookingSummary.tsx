@@ -53,9 +53,9 @@ export default function BookingSummary({
         )}
       </div>
 
-      <div className="flex items-end justify-between gap-3 pt-4">
+      <div className="flex flex-wrap items-end justify-between gap-2 pt-4">
         <span className="text-base font-bold text-gray-900">รวมทั้งหมด</span>
-        <span className="text-[1.75rem] font-bold leading-none text-accent">{totalPrice.toLocaleString()} บาท</span>
+        <span className="text-2xl sm:text-[1.75rem] font-bold leading-none text-accent">{totalPrice.toLocaleString()} บาท</span>
       </div>
 
       <button
@@ -64,7 +64,7 @@ export default function BookingSummary({
         disabled={isBookingDisabled}
         className={`ui-focus-ring ui-pressable mt-4 w-full rounded-2xl py-3 text-base font-semibold ${isBookingDisabled
           ? 'cursor-not-allowed bg-gray-200 text-gray-400 shadow-none hover:transform-none'
-          : 'bg-accent text-white shadow-md hover:bg-orange-500'
+          : 'bg-primary text-white shadow-md hover:bg-primary-dark'
         }`}
       >
         {buttonText}

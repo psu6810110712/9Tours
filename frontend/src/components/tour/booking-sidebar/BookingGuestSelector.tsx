@@ -46,32 +46,35 @@ export default function BookingGuestSelector({
 
   return (
     <div className="mb-5">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <label className="text-lg font-bold text-gray-600">จำนวนผู้เดินทาง</label>
-        {!hasSelectedSchedule && <span className="text-md text-amber-600">เลือกวันที่ก่อนเพื่อเลือกจำนวนคน</span>}
+      <div className="mb-3">
+        <label className="block text-lg font-bold text-slate-800">จำนวนผู้เดินทาง</label>
+        {!hasSelectedSchedule && <p className="mt-1 text-xs text-amber-600">กรุณาเลือกวันที่ก่อนเพื่อเลือกจำนวนคน</p>}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
         {[
-          { label: 'ผู้ใหญ่', value: adults, min: 1, setValue: setAdults },
-          { label: 'เด็ก', value: children, min: 0, setValue: setChildren },
-        ].map(({ label, value, min, setValue }) => (
-          <div key={label} className="rounded-[1.25rem] border border-gray-100 bg-gray-50 px-4 py-3">
-            <label className="mb-3 block text-md font-semibold text-gray-500">{label}</label>
+          { label: 'ผู้ใหญ่', hint: 'อายุ 12 ปีขึ้นไป', value: adults, min: 1, setValue: setAdults },
+          { label: 'เด็ก', hint: 'อายุ 3–11 ปี', value: children, min: 0, setValue: setChildren },
+        ].map(({ label, hint, value, min, setValue }) => (
+          <div key={label} className="flex items-center justify-between gap-3 rounded-[1.25rem] border border-gray-100 bg-gray-50 px-4 py-2.5 sm:flex-col sm:items-stretch sm:gap-0 sm:py-3">
+            <div className="sm:mb-3">
+              <label className="text-md font-semibold text-slate-600 sm:block">{label}</label>
+              <p className="text-[11px] text-slate-400">{hint}</p>
+            </div>
             <div className="flex items-center rounded-2xl border border-gray-200 bg-white">
               <button
                 type="button"
                 onClick={() => setValue(Math.max(min, value - 1))}
-                className="ui-focus-ring flex h-11 w-11 items-center justify-center text-lg font-semibold text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="ui-focus-ring flex h-10 w-10 items-center justify-center text-lg font-semibold text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 sm:h-11 sm:w-11"
                 disabled={value <= min}
               >
                 −
               </button>
-              <span className="flex-1 text-center text-base font-semibold text-gray-900">{value}</span>
+              <span className="min-w-[2.5rem] flex-1 text-center text-base font-semibold text-gray-900">{value}</span>
               <button
                 type="button"
                 onClick={() => setValue(value + 1)}
-                className="ui-focus-ring flex h-11 w-11 items-center justify-center text-lg font-semibold text-gray-500 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="ui-focus-ring flex h-10 w-10 items-center justify-center text-lg font-semibold text-gray-500 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 sm:h-11 sm:w-11"
                 disabled={isMaxReached || !hasSelectedSchedule}
               >
                 +

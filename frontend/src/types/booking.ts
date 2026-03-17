@@ -74,6 +74,9 @@ export interface Booking {
   contactPhone?: string | null
   reviewedByUserId?: string | null
   reviewedAt?: string | null
+  travelersInfo?: { name: string; isLeadTraveler?: boolean }[] | null
+  cancellationReason?: string | null
+  isRefundRequested?: boolean
 }
 
 export interface CreateBookingDto {
@@ -86,4 +89,5 @@ export interface CreateBookingDto {
   contactName: string
   contactEmail: string
   contactPhone: string
+  travelersInfo?: { name: string; isLeadTraveler?: boolean }[]
 }

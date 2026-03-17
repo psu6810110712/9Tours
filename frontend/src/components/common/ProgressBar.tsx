@@ -20,16 +20,28 @@ const steps = [
 export default function ProgressBar({ currentStep }: ProgressBarProps) {
   return (
     <>
-      <div className="flex w-full items-center justify-center gap-2 md:hidden">
-        {steps.map((step) => {
-          const isActive = currentStep >= step.num
+      <div className="flex w-full items-center justify-center gap-1.5 md:hidden">
+        {steps.map((step, index) => {
+          const isCompleted = currentStep > step.num
+          const isCurrent = currentStep === step.num
+          const isActive = isCompleted || isCurrent
           return (
-            <div
-              key={step.num}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold ${isActive ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}`}
-            >
-              {step.num}. {step.label}
-            </div>
+            <React.Fragment key={step.num}>
+              {isCurrent ? (
+                <div className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-white">
+                  {step.num}. {step.label}
+                </div>
+              ) : (
+                <div
+                  className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold ${isActive ? 'bg-primary text-white' : 'bg-gray-200 text-gray-400'}`}
+                >
+                  {step.num}
+                </div>
+              )}
+              {index < steps.length - 1 && (
+                <div className={`h-[2px] w-4 ${currentStep > step.num ? 'bg-primary' : 'bg-gray-200'}`} />
+              )}
+            </React.Fragment>
           )
         })}
       </div>

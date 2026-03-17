@@ -82,6 +82,7 @@ export class BookingsService {
       contactName,
       contactEmail,
       contactPhone,
+      travelersInfo,
     } = createBookingDto;
 
     const paxCount = adults + children;
@@ -184,6 +185,7 @@ export class BookingsService {
         contactEmail: normalizedContactEmail,
         contactPhone: normalizedContactPhone,
         specialRequest,
+        travelersInfo: travelersInfo || null,
         status: BookingStatus.PENDING_PAYMENT,
       });
 
@@ -291,6 +293,21 @@ export class BookingsService {
 
     const previousStatus = booking.status;
     const newStatus = updateBookingStatusDto.status;
+    const refundAction = updateBookingStatusDto.refundAction;
+
+    if (refundAction) {
+      if (!booking.isRefundRequested) {
+        throw new BadRequestException('รายการนี้ไม่มีคำขอคืนเงินที่ต้องดำเนินการ');
+      }
+      if (newStatus !== previousStatus) {
+        throw new BadRequestException('การดำเนินการคำขอคืนเงินไม่ควรเปลี่ยนสถานะการจอง');
+      }
+
+      booking.isRefundRequested = false;
+      booking.adminNotes = refundAction === 'approve'
+        ? 'อนุมัติคำขอคืนเงิน'
+        : 'ปฏิเสธคำขอคืนเงิน';
+    }
 
     const activeStatuses = [
       BookingStatus.PENDING_PAYMENT,
@@ -411,7 +428,7 @@ export class BookingsService {
     };
   }
 
-  async cancelBooking(bookingId: number, userId: string) {
+  async cancelBooking(bookingId: number, userId: string, reason?: string) {
     const booking = await this.bookingsRepository.findOne({
       where: { id: bookingId },
     });
@@ -427,6 +444,15 @@ export class BookingsService {
     const cancellableStatuses = [BookingStatus.PENDING_PAYMENT, BookingStatus.AWAITING_APPROVAL, BookingStatus.CONFIRMED, BookingStatus.SUCCESS];
     if (!cancellableStatuses.includes(booking.status)) {
       throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงิน รอตรวจสอบ หรือสำเร็จเท่านั้น');
+    }
+
+    if (reason) {
+      booking.cancellationReason = reason;
+    }
+
+    const paidStatuses = [BookingStatus.AWAITING_APPROVAL, BookingStatus.CONFIRMED, BookingStatus.SUCCESS];
+    if (paidStatuses.includes(booking.status)) {
+      booking.isRefundRequested = true;
     }
 
     booking.status = BookingStatus.CANCELED;

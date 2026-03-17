@@ -146,4 +146,9 @@ export class CreateTourDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  festivalId?: number | null;
 }
