@@ -64,6 +64,7 @@ export default function MyBookingPage() {
       case 'canceled': return 'ยกเลิกแล้ว'
       case 'refund_pending': return 'รอคืนเงิน'
       case 'refund_completed': return 'คืนเงินสำเร็จ'
+      case 'refund_rejected': return 'ปฏิเสธการคืนเงิน'
       default: return status
     }
   }
@@ -161,6 +162,9 @@ export default function MyBookingPage() {
       case 'รอตรวจสอบ': return 'bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-600/20'
       case 'สำเร็จ': return 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
       case 'ยกเลิกแล้ว': return 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10'
+      case 'รอคืนเงิน': return 'bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-600/20'
+      case 'คืนเงินสำเร็จ': return 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20'
+      case 'ปฏิเสธการคืนเงิน': return 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10'
       default: return 'bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/10'
     }
   }
@@ -171,6 +175,9 @@ export default function MyBookingPage() {
       case 'รอตรวจสอบ': return 'bg-[#F97316]'
       case 'สำเร็จ': return 'bg-[#10B981]'
       case 'ยกเลิกแล้ว': return 'bg-[#EF4444]'
+      case 'รอคืนเงิน': return 'bg-[#A855F7]'
+      case 'คืนเงินสำเร็จ': return 'bg-[#3B82F6]'
+      case 'ปฏิเสธการคืนเงิน': return 'bg-[#EF4444]'
       default: return 'bg-gray-500'
     }
   }
@@ -181,6 +188,9 @@ export default function MyBookingPage() {
       case 'รอตรวจสอบ': return 'รอการตรวจสอบ'
       case 'สำเร็จ': return 'ชำระเงินแล้ว'
       case 'ยกเลิกแล้ว': return 'ยกเลิกแล้ว'
+      case 'รอคืนเงิน': return 'รอการคืนเงิน'
+      case 'คืนเงินสำเร็จ': return 'คืนเงินสำเร็จแล้ว'
+      case 'ปฏิเสธการคืนเงิน': return 'ปฏิเสธการคืนเงิน'
       default: return 'สถานะไม่ทราบ'
     }
   }
@@ -320,6 +330,24 @@ export default function MyBookingPage() {
                         >
                           รายละเอียด
                         </button>
+
+                        {(booking.status === 'สำเร็จ' ||
+                          booking.status.includes('ยกเลิก') ||
+                          booking.status.includes('คืนเงิน')) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (booking.tourId) {
+                                navigate(`/tours/${booking.tourId}`)
+                              } else {
+                                navigate('/tours')
+                              }
+                            }}
+                            className="ui-focus-ring ui-pressable rounded-full border border-primary bg-white px-5 py-2.5 text-sm font-bold text-primary hover:bg-primary/5"
+                          >
+                            จองอีกครั้ง
+                          </button>
+                        )}
 
                         {canPay && (
                           <button
@@ -557,6 +585,27 @@ export default function MyBookingPage() {
                 <span />
               )}
                 <div className="flex flex-col gap-3 sm:ml-auto sm:flex-row">
+                  {(selectedBooking.status === 'สำเร็จ' ||
+                    selectedBooking.status === 'confirmed' ||
+                    selectedBooking.status.includes('ยกเลิก') ||
+                    selectedBooking.status === 'canceled' ||
+                    selectedBooking.status.includes('คืนเงิน')) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const tourId = selectedBooking.tourId;
+                        setSelectedBooking(null);
+                        if (tourId) {
+                          navigate(`/tours/${tourId}`);
+                        } else {
+                          navigate('/tours');
+                        }
+                      }}
+                      className="ui-focus-ring ui-pressable rounded-full border border-primary bg-white px-6 py-3 text-base font-bold text-primary hover:bg-primary/5"
+                    >
+                      จองอีกครั้ง
+                    </button>
+                  )}
                   {selectedCanPay && (
                     <button
                       type="button"
