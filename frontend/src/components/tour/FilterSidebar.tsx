@@ -17,6 +17,11 @@ const PROVINCES_BY_REGION: Record<string, string[]> = {
   ภาคตะวันออกเฉียงเหนือ: ['ขอนแก่น', 'นครราชสีมา', 'อุดรธานี'],
 }
 
+interface FestivalOption {
+  id: number
+  name: string
+}
+
 interface FilterSidebarProps {
   region: string
   province: string
@@ -33,6 +38,8 @@ interface FilterSidebarProps {
   }
   availableCategories: string[]
   availableMonths: MonthOption[]
+  festivals?: FestivalOption[]
+  festivalId?: number | null
   onRegionChange: (value: string) => void
   onProvinceChange: (value: string) => void
   onTourTypeChange: (value: string) => void
@@ -41,6 +48,7 @@ interface FilterSidebarProps {
   onMonthChange: (value: string) => void
   onMinPriceChange: (value: number) => void
   onMaxPriceChange: (value: number) => void
+  onFestivalChange?: (value: number | null) => void
   onClear: () => void
   mode?: 'sidebar' | 'drawer'
   onClose?: () => void
@@ -252,6 +260,8 @@ export default function FilterSidebar({
   priceBounds,
   availableCategories,
   availableMonths,
+  festivals = [],
+  festivalId,
   onRegionChange,
   onProvinceChange,
   onTourTypeChange,
@@ -260,12 +270,13 @@ export default function FilterSidebar({
   onMonthChange,
   onMinPriceChange,
   onMaxPriceChange,
+  onFestivalChange,
   onClear,
   mode = 'sidebar',
   onClose,
 }: FilterSidebarProps) {
   const hasPriceFilter = minPrice > priceBounds.min || maxPrice < priceBounds.max
-  const hasFilter = region || province || tourType || search || month || categories.length > 0 || hasPriceFilter
+  const hasFilter = region || province || tourType || search || month || categories.length > 0 || festivalId || hasPriceFilter
   const provinceOptions = region
     ? (PROVINCES_BY_REGION[region] ?? [])
     : Object.values(PROVINCES_BY_REGION).flat()
@@ -614,6 +625,21 @@ export default function FilterSidebar({
               ]}
             />
           </div>
+
+          {festivals.length > 0 && onFestivalChange && (
+            <div>
+              <label className="mb-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">เทศกาล</label>
+              <CustomSelect
+                value={festivalId ? String(festivalId) : ''}
+                placeholder="ทุกเทศกาล"
+                onChange={(value) => onFestivalChange(value ? Number(value) : null)}
+                options={[
+                  { value: '', label: 'ทุกเทศกาล' },
+                  ...festivals.map((f) => ({ value: String(f.id), label: f.name })),
+                ]}
+              />
+            </div>
+          )}
         </div>
       </div>
     </aside>

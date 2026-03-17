@@ -11,6 +11,7 @@ export interface TourFilters {
   categories?: string[]
   minPrice?: number
   maxPrice?: number
+  festivalId?: number
 }
 
 export interface AvailableSeatsResponse {
@@ -35,6 +36,7 @@ export const tourService = {
     if (filters?.categories?.length) params.categories = filters.categories.join(',')
     if (typeof filters?.minPrice === 'number') params.minPrice = filters.minPrice
     if (typeof filters?.maxPrice === 'number') params.maxPrice = filters.maxPrice
+    if (filters?.festivalId) params.festivalId = filters.festivalId
 
     return api.get<Tour[]>('/tours', { params }).then((r) => r.data)
   },

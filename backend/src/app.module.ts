@@ -9,6 +9,9 @@ import { BookingsModule } from './bookings/bookings.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { FestivalsModule } from './festivals/festivals.module';
+import { FavoritesModule } from './favorites/favorites.module';
+import { ReviewsModule } from './reviews/reviews.module';
 import { validateEnv } from './config/env.validation';
 
 @Module({
@@ -45,6 +48,9 @@ import { validateEnv } from './config/env.validation';
     PaymentsModule,
     AnalyticsModule,
     NotificationsModule,
+    FestivalsModule,
+    FavoritesModule,
+    ReviewsModule,
   ],
 })
 export class AppModule { }

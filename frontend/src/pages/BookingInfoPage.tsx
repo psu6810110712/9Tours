@@ -63,6 +63,9 @@ export default function BookingInfoPage() {
   const [manualContactDraft, setManualContactDraft] = useState<ContactDetails>(accountContact)
   const [hasManualDraft, setHasManualDraft] = useState(false)
   const [specialRequest, setSpecialRequest] = useState('')
+  const [travelersInfo, setTravelersInfo] = useState<{ name: string; isLeadTraveler: boolean }[]>(
+    () => Array.from({ length: adults + children }, (_, i) => ({ name: '', isLeadTraveler: i === 0 }))
+  )
 
   useEffect(() => {
     if (!tourId) {
@@ -158,6 +161,10 @@ export default function BookingInfoPage() {
     setErrors({})
 
     try {
+      const filledTravelers = travelersInfo
+        .map((t) => ({ name: t.name.trim(), isLeadTraveler: t.isLeadTraveler }))
+        .filter((t) => t.name.length > 0)
+
       const payload = {
         scheduleId: Number(scheduleId),
         paxCount: adults + children,
@@ -168,6 +175,7 @@ export default function BookingInfoPage() {
         contactName: sanitizeCustomerName(resolvedContact.name),
         contactEmail: normalizeEmail(resolvedContact.email),
         contactPhone: normalizeThaiPhoneInput(resolvedContact.phone) ?? resolvedContact.phone,
+        travelersInfo: filledTravelers.length > 0 ? filledTravelers : undefined,
       }
 
       const response = await bookingService.createBooking(payload)
@@ -214,11 +222,21 @@ export default function BookingInfoPage() {
             </svg>
             ย้อนกลับ
           </button>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="ui-pressable self-start flex items-center gap-1.5 text-base font-bold text-primary hover:underline md:hidden"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19 3 12m0 0 7-7m-7 7h18" />
+            </svg>
+            ย้อนกลับ
+          </button>
           <ProgressBar currentStep={2} />
         </div>
 
         <div className="mb-8 text-center lg:text-left">
-          <h1 className="text-2xl font-bold text-gray-900">การจองของท่าน</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">การจองของท่าน</h1>
           <p className="mt-2 text-sm text-gray-500">กรุณาตรวจสอบข้อมูลผู้ติดต่อและรายละเอียดการเดินทางก่อนดำเนินการต่อ</p>
         </div>
 
@@ -344,6 +362,36 @@ export default function BookingInfoPage() {
                   <p className="mt-1.5 text-sm text-gray-400">ใช้สำหรับส่งรายละเอียดการจองและใบยืนยัน</p>
                   {errors.email && <p className="mt-1.5 text-sm text-red-500">{errors.email}</p>}
                 </div>
+              </div>
+            </section>
+
+            <section className="ui-surface rounded-[1.75rem] border border-gray-100 bg-white p-6 md:p-8">
+              <div className="mb-4">
+                <h2 className="text-xl font-bold text-gray-900">รายชื่อผู้เดินทาง</h2>
+                <p className="mt-1 text-sm text-gray-500">ระบุชื่อผู้เดินทางทุกท่าน (ไม่บังคับ)</p>
+              </div>
+              <div className="space-y-3">
+                {travelersInfo.map((traveler, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <span className="w-20 shrink-0 text-sm font-semibold text-gray-500">
+                      {index < adults ? `ผู้ใหญ่ ${index + 1}` : `เด็ก ${index - adults + 1}`}
+                    </span>
+                    <input
+                      type="text"
+                      className="ui-focus-ring flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-300 focus:border-primary focus:bg-white"
+                      placeholder="ชื่อ-นามสกุล"
+                      value={traveler.name}
+                      onChange={(e) => {
+                        const next = [...travelersInfo]
+                        next[index] = { ...next[index], name: e.target.value }
+                        setTravelersInfo(next)
+                      }}
+                    />
+                    {traveler.isLeadTraveler && (
+                      <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700">หัวหน้าทริป</span>
+                    )}
+                  </div>
+                ))}
               </div>
             </section>
 

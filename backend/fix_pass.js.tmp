@@ -1,0 +1,24 @@
+
+const bcrypt = require('bcrypt');
+const { Client } = require('pg');
+
+async function run() {
+  const client = new Client({
+    user: 'init',
+    host: 'db',
+    database: '9tours_db',
+    password: 'secret',
+    port: 5432,
+  });
+
+  await client.connect();
+  const pass = '987654321'; // Simple password for user to remember
+  const hash = await bcrypt.hash(pass, 10);
+  
+  await client.query("UPDATE users SET password = $1, role = 'admin' WHERE email = 'admin@9tours.com'", [hash]);
+  console.log('Fixed admin@9tours.com with password: ' + pass);
+  
+  await client.end();
+}
+
+run().catch(console.error);

@@ -7,8 +7,9 @@ import AdminTourPreviewCard from '../../components/admin/tour-form/AdminTourPrev
 import ImageUploadSection from '../../components/admin/tour-form/ImageUploadSection'
 import ItinerarySection from '../../components/admin/tour-form/ItinerarySection'
 import ScheduleSection from '../../components/admin/tour-form/ScheduleSection'
+import { festivalService } from '../../services/festivalService'
 import { tourService } from '../../services/tourService'
-import type { CreateTourPayload, Tour } from '../../types/tour'
+import type { CreateTourPayload, Festival, Tour } from '../../types/tour'
 
 const CATEGORIES = ['สายธรรมชาติ', 'สายคาเฟ่', 'สายกิจกรรม', 'สายมู', 'สายชิล']
 const REGIONS = ['ภาคเหนือ', 'ภาคใต้', 'ภาคกลาง', 'ภาคตะวันออกเฉียงเหนือ', 'ภาคตะวันออก', 'ภาคตะวันตก']
@@ -130,6 +131,8 @@ function buildPreviewTour({
   province,
   price,
   discountPercent,
+  discountStartDate,
+  discountEndDate,
   images,
   transportation,
   duration,
@@ -150,6 +153,8 @@ function buildPreviewTour({
   province: string
   price: string
   discountPercent: string
+  discountStartDate: string
+  discountEndDate: string
   images: string[]
   transportation: string
   duration: string
@@ -177,6 +182,8 @@ function buildPreviewTour({
     price: finalPrice,
     childPrice: null,
     originalPrice: hasDiscount && basePrice > 0 ? basePrice : null,
+    discountStartDate: discountStartDate || null,
+    discountEndDate: discountEndDate || null,
     images,
     highlights: [
       highlights[0]?.trim() || 'ไฮไลต์หลักของทัวร์',
@@ -249,6 +256,14 @@ export default function AdminTourFormPage() {
   const [bulkCapacity, setBulkCapacity] = useState(20)
   const [bulkDuration, setBulkDuration] = useState<number>(1)
   const [bulkDays, setBulkDays] = useState<Set<number>>(new Set())
+  const [discountStartDate, setDiscountStartDate] = useState('')
+  const [discountEndDate, setDiscountEndDate] = useState('')
+  const [festivals, setFestivals] = useState<Festival[]>([])
+  const [festivalId, setFestivalId] = useState<number | null>(null)
+
+  useEffect(() => {
+    festivalService.getAll().then(setFestivals).catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!isEditing) return
@@ -298,6 +313,9 @@ export default function AdminTourFormPage() {
         setTransportation(tour.transportation || '')
         setAccommodation(tour.accommodation || '')
         setItinerary(tour.itinerary || [])
+        setDiscountStartDate(tour.discountStartDate || '')
+        setDiscountEndDate(tour.discountEndDate || '')
+        setFestivalId(tour.festivalId ?? null)
         setSchedules(
           tour.schedules.map((schedule) => ({
             id: schedule.id,
@@ -482,6 +500,18 @@ export default function AdminTourFormPage() {
       return
     }
 
+    const numDiscountCheck = Number(discountPercent)
+    if (Number.isFinite(numDiscountCheck) && numDiscountCheck >= 90) {
+      toast.error('ส่วนลดต้องน้อยกว่า 90% — กรุณาตรวจสอบราคาอีกครั้ง')
+      return
+    }
+
+    const enabledSchedules = schedules.filter((schedule) => schedule.enabled && schedule.startDate && schedule.endDate)
+    if (enabledSchedules.length === 0) {
+      toast.error('กรุณาเพิ่มรอบเดินทางอย่างน้อย 1 รอบก่อนเผยแพร่ทัวร์')
+      return
+    }
+
     setSaving(true)
 
     const numPrice = Number(price)
@@ -516,6 +546,9 @@ export default function AdminTourFormPage() {
       province,
       accommodation: tourType === 'package' ? accommodation : null,
       itinerary,
+      discountStartDate: discountStartDate || null,
+      discountEndDate: discountEndDate || null,
+      festivalId: festivalId || null,
       schedules: schedules
         .filter((schedule) => schedule.enabled && schedule.startDate && schedule.endDate)
         .map((schedule) => ({
@@ -560,6 +593,8 @@ export default function AdminTourFormPage() {
     province,
     price,
     discountPercent,
+    discountStartDate,
+    discountEndDate,
     images,
     transportation,
     duration,
@@ -701,6 +736,22 @@ export default function AdminTourFormPage() {
                     </div>
                   </div>
 
+                  {festivals.length > 0 && (
+                    <div className="mt-6">
+                      <FieldLabel text="เทศกาล / แคมเปญ" />
+                      <select
+                        value={festivalId ?? ''}
+                        onChange={(e) => setFestivalId(e.target.value ? Number(e.target.value) : null)}
+                        className={inputClass}
+                      >
+                        <option value="">ไม่ระบุเทศกาล</option>
+                        {festivals.map((f) => (
+                          <option key={f.id} value={f.id}>{f.name} ({f.startDate} – {f.endDate})</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
                   <div className="mt-6">
                     <FieldLabel text="รายละเอียดทัวร์" required />
                     <textarea value={description} onChange={(event) => setDescription(event.target.value)} required rows={4} className={`${inputClass} min-h-[9rem] resize-y leading-7`} />
@@ -762,6 +813,63 @@ export default function AdminTourFormPage() {
                       <input type="number" value={childPrice} onChange={(event) => setChildPrice(event.target.value)} min={0} placeholder="ไม่บังคับ" className={inputClass} />
                     </div>
                   </div>
+
+                  {(() => {
+                    const numP = Number(price)
+                    const numD = Number(discountPercent)
+                    if (!Number.isFinite(numP) || numP <= 0 || !Number.isFinite(numD) || numD <= 0) return null
+
+                    const finalAdult = Math.round(numP * (1 - numD / 100))
+                    const numChild = Number(childPrice)
+                    const finalChild = Number.isFinite(numChild) && numChild > 0 ? Math.round(numChild * (1 - numD / 100)) : null
+
+                    return (
+                      <div className={`mt-4 rounded-2xl border p-4 text-sm ${numD >= 90 ? 'border-red-300 bg-red-50' : numD >= 50 ? 'border-amber-200 bg-amber-50' : 'border-emerald-200 bg-emerald-50'}`}>
+                        <p className="font-bold text-gray-800">ราคาหลังหักส่วนลด {numD}%</p>
+                        <div className="mt-2 flex flex-wrap gap-4">
+                          <span>ผู้ใหญ่: <strong className="text-gray-900">฿{finalAdult.toLocaleString()}</strong></span>
+                          {finalChild !== null && <span>เด็ก: <strong className="text-gray-900">฿{finalChild.toLocaleString()}</strong></span>}
+                        </div>
+                        {numD >= 90 && <p className="mt-2 font-semibold text-red-600">⚠ ส่วนลดสูงเกินไป — ไม่สามารถบันทึกได้</p>}
+                        {numD >= 50 && numD < 90 && <p className="mt-2 font-semibold text-amber-700">⚠ ส่วนลดสูง — กรุณาตรวจสอบราคาอีกครั้ง</p>}
+                      </div>
+                    )
+                  })()}
+
+                  {Number(discountPercent) > 0 && (
+                    <div className="mt-6 rounded-[1.5rem] border border-blue-100 bg-blue-50/60 p-4 md:p-5">
+                      <FieldLabel text="ระยะเวลาโปรโมชัน" />
+                      <p className="mb-3 text-sm text-gray-500">กำหนดช่วงเวลาที่ส่วนลดจะมีผล หากไม่ระบุ ส่วนลดจะแสดงตลอด</p>
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                          <FineLabel text="วันเริ่มต้นโปรโมชัน" />
+                          <input
+                            type="date"
+                            value={discountStartDate}
+                            onChange={(e) => setDiscountStartDate(e.target.value)}
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <FineLabel text="วันสิ้นสุดโปรโมชัน" />
+                          <input
+                            type="date"
+                            value={discountEndDate}
+                            onChange={(e) => setDiscountEndDate(e.target.value)}
+                            className={inputClass}
+                          />
+                        </div>
+                      </div>
+                      {discountStartDate && discountEndDate && discountEndDate < discountStartDate && (
+                        <p className="mt-2 text-sm font-semibold text-red-600">วันสิ้นสุดต้องไม่อยู่ก่อนวันเริ่มต้น</p>
+                      )}
+                      {discountEndDate && discountEndDate >= (discountStartDate || '0000-00-00') && (
+                        <p className="mt-2 text-sm text-blue-700">
+                          ส่วนลดจะหมดอายุหลังวันที่ {new Date(discountEndDate + 'T00:00:00').toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   <div className="mt-6 rounded-[1.5rem] border border-gray-100 bg-gray-50/70 p-4 md:p-5">
                     <FieldLabel text="ข้อความบนการ์ดทัวร์" />

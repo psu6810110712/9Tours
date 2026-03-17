@@ -140,18 +140,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 9999px;
-  border: 1px solid #38bdf8;
-  background: #38bdf8;
-  color: #ffffff;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .ui-arrow-button:hover:not(:disabled) {
-  background: #38bdf8;
-  color: #ffffff;
-  border-color: #38bdf8;
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
   transform: none;
 }
 
@@ -227,6 +228,18 @@
 
   .ui-pressable:hover {
     transform: none;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .ui-pressable:hover {
+    transform: none;
+  }
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 

@@ -22,8 +22,8 @@ export const bookingService = {
     return response.data
   },
 
-  cancelBooking: async (id: string): Promise<Booking> => {
-    const response = await api.patch(`/bookings/${id}/cancel`)
+  cancelBooking: async (id: string, reason?: string): Promise<Booking> => {
+    const response = await api.patch(`/bookings/${id}/cancel`, { reason })
     return response.data
   },
 

@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
+import { FavoritesProvider } from './context/FavoritesContext'
 import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
 import ToursPage from './pages/ToursPage'
@@ -11,12 +12,15 @@ import AdminTourFormPage from './pages/admin/AdminTourFormPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminBookings from './pages/admin/AdminBookings'
 import AdminTourOverview from './pages/admin/AdminTourOverview'
+import AdminFestivalsPage from './pages/admin/AdminFestivalsPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import ScrollToTop from './components/common/ScrollToTop'
 import BookingInfoPage from './pages/BookingInfoPage'
 import PaymentPage from './pages/PaymentPage'
 import GoogleAuthCallbackPage from './pages/GoogleAuthCallbackPage'
 import CompleteProfilePage from './pages/CompleteProfilePage'
 import { useAuth } from './context/AuthContext'
+import FavoritesPage from './pages/FavoritesPage'
 
 function HomeRoute() {
   const { user, isLoading } = useAuth()
@@ -48,7 +52,9 @@ function App() {
           },
         }}
       />
+      <FavoritesProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/auth/google/callback" element={<GoogleAuthCallbackPage />} />
 
@@ -93,6 +99,15 @@ function App() {
             />
 
             <Route
+              path="/favorites"
+              element={
+                <ProtectedRoute>
+                  <FavoritesPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/admin/dashboard"
               element={
                 <ProtectedRoute requiredRole="admin">
@@ -125,6 +140,14 @@ function App() {
               }
             />
             <Route
+              path="/admin/festivals"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminFestivalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/tours/new"
               element={
                 <ProtectedRoute requiredRole="admin">
@@ -143,6 +166,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      </FavoritesProvider>
     </AuthProvider>
   )
 }

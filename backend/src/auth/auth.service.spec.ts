@@ -45,6 +45,7 @@ describe('AuthService', () => {
     bookings: [],
     tourViews: [],
     refreshSessions: [],
+    favoriteTours: [],
     ...overrides,
   })
 

@@ -3,6 +3,7 @@ import { Booking } from '../../bookings/entities/booking.entity';
 import { TourView } from '../../analytics/entities/tour-view.entity';
 import { RefreshSession } from '../../auth/entities/refresh-session.entity';
 import type { CustomerPrefix } from '../customer-profile.utils';
+import { FavoriteTour } from '../../favorites/entities/favorite-tour.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -57,4 +58,7 @@ export class User {
 
   @OneToMany(() => RefreshSession, (refreshSession) => refreshSession.user)
   refreshSessions: RefreshSession[];
+
+  @OneToMany(() => FavoriteTour, (favorite) => favorite.user)
+  favoriteTours: FavoriteTour[];
 }

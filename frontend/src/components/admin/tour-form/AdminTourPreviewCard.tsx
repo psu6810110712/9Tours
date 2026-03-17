@@ -63,6 +63,11 @@ export default function AdminTourPreviewCard({ tour }: AdminTourPreviewCardProps
           {hasDiscount && (
             <div className="absolute right-0 top-0 z-10 flex min-h-[1rem] min-w-[2rem] flex-col items-center justify-center rounded-bl-[1.15rem] rounded-tr-[0.25rem] bg-red-500 px-4 py-2.5 text-right text-white">
               <p className="text-[1rem] font-black leading-none">ลด {discountPercent}%</p>
+              {tour.discountEndDate && (
+                <p className="mt-1 text-[0.8rem] font-semibold leading-none text-white/80">
+                  ถึง {new Date(`${tour.discountEndDate}T00:00:00`).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
+                </p>
+              )}
             </div>
           )}
 

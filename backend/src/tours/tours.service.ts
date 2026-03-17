@@ -5,6 +5,7 @@ import * as path from 'path';
 import { In, QueryFailedError, Repository } from 'typeorm';
 import { BehaviorEvent } from '../analytics/entities/behavior-event.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
+import { Festival } from '../festivals/entities/festival.entity';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
 import { TourSchedule } from './entities/tour-schedule.entity';
@@ -94,7 +95,7 @@ export class ToursService implements OnModuleInit {
 
     try {
       tours = await this.toursRepo.find({
-        relations: ['schedules'],
+        relations: ['schedules', 'festival'],
         order: { id: 'ASC' },
       });
     } catch (error) {
@@ -128,6 +129,13 @@ export class ToursService implements OnModuleInit {
         }))
       : [];
 
+    const rawOriginalPrice = normalizeNullableNumber(tour.originalPrice);
+    const rawPrice = normalizeNumber(tour.price, 0);
+    const hasDiscountDates = Boolean(tour.discountStartDate || tour.discountEndDate);
+    const discountActive = this.isDiscountCurrentlyActive(tour.discountStartDate, tour.discountEndDate);
+    const showDiscount = rawOriginalPrice != null && rawOriginalPrice > rawPrice
+      && (!hasDiscountDates || discountActive);
+
     return {
       id: tour.id,
       tourCode: tour.tourCode,
@@ -135,11 +143,14 @@ export class ToursService implements OnModuleInit {
       description: tour.description,
       tourType: tour.tourType,
       categories: Array.isArray(tour.categories) ? tour.categories : [],
-      price: normalizeNumber(tour.price, 0),
+      price: showDiscount ? rawPrice : (rawOriginalPrice ?? rawPrice),
       childPrice: normalizeNullableNumber(tour.childPrice),
       minPeople: normalizeNullableNumber(tour.minPeople),
       maxPeople: normalizeNullableNumber(tour.maxPeople),
-      originalPrice: normalizeNullableNumber(tour.originalPrice),
+      originalPrice: showDiscount ? rawOriginalPrice : null,
+      discountStartDate: tour.discountStartDate ?? null,
+      discountEndDate: tour.discountEndDate ?? null,
+      discountActive: showDiscount,
       images: Array.isArray(tour.images) ? tour.images : [],
       highlights: Array.isArray(tour.highlights) ? tour.highlights : [],
       itinerary: Array.isArray(tour.itinerary) ? tour.itinerary : [],
@@ -151,10 +162,20 @@ export class ToursService implements OnModuleInit {
       rating: normalizeNumber(tour.rating, 0),
       reviewCount: normalizeNumber(tour.reviewCount, 0),
       isActive: Boolean(tour.isActive),
+      festivalId: tour.festival?.id ?? null,
+      festival: tour.festival ? { id: tour.festival.id, name: tour.festival.name, startDate: tour.festival.startDate, endDate: tour.festival.endDate } : null,
       schedules,
       createdAt: tour.createdAt,
       updatedAt: tour.updatedAt,
     };
+  }
+
+  private isDiscountCurrentlyActive(startDate: string | null | undefined, endDate: string | null | undefined): boolean {
+    if (!startDate && !endDate) return true;
+    const today = new Date().toISOString().slice(0, 10);
+    if (startDate && today < startDate) return false;
+    if (endDate && today > endDate) return false;
+    return true;
   }
 
   private cloneTour(tour: TourRecord): TourRecord {
@@ -183,14 +204,15 @@ export class ToursService implements OnModuleInit {
   }
 
   private async upsertImportedTour(tourData: TourRecord) {
+    const festivalId = normalizeNullableNumber(tourData.festivalId ?? tourData.festival?.id);
     const existingTour = await this.toursRepo.findOne({
       where: { tourCode: tourData.tourCode },
-      relations: ['schedules'],
+      relations: ['schedules', 'festival'],
     });
     const schedules = Array.isArray(tourData.schedules) ? tourData.schedules : [];
 
     if (!existingTour) {
-      const savedTour = await this.toursRepo.save(this.toursRepo.create({
+      const newTourData = this.toursRepo.create({
         tourCode: tourData.tourCode,
         name: tourData.name,
         description: tourData.description,
@@ -212,7 +234,9 @@ export class ToursService implements OnModuleInit {
         rating: normalizeNumber(tourData.rating, 0),
         reviewCount: normalizeNumber(tourData.reviewCount, 0),
         isActive: tourData.isActive ?? true,
-      }));
+        festival: festivalId ? ({ id: festivalId } as Festival) : undefined,
+      });
+      const savedTour = await this.toursRepo.save(newTourData);
 
       if (schedules.length > 0) {
         await this.schedulesRepo.save(
@@ -253,6 +277,7 @@ export class ToursService implements OnModuleInit {
       reviewCount: normalizeNumber(tourData.reviewCount, 0),
       isActive: tourData.isActive ?? true,
     });
+    (existingTour as any).festival = festivalId ? ({ id: festivalId } as Festival) : null;
     await this.toursRepo.save(existingTour);
 
     const existingSchedules = Array.isArray(existingTour.schedules) ? existingTour.schedules : [];
@@ -339,7 +364,8 @@ export class ToursService implements OnModuleInit {
   }
 
   async create(dto: CreateTourDto) {
-    const newTour = await this.toursRepo.save(this.toursRepo.create({
+    const festivalId = normalizeNullableNumber(dto.festivalId);
+    const newTourData = this.toursRepo.create({
       tourCode: await this.makeTourCode(),
       name: dto.name,
       description: dto.description,
@@ -363,8 +389,12 @@ export class ToursService implements OnModuleInit {
       accommodation: dto.accommodation || null,
       rating: 0,
       reviewCount: 0,
+      discountStartDate: dto.discountStartDate || null,
+      discountEndDate: dto.discountEndDate || null,
       isActive: dto.isActive ?? true,
-    }));
+      festival: festivalId ? ({ id: festivalId } as Festival) : undefined,
+    });
+    const newTour = await this.toursRepo.save(newTourData);
 
     if (Array.isArray(dto.schedules) && dto.schedules.length > 0) {
       const schedules = dto.schedules.map((schedule) => this.schedulesRepo.create({
@@ -393,8 +423,9 @@ export class ToursService implements OnModuleInit {
     categories?: string | string[];
     minPrice?: string | number;
     maxPrice?: string | number;
+    festivalId?: string | number;
   }) {
-    const { region, province, tourType, search, admin, month, categories, minPrice, maxPrice } = filters || {};
+    const { region, province, tourType, search, admin, month, categories, minPrice, maxPrice, festivalId } = filters || {};
 
     const parsedCategories = (Array.isArray(categories) ? categories : String(categories || '').split(','))
       .map((item) => item.trim().toLowerCase())
@@ -437,6 +468,12 @@ export class ToursService implements OnModuleInit {
       result = result.filter((tour) => Array.isArray(tour.schedules)
         && tour.schedules.some((schedule: ScheduleRecord) => schedule.startDate && schedule.startDate.startsWith(month)));
     }
+    if (festivalId) {
+      const parsedFestivalId = Number(festivalId);
+      if (Number.isFinite(parsedFestivalId)) {
+        result = result.filter((tour) => tour.festivalId === parsedFestivalId);
+      }
+    }
 
     return result;
   }
@@ -473,11 +510,20 @@ export class ToursService implements OnModuleInit {
   async update(id: number, dto: UpdateTourDto) {
     const tour = await this.toursRepo.findOne({
       where: { id },
-      relations: ['schedules'],
+      relations: ['schedules', 'festival'],
     });
     if (!tour) return null;
 
-    const { schedules: incomingSchedules, ...rest } = dto as UpdateTourDto & { schedules?: ScheduleRecord[] };
+    const { schedules: incomingSchedules, festivalId, ...rest } = dto as UpdateTourDto & { schedules?: ScheduleRecord[]; festivalId?: number | null };
+
+    const willBeActive = rest.isActive !== undefined ? rest.isActive : tour.isActive;
+    const willHaveSchedules = Array.isArray(incomingSchedules)
+      ? incomingSchedules.length > 0
+      : (Array.isArray(tour.schedules) && tour.schedules.length > 0);
+
+    if (willBeActive && !willHaveSchedules) {
+      throw new BadRequestException('ไม่สามารถเปิดใช้งานทัวร์ได้ เนื่องจากยังไม่มีรอบเดินทาง กรุณาเพิ่มรอบเดินทางก่อน');
+    }
 
     Object.assign(tour, {
       ...rest,
@@ -486,6 +532,8 @@ export class ToursService implements OnModuleInit {
       minPeople: rest.minPeople !== undefined ? normalizeNullableNumber(rest.minPeople) : tour.minPeople,
       maxPeople: rest.maxPeople !== undefined ? normalizeNullableNumber(rest.maxPeople) : tour.maxPeople,
       originalPrice: rest.originalPrice !== undefined ? normalizeNullableNumber(rest.originalPrice) : tour.originalPrice,
+      discountStartDate: rest.discountStartDate !== undefined ? (rest.discountStartDate || null) : tour.discountStartDate,
+      discountEndDate: rest.discountEndDate !== undefined ? (rest.discountEndDate || null) : tour.discountEndDate,
       itinerary: Array.isArray(rest.itinerary)
         ? rest.itinerary.map((item) => ({
           ...item,
@@ -494,6 +542,10 @@ export class ToursService implements OnModuleInit {
         : tour.itinerary,
       updatedAt: new Date(),
     });
+
+    if (festivalId !== undefined) {
+      (tour as any).festival = festivalId ? { id: festivalId } : null;
+    }
 
     await this.toursRepo.save(tour);
 

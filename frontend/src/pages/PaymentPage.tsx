@@ -356,6 +356,16 @@ export default function PaymentPage() {
             </svg>
             ย้อนกลับ
           </button>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="ui-pressable self-start flex items-center gap-1.5 text-base font-bold text-primary hover:underline md:hidden"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19 3 12m0 0 7-7m-7 7h18" />
+            </svg>
+            ย้อนกลับ
+          </button>
           <ProgressBar currentStep={3} />
         </div>
 
@@ -364,7 +374,7 @@ export default function PaymentPage() {
           <p className="mt-2 text-base text-gray-500">โอนเงินตาม QR ด้านล่าง และอัปโหลดสลิปเพื่อส่งหลักฐานการชำระเงิน</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_1.15fr_1fr]">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-[1fr_1.15fr_1fr]">
           <section className="ui-surface flex h-full flex-col overflow-hidden rounded-[1.65rem] border border-gray-100 bg-white">
             <div className="bg-[linear-gradient(180deg,#f8fbff_0%,#eef5ff_100%)] px-5 py-5">
               {canShowQr ? (
@@ -399,13 +409,9 @@ export default function PaymentPage() {
                           </div>
                         </div>
 
-                        <div className="mt-4 rounded-[1.1rem] border border-slate-200 bg-[#f8fbff] px-4 py-3 text-left">
-                          <p className="text-sm font-medium text-gray-500">ยอดที่ต้องชำระ</p>
-                          <p className="mt-1 text-2xl font-bold text-gray-900">฿{paymentQr.amount.toLocaleString()}</p>
-                          <p className="mt-2 text-sm text-gray-600">
-                            QR นี้ใช้ได้ถึง {qrExpiryLabel} น.
-                          </p>
-                        </div>
+                        <p className="mt-3 text-center text-xs text-gray-400">
+                          QR ใช้ได้ถึง {qrExpiryLabel} น.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -539,7 +545,7 @@ export default function PaymentPage() {
             type="button"
             onClick={handleConfirmPayment}
             disabled={isSubmitting || isPaymentClosed}
-            className={`ui-focus-ring ui-pressable flex min-w-[280px] items-center justify-center gap-3 rounded-full px-8 py-4 text-lg font-bold text-white ${isSubmitting || isPaymentClosed
+            className={`ui-focus-ring ui-pressable flex w-full sm:w-auto min-w-0 sm:min-w-[280px] items-center justify-center gap-3 rounded-full px-8 py-4 text-base sm:text-lg font-bold text-white ${isSubmitting || isPaymentClosed
               ? 'cursor-not-allowed bg-gray-400 shadow-none hover:transform-none'
               : 'bg-primary shadow-[0_10px_25px_rgba(37,99,235,0.25)] hover:bg-primary-dark'
             }`}
@@ -562,9 +568,9 @@ export default function PaymentPage() {
             )}
           </button>
 
-          <div className="mt-5 flex gap-4 text-base font-medium text-gray-400">
+          <div className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm sm:text-base font-medium text-gray-400">
             <span>ข้อกำหนดและเงื่อนไขการชำระเงิน</span>
-            <span>|</span>
+            <span className="hidden sm:inline">|</span>
             <span>นโยบายความเป็นส่วนตัว</span>
           </div>
         </div>
