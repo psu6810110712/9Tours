@@ -45,7 +45,7 @@ function DetailItem({ icon, text }: DetailItemProps) {
     : <CheckIcon />
 
   return (
-    <div className="flex items-center gap-2 text-[13px] sm:text-[15px] md:text-[17px] font-semibold leading-[1.05] text-gray-600">
+    <div className="flex items-center gap-2 text-[13px] sm:text-[15px] md:text-[17px] font-medium leading-[1.05] text-gray-600">
       {iconNode}
       <span className="line-clamp-1">{text}</span>
     </div>
@@ -148,7 +148,7 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
           </span>
         </div>
       )}
-      <div className="h-[110px] sm:h-[180px] overflow-hidden border-b border-gray-100 bg-slate-100">
+      <div className="h-[110px] sm:h-[170px] overflow-hidden border-b border-gray-100 bg-slate-100">
         {hasCoverImage ? (
           <img
             src={coverImage}
@@ -157,7 +157,7 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 px-6 text-center">
-            <p className="text-lg font-bold text-slate-600">ไม่มีภาพประกอบสำหรับทัวร์นี้</p>
+            <p className="text-md font-bold text-slate-600">ไม่มีภาพประกอบสำหรับทัวร์นี้</p>
           </div>
         )}
       </div>
@@ -167,7 +167,7 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
           {tour.name}
         </h3>
 
-        <div className="mt-1 -ml-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] sm:text-[15px] md:text-[16px] font-bold text-gray-700">
+        <div className="mt-1 -ml-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] sm:text-[15px] md:text-[16px] font-semibold text-gray-700">
           <span className="inline-flex items-center gap-1 leading-none text-gray-700">
             <StarIcon />
             <span>{tour.rating.toFixed(1)}</span>
@@ -183,7 +183,7 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
           ))}
         </div>
 
-        <div className="-mx-3 -mb-5 mt-2 border-t border-gray-200">
+        <div className="-mx-3 -mb-5.5 mt-2 border-t border-gray-200">
           <div className="relative min-h-[5.6rem] px-3 py-2">
             <div>
               <p className="text-[0.8rem] sm:text-[0.85rem] md:text-[0.9rem] font-semibold text-gray-700">

@@ -65,7 +65,7 @@ export default function ToursPage() {
     tourService.getAll()
       .then(setAllTours)
       .catch(() => setAllTours([]))
-    festivalService.getAll().then(setFestivals).catch(() => {})
+    festivalService.getAll().then(setFestivals).catch(() => { })
   }, [])
 
   useEffect(() => {
@@ -405,7 +405,7 @@ export default function ToursPage() {
               <p className="mt-2 text-sm text-gray-400">ลองขยายช่วงราคา เปลี่ยนเดือน หรือเลือกตัวกรองให้น้อยลง</p>
             </div>
           ) : (
-            <div className="mx-auto grid max-w-4xl grid-cols-2 gap-2 sm:grid-cols-2 md:grid-cols-3">
+            <div className="mx-auto grid max-w-5xl grid-cols-2 gap-2.25 sm:gap-4 md:grid-cols-3 md:gap-4">
               {sortedTours.map((tour) => (
                 <TourCard
                   key={tour.id}

@@ -1,4 +1,4 @@
-﻿import type { Tour } from '../../../types/tour'
+import type { Tour } from '../../../types/tour'
 
 interface BookingGuestSelectorProps {
   tour: Tour
@@ -26,7 +26,7 @@ export default function BookingGuestSelector({
       <div className="mb-4 rounded-[1.25rem] border border-slate-200 bg-slate-50 px-3 py-3 sm:mb-5 sm:rounded-[1.5rem] sm:px-4 sm:py-4">
         <label className="mb-2 block text-sm font-semibold text-slate-700 sm:text-md">จำนวนผู้เดินทาง</label>
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 sm:h-10 sm:w-10">
+          <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 sm:h-10 sm:w-10">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -46,7 +46,7 @@ export default function BookingGuestSelector({
 
   return (
     <div className="mb-4 sm:mb-5">
-      <div className="mb-2.5 sm:mb-3">
+      <div className="mb-3 sm:mb-4">
         <label className="block text-base font-bold text-slate-800 sm:text-lg">จำนวนผู้เดินทาง</label>
         {!hasSelectedSchedule && <p className="mt-1 text-xs text-amber-600">กรุณาเลือกวันที่ก่อนเพื่อเลือกจำนวนคน</p>}
       </div>
