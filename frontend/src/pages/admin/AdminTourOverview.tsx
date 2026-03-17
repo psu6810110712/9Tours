@@ -227,9 +227,8 @@ export default function AdminTourOverview() {
             key={value}
             type="button"
             onClick={() => setFilter(value)}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-              filter === value ? 'bg-yellow-400 text-white' : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-            }`}
+            className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${filter === value ? 'bg-yellow-400 text-white' : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+              }`}
           >
             {value === 'all' ? 'ทั้งหมด' : value === 'available' ? 'มีที่ว่าง' : 'เต็มแล้ว'}
           </button>
@@ -237,9 +236,8 @@ export default function AdminTourOverview() {
         <button
           type="button"
           onClick={() => setShowPastSchedules((prev) => !prev)}
-          className={`ml-auto rounded-xl border px-4 py-2 text-sm font-medium transition-colors ${
-            showPastSchedules ? 'border-gray-800 bg-gray-800 text-white' : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
-          }`}
+          className={`ml-auto rounded-xl border px-4 py-2 text-sm font-medium transition-colors ${showPastSchedules ? 'border-gray-800 bg-gray-800 text-white' : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+            }`}
         >
           {showPastSchedules ? 'แสดงรอบที่ผ่านไปแล้ว' : 'ซ่อนรอบที่ผ่านไปแล้ว'}
         </button>
@@ -363,9 +361,8 @@ export default function AdminTourOverview() {
                   key={schedule.id}
                   type="button"
                   onClick={() => void handleScheduleClick(schedule, selectedMonthSchedules.tourName)}
-                  className={`flex w-full items-center gap-4 rounded-2xl border border-gray-100 bg-white px-5 py-4 text-left transition-colors hover:border-yellow-300 hover:bg-yellow-50/40 ${
-                    isPast ? 'opacity-60' : ''
-                  }`}
+                  className={`flex w-full items-center gap-4 rounded-2xl border border-gray-100 bg-white px-5 py-4 text-left transition-colors hover:border-yellow-300 hover:bg-yellow-50/40 ${isPast ? 'opacity-60' : ''
+                    }`}
                 >
                   <div className="w-48 flex-shrink-0">
                     <div className="flex items-center gap-2">

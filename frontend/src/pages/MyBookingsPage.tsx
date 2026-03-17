@@ -1,8 +1,8 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
-import ConfirmModal from '../components/common/ConfirmModal'
 import Modal from '../components/common/Modal'
+import ContactAdminModal from '../components/booking/ContactAdminModal'
 import { bookingService } from '../services/bookingService'
 import { buildDisplayName } from '../utils/profileValidation'
 
@@ -47,6 +47,8 @@ export default function MyBookingPage() {
   const [selectedBooking, setSelectedBooking] = useState<MyBookingItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [cancelModalId, setCancelModalId] = useState<string | null>(null)
+  const [contactAdminModalId, setContactAdminModalId] = useState<string | null>(null)
+  const [cancelReason, setCancelReason] = useState('')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -62,6 +64,7 @@ export default function MyBookingPage() {
       case 'canceled': return 'ยกเลิกแล้ว'
       case 'refund_pending': return 'รอคืนเงิน'
       case 'refund_completed': return 'คืนเงินสำเร็จ'
+      case 'refund_rejected': return 'ปฏิเสธการคืนเงิน'
       default: return status
     }
   }
@@ -134,12 +137,16 @@ export default function MyBookingPage() {
       await bookingService.cancelBooking(bookingId)
       toast.success('ยกเลิกการจองสำเร็จ')
       setCancelModalId(null)
+      setContactAdminModalId(null)
+      setCancelReason('')
       await loadBookings()
     } catch (error: unknown) {
       const resolvedError = error as { response?: { data?: { message?: string } } }
       console.error('Error canceling booking:', error)
       toast.error(resolvedError.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก กรุณาลองใหม่อีกครั้ง')
       setCancelModalId(null)
+      setContactAdminModalId(null)
+      setCancelReason('')
     }
   }
 
@@ -155,6 +162,9 @@ export default function MyBookingPage() {
       case 'รอตรวจสอบ': return 'bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-600/20'
       case 'สำเร็จ': return 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
       case 'ยกเลิกแล้ว': return 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10'
+      case 'รอคืนเงิน': return 'bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-600/20'
+      case 'คืนเงินสำเร็จ': return 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20'
+      case 'ปฏิเสธการคืนเงิน': return 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10'
       default: return 'bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/10'
     }
   }
@@ -165,6 +175,9 @@ export default function MyBookingPage() {
       case 'รอตรวจสอบ': return 'bg-[#F97316]'
       case 'สำเร็จ': return 'bg-[#10B981]'
       case 'ยกเลิกแล้ว': return 'bg-[#EF4444]'
+      case 'รอคืนเงิน': return 'bg-[#A855F7]'
+      case 'คืนเงินสำเร็จ': return 'bg-[#3B82F6]'
+      case 'ปฏิเสธการคืนเงิน': return 'bg-[#EF4444]'
       default: return 'bg-gray-500'
     }
   }
@@ -175,6 +188,9 @@ export default function MyBookingPage() {
       case 'รอตรวจสอบ': return 'รอการตรวจสอบ'
       case 'สำเร็จ': return 'ชำระเงินแล้ว'
       case 'ยกเลิกแล้ว': return 'ยกเลิกแล้ว'
+      case 'รอคืนเงิน': return 'รอการคืนเงิน'
+      case 'คืนเงินสำเร็จ': return 'คืนเงินสำเร็จแล้ว'
+      case 'ปฏิเสธการคืนเงิน': return 'ปฏิเสธการคืนเงิน'
       default: return 'สถานะไม่ทราบ'
     }
   }
@@ -315,6 +331,24 @@ export default function MyBookingPage() {
                           รายละเอียด
                         </button>
 
+                        {(booking.status === 'สำเร็จ' ||
+                          booking.status.includes('ยกเลิก') ||
+                          booking.status.includes('คืนเงิน')) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (booking.tourId) {
+                                navigate(`/tours/${booking.tourId}`)
+                              } else {
+                                navigate('/tours')
+                              }
+                            }}
+                            className="ui-focus-ring ui-pressable rounded-full border border-primary bg-white px-5 py-2.5 text-sm font-bold text-primary hover:bg-primary/5"
+                          >
+                            จองอีกครั้ง
+                          </button>
+                        )}
+
                         {canPay && (
                           <button
                             type="button"
@@ -328,7 +362,13 @@ export default function MyBookingPage() {
                         {canCancel && (
                           <button
                             type="button"
-                            onClick={() => setCancelModalId(String(booking.id))}
+                            onClick={() => {
+                              if (booking.status === 'รอตรวจสอบ' || booking.status === 'สำเร็จ') {
+                                setContactAdminModalId(String(booking.id))
+                              } else {
+                                setCancelModalId(String(booking.id))
+                              }
+                            }}
                             className="ui-focus-ring ui-pressable rounded-full border border-red-200 bg-white px-5 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50"
                           >
                             ยกเลิกการจอง
@@ -370,187 +410,209 @@ export default function MyBookingPage() {
                 <h3 className="mt-1 text-lg font-bold leading-6 sm:text-xl">{getModalHeaderText(selectedBooking.status)}</h3>
               </div>
             </div>
-              <div className="rounded-[1.25rem] border border-gray-100 bg-gray-50 px-5 py-4">
-                <h4 className="mb-3 text-sm font-bold text-gray-800">ข้อมูลการจอง</h4>
-                <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            <div className="rounded-[1.25rem] border border-gray-100 bg-gray-50 px-5 py-4">
+              <h4 className="mb-3 text-sm font-bold text-gray-800">ข้อมูลการจอง</h4>
+              <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <p className="text-gray-500">เลขที่จอง</p>
+                  <p className="mt-1 font-bold text-gray-800">#{selectedBooking.id}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">วันที่จอง</p>
+                  <p className="mt-1 font-semibold text-gray-700">{formatDateTime(selectedBooking.createdAt)}</p>
+                </div>
+                {selectedBooking.paidAt && (
                   <div>
-                    <p className="text-gray-500">เลขที่จอง</p>
-                    <p className="mt-1 font-bold text-gray-800">#{selectedBooking.id}</p>
+                    <p className="text-gray-500">ชำระเงินเมื่อ</p>
+                    <p className="mt-1 font-semibold text-gray-700">{formatDateTime(selectedBooking.paidAt)}</p>
                   </div>
-                  <div>
-                    <p className="text-gray-500">วันที่จอง</p>
-                    <p className="mt-1 font-semibold text-gray-700">{formatDateTime(selectedBooking.createdAt)}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_15rem]">
+              <div className="rounded-[1.5rem] border border-gray-100 bg-white p-5">
+                <h4 className="mb-4 text-sm font-bold text-gray-800">รายละเอียดทัวร์</h4>
+                <div className="space-y-3 text-sm leading-7 text-gray-700">
+                  <div className="grid grid-cols-[120px_1fr] gap-3">
+                    <span className="font-bold text-gray-800">รหัสทัวร์</span>
+                    <span>{selectedBooking.tourCode}</span>
                   </div>
-                  {selectedBooking.paidAt && (
-                    <div>
-                      <p className="text-gray-500">ชำระเงินเมื่อ</p>
-                      <p className="mt-1 font-semibold text-gray-700">{formatDateTime(selectedBooking.paidAt)}</p>
+                  <div className="grid grid-cols-[120px_1fr] gap-3">
+                    <span className="font-bold text-gray-800">ชื่อทัวร์</span>
+                    <span>{selectedBooking.tourName}</span>
+                  </div>
+                  <div className="grid grid-cols-[120px_1fr] gap-3">
+                    <span className="font-bold text-gray-800">วันที่เดินทาง</span>
+                    <span>{formatTravelDate(selectedBooking)}</span>
+                  </div>
+                  <div className="grid grid-cols-[120px_1fr] gap-3">
+                    <span className="font-bold text-gray-800">จำนวนผู้เดินทาง</span>
+                    <span>ผู้ใหญ่ {selectedBooking.adults}, เด็ก {selectedBooking.children}</span>
+                  </div>
+                  {selectedBooking.accommodation && (
+                    <div className="grid grid-cols-[120px_1fr] gap-3">
+                      <span className="font-bold text-gray-800">ที่พัก</span>
+                      <span>{selectedBooking.accommodation}</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_15rem]">
-                <div className="rounded-[1.5rem] border border-gray-100 bg-white p-5">
-                  <h4 className="mb-4 text-sm font-bold text-gray-800">รายละเอียดทัวร์</h4>
-                  <div className="space-y-3 text-sm leading-7 text-gray-700">
-                    <div className="grid grid-cols-[120px_1fr] gap-3">
-                      <span className="font-bold text-gray-800">รหัสทัวร์</span>
-                      <span>{selectedBooking.tourCode}</span>
+              <img
+                src={selectedBooking.image}
+                alt={selectedBooking.tourName}
+                className={`h-48 w-full rounded-[1.25rem] border border-gray-100 object-cover lg:h-full ${selectedBooking.status === 'ยกเลิกแล้ว' ? 'grayscale' : ''}`}
+              />
+            </div>
+
+            {!selectedHidePriceBreakdown && (
+              <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-5">
+                <h4 className="mb-3 text-sm font-bold text-gray-800">รายละเอียดราคา</h4>
+                <div className="space-y-3 text-sm">
+                  {selectedBooking.adults > 0 && (
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-medium text-gray-600">ผู้ใหญ่</span>
+                      <span className="text-gray-400">{selectedBooking.adultPrice > 0 ? `${selectedBooking.adultPrice.toLocaleString()} × ${selectedBooking.adults}` : `(${selectedBooking.adults} ท่าน)`}</span>
+                      <span className="font-bold text-gray-800">{selectedBooking.adultPrice > 0 ? `${(selectedBooking.adults * selectedBooking.adultPrice).toLocaleString()} บาท` : '-'}</span>
                     </div>
-                    <div className="grid grid-cols-[120px_1fr] gap-3">
-                      <span className="font-bold text-gray-800">ชื่อทัวร์</span>
-                      <span>{selectedBooking.tourName}</span>
+                  )}
+                  {selectedBooking.children > 0 && (
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-medium text-gray-600">เด็ก</span>
+                      <span className="text-gray-400">{selectedBooking.childPrice > 0 ? `${selectedBooking.childPrice.toLocaleString()} × ${selectedBooking.children}` : `(${selectedBooking.children} ท่าน)`}</span>
+                      <span className="font-bold text-gray-800">{selectedBooking.childPrice > 0 ? `${(selectedBooking.children * selectedBooking.childPrice).toLocaleString()} บาท` : '-'}</span>
                     </div>
-                    <div className="grid grid-cols-[120px_1fr] gap-3">
-                      <span className="font-bold text-gray-800">วันที่เดินทาง</span>
-                      <span>{formatTravelDate(selectedBooking)}</span>
-                    </div>
-                    <div className="grid grid-cols-[120px_1fr] gap-3">
-                      <span className="font-bold text-gray-800">จำนวนผู้เดินทาง</span>
-                      <span>ผู้ใหญ่ {selectedBooking.adults}, เด็ก {selectedBooking.children}</span>
-                    </div>
-                    {selectedBooking.accommodation && (
-                      <div className="grid grid-cols-[120px_1fr] gap-3">
-                        <span className="font-bold text-gray-800">ที่พัก</span>
-                        <span>{selectedBooking.accommodation}</span>
-                      </div>
-                    )}
+                  )}
+                </div>
+                <div className="mt-5 flex items-end justify-between border-t border-gray-200 pt-5">
+                  <span className="font-bold text-gray-800">ยอดที่ต้องชำระ</span>
+                  <div className="text-right">
+                    <span className={`text-4xl font-black ${selectedBooking.status === 'ยกเลิกแล้ว' ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                      {Math.round(selectedBooking.price).toLocaleString()}
+                    </span>
+                    <span className="ml-2 text-base font-bold text-gray-800">บาท</span>
                   </div>
                 </div>
-
-                <img
-                  src={selectedBooking.image}
-                  alt={selectedBooking.tourName}
-                  className={`h-48 w-full rounded-[1.25rem] border border-gray-100 object-cover lg:h-full ${selectedBooking.status === 'ยกเลิกแล้ว' ? 'grayscale' : ''}`}
-                />
               </div>
+            )}
 
-              {!selectedHidePriceBreakdown && (
+            {showBookingExtraDetails && (
+              <div className="grid gap-5 lg:grid-cols-2">
+                <div className="rounded-[1.5rem] border border-gray-100 bg-white p-5">
+                  <h4 className="mb-4 text-sm font-bold text-gray-800">ข้อมูลติดต่อผู้จอง</h4>
+                  <div className="space-y-3 text-sm leading-7 text-gray-700">
+                    <div className="grid grid-cols-[110px_1fr] gap-3">
+                      <span className="font-bold text-gray-800">ชื่อผู้จอง</span>
+                      <span>{selectedContactName}</span>
+                    </div>
+                    <div className="grid grid-cols-[110px_1fr] gap-3">
+                      <span className="font-bold text-gray-800">อีเมล</span>
+                      <span className="break-all">{selectedBooking.contactEmail || '-'}</span>
+                    </div>
+                    <div className="grid grid-cols-[110px_1fr] gap-3">
+                      <span className="font-bold text-gray-800">โทรศัพท์</span>
+                      <span>{selectedBooking.contactPhone || '-'}</span>
+                    </div>
+                    {selectedBooking.specialRequest && (
+                      <div className="grid grid-cols-[110px_1fr] gap-3">
+                        <span className="font-bold text-gray-800">คำขอเพิ่มเติม</span>
+                        <span className="whitespace-pre-wrap">{selectedBooking.specialRequest}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-5">
-                  <h4 className="mb-3 text-sm font-bold text-gray-800">รายละเอียดราคา</h4>
-                  <div className="space-y-3 text-sm">
-                    {selectedBooking.adults > 0 && (
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="font-medium text-gray-600">ผู้ใหญ่</span>
-                        <span className="text-gray-400">{selectedBooking.adultPrice > 0 ? `${selectedBooking.adultPrice.toLocaleString()} × ${selectedBooking.adults}` : `(${selectedBooking.adults} ท่าน)`}</span>
-                        <span className="font-bold text-gray-800">{selectedBooking.adultPrice > 0 ? `${(selectedBooking.adults * selectedBooking.adultPrice).toLocaleString()} บาท` : '-'}</span>
+                  <h4 className="mb-4 text-sm font-bold text-gray-800">ข้อมูลทัวร์เพิ่มเติม</h4>
+                  <div className="space-y-3 text-sm leading-7 text-gray-700">
+                    <div className="grid grid-cols-[110px_1fr] gap-3">
+                      <span className="font-bold text-gray-800">รอบเดินทาง</span>
+                      <span>{selectedRoundLabel}</span>
+                    </div>
+                    <div className="grid grid-cols-[110px_1fr] gap-3">
+                      <span className="font-bold text-gray-800">ระยะเวลา</span>
+                      <span>{selectedBooking.duration || '-'}</span>
+                    </div>
+                    <div className="grid grid-cols-[110px_1fr] gap-3">
+                      <span className="font-bold text-gray-800">การเดินทาง</span>
+                      <span>{selectedBooking.transportation || '-'}</span>
+                    </div>
+
+                    {selectedTourNotes.length > 0 && (
+                      <div className="grid grid-cols-[110px_1fr] gap-3">
+                        <span className="font-bold text-gray-800">คำแนะนำ</span>
+                        <div className="flex flex-wrap gap-2 pt-0.5">
+                          {selectedTourNotes.map((note) => (
+                            <span
+                              key={note}
+                              className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200"
+                            >
+                              {note}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     )}
-                    {selectedBooking.children > 0 && (
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="font-medium text-gray-600">เด็ก</span>
-                        <span className="text-gray-400">{selectedBooking.childPrice > 0 ? `${selectedBooking.childPrice.toLocaleString()} × ${selectedBooking.children}` : `(${selectedBooking.children} ท่าน)`}</span>
-                        <span className="font-bold text-gray-800">{selectedBooking.childPrice > 0 ? `${(selectedBooking.children * selectedBooking.childPrice).toLocaleString()} บาท` : '-'}</span>
+
+                    {selectedItineraryPreview.length > 0 && (
+                      <div className="grid grid-cols-[110px_1fr] gap-3">
+                        <span className="font-bold text-gray-800">กำหนดการ</span>
+                        <div className="space-y-2">
+                          {selectedItineraryPreview.map((item, index) => (
+                            <div key={`${item.time}-${item.title}-${index}`} className="rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-gray-200">
+                              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-400">
+                                {[item.day ? `Day ${item.day}` : null, item.time || null].filter(Boolean).join(' • ') || `ช่วงที่ ${index + 1}`}
+                              </p>
+                              <p className="mt-1 font-semibold text-gray-800">{item.title}</p>
+                              {item.description && (
+                                <p className="mt-0.5 line-clamp-2 text-gray-500">{item.description}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
-                  <div className="mt-5 flex items-end justify-between border-t border-gray-200 pt-5">
-                    <span className="font-bold text-gray-800">ยอดที่ต้องชำระ</span>
-                    <div className="text-right">
-                      <span className={`text-4xl font-black ${selectedBooking.status === 'ยกเลิกแล้ว' ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
-                        {Math.round(selectedBooking.price).toLocaleString()}
-                      </span>
-                      <span className="ml-2 text-base font-bold text-gray-800">บาท</span>
-                    </div>
-                  </div>
                 </div>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              {selectedCanCancel ? (
+                <p className="text-xs text-gray-400">สามารถยกเลิกได้ก่อนวันเดินทางอย่างน้อย 7 วัน</p>
+              ) : (
+                <span />
               )}
-
-              {showBookingExtraDetails && (
-                <div className="grid gap-5 lg:grid-cols-2">
-                  <div className="rounded-[1.5rem] border border-gray-100 bg-white p-5">
-                    <h4 className="mb-4 text-sm font-bold text-gray-800">ข้อมูลติดต่อผู้จอง</h4>
-                    <div className="space-y-3 text-sm leading-7 text-gray-700">
-                      <div className="grid grid-cols-[110px_1fr] gap-3">
-                        <span className="font-bold text-gray-800">ชื่อผู้จอง</span>
-                        <span>{selectedContactName}</span>
-                      </div>
-                      <div className="grid grid-cols-[110px_1fr] gap-3">
-                        <span className="font-bold text-gray-800">อีเมล</span>
-                        <span className="break-all">{selectedBooking.contactEmail || '-'}</span>
-                      </div>
-                      <div className="grid grid-cols-[110px_1fr] gap-3">
-                        <span className="font-bold text-gray-800">โทรศัพท์</span>
-                        <span>{selectedBooking.contactPhone || '-'}</span>
-                      </div>
-                      {selectedBooking.specialRequest && (
-                        <div className="grid grid-cols-[110px_1fr] gap-3">
-                          <span className="font-bold text-gray-800">คำขอเพิ่มเติม</span>
-                          <span className="whitespace-pre-wrap">{selectedBooking.specialRequest}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-5">
-                    <h4 className="mb-4 text-sm font-bold text-gray-800">ข้อมูลทัวร์เพิ่มเติม</h4>
-                    <div className="space-y-3 text-sm leading-7 text-gray-700">
-                      <div className="grid grid-cols-[110px_1fr] gap-3">
-                        <span className="font-bold text-gray-800">รอบเดินทาง</span>
-                        <span>{selectedRoundLabel}</span>
-                      </div>
-                      <div className="grid grid-cols-[110px_1fr] gap-3">
-                        <span className="font-bold text-gray-800">ระยะเวลา</span>
-                        <span>{selectedBooking.duration || '-'}</span>
-                      </div>
-                      <div className="grid grid-cols-[110px_1fr] gap-3">
-                        <span className="font-bold text-gray-800">การเดินทาง</span>
-                        <span>{selectedBooking.transportation || '-'}</span>
-                      </div>
-
-                      {selectedTourNotes.length > 0 && (
-                        <div className="grid grid-cols-[110px_1fr] gap-3">
-                          <span className="font-bold text-gray-800">คำแนะนำ</span>
-                          <div className="flex flex-wrap gap-2 pt-0.5">
-                            {selectedTourNotes.map((note) => (
-                              <span
-                                key={note}
-                                className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200"
-                              >
-                                {note}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {selectedItineraryPreview.length > 0 && (
-                        <div className="grid grid-cols-[110px_1fr] gap-3">
-                          <span className="font-bold text-gray-800">กำหนดการ</span>
-                          <div className="space-y-2">
-                            {selectedItineraryPreview.map((item, index) => (
-                              <div key={`${item.time}-${item.title}-${index}`} className="rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-gray-200">
-                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-400">
-                                  {[item.day ? `Day ${item.day}` : null, item.time || null].filter(Boolean).join(' • ') || `ช่วงที่ ${index + 1}`}
-                                </p>
-                                <p className="mt-1 font-semibold text-gray-800">{item.title}</p>
-                                {item.description && (
-                                  <p className="mt-0.5 line-clamp-2 text-gray-500">{item.description}</p>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                {selectedCanCancel ? (
-                  <p className="text-xs text-gray-400">สามารถยกเลิกได้ก่อนวันเดินทางอย่างน้อย 7 วัน</p>
-                ) : (
-                  <span />
-                )}
                 <div className="flex flex-col gap-3 sm:ml-auto sm:flex-row">
+                  {(selectedBooking.status === 'สำเร็จ' ||
+                    selectedBooking.status === 'confirmed' ||
+                    selectedBooking.status.includes('ยกเลิก') ||
+                    selectedBooking.status === 'canceled' ||
+                    selectedBooking.status.includes('คืนเงิน')) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const tourId = selectedBooking.tourId;
+                        setSelectedBooking(null);
+                        if (tourId) {
+                          navigate(`/tours/${tourId}`);
+                        } else {
+                          navigate('/tours');
+                        }
+                      }}
+                      className="ui-focus-ring ui-pressable rounded-full border border-primary bg-white px-6 py-3 text-base font-bold text-primary hover:bg-primary/5"
+                    >
+                      จองอีกครั้ง
+                    </button>
+                  )}
                   {selectedCanPay && (
                     <button
                       type="button"
                       onClick={() => {
+                        const bookingId = selectedBooking.id
                         setSelectedBooking(null)
-                        navigate(`/payment/${selectedBooking.id}`)
+                        navigate(`/payment/${bookingId}`)
                       }}
                       className="ui-focus-ring ui-pressable rounded-full bg-primary px-6 py-3 text-base font-bold text-white hover:bg-primary-dark"
                     >
@@ -561,8 +623,14 @@ export default function MyBookingPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        setSelectedBooking(null)
-                        setCancelModalId(String(selectedBooking.id))
+                        const bookingId = selectedBooking.id
+                        if (selectedBooking.status === 'รอตรวจสอบ' || selectedBooking.status === 'สำเร็จ') {
+                          setSelectedBooking(null)
+                          setContactAdminModalId(String(bookingId))
+                        } else {
+                          setSelectedBooking(null)
+                          setCancelModalId(String(bookingId))
+                        }
                       }}
                       className="ui-focus-ring ui-pressable rounded-full border border-red-200 bg-white px-6 py-3 text-base font-bold text-red-500 hover:bg-red-50"
                     >
@@ -572,18 +640,59 @@ export default function MyBookingPage() {
                 </div>
               </div>
             </div>
-        )}
+          )}
+        </Modal>
+
+      <Modal isOpen={cancelModalId !== null} onClose={() => { setCancelModalId(null); setCancelReason('') }} width="max-w-md">
+        <div className="space-y-5">
+          <div className="flex items-center justify-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
+              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+          </div>
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-gray-900">ยืนยันการยกเลิก</h3>
+            <p className="mt-2 text-sm leading-6 text-gray-500">หากยกเลิกแล้วจะไม่สามารถย้อนกลับได้</p>
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-gray-700">เหตุผลการยกเลิก (ไม่บังคับ)</label>
+            <textarea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              maxLength={500}
+              rows={3}
+              placeholder="เช่น ติดธุระไม่สะดวก, เปลี่ยนแผนการเดินทาง"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-yellow-400 focus:bg-white"
+            />
+            <p className="mt-1 text-right text-xs text-gray-400">{cancelReason.length}/500</p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => { setCancelModalId(null); setCancelReason('') }}
+              className="ui-focus-ring ui-pressable flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              ปิดหน้าต่าง
+            </button>
+            <button
+              type="button"
+              onClick={() => cancelModalId && handleCancelBooking(cancelModalId)}
+              className="ui-focus-ring ui-pressable flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700"
+            >
+              ยืนยันยกเลิก
+            </button>
+          </div>
+        </div>
       </Modal>
 
-      <ConfirmModal
-        isOpen={cancelModalId !== null}
-        title="ยืนยันการยกเลิก"
-        message="หากยกเลิกแล้วจะไม่สามารถย้อนกลับได้"
-        confirmText="ยืนยันยกเลิก"
-        cancelText="ปิดหน้าต่าง"
-        confirmStyle="danger"
-        onConfirm={() => cancelModalId && handleCancelBooking(cancelModalId)}
-        onCancel={() => setCancelModalId(null)}
+      <ContactAdminModal
+        isOpen={contactAdminModalId !== null}
+        onClose={() => setContactAdminModalId(null)}
+        onConfirm={() => contactAdminModalId && handleCancelBooking(contactAdminModalId)}
+        title="ยกเลิกการจอง"
+        description="รายการจองนี้ได้รับการชำระเงินหรือรอตรวจสอบแล้ว หากต้องการยกเลิกหรือขอเงินคืน กรุณาติดต่อแอดมินโดยตรงเพื่อดำเนินการต่อไปครับ"
       />
     </div>
   )

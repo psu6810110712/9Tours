@@ -58,7 +58,7 @@ export class ToursService implements OnModuleInit {
     private readonly behaviorEventsRepo: Repository<BehaviorEvent>,
     @InjectRepository(Booking)
     private readonly bookingsRepo: Repository<Booking>,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     if (this.isJsonImportEnabled()) {
