@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
-import ConfirmModal from '../components/common/ConfirmModal'
 import Modal from '../components/common/Modal'
+import ContactAdminModal from '../components/booking/ContactAdminModal'
 import { bookingService } from '../services/bookingService'
 import { buildDisplayName } from '../utils/profileValidation'
 
@@ -47,6 +47,8 @@ export default function MyBookingPage() {
   const [selectedBooking, setSelectedBooking] = useState<MyBookingItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [cancelModalId, setCancelModalId] = useState<string | null>(null)
+  const [contactAdminModalId, setContactAdminModalId] = useState<string | null>(null)
+  const [cancelReason, setCancelReason] = useState('')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -134,12 +136,16 @@ export default function MyBookingPage() {
       await bookingService.cancelBooking(bookingId)
       toast.success('ยกเลิกการจองสำเร็จ')
       setCancelModalId(null)
+      setContactAdminModalId(null)
+      setCancelReason('')
       await loadBookings()
     } catch (error: unknown) {
       const resolvedError = error as { response?: { data?: { message?: string } } }
       console.error('Error canceling booking:', error)
       toast.error(resolvedError.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก กรุณาลองใหม่อีกครั้ง')
       setCancelModalId(null)
+      setContactAdminModalId(null)
+      setCancelReason('')
     }
   }
 
@@ -328,7 +334,13 @@ export default function MyBookingPage() {
                         {canCancel && (
                           <button
                             type="button"
-                            onClick={() => setCancelModalId(String(booking.id))}
+                            onClick={() => {
+                              if (booking.status === 'รอตรวจสอบ' || booking.status === 'สำเร็จ') {
+                                setContactAdminModalId(String(booking.id))
+                              } else {
+                                setCancelModalId(String(booking.id))
+                              }
+                            }}
                             className="ui-focus-ring ui-pressable rounded-full border border-red-200 bg-white px-5 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50"
                           >
                             ยกเลิกการจอง
@@ -535,55 +547,100 @@ export default function MyBookingPage() {
                     )}
                   </div>
                 </div>
+              )}
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                {selectedCanCancel ? (
+                  <p className="text-xs text-gray-400">สามารถยกเลิกได้ก่อนวันเดินทางอย่างน้อย 7 วัน</p>
+                ) : (
+                  <span />
+                )}
+                <div className="flex flex-col gap-3 sm:ml-auto sm:flex-row">
+                  {selectedCanPay && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedBooking(null)
+                        navigate(`/payment/${selectedBooking.id}`)
+                      }}
+                      className="ui-focus-ring ui-pressable rounded-full bg-primary px-6 py-3 text-base font-bold text-white hover:bg-primary-dark"
+                    >
+                      ชำระเงิน
+                    </button>
+                  )}
+                  {selectedCanCancel && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedBooking.status === 'รอตรวจสอบ' || selectedBooking.status === 'สำเร็จ') {
+                          setContactAdminModalId(String(selectedBooking.id))
+                        } else {
+                          setSelectedBooking(null)
+                          setCancelModalId(String(selectedBooking.id))
+                        }
+                      }}
+                      className="ui-focus-ring ui-pressable rounded-full border border-red-200 bg-white px-6 py-3 text-base font-bold text-red-500 hover:bg-red-50"
+                    >
+                      ยกเลิกการจอง
+                    </button>
+                  )}
+                </div>
               </div>
             )}
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              {selectedCanCancel ? (
-                <p className="text-xs text-gray-400">สามารถยกเลิกได้ก่อนวันเดินทางอย่างน้อย 7 วัน</p>
-              ) : (
-                <span />
-              )}
-              <div className="flex flex-col gap-3 sm:ml-auto sm:flex-row">
-                {selectedCanPay && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedBooking(null)
-                      navigate(`/payment/${selectedBooking.id}`)
-                    }}
-                    className="ui-focus-ring ui-pressable rounded-full bg-primary px-6 py-3 text-base font-bold text-white hover:bg-primary-dark"
-                  >
-                    ชำระเงิน
-                  </button>
-                )}
-                {selectedCanCancel && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedBooking(null)
-                      setCancelModalId(String(selectedBooking.id))
-                    }}
-                    className="ui-focus-ring ui-pressable rounded-full border border-red-200 bg-white px-6 py-3 text-base font-bold text-red-500 hover:bg-red-50"
-                  >
-                    ยกเลิกการจอง
-                  </button>
-                )}
-              </div>
-            </div>
           </div>
         )}
       </Modal>
 
-      <ConfirmModal
-        isOpen={cancelModalId !== null}
-        title="ยืนยันการยกเลิก"
-        message="หากยกเลิกแล้วจะไม่สามารถย้อนกลับได้"
-        confirmText="ยืนยันยกเลิก"
-        cancelText="ปิดหน้าต่าง"
-        confirmStyle="danger"
-        onConfirm={() => cancelModalId && handleCancelBooking(cancelModalId)}
-        onCancel={() => setCancelModalId(null)}
+      <Modal isOpen={cancelModalId !== null} onClose={() => { setCancelModalId(null); setCancelReason('') }} width="max-w-md">
+        <div className="space-y-5">
+          <div className="flex items-center justify-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
+              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+          </div>
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-gray-900">ยืนยันการยกเลิก</h3>
+            <p className="mt-2 text-sm leading-6 text-gray-500">หากยกเลิกแล้วจะไม่สามารถย้อนกลับได้</p>
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-gray-700">เหตุผลการยกเลิก (ไม่บังคับ)</label>
+            <textarea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              maxLength={500}
+              rows={3}
+              placeholder="เช่น ติดธุระไม่สะดวก, เปลี่ยนแผนการเดินทาง"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-yellow-400 focus:bg-white"
+            />
+            <p className="mt-1 text-right text-xs text-gray-400">{cancelReason.length}/500</p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => { setCancelModalId(null); setCancelReason('') }}
+              className="ui-focus-ring ui-pressable flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              ปิดหน้าต่าง
+            </button>
+            <button
+              type="button"
+              onClick={() => cancelModalId && handleCancelBooking(cancelModalId)}
+              className="ui-focus-ring ui-pressable flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700"
+            >
+              ยืนยันยกเลิก
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <ContactAdminModal
+        isOpen={contactAdminModalId !== null}
+        onClose={() => setContactAdminModalId(null)}
+        onConfirm={() => contactAdminModalId && handleCancelBooking(contactAdminModalId)}
+        title="ยกเลิกการจอง"
+        description="รายการจองนี้ได้รับการชำระเงินหรือรอตรวจสอบแล้ว หากต้องการยกเลิกหรือขอเงินคืน กรุณาติดต่อแอดมินโดยตรงเพื่อดำเนินการต่อไปครับ"
       />
     </div>
   )

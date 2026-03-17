@@ -291,6 +291,28 @@ export class BookingsService {
 
     const previousStatus = booking.status;
     const newStatus = updateBookingStatusDto.status;
+<<<<<<< Updated upstream
+=======
+    const refundAction = updateBookingStatusDto.refundAction;
+
+    if (refundAction) {
+      if (!booking.isRefundRequested) {
+        throw new BadRequestException('รายการนี้ไม่มีคำขอคืนเงินที่ต้องดำเนินการ');
+      }
+      if (newStatus !== previousStatus) {
+        throw new BadRequestException('การดำเนินการคำขอคืนเงินไม่ควรเปลี่ยนสถานะการจอง');
+      }
+
+      booking.isRefundRequested = false;
+      if (refundAction === 'approve') {
+        booking.status = BookingStatus.REFUND_COMPLETED;
+        booking.adminNotes = 'อนุมัติคำขอคืนเงินและคืนเงินสำเร็จ';
+      } else {
+        booking.status = BookingStatus.CANCELED;
+        booking.adminNotes = 'ปฏิเสธคำขอคืนเงิน';
+      }
+    }
+>>>>>>> Stashed changes
 
     const activeStatuses = [
       BookingStatus.PENDING_PAYMENT,
@@ -411,7 +433,7 @@ export class BookingsService {
     };
   }
 
-  async cancelBooking(bookingId: number, userId: string) {
+  async cancelBooking(bookingId: number, userId: string, reason?: string) {
     const booking = await this.bookingsRepository.findOne({
       where: { id: bookingId },
     });
@@ -429,7 +451,17 @@ export class BookingsService {
       throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงิน รอตรวจสอบ หรือสำเร็จเท่านั้น');
     }
 
-    booking.status = BookingStatus.CANCELED;
+    if (reason) {
+      booking.cancellationReason = reason;
+    }
+
+    const paidStatuses = [BookingStatus.AWAITING_APPROVAL, BookingStatus.CONFIRMED, BookingStatus.SUCCESS];
+    if (paidStatuses.includes(booking.status)) {
+      booking.isRefundRequested = true;
+      booking.status = BookingStatus.REFUND_PENDING;
+    } else {
+      booking.status = BookingStatus.CANCELED;
+    }
     const updated = await this.bookingsRepository.save(booking);
 
     const foundForCancel = this.findScheduleInData(booking.scheduleId);

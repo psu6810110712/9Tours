@@ -5,6 +5,7 @@ import {
     ManyToOne,
     JoinColumn,
     CreateDateColumn,
+    Index,
 } from 'typeorm';
 import { Tour } from '../../tours/entities/tour.entity';
 import { User } from '../../users/entities/user.entity';
@@ -25,8 +26,12 @@ export class TourView {
     @JoinColumn({ name: 'user_id' })
     user: User;
 
-    @Column({ name: 'user_id', nullable: true })
-    userId: number;
+    @Column({ name: 'user_id', type: 'uuid', nullable: true })
+    userId: string | null;
+
+    @Index('idx_tour_views_anonymous_id')
+    @Column({ name: 'anonymous_id', type: 'varchar', length: 64, nullable: true })
+    anonymousId: string | null;
 
     @CreateDateColumn({ type: 'timestamptz', name: 'viewed_at' })
     viewedAt: Date;

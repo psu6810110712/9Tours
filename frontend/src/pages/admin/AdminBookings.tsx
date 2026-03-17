@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import Modal from '../../components/common/Modal'
 import { adminService } from '../../services/adminService'
@@ -127,6 +127,10 @@ function getStatusBadge(status: string) {
       return <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">ยืนยันแล้ว</span>
     case 'canceled':
       return <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">ยกเลิกแล้ว</span>
+    case 'refund_pending':
+      return <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">รอคืนเงิน</span>
+    case 'refund_completed':
+      return <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">คืนเงินสำเร็จ</span>
     default:
       return <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">{status}</span>
   }
@@ -384,7 +388,12 @@ export default function AdminBookings() {
     return bookings.filter((booking) => {
       if (filter === 'awaiting_approval' && booking.status !== 'awaiting_approval') return false
       if (filter === 'confirmed' && !['confirmed', 'success'].includes(booking.status)) return false
+<<<<<<< Updated upstream
       if (filter === 'canceled' && booking.status !== 'canceled') return false
+=======
+      if (filter === 'refund_requested' && !booking.isRefundRequested && booking.status !== 'refund_pending') return false
+      if (filter === 'canceled' && booking.status !== 'canceled' && booking.status !== 'refund_completed') return false
+>>>>>>> Stashed changes
 
       if (!search.trim()) return true
 
