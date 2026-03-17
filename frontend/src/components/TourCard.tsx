@@ -157,7 +157,7 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 px-6 text-center">
-            <p className="text-lg font-bold text-slate-600">ไม่มีภาพประกอบสำหรับทัวร์นี้</p>
+            <p className="text-md font-bold text-slate-600">ไม่มีภาพประกอบสำหรับทัวร์นี้</p>
           </div>
         )}
       </div>
@@ -167,7 +167,7 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
           {tour.name}
         </h3>
 
-        <div className="mt-1 -ml-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] sm:text-[15px] md:text-[16px] font-bold text-gray-700">
+        <div className="mt-1 -ml-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] sm:text-[15px] md:text-[16px] font-semibold text-gray-700">
           <span className="inline-flex items-center gap-1 leading-none text-gray-700">
             <StarIcon />
             <span>{tour.rating.toFixed(1)}</span>
