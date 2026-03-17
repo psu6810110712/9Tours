@@ -33,12 +33,12 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { refresh_token, ...result } = await this.authService.register(
+    const { refresh_token, access_token, user } = await this.authService.register(
       createUserDto,
       this.extractSessionContext(req),
     );
-    this.setRefreshCookie(res, refresh_token, false);
-    return result;
+    this.setAuthCookies(res, access_token, refresh_token, false);
+    return { user };
   }
 
   @HttpCode(HttpStatus.OK)
@@ -48,14 +48,14 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { refresh_token, rememberMe, ...result } = await this.authService.login(
+    const { refresh_token, access_token, user, rememberMe } = await this.authService.login(
       loginDto.identifier,
       loginDto.password,
       loginDto.rememberMe ?? false,
       this.extractSessionContext(req),
     );
-    this.setRefreshCookie(res, refresh_token, rememberMe);
-    return result;
+    this.setAuthCookies(res, access_token, refresh_token, rememberMe);
+    return { user };
   }
 
   @Get('google')
@@ -71,11 +71,11 @@ export class AuthController {
     @Res() res: Response,
   ) {
     try {
-      const { refresh_token, rememberMe } = await this.authService.loginWithGoogle(
+      const { refresh_token, access_token, rememberMe } = await this.authService.loginWithGoogle(
         req.user,
         this.extractSessionContext(req),
       );
-      this.setRefreshCookie(res, refresh_token, rememberMe);
+      this.setAuthCookies(res, access_token, refresh_token, rememberMe);
       return res.redirect(this.buildFrontendCallbackUrl('success'));
     } catch (error) {
       return res.redirect(this.buildFrontendCallbackUrl('error', this.mapGoogleOAuthError(error)));
@@ -96,24 +96,40 @@ export class AuthController {
       throw new UnauthorizedException('ไม่พบ refresh token');
     }
 
-    const { refresh_token, ...result } = await this.authService.refreshToken(
+    const { refresh_token, access_token, user } = await this.authService.refreshToken(
       token,
       this.extractSessionContext(req),
     );
-    this.setRefreshCookie(res, refresh_token, false);
-    return result;
+    this.setAuthCookies(res, access_token, refresh_token, false);
+    return { user };
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     await this.authService.logout(req.cookies?.[this.cookieName]);
+    res.clearCookie('access_token', this.buildClearCookieOptions());
     res.clearCookie(this.cookieName, this.buildClearCookieOptions());
     return { message: 'ออกจากระบบสำเร็จ' };
   }
 
-  private setRefreshCookie(res: Response, token: string, remember: boolean) {
-    res.cookie(this.cookieName, token, this.buildRefreshCookieOptions(remember));
+  private setAuthCookies(res: Response, accessToken: string, refreshToken: string, remember: boolean) {
+    res.cookie('access_token', accessToken, this.buildAccessTokenCookieOptions());
+    res.cookie(this.cookieName, refreshToken, this.buildRefreshCookieOptions(remember));
+  }
+
+  private buildAccessTokenCookieOptions(): CookieOptions {
+    const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+    const cookieDomain = this.configService.get<string>('AUTH_COOKIE_DOMAIN');
+
+    return {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+      path: '/',
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    };
   }
 
   private buildRefreshCookieOptions(remember: boolean): CookieOptions {
