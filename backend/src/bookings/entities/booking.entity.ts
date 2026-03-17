@@ -1,4 +1,4 @@
-import {
+﻿import {
     Entity,
     PrimaryGeneratedColumn,
     Column,
@@ -18,7 +18,6 @@ export enum BookingStatus {
     CANCELED = 'canceled',
     REFUND_PENDING = 'refund_pending',
     REFUND_COMPLETED = 'refund_completed',
-    REFUND_REJECTED = 'refund_rejected',
 }
 
 @Entity('bookings')
@@ -79,15 +78,6 @@ export class Booking {
 
     @Column({ name: 'special_request', type: 'text', nullable: true })
     specialRequest: string;
-
-    @Column({ name: 'cancellation_reason', type: 'text', nullable: true, default: null })
-    cancellationReason: string | null;
-
-    @Column({ name: 'is_refund_requested', type: 'boolean', default: false })
-    isRefundRequested: boolean;
-
-    @Column({ name: 'travelers_info', type: 'jsonb', nullable: true, default: null })
-    travelersInfo: { name: string; isLeadTraveler?: boolean }[] | null;
 
     @OneToMany(() => Payment, (payment) => payment.booking)
     payments: Payment[];
