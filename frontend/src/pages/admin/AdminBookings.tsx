@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import Modal from '../../components/common/Modal'
 import { adminService } from '../../services/adminService'
@@ -10,7 +10,6 @@ const FILTER_TABS = [
   { label: 'ทั้งหมด', value: 'all' },
   { label: 'รอตรวจสอบสลิป', value: 'awaiting_approval' },
   { label: 'ยืนยันแล้ว', value: 'confirmed' },
-  { label: 'รอคืนเงิน', value: 'refund_requested' },
   { label: 'ยกเลิกแล้ว', value: 'canceled' },
 ] as const
 
@@ -128,12 +127,6 @@ function getStatusBadge(status: string) {
       return <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">ยืนยันแล้ว</span>
     case 'canceled':
       return <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">ยกเลิกแล้ว</span>
-    case 'refund_pending':
-      return <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">รอคืนเงิน</span>
-    case 'refund_completed':
-      return <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">คืนเงินสำเร็จ</span>
-    case 'refund_rejected':
-      return <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">ปฏิเสธการคืนเงิน</span>
     default:
       return <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">{status}</span>
   }
@@ -370,12 +363,12 @@ export default function AdminBookings() {
     setShowVerificationRaw(false)
   }, [selectedBooking])
 
-  const handleUpdateStatus = async (status: string, refundAction?: 'approve' | 'reject') => {
+  const handleUpdateStatus = async (status: string) => {
     if (!selectedBooking) return
 
     try {
       setIsProcessing(true)
-      const updatedBooking = await adminService.updateBookingStatus(selectedBooking.id, status, refundAction)
+      const updatedBooking = await adminService.updateBookingStatus(selectedBooking.id, status)
       toast.success('อัปเดตสถานะสำเร็จ')
       setBookings((prev) => prev.map((booking) => (booking.id === updatedBooking.id ? updatedBooking : booking)))
       setSelectedBooking(null)
@@ -391,8 +384,7 @@ export default function AdminBookings() {
     return bookings.filter((booking) => {
       if (filter === 'awaiting_approval' && booking.status !== 'awaiting_approval') return false
       if (filter === 'confirmed' && !['confirmed', 'success'].includes(booking.status)) return false
-      if (filter === 'refund_requested' && !booking.isRefundRequested && !['refund_pending', 'refund_rejected'].includes(booking.status)) return false
-      if (filter === 'canceled' && !['canceled', 'refund_completed'].includes(booking.status)) return false
+      if (filter === 'canceled' && booking.status !== 'canceled') return false
 
       if (!search.trim()) return true
 
@@ -659,27 +651,6 @@ export default function AdminBookings() {
                               className="ui-focus-ring ui-pressable flex-1 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-50"
                             >
                               อนุมัติ
-                            </button>
-                          </>
-                        )}
-
-                        {['confirmed', 'success', 'refund_pending', 'refund_rejected'].includes(selectedBooking.status) && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateStatus(selectedBooking.status, 'reject')}
-                              disabled={isProcessing}
-                              className="ui-focus-ring ui-pressable flex-1 rounded-xl bg-red-100 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-200 disabled:opacity-50"
-                            >
-                              {selectedBooking.status === 'refund_rejected' ? 'ยืนยันปฏิเสธอีกครั้ง' : 'ปฏิเสธการคืนเงิน'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateStatus(selectedBooking.status, 'approve')}
-                              disabled={isProcessing}
-                              className="ui-focus-ring ui-pressable flex-1 rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-50"
-                            >
-                              คืนเงินสำเร็จ
                             </button>
                           </>
                         )}

@@ -1,4 +1,4 @@
-import type { User } from './user'
+﻿import type { User } from './user'
 import type { CustomerPrefix } from '../utils/profileValidation'
 
 export interface Payment {
@@ -74,9 +74,6 @@ export interface Booking {
   contactPhone?: string | null
   reviewedByUserId?: string | null
   reviewedAt?: string | null
-  isRefundRequested?: boolean
-  cancellationReason?: string | null
-  adminNotes?: string | null
 }
 
 export interface CreateBookingDto {

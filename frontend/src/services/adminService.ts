@@ -32,8 +32,8 @@ export const adminService = {
         return response.data
     },
 
-    updateBookingStatus: async (bookingId: number, status: string, refundAction?: 'approve' | 'reject') => {
-        const response = await api.patch<Booking>(`/bookings/${bookingId}/status`, { status, refundAction })
+    updateBookingStatus: async (bookingId: number, status: string) => {
+        const response = await api.patch<Booking>(`/bookings/${bookingId}/status`, { status })
         return response.data
     },
 
