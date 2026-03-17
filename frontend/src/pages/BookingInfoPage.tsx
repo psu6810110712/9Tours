@@ -390,13 +390,13 @@ export default function BookingInfoPage() {
               </div>
 
               {isPrivate && (
-                <div className="mb-6 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-4 sm:px-5">
+                <div className="mb-6 rounded-[1.25rem] border border-gray-200 bg-gray-50 px-4 py-4 sm:px-5">
                   <div className="mb-3 flex items-center justify-between">
-                    <span className="text-[13px] font-bold text-amber-900 sm:text-sm">กรุณาระบุจำนวนผู้เดินทางจริงเพื่อเตรียมรถ/ที่พัก</span>
-                    <span className="text-xs font-bold text-amber-700 bg-amber-100/50 px-2.5 py-1 rounded-full">{adults + children} ท่าน</span>
+                    <span className="text-[13px] font-bold text-gray-900 sm:text-sm">กรุณาระบุจำนวนผู้เดินทางจริงเพื่อเตรียมรถ/ที่พัก</span>
+                    <span className="text-xs font-bold text-gray-700 bg-gray-100/50 px-2.5 py-1 rounded-full">{adults + children} ท่าน</span>
                   </div>
                   <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
-                    <div className="flex items-center justify-between rounded-[1rem] bg-white p-2.5 px-4 shadow-sm border border-amber-100/50">
+                    <div className="flex items-center justify-between rounded-[1rem] bg-white p-2.5 px-4 shadow-sm border border-gray-100/50">
                       <div>
                         <span className="block text-sm font-bold text-slate-700">ผู้ใหญ่</span>
                       </div>
