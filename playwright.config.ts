@@ -11,7 +11,7 @@ export default defineConfig({
     {
       command: 'npm --prefix backend run start:dev',
       url: 'http://127.0.0.1:3000/',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: process.env.CI,
       timeout: 120_000,
     },
     {
