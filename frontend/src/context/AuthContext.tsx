@@ -2,13 +2,11 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import type { User } from '../types/user'
 import { authService } from '../services/authService'
 import { bookingService } from '../services/bookingService'
-import { setAccessToken } from '../services/api'
 import { toast } from 'react-hot-toast'
 import type { CustomerPrefix } from '../utils/profileValidation'
 
 interface AuthContextType {
   user: User | null
-  token: string | null
   isLoading: boolean
   login: (identifier: string, password: string, remember?: boolean) => Promise<User>
   register: (prefix: CustomerPrefix, name: string, email: string, phone: string, password: string) => Promise<User>
@@ -49,23 +47,18 @@ function shouldAttemptSessionRestore() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const applyUser = (nextUser: User) => {
     setUser(nextUser)
   }
 
-  const applySession = (nextToken: string, nextUser: User) => {
-    setToken(nextToken)
-    setAccessToken(nextToken)
+  const applySession = (nextUser: User) => {
     applyUser(nextUser)
     setSessionHint(true)
   }
 
   const clearSession = () => {
-    setToken(null)
-    setAccessToken(null)
     setUser(null)
     setSessionHint(false)
   }
@@ -93,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     authService.refresh({ silent: true })
       .then((data) => {
-        applySession(data.access_token, data.user)
+        applySession(data.user)
         setTimeout(() => void checkPendingBookings(), 500)
       })
       .catch(() => {
@@ -121,14 +114,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (identifier: string, password: string, remember: boolean = false) => {
     const data = await authService.login({ identifier, password, rememberMe: remember })
-    applySession(data.access_token, data.user)
+    applySession(data.user)
     setTimeout(() => void checkPendingBookings(), 500)
     return data.user
   }
 
   const register = async (prefix: CustomerPrefix, name: string, email: string, phone: string, password: string) => {
     const data = await authService.register({ prefix, name, email, phone, password })
-    applySession(data.access_token, data.user)
+    applySession(data.user)
     return data.user
   }
 
@@ -144,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const completeGoogleLogin = async () => {
     const data = await authService.refresh({ silent: true })
-    applySession(data.access_token, data.user)
+    applySession(data.user)
     setTimeout(() => void checkPendingBookings(), 500)
     return data.user
   }
@@ -160,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      user, token, isLoading,
+      user, isLoading,
       login, register, updateOwnProfile, refreshCurrentUser,
       loginWithGoogle, completeGoogleLogin, logout,
       isAdmin: user?.role === 'admin',
