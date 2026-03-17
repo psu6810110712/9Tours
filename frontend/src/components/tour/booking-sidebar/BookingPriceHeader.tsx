@@ -2,9 +2,10 @@ import type { Tour } from '../../../types/tour'
 
 interface BookingPriceHeaderProps {
   tour: Tour
+  isDrawer?: boolean
 }
 
-export default function BookingPriceHeader({ tour }: BookingPriceHeaderProps) {
+export default function BookingPriceHeader({ tour, isDrawer = false }: BookingPriceHeaderProps) {
   const isPrivate = !!tour.minPeople
   const price = Number(tour.price || 0)
   const originalPrice = Number(tour.originalPrice || 0)
@@ -13,10 +14,18 @@ export default function BookingPriceHeader({ tour }: BookingPriceHeaderProps) {
     ? Math.abs(Math.round((1 - price / originalPrice) * 100))
     : 0
 
+  const containerClasses = isDrawer
+    ? "relative mb-4 border-b border-gray-100 pb-4"
+    : "relative -mx-4 -mt-4 mb-4 overflow-hidden rounded-t-[1.5rem] border-b border-gray-100 px-4 pb-4 pt-4 sm:-mx-5 sm:-mt-5 sm:mb-5 sm:rounded-t-[1.75rem] sm:px-5 sm:pb-5 sm:pt-5"
+
+  const badgeClasses = isDrawer
+    ? "absolute right-0 top-0 rounded-bl-[1.25rem] rounded-tr-[1rem] rounded-tl-[0.5rem] rounded-br-[0.5rem] bg-red-500 px-3 py-1.5 text-right text-white shadow-sm"
+    : "absolute right-0 top-0 rounded-bl-[1.25rem] rounded-tr-[1.5rem] bg-red-500 px-3 py-1.5 text-right text-white shadow-sm sm:rounded-bl-[1.5rem] sm:rounded-tr-[1.75rem] sm:px-5 sm:py-2"
+
   return (
-    <div className="relative -mx-4 -mt-4 mb-4 overflow-hidden rounded-t-[1.5rem] border-b border-gray-100 px-4 pb-4 pt-4 sm:-mx-5 sm:-mt-5 sm:mb-5 sm:rounded-t-[1.75rem] sm:px-5 sm:pb-5 sm:pt-5">
+    <div className={containerClasses}>
       {hasDiscount && (
-        <div className="absolute right-0 top-0 rounded-bl-[1.25rem] rounded-tr-[1.5rem] bg-red-500 px-3 py-1.5 text-right text-white shadow-sm sm:rounded-bl-[1.5rem] sm:rounded-tr-[1.75rem] sm:px-5 sm:py-2">
+        <div className={badgeClasses}>
           {tour.discountEndDate && (
             <p className="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.07em] text-white/75 sm:mt-2 sm:text-[1rem]">
               ถึง {new Date(tour.discountEndDate + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}

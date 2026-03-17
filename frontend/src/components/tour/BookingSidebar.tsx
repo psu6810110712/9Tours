@@ -118,6 +118,17 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
     return () => { cancelled = true }
   }, [tour?.id, selectedMonth, upcomingSchedules, fetchKey])
 
+  useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [drawerOpen])
+
   const seatsLeft = selectedSchedule
     ? Math.max(0, availableSeatsData[selectedSchedule.id] ?? (selectedSchedule.maxCapacity - selectedSchedule.currentBooked))
     : 0
@@ -189,9 +200,9 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
 
   const summaryLabel = isPrivate ? 'ราคาเหมาจ่ายทั้งกลุ่ม' : 'ยอดชำระรวม'
 
-  const fullContent = (
+  const renderContent = (isDrawer: boolean) => (
     <>
-      <BookingPriceHeader tour={tour} />
+      <BookingPriceHeader tour={tour} isDrawer={isDrawer} />
 
       <BookingDateSelector
         tour={tour}
@@ -235,23 +246,22 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
           <div className={`fixed inset-x-0 bottom-0 z-40 px-4 pb-[env(safe-area-inset-bottom,1rem)] pt-2 transition-transform duration-300 lg:hidden ${drawerOpen ? 'translate-y-0' : 'translate-y-[calc(100%-150px)]'}`}>
             <div className="ui-surface relative rounded-[1.5rem] border border-gray-200 bg-white p-4 shadow-[0_24px_45px_rgba(15,23,42,0.25)] overflow-hidden">
               <button type="button" aria-label="ปรับสถานะลิ้นชักการจอง" className="mx-auto mb-3 flex h-1.5 w-12 items-center justify-center rounded-full bg-gray-200" onClick={handleDrawerToggle} />
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <div className={drawerOpen ? 'opacity-0 transition-opacity duration-200' : 'transition-opacity duration-200'}>
+              <div className={`flex items-center justify-between gap-3 ${drawerOpen ? 'h-0 overflow-hidden opacity-0' : 'mb-3'}`}>
+                <div>
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{summaryLabel}</p>
                   <p className="text-xl font-bold text-gray-900">฿{totalPrice.toLocaleString()}</p>
                 </div>
                 <div className="flex gap-2">
-                  <button type="button" onClick={handleDrawerToggle} className={`ui-pressable rounded-xl border px-3 py-2 text-xs font-semibold ${drawerOpen ? 'border-gray-200 bg-gray-50 text-gray-700' : 'border-primary bg-primary text-white'}`}>
-                    {drawerOpen ? 'ย่อ' : 'ดูรายละเอียด'}
+                  <button type="button" onClick={handleDrawerToggle} className="ui-pressable rounded-xl border border-primary bg-primary px-3 py-2 text-xs font-semibold text-white">
+                    ดูรายละเอียด
                   </button>
-                  {!drawerOpen && (
-                    <button type="button" onClick={handleDrawerToggle} className="hidden" aria-hidden="true" />
-                  )}
                 </div>
               </div>
 
-              <div className={`transition-[max-height] duration-300 ${drawerOpen ? 'max-h-[calc(100vh-260px)] overflow-y-auto overflow-x-hidden pr-2' : 'max-h-0 overflow-hidden'}`}>
-                {fullContent}
+              <div className={`transition-[max-height] duration-300 ${drawerOpen ? 'max-h-[60vh] overflow-y-auto overflow-x-hidden' : 'max-h-0 overflow-hidden'}`}>
+                <div className="pb-3">
+                  {renderContent(true)}
+                </div>
               </div>
             </div>
           </div>
@@ -260,7 +270,7 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
 
       <div className={shouldUseDrawer ? 'hidden lg:block' : ''}>
         <div className="ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-4 sm:p-5 sm:rounded-[1.75rem] lg:sticky lg:top-24">
-          {fullContent}
+          {renderContent(false)}
         </div>
       </div>
 
