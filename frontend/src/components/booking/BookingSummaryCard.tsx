@@ -73,31 +73,31 @@ export default function BookingSummaryCard({
       </div>
 
       <div className="space-y-3 text-base text-gray-700">
-        <div className="grid grid-cols-[104px_1fr] gap-3">
+        <div className="grid grid-cols-[84px_1fr] sm:grid-cols-[104px_1fr] gap-2 sm:gap-3">
           <span className="font-semibold text-gray-800">รหัสทัวร์</span>
           <span className="font-mono font-semibold tracking-wide text-gray-600">{tourCode}</span>
         </div>
-        <div className="grid grid-cols-[104px_1fr] gap-3">
+        <div className="grid grid-cols-[84px_1fr] sm:grid-cols-[104px_1fr] gap-2 sm:gap-3">
           <span className="font-semibold text-gray-800">ชื่อทัวร์</span>
           <span className="leading-6 text-gray-700">{tourName}</span>
         </div>
-        <div className="grid grid-cols-[104px_1fr] gap-3">
+        <div className="grid grid-cols-[84px_1fr] sm:grid-cols-[104px_1fr] gap-2 sm:gap-3">
           <span className="font-semibold text-gray-800">วันที่เดินทาง</span>
           <span className="leading-6 text-gray-700">{date}</span>
         </div>
-        <div className="grid grid-cols-[104px_1fr] gap-3">
+        <div className="grid grid-cols-[84px_1fr] sm:grid-cols-[104px_1fr] gap-2 sm:gap-3">
           <span className="font-semibold text-gray-800">จำนวน</span>
           <div className="leading-6 text-gray-700">
             <p>{isPrivate ? 'กรุ๊ปเหมาส่วนตัว' : `ผู้ใหญ่ ${adults}, เด็ก ${children}`}</p>
             <p className="text-[15px] text-gray-500">รวม {totalTravelers.toLocaleString('en-US')} คน</p>
           </div>
         </div>
-        <div className="grid grid-cols-[104px_1fr] gap-3">
+        <div className="grid grid-cols-[84px_1fr] sm:grid-cols-[104px_1fr] gap-2 sm:gap-3">
           <span className="font-semibold text-gray-800">รูปแบบ</span>
           <span className="leading-6 text-gray-700">{bookingTypeLabel}</span>
         </div>
         {accommodation && (
-          <div className="grid grid-cols-[104px_1fr] gap-3">
+          <div className="grid grid-cols-[84px_1fr] sm:grid-cols-[104px_1fr] gap-2 sm:gap-3">
             <span className="font-semibold text-gray-800">ที่พัก</span>
             <span className="leading-6 text-gray-700">{accommodation}</span>
           </div>
@@ -110,15 +110,15 @@ export default function BookingSummaryCard({
           <div className="mt-3 space-y-2.5 text-base text-gray-700">
             <div className="flex items-start justify-between gap-4">
               <span className="font-medium text-gray-500">ชื่อ</span>
-              <span className="max-w-[260px] break-words text-right font-semibold text-gray-900">{contactDisplayName}</span>
+              <span className="max-w-full sm:max-w-[260px] break-words text-right font-semibold text-gray-900">{contactDisplayName}</span>
             </div>
             <div className="flex items-start justify-between gap-4">
               <span className="font-medium text-gray-500">อีเมล</span>
-              <span className="max-w-[260px] break-all text-right text-gray-900">{contactEmailLabel}</span>
+              <span className="max-w-full sm:max-w-[260px] break-all text-right text-gray-900">{contactEmailLabel}</span>
             </div>
             <div className="flex items-start justify-between gap-4">
               <span className="font-medium text-gray-500">โทรศัพท์</span>
-              <span className="max-w-[260px] break-words text-right text-gray-900">{contactPhoneLabel}</span>
+              <span className="max-w-full sm:max-w-[260px] break-words text-right text-gray-900">{contactPhoneLabel}</span>
             </div>
           </div>
         </div>
@@ -159,11 +159,11 @@ export default function BookingSummaryCard({
         </div>
       </div>
 
-      <div className="mt-auto flex items-end justify-between gap-3 border-t border-gray-100 pt-4">
-        <span className="text-lg font-bold text-gray-800">ยอดที่ต้องชำระ</span>
+      <div className="mt-auto flex flex-wrap items-end justify-between gap-2 sm:gap-3 border-t border-gray-100 pt-4">
+        <span className="text-base sm:text-lg font-bold text-gray-800">ยอดที่ต้องชำระ</span>
         <div className="text-right">
-          <span className="text-3xl font-bold text-primary">{formatAmount(calculatedTotal)}</span>
-          <span className="ml-1.5 text-lg font-bold text-gray-800">บาท</span>
+          <span className="text-2xl sm:text-3xl font-bold text-primary">{formatAmount(calculatedTotal)}</span>
+          <span className="ml-1 sm:ml-1.5 text-base sm:text-lg font-bold text-gray-800">บาท</span>
         </div>
       </div>
     </div>

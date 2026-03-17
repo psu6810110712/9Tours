@@ -16,6 +16,7 @@ import { User } from '../users/entities/user.entity';
 import { normalizeEmail, normalizeThaiPhoneInput, sanitizeCustomerName } from '../users/customer-profile.utils';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/entities/notification.entity';
+import { Review } from '../reviews/entities/review.entity';
 
 @Injectable()
 export class BookingsService {
@@ -26,6 +27,8 @@ export class BookingsService {
     private bookingsRepository: Repository<Booking>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Review)
+    private reviewsRepository: Repository<Review>,
     private toursService: ToursService,
     private notificationsService: NotificationsService,
   ) { }
@@ -82,6 +85,7 @@ export class BookingsService {
       contactName,
       contactEmail,
       contactPhone,
+      travelersInfo,
     } = createBookingDto;
 
     const paxCount = adults + children;
@@ -184,6 +188,7 @@ export class BookingsService {
         contactEmail: normalizedContactEmail,
         contactPhone: normalizedContactPhone,
         specialRequest,
+        travelersInfo: travelersInfo || null,
         status: BookingStatus.PENDING_PAYMENT,
       });
 
@@ -252,10 +257,19 @@ export class BookingsService {
       relations: ['payments'],
     });
 
+    const bookingIds = bookings.map((b) => b.id);
+    const reviewedSet = bookingIds.length > 0
+      ? await this.reviewsRepository.find({
+          where: { bookingId: In(bookingIds) },
+          select: ['bookingId'],
+        }).then((reviews) => new Set(reviews.map((r) => r.bookingId)))
+      : new Set<number>();
+
     return bookings.map((booking) => {
       const found = this.findScheduleInData(booking.scheduleId);
       return {
         ...booking,
+        hasReview: reviewedSet.has(booking.id),
         schedule: found
           ? {
             ...found.schedule,
@@ -291,6 +305,21 @@ export class BookingsService {
 
     const previousStatus = booking.status;
     const newStatus = updateBookingStatusDto.status;
+    const refundAction = updateBookingStatusDto.refundAction;
+
+    if (refundAction) {
+      if (!booking.isRefundRequested) {
+        throw new BadRequestException('รายการนี้ไม่มีคำขอคืนเงินที่ต้องดำเนินการ');
+      }
+      if (newStatus !== previousStatus) {
+        throw new BadRequestException('การดำเนินการคำขอคืนเงินไม่ควรเปลี่ยนสถานะการจอง');
+      }
+
+      booking.isRefundRequested = false;
+      booking.adminNotes = refundAction === 'approve'
+        ? 'อนุมัติคำขอคืนเงิน'
+        : 'ปฏิเสธคำขอคืนเงิน';
+    }
 
     const activeStatuses = [
       BookingStatus.PENDING_PAYMENT,
@@ -411,7 +440,7 @@ export class BookingsService {
     };
   }
 
-  async cancelBooking(bookingId: number, userId: string) {
+  async cancelBooking(bookingId: number, userId: string, reason?: string) {
     const booking = await this.bookingsRepository.findOne({
       where: { id: bookingId },
     });
@@ -427,6 +456,26 @@ export class BookingsService {
     const cancellableStatuses = [BookingStatus.PENDING_PAYMENT, BookingStatus.AWAITING_APPROVAL, BookingStatus.CONFIRMED, BookingStatus.SUCCESS];
     if (!cancellableStatuses.includes(booking.status)) {
       throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงิน รอตรวจสอบ หรือสำเร็จเท่านั้น');
+    }
+
+    const paidStatuses = [BookingStatus.AWAITING_APPROVAL, BookingStatus.CONFIRMED, BookingStatus.SUCCESS];
+    if (paidStatuses.includes(booking.status)) {
+      const foundForDate = this.findScheduleInData(booking.scheduleId);
+      if (foundForDate?.schedule?.startDate) {
+        const startDate = new Date(foundForDate.schedule.startDate);
+        const diffDays = (startDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+        if (diffDays < 7) {
+          throw new BadRequestException('ไม่สามารถขอคืนเงินได้ เนื่องจากเหลือเวลาน้อยกว่า 7 วันก่อนวันเดินทาง');
+        }
+      }
+    }
+
+    if (reason) {
+      booking.cancellationReason = reason;
+    }
+
+    if (paidStatuses.includes(booking.status)) {
+      booking.isRefundRequested = true;
     }
 
     booking.status = BookingStatus.CANCELED;

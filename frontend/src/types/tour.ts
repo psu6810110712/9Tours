@@ -1,5 +1,12 @@
 ﻿export type TourType = 'one_day' | 'package'
 
+export interface Festival {
+  id: number
+  name: string
+  startDate: string
+  endDate: string
+}
+
 export interface TourSchedule {
   id: number
   tourId: number
@@ -21,6 +28,9 @@ export interface Tour {
   price: number
   childPrice?: number | null
   originalPrice: number | null
+  discountStartDate?: string | null
+  discountEndDate?: string | null
+  discountActive?: boolean
   images: string[]
   highlights: string[]
   itinerary: { day?: number; time: string; title: string; description: string }[]
@@ -34,6 +44,8 @@ export interface Tour {
   rating: number
   reviewCount: number
   isActive: boolean
+  festivalId?: number | null
+  festival?: Festival | null
   schedules: TourSchedule[]
   createdAt: string
   updatedAt: string
@@ -57,6 +69,8 @@ export interface CreateTourPayload {
   price: number
   childPrice?: number | null
   originalPrice?: number | null
+  discountStartDate?: string | null
+  discountEndDate?: string | null
   minPeople?: number
   maxPeople?: number
   highlights: string[]
@@ -69,6 +83,7 @@ export interface CreateTourPayload {
   itinerary: { day?: number; time: string; title: string; description: string }[]
   schedules: CreateSchedulePayload[]
   isActive?: boolean
+  festivalId?: number | null
 }
 
 export interface UpdateTourPayload extends Partial<CreateTourPayload> {

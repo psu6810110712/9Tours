@@ -1,0 +1,1 @@
+UPDATE users SET password = '$2b$10$GRr1X34fo4IIZRbD5fXmReMcRaapkCavrf0bJKWq63owBDzmvv.AZm' WHERE email = 'admin@9tours.com';

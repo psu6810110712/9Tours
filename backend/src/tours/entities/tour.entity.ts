@@ -82,6 +82,12 @@ export class Tour {
   @Column({ default: 0 })
   reviewCount: number;
 
+  @Column({ type: 'date', nullable: true })
+  discountStartDate: string | null;
+
+  @Column({ type: 'date', nullable: true })
+  discountEndDate: string | null;
+
   @Column({ default: true })
   isActive: boolean;
 

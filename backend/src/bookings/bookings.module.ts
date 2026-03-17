@@ -6,9 +6,10 @@ import { Booking } from './entities/booking.entity';
 import { ToursModule } from '../tours/tours.module';
 import { User } from '../users/entities/user.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { Review } from '../reviews/entities/review.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Booking, User]), ToursModule, NotificationsModule],
+  imports: [TypeOrmModule.forFeature([Booking, User, Review]), ToursModule, NotificationsModule],
   providers: [BookingsService],
   controllers: [BookingsController],
   exports: [BookingsService],

@@ -1,4 +1,4 @@
-import { useEffect, useState, type RefObject } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import ScrollerArrowButton from '../../common/ScrollerArrowButton'
 import type { Tour, TourSchedule } from '../../../types/tour'
 
@@ -37,6 +37,9 @@ export default function BookingDateSelector({
 }: BookingDateSelectorProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [calendarMonthIndex, setCalendarMonthIndex] = useState(0)
+  const monthScrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const element = scrollRef.current
@@ -61,57 +64,205 @@ export default function BookingDateSelector({
     }
   }, [scrollRef, upcomingSchedules, selectedMonth])
 
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' })
+    }
+  }, [selectedMonth, scrollRef])
+
+  useEffect(() => {
+    if (!monthScrollRef.current) return
+    const activeBtn = monthScrollRef.current.querySelector('[data-active-month="true"]') as HTMLElement | null
+    if (activeBtn) {
+      const container = monthScrollRef.current
+      const scrollLeft = activeBtn.offsetLeft - container.clientWidth / 2 + activeBtn.clientWidth / 2
+      container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' })
+    }
+  }, [selectedMonth])
+
   const scrollDates = (amount: number) => {
     scrollRef.current?.scrollBy({ left: amount, behavior: 'smooth' })
   }
 
+  const handleMonthClick = (month: string) => {
+    setSelectedMonth(month)
+  }
+
+  const showMonthPills = upcomingSchedules.length > 0 && availableMonths.length > 1
+
   return (
-    <div className="mb-5 border-b border-gray-200 pb-5">
-      <div className="mb-0 flex items-start justify-between gap-3">
-        <div>
-          <label className="block text-lg font-bold text-gray-700">เลือกวันที่เดินทาง</label>
-        </div>
-        <div className="flex items-center gap-2">
-          {(canScrollLeft || canScrollRight) && (
-            <div className="hidden items-center gap-2 sm:flex">
-              <ScrollerArrowButton direction="left" onClick={() => scrollDates(-220)} disabled={!canScrollLeft} className="h-10 w-10" />
-              <ScrollerArrowButton direction="right" onClick={() => scrollDates(220)} disabled={!canScrollRight} className="h-10 w-10" />
-            </div>
-          )}
-          {upcomingSchedules.length > 0 && availableMonths.length > 1 && (
-            <select
-              value={selectedMonth}
-              onChange={(event) => setSelectedMonth(event.target.value)}
-              className="ui-focus-ring rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-bold text-gray-700 outline-none focus:border-[var(--color-primary)] focus:bg-white"
-            >
-              <option value="all">ทุกช่วงเวลา</option>
-              {availableMonths.map((month) => (
-                <option key={month} value={month}>
-                  {new Date(`${month}-01`).toLocaleString('th-TH', { month: 'long', year: 'numeric' })}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
+    <div className="mb-4 border-b border-gray-200 pb-4 sm:mb-5 sm:pb-5">
+      <div className="mb-2.5 sm:mb-3 flex items-baseline justify-between">
+        <label className="block text-base font-bold whitespace-nowrap text-slate-800 sm:text-lg">เลือกวันที่เดินทาง</label>
+        {upcomingSchedules.length > 4 && (
+          <button type="button" onClick={() => setIsExpanded(!isExpanded)} className="text-xs font-semibold text-primary sm:text-sm hover:underline">
+            {isExpanded ? 'ดูแบบเลื่อนแนวนอน' : 'ดูในรูปแบบตารางปฏิทิน'}
+          </button>
+        )}
       </div>
 
+      {!isExpanded && showMonthPills && (
+        <div className="relative mb-2.5 sm:mb-3">
+          <div
+            ref={monthScrollRef}
+            className="scrollbar-hide flex gap-1.5 overflow-x-auto pb-1 scroll-smooth"
+          >
+            <button
+              type="button"
+              data-active-month={selectedMonth === 'all'}
+              onClick={() => handleMonthClick('all')}
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold transition-all whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-xs ${selectedMonth === 'all'
+                ? 'bg-[var(--color-primary)] text-white shadow-sm'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
+              }`}
+            >
+              ทั้งหมด
+            </button>
+            {availableMonths.map((month) => {
+              const isActive = selectedMonth === month
+              const monthLabel = new Date(`${month}-01`).toLocaleString('th-TH', { month: 'short' })
+              const yearLabel = (new Date(`${month}-01`).getFullYear() + 543).toString().slice(-2)
+              return (
+                <button
+                  key={month}
+                  type="button"
+                  data-active-month={isActive}
+                  onClick={() => handleMonthClick(month)}
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold transition-all whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-xs ${isActive
+                    ? 'bg-[var(--color-primary)] text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-700'
+                  }`}
+                >
+                  {monthLabel} {yearLabel}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {upcomingSchedules.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-4 text-center text-sm text-gray-400">
+        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-3 py-3 text-center text-xs text-gray-400 sm:px-4 sm:py-4 sm:text-sm">
           ไม่มีรอบทัวร์ที่เปิดรับในขณะนี้
         </div>
       ) : (
         <>
-          <div className="relative">
-            <div
-              ref={scrollRef}
-              className="scrollbar-hide flex gap-2 overflow-x-auto px-1 pb-1 scroll-smooth"
-              style={{ scrollPaddingInline: '0.25rem' }}
-            >
+          <div className={`flex ${isExpanded ? 'flex-col' : 'items-center gap-1.5'}`}>
+            {!isExpanded && (canScrollLeft || canScrollRight) && (
+              <ScrollerArrowButton direction="left" onClick={() => scrollDates(-220)} disabled={!canScrollLeft} className="h-8 w-8 shrink-0" />
+            )}
+            <div className={`relative min-w-0 flex-1 ${isExpanded ? '' : '-mx-4 px-4 sm:mx-0 sm:px-0'}`}>
+              <div
+                ref={scrollRef}
+                className={isExpanded 
+                  ? "w-full overflow-y-auto max-h-[60vh] pr-2 scrollbar-hide" 
+                  : "scrollbar-hide flex gap-2.5 overflow-x-auto pb-4 pt-2 scroll-smooth"
+                }
+                style={isExpanded ? {} : { scrollPaddingInline: '1rem' }}
+              >
               {(() => {
+                if (isExpanded) {
+                  const safeIndex = Math.min(Math.max(0, calendarMonthIndex), Math.max(0, availableMonths.length - 1))
+                  const monthStr = availableMonths.length > 0 ? availableMonths[safeIndex] : null
+
+                  if (!monthStr) {
+                    return <div className="w-full py-3 text-center text-sm text-gray-400">ไม่มีรอบทัวร์เปิดรับ</div>
+                  }
+
+                  const [year, month] = monthStr.split('-').map(Number)
+                  const firstDay = new Date(year, month - 1, 1).getDay()
+                  const daysInMonth = new Date(year, month, 0).getDate()
+                  const monthName = new Date(year, month - 1, 1).toLocaleString('th-TH', { month: 'long', year: 'numeric' })
+                  
+                  const days = Array.from({ length: daysInMonth }, (_, i) => {
+                    const dayNum = i + 1
+                    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
+                    const schedulesOnDate = upcomingSchedules.filter((s) => s.startDate === dateStr)
+                    const isFullyBooked = schedulesOnDate.length > 0 && schedulesOnDate.every((s) => {
+                      const seats = availableSeatsData[s.id] ?? (s.maxCapacity - s.currentBooked)
+                      return Math.max(0, seats) <= 0
+                    })
+                    const isSelected = selectedSchedule?.startDate === dateStr
+                    return { dayNum, dateStr, hasTour: schedulesOnDate.length > 0, isFullyBooked, isSelected }
+                  })
+
+                  const hasNext = safeIndex < availableMonths.length - 1
+                  const hasPrev = safeIndex > 0
+
+                  return (
+                    <div className="flex w-full flex-col gap-5 pb-4">
+                      <div className="w-full rounded-2xl border border-gray-100 bg-white p-3 sm:p-4 shadow-sm">
+                        
+                        <div className="mb-4 flex items-center justify-between px-2">
+                          <button 
+                            type="button" 
+                            onClick={() => setCalendarMonthIndex(safeIndex - 1)} 
+                            disabled={!hasPrev}
+                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${hasPrev ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' : 'text-gray-200'}`}
+                          >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                          </button>
+                          
+                          <h3 className="text-sm font-extrabold text-gray-800">{monthName}</h3>
+                          
+                          <button 
+                            type="button" 
+                            onClick={() => setCalendarMonthIndex(safeIndex + 1)} 
+                            disabled={!hasNext}
+                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${hasNext ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' : 'text-gray-200'}`}
+                          >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                          </button>
+                        </div>
+
+                        <div className="mb-2 grid grid-cols-7 gap-1 text-center">
+                          {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((d) => (
+                            <div key={d} className="text-[11px] font-bold text-gray-400">{d}</div>
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+                          {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
+                          {days.map(({ dayNum, dateStr, hasTour, isFullyBooked, isSelected }) => {
+                            if (!hasTour) {
+                              return (
+                                <div key={dayNum} className="flex h-10 w-full items-center justify-center text-[13px] text-gray-300 opacity-50">
+                                  {dayNum}
+                                </div>
+                              )
+                            }
+                            return (
+                              <button
+                                key={dayNum}
+                                type="button"
+                                disabled={isFullyBooked}
+                                onClick={() => {
+                                  const sched = upcomingSchedules.find(s => s.startDate === dateStr && (availableSeatsData[s.id] ?? (s.maxCapacity - s.currentBooked)) > 0)
+                                  if (sched) setSelectedSchedule(sched)
+                                }}
+                                className={`relative flex h-10 w-full flex-col items-center justify-center rounded-xl transition-all sm:h-11 ${
+                                  isSelected ? 'bg-primary text-white font-bold shadow-md shadow-primary/30 scale-105' :
+                                  isFullyBooked ? 'bg-red-50 text-red-300 line-through' :
+                                  'bg-slate-50 text-slate-800 hover:bg-primary/10 hover:text-primary font-bold'
+                                }`}
+                              >
+                                <span className="text-[13px] sm:text-[14px]">{dayNum}</span>
+                                {hasTour && !isFullyBooked && !isSelected && <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-emerald-500 shadow-sm" />}
+                                {hasTour && isFullyBooked && !isSelected && <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-red-400 opacity-50" />}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+
                 let datesList = Array.from(new Set(upcomingSchedules.map((schedule: TourSchedule) => schedule.startDate))).sort()
 
                 if (selectedMonth !== 'all') {
                   datesList = datesList.filter((date) => date.startsWith(selectedMonth))
+                } else {
+                  datesList = datesList.slice(0, 30)
                 }
 
                 const resultList = datesList.map((dateStr: string) => {
@@ -148,47 +299,43 @@ export default function BookingDateSelector({
                       })
                       if (firstAvailable) setSelectedSchedule(firstAvailable)
                     }}
-                    className={`min-w-[72px] flex-shrink-0 rounded-[1.25rem] border px-3 py-3 text-center transition-all ${isSelected
-                      ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary)] shadow-sm'
+                    className={`min-w-[66px] sm:min-w-[70px] flex-shrink-0 flex flex-col items-center justify-center rounded-2xl border py-2.5 transition-all duration-300 sm:py-3 ${isSelected
+                      ? 'border-primary bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02]'
                       : isFullyBooked
                         ? 'cursor-not-allowed border-transparent bg-gray-50 text-gray-300'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm'
                       }`}
                   >
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-80">{weekday}</span>
-                    <span className="mt-1 block text-xl font-bold leading-none">{day}</span>
-                    <span className="mt-1 block text-[11px] font-medium opacity-80">{month}</span>
-                    <span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[14px] font-semibold ${isFullyBooked ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
+                    <span className={`text-[9px] font-bold uppercase tracking-widest ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>{weekday}</span>
+                    <span className="mt-0.5 block text-[1.25rem] font-black leading-none sm:text-[1.45rem]">{day}</span>
+                    <span className={`mt-0.5 block text-[10px] font-semibold ${isSelected ? 'text-white/80' : 'text-gray-500'}`}>{month}</span>
+                    <span className={`mt-1.5 inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold ${isSelected ? 'bg-white/20 text-white' : isFullyBooked ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
                       {isFullyBooked ? 'เต็ม' : 'ว่าง'}
                     </span>
                   </button>
                 ))
               })()}
-            </div>
-
-            {canScrollLeft && <div className="ui-rail-fade-left" />}
-            {canScrollRight && <div className="ui-rail-fade-right" />}
-
-            {(canScrollLeft || canScrollRight) && (
-              <div className="mt-3 flex items-center justify-end gap-2 sm:hidden">
-                <ScrollerArrowButton direction="left" onClick={() => scrollDates(-220)} disabled={!canScrollLeft} className="h-10 w-10" />
-                <ScrollerArrowButton direction="right" onClick={() => scrollDates(220)} disabled={!canScrollRight} className="h-10 w-10" />
               </div>
+              {!isExpanded && canScrollLeft && <div className="ui-rail-fade-left absolute left-0 top-0 bottom-4 w-6 sm:hidden pointer-events-none" />}
+              {!isExpanded && canScrollRight && <div className="ui-rail-fade-right absolute right-0 top-0 bottom-4 w-6 sm:hidden pointer-events-none" />}
+            </div>
+            {!isExpanded && (canScrollLeft || canScrollRight) && (
+              <ScrollerArrowButton direction="right" onClick={() => scrollDates(220)} disabled={!canScrollRight} className="h-8 w-8 shrink-0" />
             )}
           </div>
 
           {selectedSchedule && !tour.minPeople && (
-            <div className="mt-5">
+            <div className="mt-4 sm:mt-5">
               {(() => {
                 const schedulesOnSelectedDate = upcomingSchedules.filter((schedule: TourSchedule) => schedule.startDate === selectedSchedule.startDate)
                 const hasMultipleRounds = schedulesOnSelectedDate.length > 1
 
                 return (
-                  <div className="space-y-2.5">
-                    <label className="block text-lg font-bold text-gray-600">
+                  <div className="space-y-2">
+                    <label className="block text-base font-bold text-slate-800 sm:text-lg">
                       {hasMultipleRounds ? 'เลือกรอบเวลา (Join Trip)' : 'รายละเอียดรอบ / จำนวนที่นั่งว่าง (Join Trip)'}
                     </label>
-                    <div className="grid gap-2">
+                    <div className="grid gap-1.5 sm:gap-2">
                       {schedulesOnSelectedDate.map((schedule: TourSchedule) => {
                         const seatsLeft = Math.max(0, availableSeatsData[schedule.id] ?? (schedule.maxCapacity - schedule.currentBooked))
                         const isFull = seatsLeft <= 0
@@ -200,8 +347,8 @@ export default function BookingDateSelector({
                             type="button"
                             disabled={isFull}
                             onClick={() => setSelectedSchedule(schedule)}
-                            className={`w-full rounded-[1.25rem] border px-4 py-3 text-left transition-all ${isActiveRound
-                              ? 'border-amber-300 bg-amber-50'
+                            className={`w-full rounded-[1.15rem] border px-3 py-2.5 text-left transition-all sm:rounded-[1.25rem] sm:px-4 sm:py-3 ${isActiveRound
+                              ? 'border-blue-300 bg-blue-50'
                               : isFull
                                 ? 'cursor-not-allowed border-gray-100 bg-gray-50 opacity-60'
                                 : 'border-gray-200 bg-white hover:border-gray-300'
@@ -209,19 +356,19 @@ export default function BookingDateSelector({
                           >
                             <div className="flex items-center justify-between gap-4">
                               <div className="flex items-center gap-3">
-                                <div className={`flex h-5 w-5 items-center justify-center rounded-full border ${isActiveRound ? 'border-accent bg-accent' : 'border-gray-300 bg-white'}`}>
-                                  {isActiveRound && <div className="h-2 w-2 rounded-full bg-white" />}
+                                <div className={`flex h-4 w-4 items-center justify-center rounded-full border sm:h-5 sm:w-5 ${isActiveRound ? 'border-accent bg-accent' : 'border-gray-300 bg-white'}`}>
+                                  {isActiveRound && <div className="h-1.5 w-1.5 rounded-full bg-white sm:h-2 sm:w-2" />}
                                 </div>
                                 <div>
-                                  <p className={`text-base font-bold ${isActiveRound ? 'text-gray-900' : 'text-gray-700'}`}>
+                                  <p className={`text-sm font-bold sm:text-base ${isActiveRound ? 'text-gray-900' : 'text-gray-700'}`}>
                                     {schedule.timeSlot ? schedule.timeSlot : (hasMultipleRounds ? 'ไม่ระบุเวลา' : 'รอบออกเดินทาง')}
                                   </p>
                                   {schedule.roundName && (
-                                    <p className="text-[13px] text-gray-500">{schedule.roundName}</p>
+                                    <p className="text-[11px] text-gray-500 sm:text-[13px]">{schedule.roundName}</p>
                                   )}
                                 </div>
                               </div>
-                              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isFull ? 'bg-red-50 text-red-500' : seatsLeft <= 5 ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                              <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold sm:px-3 sm:py-1 sm:text-xs ${isFull ? 'bg-red-50 text-red-500' : seatsLeft <= 5 ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}>
                                 {isFull ? 'เต็มแล้ว' : `เหลือ ${seatsLeft} ที่`}
                               </span>
                             </div>
@@ -236,17 +383,17 @@ export default function BookingDateSelector({
           )}
 
           {selectedSchedule && (tour.tourType === 'package' || !!tour.minPeople) && (
-            <div className="mt-4 rounded-[1.5rem] border border-blue-200 bg-blue-50 px-4 py-4">
-              <label className="mb-2 block text-md font-semibold text-blue-800">วันที่ท่านเลือกคือ</label>
-              <div className="flex items-center gap-4">
-                <div className="flex h-5 w-5 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <rect x="3" y="4" width="18" height="18" rx="2" />
-                    <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-[14px] font-semibold text-blue-900">
+            <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 sm:mt-4 sm:px-4 sm:py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-semibold whitespace-nowrap text-slate-600 sm:text-sm">วันที่ท่านเลือก</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex h-4 w-4 shrink-0 items-center justify-center text-slate-400 sm:h-5 sm:w-5">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-bold text-slate-800 sm:text-sm">
                     {(() => {
                       const start = parseDate(selectedSchedule.startDate)
                       let dateText = ''

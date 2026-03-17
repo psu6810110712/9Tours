@@ -13,6 +13,7 @@ import {
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -70,7 +71,11 @@ export class BookingsController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Patch(':id/cancel')
-  async cancelBooking(@Param('id') id: string, @Req() req: any) {
-    return this.bookingsService.cancelBooking(+id, req.user.id);
+  async cancelBooking(
+    @Param('id') id: string,
+    @Body() cancelBookingDto: CancelBookingDto,
+    @Req() req: any,
+  ) {
+    return this.bookingsService.cancelBooking(+id, req.user.id, cancelBookingDto.reason);
   }
 }

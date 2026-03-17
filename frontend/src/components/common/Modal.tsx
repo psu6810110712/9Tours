@@ -54,7 +54,7 @@ export default function Modal({ isOpen, onClose, children, width = 'max-w-md' }:
         role="dialog"
         aria-modal="true"
         tabIndex={-1}
-        className={`ui-surface-strong ui-pop relative z-10 max-h-[min(92vh,52rem)] w-full overflow-y-auto overscroll-contain p-6 sm:p-8 ${width}`}
+        className={`ui-surface-strong ui-pop relative z-10 max-h-[min(88vh,52rem)] sm:max-h-[min(92vh,52rem)] w-full overflow-y-auto overscroll-contain p-4 sm:p-6 md:p-8 ${width}`}
       >
         {children}
       </div>

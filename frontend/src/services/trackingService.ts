@@ -1,4 +1,4 @@
-import api, { getAccessToken } from './api'
+import api from './api'
 import { API_BASE_URL } from './apiBaseUrl'
 
 export type TrackingEventType = 'page_view' | 'cta_click' | 'dwell_time'
@@ -63,7 +63,6 @@ export function trackEventKeepalive(
     sessionId: getTrackingSessionId(),
     occurredAt: new Date().toISOString(),
   }
-  const token = getAccessToken()
 
   fetch(TRACKING_ENDPOINT, {
     method: 'POST',
@@ -72,7 +71,6 @@ export function trackEventKeepalive(
     headers: {
       'Content-Type': 'application/json',
       'x-anonymous-id': getAnonymousId(),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify(body),
   }).catch(() => undefined)
