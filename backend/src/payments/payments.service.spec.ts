@@ -429,7 +429,7 @@ describe('PaymentsService', () => {
     });
 
     it('throws NotFoundException when payment has no slip', async () => {
-      const payment = createMockPayment({ slipUrl: null });
+      const payment = createMockPayment({ slipUrl: undefined });
       paymentsRepository.findOne.mockResolvedValue(payment);
 
       await expect(service.getSlipFilePath(1, mockUserId, false)).rejects.toThrow(
