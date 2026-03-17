@@ -291,34 +291,6 @@ export class BookingsService {
 
     const previousStatus = booking.status;
     const newStatus = updateBookingStatusDto.status;
-    const refundAction = updateBookingStatusDto.refundAction;
-
-    if (refundAction) {
-      const isPaid = [
-        BookingStatus.CONFIRMED, 
-        BookingStatus.SUCCESS, 
-        BookingStatus.REFUND_PENDING, 
-        BookingStatus.REFUND_REJECTED
-      ].includes(booking.status);
-
-      if (!booking.isRefundRequested && !isPaid) {
-        throw new BadRequestException('รายการนี้ไม่มีคำขอคืนเงินที่ต้องดำเนินการ');
-      }
-
-      booking.isRefundRequested = false;
-      if (refundAction === 'approve') {
-        booking.status = BookingStatus.REFUND_COMPLETED;
-        booking.adminNotes = 'อนุมัติคำขอคืนเงินและคืนเงินสำเร็จ';
-      } else {
-        booking.status = BookingStatus.REFUND_REJECTED;
-        booking.adminNotes = 'ปฏิเสธคำขอคืนเงิน';
-      }
-      
-      // Since we handled the refund, let's skip the normal status update logic below
-      // but still we need to save and notify.
-    } else {
-      booking.status = newStatus;
-    }
 
     const activeStatuses = [
       BookingStatus.PENDING_PAYMENT,
@@ -328,7 +300,7 @@ export class BookingsService {
     ];
 
     const wasActive = activeStatuses.includes(previousStatus);
-    const isNowActive = activeStatuses.includes(booking.status);
+    const isNowActive = activeStatuses.includes(newStatus);
 
     if (wasActive && !isNowActive) {
       const found = this.findScheduleInData(booking.scheduleId);
@@ -346,10 +318,11 @@ export class BookingsService {
       }
     }
 
+    booking.status = newStatus;
     booking.reviewedByUserId = userId;
     booking.reviewedAt = new Date();
     await this.bookingsRepository.save(booking);
-    this.logger.log(`Admin ${userId} updated booking ${bookingId} from ${previousStatus} to ${booking.status}`);
+    this.logger.log(`Admin ${userId} updated booking ${bookingId} from ${previousStatus} to ${newStatus}`);
 
     const updated = await this.bookingsRepository.findOne({
       where: { id: bookingId },
@@ -383,13 +356,13 @@ export class BookingsService {
     };
 
     // Send email notification silently, don't block the request if it fails
-    this.notificationsService.sendBookingStatusEmail(emailResult as Booking, previousStatus, booking.status).catch(e => console.error(e));
+    this.notificationsService.sendBookingStatusEmail(emailResult as Booking, previousStatus, newStatus).catch(e => console.error(e));
 
     // Create in-app notification for relevant status transitions
     const tourName = found?.tour?.name || 'ทัวร์';
-    const isConfirmed = previousStatus === BookingStatus.AWAITING_APPROVAL && booking.status === BookingStatus.CONFIRMED;
-    const isSuccess = previousStatus === BookingStatus.AWAITING_APPROVAL && booking.status === BookingStatus.SUCCESS;
-    const wasRejected = previousStatus === BookingStatus.AWAITING_APPROVAL && booking.status === BookingStatus.CANCELED;
+    const isConfirmed = previousStatus === BookingStatus.AWAITING_APPROVAL && newStatus === BookingStatus.CONFIRMED;
+    const isSuccess = previousStatus === BookingStatus.AWAITING_APPROVAL && newStatus === BookingStatus.SUCCESS;
+    const wasRejected = previousStatus === BookingStatus.AWAITING_APPROVAL && newStatus === BookingStatus.CANCELED;
 
     if (isConfirmed) {
       this.notificationsService.createBookingNotification(booking.userId, booking.id, NotificationType.BOOKING_CONFIRMED, tourName).catch(e => console.error(e));
@@ -438,7 +411,7 @@ export class BookingsService {
     };
   }
 
-  async cancelBooking(bookingId: number, userId: string, reason?: string) {
+  async cancelBooking(bookingId: number, userId: string) {
     const booking = await this.bookingsRepository.findOne({
       where: { id: bookingId },
     });
@@ -456,17 +429,7 @@ export class BookingsService {
       throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงิน รอตรวจสอบ หรือสำเร็จเท่านั้น');
     }
 
-    if (reason) {
-      booking.cancellationReason = reason;
-    }
-
-    const paidStatuses = [BookingStatus.AWAITING_APPROVAL, BookingStatus.CONFIRMED, BookingStatus.SUCCESS];
-    if (paidStatuses.includes(booking.status)) {
-      booking.isRefundRequested = true;
-      booking.status = BookingStatus.REFUND_PENDING;
-    } else {
-      booking.status = BookingStatus.CANCELED;
-    }
+    booking.status = BookingStatus.CANCELED;
     const updated = await this.bookingsRepository.save(booking);
 
     const foundForCancel = this.findScheduleInData(booking.scheduleId);

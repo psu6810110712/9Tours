@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent } from 'react'
+﻿import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import BookingSummaryCard from '../components/booking/BookingSummaryCard'
@@ -474,7 +474,7 @@ export default function PaymentPage() {
                 : isPaymentClosed
                   ? 'cursor-not-allowed border-gray-200 bg-gray-100/80'
                   : 'cursor-pointer border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/40'
-                }`}
+              }`}
               onClick={() => !previewUrl && !isPaymentClosed && fileInputRef.current?.click()}
             >
               {previewUrl ? (
@@ -542,7 +542,7 @@ export default function PaymentPage() {
             className={`ui-focus-ring ui-pressable flex min-w-[280px] items-center justify-center gap-3 rounded-full px-8 py-4 text-lg font-bold text-white ${isSubmitting || isPaymentClosed
               ? 'cursor-not-allowed bg-gray-400 shadow-none hover:transform-none'
               : 'bg-primary shadow-[0_10px_25px_rgba(37,99,235,0.25)] hover:bg-primary-dark'
-              }`}
+            }`}
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">
