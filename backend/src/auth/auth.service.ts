@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
-import { AuthProvider, UserRole } from '../users/entities/user.entity';
+import { User, AuthProvider, UserRole } from '../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 
@@ -38,7 +38,7 @@ export class AuthService {
     // Create new user - ใช้ role จาก DTO ถ้ามี ไม่งั้นใช้ 'customer' เป็นค่าเริ่มต้น
     const role = (createUserDto.role === 'admin' ? UserRole.ADMIN : UserRole.CUSTOMER);
     const user = await this.usersService.create({
-      prefix: (createUserDto.prefix as any) || null,
+      prefix: (createUserDto as any)['prefix'] ?? null,
       email: createUserDto.email,
       name: createUserDto.name,
       password: hashedPassword,
@@ -67,7 +67,7 @@ export class AuthService {
     return { ...this.generateToken(user), rememberMe };
   }
 
-  private generateToken(user: any) {
+  private generateToken(user: User) {
     const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
