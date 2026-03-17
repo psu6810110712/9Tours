@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import ConfirmModal from '../../common/ConfirmModal';
 
 interface ScheduleRow {
@@ -10,6 +10,11 @@ interface ScheduleRow {
     enabled: boolean;
 }
 
+interface BulkRound {
+    roundName: string;
+    timeSlot: string;
+}
+
 interface ScheduleSectionProps {
     schedules: ScheduleRow[];
     tourType: 'package' | 'one_day';
@@ -19,11 +24,13 @@ interface ScheduleSectionProps {
     bulkCapacity: number;
     bulkDuration: number;
     bulkDays: Set<number>;
+    bulkRounds: BulkRound[];
     setBulkFrom: (val: string) => void;
     setBulkTo: (val: string) => void;
     setBulkCapacity: (val: number) => void;
     setBulkDuration: (val: number) => void;
     setBulkDays: (val: Set<number>) => void;
+    setBulkRounds: (val: BulkRound[]) => void;
     removeSchedule: (index: number) => void;
     removeSchedules: (indices: number[]) => void;
     updateSchedule: (index: number, field: keyof ScheduleRow, value: string | number | boolean) => void;
@@ -41,11 +48,13 @@ export default function ScheduleSection({
     bulkCapacity,
     bulkDuration,
     bulkDays,
+    bulkRounds,
     setBulkFrom,
     setBulkTo,
     setBulkCapacity,
     setBulkDuration,
     setBulkDays,
+    setBulkRounds,
     removeSchedule,
     removeSchedules,
     updateSchedule,
@@ -268,8 +277,72 @@ export default function ScheduleSection({
                 </div>
 
                 {bookingMode === 'join' && (
-                    <div className="mt-4">
-                        <p className="text-xs text-blue-500">ระบบจะสร้าง 1 รอบต่อวันให้อัตโนมัติ</p>
+                    <div className="mt-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                            <span className="text-md font-semibold text-gray-700">กำหนดรอบเวลาต่อวัน</span>
+                            <button
+                                type="button"
+                                onClick={() => setBulkRounds([...bulkRounds, { roundName: '', timeSlot: '' }])}
+                                className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-all ${theme.btnBg}`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                                </svg>
+                                เพิ่มรอบ
+                            </button>
+                        </div>
+                        {bulkRounds.length === 0 && (
+                            <p className="text-xs text-blue-500">ระบบจะสร้าง 1 รอบต่อวันให้อัตโนมัติ (ไม่ระบุเวลา)</p>
+                        )}
+                        {bulkRounds.map((round, rIdx) => (
+                            <div key={rIdx} className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-3">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-[11px] font-medium text-gray-500">ชื่อรอบ</span>
+                                    <input
+                                        type="text"
+                                        value={round.roundName}
+                                        onChange={(e) => {
+                                            const next = [...bulkRounds];
+                                            next[rIdx] = { ...next[rIdx], roundName: e.target.value };
+                                            setBulkRounds(next);
+                                        }}
+                                        placeholder="เช่น รอบเช้า"
+                                        className={`w-32 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-sm outline-none ${theme.focus}`}
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-[11px] font-medium text-gray-500">เวลาออกเดินทาง</span>
+                                    <input
+                                        type="time"
+                                        value={round.timeSlot}
+                                        onChange={(e) => {
+                                            const next = [...bulkRounds];
+                                            next[rIdx] = { ...next[rIdx], timeSlot: e.target.value };
+                                            setBulkRounds(next);
+                                        }}
+                                        className={`w-32 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-sm outline-none ${theme.focus}`}
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const next = bulkRounds.filter((_, i) => i !== rIdx);
+                                        setBulkRounds(next);
+                                    }}
+                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-400 transition-colors hover:bg-red-100 hover:text-red-600"
+                                    title="ลบรอบนี้"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        ))}
+                        {bulkRounds.length > 0 && (
+                            <p className="text-xs text-blue-500">
+                                ระบบจะสร้าง {bulkRounds.length} รอบต่อวันตามที่กำหนด
+                            </p>
+                        )}
                     </div>
                 )}
 
@@ -428,6 +501,26 @@ export default function ScheduleSection({
                                                 )}
 
 
+                                                <div className="flex flex-col gap-1.5">
+                                                    <span className="text-[11px] font-bold text-gray-500">ชื่อรอบ</span>
+                                                    <input
+                                                        type="text"
+                                                        value={s.roundName}
+                                                        onChange={(e) => updateSchedule(i, 'roundName', e.target.value)}
+                                                        placeholder="เช่น รอบเช้า"
+                                                        className={`w-28 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-sm outline-none ${theme.focus} focus:bg-white`}
+                                                    />
+                                                </div>
+
+                                                <div className="flex flex-col gap-1.5">
+                                                    <span className="text-[11px] font-bold text-gray-500">เวลา</span>
+                                                    <input
+                                                        type="time"
+                                                        value={s.timeSlot}
+                                                        onChange={(e) => updateSchedule(i, 'timeSlot', e.target.value)}
+                                                        className={`w-28 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-sm outline-none ${theme.focus} focus:bg-white`}
+                                                    />
+                                                </div>
 
                                                 <div className="flex flex-col gap-1.5">
                                                     <span className="text-[11px] font-bold text-gray-500">({capacityLabel})</span>

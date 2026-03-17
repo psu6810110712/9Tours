@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { isAxiosError } from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
@@ -256,6 +256,7 @@ export default function AdminTourFormPage() {
   const [bulkCapacity, setBulkCapacity] = useState(20)
   const [bulkDuration, setBulkDuration] = useState<number>(1)
   const [bulkDays, setBulkDays] = useState<Set<number>>(new Set())
+  const [bulkRounds, setBulkRounds] = useState<{ roundName: string; timeSlot: string }[]>([])
   const [discountStartDate, setDiscountStartDate] = useState('')
   const [discountEndDate, setDiscountEndDate] = useState('')
   const [festivals, setFestivals] = useState<Festival[]>([])
@@ -428,9 +429,10 @@ export default function AdminTourFormPage() {
     const current = new Date(bulkFrom)
     const end = new Date(bulkTo)
 
-    // Create one single schedule round per day automatically since
-    // user requested to remove explicit timeslot/roundName UI definition.
-    const rounds = [{ roundName: '', timeSlot: '' }]
+    // Use user-defined rounds if any, otherwise create 1 default round per day
+    const rounds = bulkRounds.length > 0
+      ? bulkRounds
+      : [{ roundName: '', timeSlot: '' }]
 
     while (current <= end) {
       if (bulkDays.has(current.getDay())) {
@@ -946,11 +948,13 @@ export default function AdminTourFormPage() {
                         bulkCapacity={bulkCapacity}
                         bulkDuration={bulkDuration}
                         bulkDays={bulkDays}
+                        bulkRounds={bulkRounds}
                         setBulkFrom={setBulkFrom}
                         setBulkTo={setBulkTo}
                         setBulkCapacity={setBulkCapacity}
                         setBulkDuration={setBulkDuration}
                         setBulkDays={setBulkDays}
+                        setBulkRounds={setBulkRounds}
                         removeSchedule={removeSchedule}
                         removeSchedules={removeSchedules}
                         updateSchedule={updateSchedule}
