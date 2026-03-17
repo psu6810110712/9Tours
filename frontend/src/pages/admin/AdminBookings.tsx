@@ -10,6 +10,7 @@ const FILTER_TABS = [
   { label: 'ทั้งหมด', value: 'all' },
   { label: 'รอตรวจสอบสลิป', value: 'awaiting_approval' },
   { label: 'ยืนยันแล้ว', value: 'confirmed' },
+  { label: 'รอคืนเงิน', value: 'refund_requested' },
   { label: 'ยกเลิกแล้ว', value: 'canceled' },
 ] as const
 
@@ -388,12 +389,8 @@ export default function AdminBookings() {
     return bookings.filter((booking) => {
       if (filter === 'awaiting_approval' && booking.status !== 'awaiting_approval') return false
       if (filter === 'confirmed' && !['confirmed', 'success'].includes(booking.status)) return false
-<<<<<<< Updated upstream
-      if (filter === 'canceled' && booking.status !== 'canceled') return false
-=======
       if (filter === 'refund_requested' && !booking.isRefundRequested && booking.status !== 'refund_pending') return false
       if (filter === 'canceled' && booking.status !== 'canceled' && booking.status !== 'refund_completed') return false
->>>>>>> Stashed changes
 
       if (!search.trim()) return true
 

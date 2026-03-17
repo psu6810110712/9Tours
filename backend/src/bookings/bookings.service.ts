@@ -291,8 +291,6 @@ export class BookingsService {
 
     const previousStatus = booking.status;
     const newStatus = updateBookingStatusDto.status;
-<<<<<<< Updated upstream
-=======
     const refundAction = updateBookingStatusDto.refundAction;
 
     if (refundAction) {
@@ -312,7 +310,6 @@ export class BookingsService {
         booking.adminNotes = 'ปฏิเสธคำขอคืนเงิน';
       }
     }
->>>>>>> Stashed changes
 
     const activeStatuses = [
       BookingStatus.PENDING_PAYMENT,
