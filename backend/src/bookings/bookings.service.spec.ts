@@ -28,6 +28,7 @@ describe('BookingsService', () => {
       bookings: [],
       tourViews: [],
       refreshSessions: [],
+      favoriteTours: [],
     }
 
     bookingRepoInTransaction = {

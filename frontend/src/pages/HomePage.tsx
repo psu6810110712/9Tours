@@ -4,6 +4,7 @@ import TourCard from '../components/TourCard'
 import SearchBar from '../components/common/SearchBar'
 import ScrollerArrowButton from '../components/common/ScrollerArrowButton'
 import { useAuth } from '../context/AuthContext'
+import { useFavoritesContext } from '../context/FavoritesContext'
 import { tourService } from '../services/tourService'
 import type { Tour } from '../types/tour'
 
@@ -126,6 +127,7 @@ function RailShell({ children, scrollRef, canScrollLeft, canScrollRight, onPrev,
 
 export default function HomePage() {
   const { user } = useAuth()
+  const { isFavorite, toggleFavorite } = useFavoritesContext()
   const [tours, setTours] = useState<Tour[]>([])
   const [toursLoading, setToursLoading] = useState(true)
   const [recommendedTours, setRecommendedTours] = useState<Tour[]>([])
@@ -349,7 +351,7 @@ export default function HomePage() {
             >
               {displayedTours.map((tour) => (
                 <div key={tour.id} className="w-[260px] flex-shrink-0 sm:w-[280px]">
-                  <TourCard tour={tour} />
+                  <TourCard tour={tour} isFavorite={isFavorite(tour.id)} onToggleFavorite={toggleFavorite} />
                 </div>
               ))}
             </RailShell>
@@ -376,7 +378,7 @@ export default function HomePage() {
               >
                 {recommendedTours.map((tour) => (
                   <div key={tour.id} className="w-[260px] flex-shrink-0 sm:w-[280px]">
-                    <TourCard tour={tour} />
+                    <TourCard tour={tour} isFavorite={isFavorite(tour.id)} onToggleFavorite={toggleFavorite} />
                   </div>
                 ))}
               </RailShell>

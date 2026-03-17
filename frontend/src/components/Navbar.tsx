@@ -6,6 +6,7 @@ import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
 import { buildDisplayName } from '../utils/profileValidation'
 import NotificationBell from './NotificationBell'
+import { useFavoritesContext } from '../context/FavoritesContext'
 
 type NavLink = {
   label: string
@@ -28,6 +29,7 @@ const ADMIN_LINKS: NavLink[] = [
 
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth()
+  const { total: favCount } = useFavoritesContext()
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [modal, setModal] = useState<'login' | 'register' | null>(null)
@@ -147,12 +149,35 @@ export default function Navbar() {
             {user ? (
               <>
                 {user.role === 'customer' && user.profileCompleted ? (
-                  <Link
-                    to="/my-bookings"
-                    className={`hidden text-[15px] transition-colors md:block ${pathname === '/my-bookings' ? 'font-semibold text-[var(--color-primary)]' : 'text-gray-500 hover:text-gray-900'}`}
-                  >
-                    การจองของฉัน
-                  </Link>
+                  <>
+                    <Link
+                      to="/favorites"
+                      className={`ui-focus-ring ui-pressable relative inline-flex items-center justify-center rounded-2xl border p-1.5 transition-colors ${
+                        pathname === '/favorites'
+                          ? 'border-red-200 bg-red-50 text-red-500'
+                          : 'border-transparent text-gray-400 hover:border-red-100 hover:bg-red-50 hover:text-red-500'
+                      }`}
+                      aria-label="ทัวร์ที่ถูกใจ"
+                    >
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill={pathname === '/favorites' || favCount > 0 ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                    </Link>
+                    <Link
+                      to="/my-bookings"
+                      className={`ui-focus-ring ui-pressable inline-flex items-center gap-1 rounded-2xl border px-3 py-1.5 text-[13px] font-semibold transition-colors sm:text-[15px] ${
+                        pathname === '/my-bookings'
+                          ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)]/60 text-[var(--color-primary)]'
+                          : 'border-transparent text-gray-500 hover:border-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/60 hover:text-[var(--color-primary)]'
+                      }`}
+                    >
+                      <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V5m8 2V5m-9 9h10m-11 6h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2Z" />
+                      </svg>
+                      <span className="sm:hidden">การจอง</span>
+                      <span className="hidden sm:inline">การจองของฉัน</span>
+                    </Link>
+                  </>
                 ) : null}
 
                 {(user.role === 'customer' && user.profileCompleted) || isAdmin ? (
@@ -308,7 +333,16 @@ export default function Navbar() {
             </div>
 
             {user && user.role === 'customer' && user.profileCompleted && (
-              <div className="mt-3 border-t border-gray-100 pt-3">
+              <div className="mt-3 space-y-1.5 border-t border-gray-100 pt-3">
+                <Link
+                  to="/favorites"
+                  className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-[15px] font-semibold transition-colors ${pathname === '/favorites' ? 'bg-red-50 text-red-500' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill={pathname === '/favorites' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  ทัวร์ที่ถูกใจ
+                </Link>
                 <Link
                   to="/my-bookings"
                   className={`block rounded-2xl px-4 py-3 text-[15px] font-semibold transition-colors ${pathname === '/my-bookings' ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]' : 'text-gray-700 hover:bg-gray-50'}`}

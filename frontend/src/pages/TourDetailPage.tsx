@@ -8,6 +8,7 @@ import BookingSidebar from '../components/tour/BookingSidebar'
 import { trackEvent } from '../services/trackingService'
 import { tourService } from '../services/tourService'
 import { useAuth } from '../context/AuthContext'
+import { useFavoritesContext } from '../context/FavoritesContext'
 import type { Tour } from '../types/tour'
 
 export default function TourDetailPage() {
@@ -16,6 +17,7 @@ export default function TourDetailPage() {
   const [related, setRelated] = useState<Tour[]>([])
   const navigate = useNavigate()
   const { isAdmin } = useAuth()
+  const { isFavorite, toggleFavorite } = useFavoritesContext()
   const trackedTourIdRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -96,7 +98,14 @@ export default function TourDetailPage() {
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {related.map((item) => <TourCard key={item.id} tour={item} />)}
+            {related.map((item) => (
+              <TourCard
+                key={item.id}
+                tour={item}
+                isFavorite={isFavorite(item.id)}
+                onToggleFavorite={toggleFavorite}
+              />
+            ))}
           </div>
         </section>
       )}

@@ -4,6 +4,9 @@ import type { Tour } from '../types/tour'
 
 interface TourCardProps {
   tour: Tour
+  isFavorite?: boolean
+  isInactive?: boolean
+  onToggleFavorite?: (tourId: number) => void
 }
 
 function ClockIcon() {
@@ -70,7 +73,28 @@ function getCardDetailItems(tour: Tour) {
   ]
 }
 
-export default function TourCard({ tour }: TourCardProps) {
+function HeartButton({ active, onClick }: { active: boolean; onClick: (e: React.MouseEvent) => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={active ? 'ลบออกจากรายการถูกใจ' : 'เพิ่มในรายการถูกใจ'}
+      aria-pressed={active}
+      className="ui-pressable absolute left-2.5 top-2.5 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur transition-colors hover:bg-white"
+    >
+      <svg
+        className={`h-5 w-5 transition-colors ${active ? 'fill-red-500 text-red-500' : 'fill-none text-gray-500'}`}
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={active ? 0 : 2}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      </svg>
+    </button>
+  )
+}
+
+export default function TourCard({ tour, isFavorite = false, isInactive = false, onToggleFavorite }: TourCardProps) {
   const isPrivate = !!tour.minPeople
   const originalPrice = tour.originalPrice
   const hasDiscount = typeof originalPrice === 'number' && originalPrice > tour.price
@@ -99,11 +123,30 @@ export default function TourCard({ tour }: TourCardProps) {
         })
       }}
     >
+      {onToggleFavorite && (
+        <HeartButton
+          active={isFavorite}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            onToggleFavorite(tour.id)
+          }}
+        />
+      )}
+
       {hasDiscount && (
         <div className="absolute right-0 top-0 z-10 flex min-h-[1rem] min-w-[2rem] flex-col items-center justify-center rounded-bl-[1.15rem] rounded-tr-[0.25rem] bg-red-500 px-4 py-2.5 text-right text-white">
           <p className="text-[1rem] font-black leading-none">ลด {discountPercent}%</p>
           <p className=" text-[1rem] font-semibold leading-none text-white/80 line-through">
           </p>
+        </div>
+      )}
+
+      {isInactive && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center rounded-[1.15rem] bg-black/40">
+          <span className="rounded-xl bg-white/90 px-4 py-2 text-sm font-semibold text-gray-700 shadow">
+            ทัวร์นี้ปิดให้บริการชั่วคราว
+          </span>
         </div>
       )}
 

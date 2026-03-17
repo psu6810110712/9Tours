@@ -7,6 +7,7 @@ import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import { festivalService } from '../services/festivalService'
 import { tourService } from '../services/tourService'
 import type { Festival, Tour } from '../types/tour'
+import { useFavoritesContext } from '../context/FavoritesContext'
 
 const SORT_OPTIONS = [
   { value: 'default', label: 'เรียงตาม: ค่าเริ่มต้น' },
@@ -33,6 +34,7 @@ function formatMonthLabel(monthValue: string) {
 }
 
 export default function ToursPage() {
+  const { isFavorite, toggleFavorite } = useFavoritesContext()
   const [searchParams, setSearchParams] = useSearchParams()
   const [allTours, setAllTours] = useState<Tour[]>([])
   const [tours, setTours] = useState<Tour[]>([])
@@ -396,7 +398,14 @@ export default function ToursPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {sortedTours.map((tour) => <TourCard key={tour.id} tour={tour} />)}
+              {sortedTours.map((tour) => (
+                <TourCard
+                  key={tour.id}
+                  tour={tour}
+                  isFavorite={isFavorite(tour.id)}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ))}
             </div>
           )}
         </main>

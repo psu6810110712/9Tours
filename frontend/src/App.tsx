@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
+import { FavoritesProvider } from './context/FavoritesContext'
 import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
 import ToursPage from './pages/ToursPage'
@@ -18,6 +19,7 @@ import PaymentPage from './pages/PaymentPage'
 import GoogleAuthCallbackPage from './pages/GoogleAuthCallbackPage'
 import CompleteProfilePage from './pages/CompleteProfilePage'
 import { useAuth } from './context/AuthContext'
+import FavoritesPage from './pages/FavoritesPage'
 
 function HomeRoute() {
   const { user, isLoading } = useAuth()
@@ -49,6 +51,7 @@ function App() {
           },
         }}
       />
+      <FavoritesProvider>
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
@@ -90,6 +93,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MyBookingsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/favorites"
+              element={
+                <ProtectedRoute>
+                  <FavoritesPage />
                 </ProtectedRoute>
               }
             />
@@ -145,6 +157,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      </FavoritesProvider>
     </AuthProvider>
   )
 }
