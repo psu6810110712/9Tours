@@ -61,7 +61,8 @@ export class EventsService {
     if (dto.eventType === 'page_view' && dto.tourId) {
       const tourView = new TourView();
       tourView.tourId = dto.tourId;
-      tourView.userId = context.userId || null;
+      const parsedUserId = context.userId ? parseInt(context.userId, 10) : null;
+      tourView.userId = Number.isNaN(parsedUserId) ? null : parsedUserId;
       tourView.anonymousId = context.anonymousId || null;
       tourView.sessionId = dto.sessionId;
       tourView.browserInfo = this.normalizeUserAgent(context.userAgent) ?? '';
@@ -71,7 +72,7 @@ export class EventsService {
     return { accepted: true as const };
   }
 
-  async stitchAnonymousViews(userId: string, anonymousId: string): Promise<number> {
+  async stitchAnonymousViews(userId: number, anonymousId: string): Promise<number> {
     const result = await this.tourViewsRepo
       .createQueryBuilder()
       .update(TourView)

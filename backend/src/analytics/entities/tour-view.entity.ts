@@ -19,15 +19,15 @@ export class TourView {
     @JoinColumn({ name: 'tour_id' })
     tour: Tour;
 
-    @Column({ name: 'tour_id' })
+    @Column({ name: 'tour_id', type: 'int' })
     tourId: number;
 
     @ManyToOne(() => User, (user) => user.tourViews, { nullable: true, onDelete: 'SET NULL' })
     @JoinColumn({ name: 'user_id' })
     user: User;
 
-    @Column({ name: 'user_id', type: 'uuid', nullable: true })
-    userId: string | null;
+    @Column({ name: 'user_id', type: 'int', nullable: true })
+    userId: number | null;
 
     @Index('idx_tour_views_anonymous_id')
     @Column({ name: 'anonymous_id', type: 'varchar', length: 64, nullable: true })

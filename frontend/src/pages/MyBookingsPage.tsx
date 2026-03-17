@@ -547,21 +547,23 @@ export default function MyBookingPage() {
                     )}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                {selectedCanCancel ? (
-                  <p className="text-xs text-gray-400">สามารถยกเลิกได้ก่อนวันเดินทางอย่างน้อย 7 วัน</p>
-                ) : (
-                  <span />
-                )}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              {selectedCanCancel ? (
+                <p className="text-xs text-gray-400">สามารถยกเลิกได้ก่อนวันเดินทางอย่างน้อย 7 วัน</p>
+              ) : (
+                <span />
+              )}
                 <div className="flex flex-col gap-3 sm:ml-auto sm:flex-row">
                   {selectedCanPay && (
                     <button
                       type="button"
                       onClick={() => {
+                        const bookingId = selectedBooking.id
                         setSelectedBooking(null)
-                        navigate(`/payment/${selectedBooking.id}`)
+                        navigate(`/payment/${bookingId}`)
                       }}
                       className="ui-focus-ring ui-pressable rounded-full bg-primary px-6 py-3 text-base font-bold text-white hover:bg-primary-dark"
                     >
@@ -572,11 +574,13 @@ export default function MyBookingPage() {
                     <button
                       type="button"
                       onClick={() => {
+                        const bookingId = selectedBooking.id
                         if (selectedBooking.status === 'รอตรวจสอบ' || selectedBooking.status === 'สำเร็จ') {
-                          setContactAdminModalId(String(selectedBooking.id))
+                          setSelectedBooking(null)
+                          setContactAdminModalId(String(bookingId))
                         } else {
                           setSelectedBooking(null)
-                          setCancelModalId(String(selectedBooking.id))
+                          setCancelModalId(String(bookingId))
                         }
                       }}
                       className="ui-focus-ring ui-pressable rounded-full border border-red-200 bg-white px-6 py-3 text-base font-bold text-red-500 hover:bg-red-50"
@@ -586,10 +590,9 @@ export default function MyBookingPage() {
                   )}
                 </div>
               </div>
-            )}
-          </div>
-        )}
-      </Modal>
+            </div>
+          )}
+        </Modal>
 
       <Modal isOpen={cancelModalId !== null} onClose={() => { setCancelModalId(null); setCancelReason('') }} width="max-w-md">
         <div className="space-y-5">
