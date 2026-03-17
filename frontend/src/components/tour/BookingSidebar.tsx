@@ -242,7 +242,7 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
     <>
       {shouldUseDrawer && (
         <>
-          {drawerOpen && <button type="button" aria-label="ปิดหน้าต่างจอง" className="fixed inset-0 z-30 bg-black/30 backdrop-blur-sm lg:hidden" onClick={handleDrawerClose} />}
+          {drawerOpen && <button type="button" aria-label="ปิดหน้าต่างจอง" className="fixed inset-0 z-30 lg:hidden" onClick={handleDrawerClose} />}
           <div className={`fixed inset-x-0 bottom-0 z-40 px-4 pb-[env(safe-area-inset-bottom,1rem)] pt-2 transition-transform duration-300 lg:hidden ${drawerOpen ? 'translate-y-0' : 'translate-y-[calc(100%-150px)]'}`}>
             <div className="ui-surface relative rounded-[1.5rem] border border-gray-200 bg-white p-4 shadow-[0_24px_45px_rgba(15,23,42,0.25)] overflow-hidden">
               <button type="button" aria-label="ปรับสถานะลิ้นชักการจอง" className="mx-auto mb-3 flex h-1.5 w-12 items-center justify-center rounded-full bg-gray-200" onClick={handleDrawerToggle} />

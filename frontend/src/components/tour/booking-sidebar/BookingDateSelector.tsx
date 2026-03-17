@@ -37,6 +37,8 @@ export default function BookingDateSelector({
 }: BookingDateSelectorProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [calendarMonthIndex, setCalendarMonthIndex] = useState(0)
   const monthScrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -90,11 +92,16 @@ export default function BookingDateSelector({
 
   return (
     <div className="mb-4 border-b border-gray-200 pb-4 sm:mb-5 sm:pb-5">
-      <div className="mb-2.5 sm:mb-3">
+      <div className="mb-2.5 sm:mb-3 flex items-baseline justify-between">
         <label className="block text-base font-bold whitespace-nowrap text-slate-800 sm:text-lg">เลือกวันที่เดินทาง</label>
+        {upcomingSchedules.length > 4 && (
+          <button type="button" onClick={() => setIsExpanded(!isExpanded)} className="text-xs font-semibold text-primary sm:text-sm hover:underline">
+            {isExpanded ? 'ดูแบบเลื่อนแนวนอน' : 'ดูในรูปแบบตารางปฏิทิน'}
+          </button>
+        )}
       </div>
 
-      {showMonthPills && (
+      {!isExpanded && showMonthPills && (
         <div className="relative mb-2.5 sm:mb-3">
           <div
             ref={monthScrollRef}
@@ -140,17 +147,116 @@ export default function BookingDateSelector({
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-1.5">
-            {(canScrollLeft || canScrollRight) && (
+          <div className={`flex ${isExpanded ? 'flex-col' : 'items-center gap-1.5'}`}>
+            {!isExpanded && (canScrollLeft || canScrollRight) && (
               <ScrollerArrowButton direction="left" onClick={() => scrollDates(-220)} disabled={!canScrollLeft} className="h-8 w-8 shrink-0" />
             )}
-            <div className="relative min-w-0 flex-1">
-            <div
-              ref={scrollRef}
-              className="scrollbar-hide flex gap-2 overflow-x-auto px-1 pb-1 scroll-smooth"
-              style={{ scrollPaddingInline: '0.25rem' }}
-            >
+            <div className={`relative min-w-0 flex-1 ${isExpanded ? '' : '-mx-4 px-4 sm:mx-0 sm:px-0'}`}>
+              <div
+                ref={scrollRef}
+                className={isExpanded 
+                  ? "w-full overflow-y-auto max-h-[60vh] pr-2 scrollbar-hide" 
+                  : "scrollbar-hide flex gap-2.5 overflow-x-auto pb-4 pt-2 scroll-smooth"
+                }
+                style={isExpanded ? {} : { scrollPaddingInline: '1rem' }}
+              >
               {(() => {
+                if (isExpanded) {
+                  const safeIndex = Math.min(Math.max(0, calendarMonthIndex), Math.max(0, availableMonths.length - 1))
+                  const monthStr = availableMonths.length > 0 ? availableMonths[safeIndex] : null
+
+                  if (!monthStr) {
+                    return <div className="w-full py-3 text-center text-sm text-gray-400">ไม่มีรอบทัวร์เปิดรับ</div>
+                  }
+
+                  const [year, month] = monthStr.split('-').map(Number)
+                  const firstDay = new Date(year, month - 1, 1).getDay()
+                  const daysInMonth = new Date(year, month, 0).getDate()
+                  const monthName = new Date(year, month - 1, 1).toLocaleString('th-TH', { month: 'long', year: 'numeric' })
+                  
+                  const days = Array.from({ length: daysInMonth }, (_, i) => {
+                    const dayNum = i + 1
+                    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
+                    const schedulesOnDate = upcomingSchedules.filter((s) => s.startDate === dateStr)
+                    const isFullyBooked = schedulesOnDate.length > 0 && schedulesOnDate.every((s) => {
+                      const seats = availableSeatsData[s.id] ?? (s.maxCapacity - s.currentBooked)
+                      return Math.max(0, seats) <= 0
+                    })
+                    const isSelected = selectedSchedule?.startDate === dateStr
+                    return { dayNum, dateStr, hasTour: schedulesOnDate.length > 0, isFullyBooked, isSelected }
+                  })
+
+                  const hasNext = safeIndex < availableMonths.length - 1
+                  const hasPrev = safeIndex > 0
+
+                  return (
+                    <div className="flex w-full flex-col gap-5 pb-4">
+                      <div className="w-full rounded-2xl border border-gray-100 bg-white p-3 sm:p-4 shadow-sm">
+                        
+                        <div className="mb-4 flex items-center justify-between px-2">
+                          <button 
+                            type="button" 
+                            onClick={() => setCalendarMonthIndex(safeIndex - 1)} 
+                            disabled={!hasPrev}
+                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${hasPrev ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' : 'text-gray-200'}`}
+                          >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                          </button>
+                          
+                          <h3 className="text-sm font-extrabold text-gray-800">{monthName}</h3>
+                          
+                          <button 
+                            type="button" 
+                            onClick={() => setCalendarMonthIndex(safeIndex + 1)} 
+                            disabled={!hasNext}
+                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${hasNext ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' : 'text-gray-200'}`}
+                          >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                          </button>
+                        </div>
+
+                        <div className="mb-2 grid grid-cols-7 gap-1 text-center">
+                          {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((d) => (
+                            <div key={d} className="text-[11px] font-bold text-gray-400">{d}</div>
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+                          {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
+                          {days.map(({ dayNum, dateStr, hasTour, isFullyBooked, isSelected }) => {
+                            if (!hasTour) {
+                              return (
+                                <div key={dayNum} className="flex h-10 w-full items-center justify-center text-[13px] text-gray-300 opacity-50">
+                                  {dayNum}
+                                </div>
+                              )
+                            }
+                            return (
+                              <button
+                                key={dayNum}
+                                type="button"
+                                disabled={isFullyBooked}
+                                onClick={() => {
+                                  const sched = upcomingSchedules.find(s => s.startDate === dateStr && (availableSeatsData[s.id] ?? (s.maxCapacity - s.currentBooked)) > 0)
+                                  if (sched) setSelectedSchedule(sched)
+                                }}
+                                className={`relative flex h-10 w-full flex-col items-center justify-center rounded-xl transition-all sm:h-11 ${
+                                  isSelected ? 'bg-primary text-white font-bold shadow-md shadow-primary/30 scale-105' :
+                                  isFullyBooked ? 'bg-red-50 text-red-300 line-through' :
+                                  'bg-slate-50 text-slate-800 hover:bg-primary/10 hover:text-primary font-bold'
+                                }`}
+                              >
+                                <span className="text-[13px] sm:text-[14px]">{dayNum}</span>
+                                {hasTour && !isFullyBooked && !isSelected && <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-emerald-500 shadow-sm" />}
+                                {hasTour && isFullyBooked && !isSelected && <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-red-400 opacity-50" />}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+
                 let datesList = Array.from(new Set(upcomingSchedules.map((schedule: TourSchedule) => schedule.startDate))).sort()
 
                 if (selectedMonth !== 'all') {
@@ -193,28 +299,27 @@ export default function BookingDateSelector({
                       })
                       if (firstAvailable) setSelectedSchedule(firstAvailable)
                     }}
-                    className={`min-w-[68px] flex-shrink-0 rounded-[1.15rem] border px-2.5 py-2.5 text-center transition-all sm:min-w-[72px] sm:rounded-[1.25rem] sm:px-3 sm:py-3 ${isSelected
-                      ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary)] shadow-sm'
+                    className={`min-w-[66px] sm:min-w-[70px] flex-shrink-0 flex flex-col items-center justify-center rounded-2xl border py-2.5 transition-all duration-300 sm:py-3 ${isSelected
+                      ? 'border-primary bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02]'
                       : isFullyBooked
                         ? 'cursor-not-allowed border-transparent bg-gray-50 text-gray-300'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm'
                       }`}
                   >
-                    <span className="text-[9px] font-semibold uppercase tracking-[0.14em] opacity-80 sm:text-[10px] sm:tracking-[0.16em]">{weekday}</span>
-                    <span className="mt-0.5 block text-lg font-bold leading-none sm:mt-1 sm:text-xl">{day}</span>
-                    <span className="mt-0.5 block text-[10px] font-medium opacity-80 sm:mt-1 sm:text-[11px]">{month}</span>
-                    <span className={`mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[11px] font-semibold sm:px-2 sm:text-[14px] ${isFullyBooked ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
+                    <span className={`text-[9px] font-bold uppercase tracking-widest ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>{weekday}</span>
+                    <span className="mt-0.5 block text-[1.25rem] font-black leading-none sm:text-[1.45rem]">{day}</span>
+                    <span className={`mt-0.5 block text-[10px] font-semibold ${isSelected ? 'text-white/80' : 'text-gray-500'}`}>{month}</span>
+                    <span className={`mt-1.5 inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold ${isSelected ? 'bg-white/20 text-white' : isFullyBooked ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
                       {isFullyBooked ? 'เต็ม' : 'ว่าง'}
                     </span>
                   </button>
                 ))
               })()}
+              </div>
+              {!isExpanded && canScrollLeft && <div className="ui-rail-fade-left absolute left-0 top-0 bottom-4 w-6 sm:hidden pointer-events-none" />}
+              {!isExpanded && canScrollRight && <div className="ui-rail-fade-right absolute right-0 top-0 bottom-4 w-6 sm:hidden pointer-events-none" />}
             </div>
-
-            {canScrollLeft && <div className="ui-rail-fade-left" />}
-            {canScrollRight && <div className="ui-rail-fade-right" />}
-            </div>
-            {(canScrollLeft || canScrollRight) && (
+            {!isExpanded && (canScrollLeft || canScrollRight) && (
               <ScrollerArrowButton direction="right" onClick={() => scrollDates(220)} disabled={!canScrollRight} className="h-8 w-8 shrink-0" />
             )}
           </div>

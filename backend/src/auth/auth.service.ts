@@ -53,11 +53,12 @@ export class AuthService {
 
   async login(email: string, password: string, rememberMe: boolean = false, context?: SessionContext) {
     const user = await this.usersService.findByEmail(email);
-    if (!user || !user.password) {
+    const hashedPassword = user?.password;
+    if (!user || !hashedPassword) {
       throw new UnauthorizedException('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, hashedPassword);
     if (!isPasswordValid) {
       throw new UnauthorizedException('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     }
