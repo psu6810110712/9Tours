@@ -12,6 +12,7 @@ import AdminTourFormPage from './pages/admin/AdminTourFormPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminBookings from './pages/admin/AdminBookings'
 import AdminTourOverview from './pages/admin/AdminTourOverview'
+import AdminFestivalsPage from './pages/admin/AdminFestivalsPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import ScrollToTop from './components/common/ScrollToTop'
 import BookingInfoPage from './pages/BookingInfoPage'
@@ -135,6 +136,14 @@ function App() {
               element={
                 <ProtectedRoute requiredRole="admin">
                   <AdminTourOverview />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/festivals"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminFestivalsPage />
                 </ProtectedRoute>
               }
             />

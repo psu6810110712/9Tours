@@ -129,6 +129,13 @@ export class ToursService implements OnModuleInit {
         }))
       : [];
 
+    const rawOriginalPrice = normalizeNullableNumber(tour.originalPrice);
+    const rawPrice = normalizeNumber(tour.price, 0);
+    const hasDiscountDates = Boolean(tour.discountStartDate || tour.discountEndDate);
+    const discountActive = this.isDiscountCurrentlyActive(tour.discountStartDate, tour.discountEndDate);
+    const showDiscount = rawOriginalPrice != null && rawOriginalPrice > rawPrice
+      && (!hasDiscountDates || discountActive);
+
     return {
       id: tour.id,
       tourCode: tour.tourCode,
@@ -136,11 +143,14 @@ export class ToursService implements OnModuleInit {
       description: tour.description,
       tourType: tour.tourType,
       categories: Array.isArray(tour.categories) ? tour.categories : [],
-      price: normalizeNumber(tour.price, 0),
+      price: showDiscount ? rawPrice : (rawOriginalPrice ?? rawPrice),
       childPrice: normalizeNullableNumber(tour.childPrice),
       minPeople: normalizeNullableNumber(tour.minPeople),
       maxPeople: normalizeNullableNumber(tour.maxPeople),
-      originalPrice: normalizeNullableNumber(tour.originalPrice),
+      originalPrice: showDiscount ? rawOriginalPrice : null,
+      discountStartDate: tour.discountStartDate ?? null,
+      discountEndDate: tour.discountEndDate ?? null,
+      discountActive: showDiscount,
       images: Array.isArray(tour.images) ? tour.images : [],
       highlights: Array.isArray(tour.highlights) ? tour.highlights : [],
       itinerary: Array.isArray(tour.itinerary) ? tour.itinerary : [],
@@ -158,6 +168,14 @@ export class ToursService implements OnModuleInit {
       createdAt: tour.createdAt,
       updatedAt: tour.updatedAt,
     };
+  }
+
+  private isDiscountCurrentlyActive(startDate: string | null | undefined, endDate: string | null | undefined): boolean {
+    if (!startDate && !endDate) return true;
+    const today = new Date().toISOString().slice(0, 10);
+    if (startDate && today < startDate) return false;
+    if (endDate && today > endDate) return false;
+    return true;
   }
 
   private cloneTour(tour: TourRecord): TourRecord {
@@ -371,6 +389,8 @@ export class ToursService implements OnModuleInit {
       accommodation: dto.accommodation || null,
       rating: 0,
       reviewCount: 0,
+      discountStartDate: dto.discountStartDate || null,
+      discountEndDate: dto.discountEndDate || null,
       isActive: dto.isActive ?? true,
       festival: festivalId ? ({ id: festivalId } as Festival) : undefined,
     });
@@ -512,6 +532,8 @@ export class ToursService implements OnModuleInit {
       minPeople: rest.minPeople !== undefined ? normalizeNullableNumber(rest.minPeople) : tour.minPeople,
       maxPeople: rest.maxPeople !== undefined ? normalizeNullableNumber(rest.maxPeople) : tour.maxPeople,
       originalPrice: rest.originalPrice !== undefined ? normalizeNullableNumber(rest.originalPrice) : tour.originalPrice,
+      discountStartDate: rest.discountStartDate !== undefined ? (rest.discountStartDate || null) : tour.discountStartDate,
+      discountEndDate: rest.discountEndDate !== undefined ? (rest.discountEndDate || null) : tour.discountEndDate,
       itinerary: Array.isArray(rest.itinerary)
         ? rest.itinerary.map((item) => ({
           ...item,

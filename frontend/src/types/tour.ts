@@ -28,6 +28,9 @@ export interface Tour {
   price: number
   childPrice?: number | null
   originalPrice: number | null
+  discountStartDate?: string | null
+  discountEndDate?: string | null
+  discountActive?: boolean
   images: string[]
   highlights: string[]
   itinerary: { day?: number; time: string; title: string; description: string }[]
@@ -66,6 +69,8 @@ export interface CreateTourPayload {
   price: number
   childPrice?: number | null
   originalPrice?: number | null
+  discountStartDate?: string | null
+  discountEndDate?: string | null
   minPeople?: number
   maxPeople?: number
   highlights: string[]

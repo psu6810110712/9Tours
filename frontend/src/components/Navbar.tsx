@@ -25,6 +25,7 @@ const ADMIN_LINKS: NavLink[] = [
   { label: 'จัดการทัวร์', path: '/admin/tours', match: (pathname: string) => pathname === '/admin/tours' || pathname === '/admin/tours/new' || pathname.startsWith('/admin/tours/') },
   { label: 'ภาพรวมทัวร์', path: '/admin/tour-overview', match: (pathname: string) => pathname === '/admin/tour-overview' },
   { label: 'จัดการการจอง', path: '/admin/bookings', match: (pathname: string) => pathname.startsWith('/admin/bookings') },
+  { label: 'เทศกาล', path: '/admin/festivals', match: (pathname: string) => pathname === '/admin/festivals' },
 ]
 
 export default function Navbar() {

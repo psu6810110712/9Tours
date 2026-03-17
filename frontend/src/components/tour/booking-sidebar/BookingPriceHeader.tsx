@@ -17,7 +17,12 @@ export default function BookingPriceHeader({ tour }: BookingPriceHeaderProps) {
     <div className="relative -mx-5 -mt-5 mb-5 overflow-hidden rounded-t-[1.75rem] border-b border-gray-100 px-5 pb-5 pt-5">
       {hasDiscount && (
         <div className="absolute right-0 top-0 rounded-bl-[1.5rem] rounded-tr-[1.75rem] bg-red-500 px-5 py-2 text-right text-white shadow-sm">
-          <p className="mt-2 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-white/75"></p>
+          {tour.discountEndDate && (
+            <p className="mt-2 text-[1rem] font-semibold uppercase tracking-[0.07em] text-white/75">
+              ถึง {new Date(tour.discountEndDate + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
+            </p>
+          )}
+          {!tour.discountEndDate && <p className="mt-2 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-white/75"></p>}
           <p className="mt-0.5 text-2xl font-black leading-none">{"\u0e25\u0e14 "}{discountPercent}%</p>
           <p className="mt-1.5 text-md text-lg font-semibold text-white/80 line-through">{originalPrice.toLocaleString()} บาท</p>
         </div>
