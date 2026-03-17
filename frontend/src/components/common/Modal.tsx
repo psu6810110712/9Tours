@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 
 interface ModalProps {
@@ -13,6 +13,11 @@ export default function Modal({ isOpen, onClose, children, width = 'max-w-md' }:
 
   useBodyScrollLock(isOpen)
 
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
   useEffect(() => {
     if (!isOpen) {
       return
@@ -20,7 +25,7 @@ export default function Modal({ isOpen, onClose, children, width = 'max-w-md' }:
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose()
+        onCloseRef.current()
       }
     }
 
@@ -32,7 +37,7 @@ export default function Modal({ isOpen, onClose, children, width = 'max-w-md' }:
       document.removeEventListener('keydown', handleKeyDown)
       previousActive?.focus?.()
     }
-  }, [isOpen, onClose])
+  }, [isOpen])
 
   if (!isOpen) return null
 
