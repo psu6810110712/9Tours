@@ -18,6 +18,7 @@ export enum BookingStatus {
     CANCELED = 'canceled',
     REFUND_PENDING = 'refund_pending',
     REFUND_COMPLETED = 'refund_completed',
+    REFUND_REJECTED = 'refund_rejected',
 }
 
 @Entity('bookings')
