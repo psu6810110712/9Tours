@@ -43,7 +43,16 @@ interface MyBookingItem {
 }
 
 const tabs = ['ทั้งหมด', 'รอชำระเงิน', 'รอตรวจสอบ', 'สำเร็จ', 'รอคืนเงิน', 'ยกเลิกแล้ว']
+const UNPAID_STATUSES = ['pending_payment']
+const PAID_CANCELLABLE_STATUSES = ['awaiting_approval', 'confirmed', 'success']
 const CANCELLABLE_STATUSES = ['รอชำระเงิน', 'รอตรวจสอบ', 'สำเร็จ']
+
+const CANCEL_REASONS = ['เปลี่ยนใจ', 'ป่วย / มีเหตุฉุกเฉิน', 'จองผิดวัน / จองผิดทัวร์', 'อื่นๆ']
+
+function daysUntilTour(startDate: string): number {
+  if (!startDate) return Infinity
+  return (new Date(startDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+}
 const PRICE_BREAKDOWN_HIDDEN_STATUSES = ['รอตรวจสอบ', 'สำเร็จ']
 
 export default function MyBookingPage() {
@@ -53,6 +62,8 @@ export default function MyBookingPage() {
   const [loading, setLoading] = useState(true)
   const [cancelModalId, setCancelModalId] = useState<string | null>(null)
   const [cancelReason, setCancelReason] = useState('')
+  const [cancelReasonOption, setCancelReasonOption] = useState('')
+  const [cancelIsPaid, setCancelIsPaid] = useState(false)
   const [reviewBooking, setReviewBooking] = useState<MyBookingItem | null>(null)
   const navigate = useNavigate()
 
@@ -142,11 +153,16 @@ export default function MyBookingPage() {
   }
 
   const handleCancelBooking = async (bookingId: string) => {
+    const finalReason = cancelReasonOption === 'อื่นๆ'
+      ? cancelReason.trim()
+      : cancelReasonOption
     try {
-      await bookingService.cancelBooking(bookingId, cancelReason.trim() || undefined)
-      toast.success('ยกเลิกการจองสำเร็จ')
+      await bookingService.cancelBooking(bookingId, finalReason || undefined)
+      toast.success(cancelIsPaid ? 'ส่งคำขอคืนเงินสำเร็จ' : 'ยกเลิกการจองสำเร็จ')
       setCancelModalId(null)
       setCancelReason('')
+      setCancelReasonOption('')
+      setCancelIsPaid(false)
       await loadBookings()
     } catch (error: unknown) {
       const resolvedError = error as { response?: { data?: { message?: string } } }
@@ -154,6 +170,8 @@ export default function MyBookingPage() {
       toast.error(resolvedError.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก กรุณาลองใหม่อีกครั้ง')
       setCancelModalId(null)
       setCancelReason('')
+      setCancelReasonOption('')
+      setCancelIsPaid(false)
     }
   }
 
@@ -375,15 +393,32 @@ export default function MyBookingPage() {
                           )
                         )}
 
-                        {canCancel && (
+                        {UNPAID_STATUSES.includes(booking.rawStatus) && (
                           <button
                             type="button"
-                            onClick={() => setCancelModalId(String(booking.id))}
+                            onClick={() => { setCancelIsPaid(false); setCancelReasonOption(''); setCancelReason(''); setCancelModalId(String(booking.id)) }}
                             className="ui-focus-ring ui-pressable rounded-full border border-red-200 bg-white px-5 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50"
                           >
-                            ยกเลิกการจอง
+                            ยกเลิก
                           </button>
                         )}
+                        {PAID_CANCELLABLE_STATUSES.includes(booking.rawStatus) && !booking.isRefundRequested && (() => {
+                          const days = daysUntilTour(booking.startDate)
+                          const blocked = days < 7
+                          return blocked ? (
+                            <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-5 py-2.5 text-sm font-bold text-gray-400" title={`เหลือ ${Math.ceil(days)} วัน — ไม่สามารถขอคืนเงินได้`}>
+                              ขอคืนเงิน
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => { setCancelIsPaid(true); setCancelReasonOption(''); setCancelReason(''); setCancelModalId(String(booking.id)) }}
+                              className="ui-focus-ring ui-pressable rounded-full border border-purple-200 bg-white px-5 py-2.5 text-sm font-bold text-purple-600 hover:bg-purple-50"
+                            >
+                              ขอคืนเงิน
+                            </button>
+                          )
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -630,11 +665,14 @@ export default function MyBookingPage() {
                       ชำระเงิน
                     </button>
                   )}
-                  {selectedCanCancel && (
+                  {selectedCanCancel && UNPAID_STATUSES.includes(selectedBooking.rawStatus) && (
                     <button
                       type="button"
                       onClick={() => {
                         setSelectedBooking(null)
+                        setCancelIsPaid(false)
+                        setCancelReasonOption('')
+                        setCancelReason('')
                         setCancelModalId(String(selectedBooking.id))
                       }}
                       className="ui-focus-ring ui-pressable rounded-full border border-red-200 bg-white px-6 py-3 text-base font-bold text-red-500 hover:bg-red-50"
@@ -642,41 +680,86 @@ export default function MyBookingPage() {
                       ยกเลิกการจอง
                     </button>
                   )}
+                  {PAID_CANCELLABLE_STATUSES.includes(selectedBooking.rawStatus) && !selectedBooking.isRefundRequested && (() => {
+                    const days = daysUntilTour(selectedBooking.startDate)
+                    const blocked = days < 7
+                    return blocked ? (
+                      <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-6 py-3 text-base font-bold text-gray-400" title={`เหลือ ${Math.ceil(days)} วัน — ไม่สามารถขอคืนเงินได้`}>
+                        ขอคืนเงิน
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedBooking(null)
+                          setCancelIsPaid(true)
+                          setCancelReasonOption('')
+                          setCancelReason('')
+                          setCancelModalId(String(selectedBooking.id))
+                        }}
+                        className="ui-focus-ring ui-pressable rounded-full border border-purple-200 bg-white px-6 py-3 text-base font-bold text-purple-600 hover:bg-purple-50"
+                      >
+                        ขอคืนเงิน
+                      </button>
+                    )
+                  })()}
                 </div>
               </div>
             </div>
         )}
       </Modal>
 
-      <Modal isOpen={cancelModalId !== null} onClose={() => { setCancelModalId(null); setCancelReason('') }} width="max-w-md">
+      <Modal
+        isOpen={cancelModalId !== null}
+        onClose={() => { setCancelModalId(null); setCancelReason(''); setCancelReasonOption(''); setCancelIsPaid(false) }}
+        width="max-w-md"
+      >
         <div className="space-y-5">
           <div className="flex items-center justify-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
+            <div className={`flex h-14 w-14 items-center justify-center rounded-full ${cancelIsPaid ? 'bg-purple-50 text-purple-600' : 'bg-red-50 text-red-600'}`}>
               <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
           </div>
           <div className="text-center">
-            <h3 className="text-xl font-bold text-gray-900">ยืนยันการยกเลิก</h3>
-            <p className="mt-2 text-sm leading-6 text-gray-500">หากยกเลิกแล้วจะไม่สามารถย้อนกลับได้</p>
+            <h3 className="text-xl font-bold text-gray-900">{cancelIsPaid ? 'ขอคืนเงิน' : 'ยืนยันการยกเลิก'}</h3>
+            <p className="mt-2 text-sm leading-6 text-gray-500">
+              {cancelIsPaid ? 'ทีมงานจะตรวจสอบและดำเนินการคืนเงินให้ท่าน' : 'หากยกเลิกแล้วจะไม่สามารถย้อนกลับได้'}
+            </p>
           </div>
           <div>
-            <label className="mb-2 block text-sm font-semibold text-gray-700">เหตุผลการยกเลิก (ไม่บังคับ)</label>
-            <textarea
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              maxLength={500}
-              rows={3}
-              placeholder="เช่น ติดธุระไม่สะดวก, เปลี่ยนแผนการเดินทาง"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-yellow-400 focus:bg-white"
-            />
-            <p className="mt-1 text-right text-xs text-gray-400">{cancelReason.length}/500</p>
+            <p className="mb-3 text-sm font-semibold text-gray-700">เหตุผล</p>
+            <div className="space-y-2">
+              {CANCEL_REASONS.map((reason) => (
+                <label key={reason} className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 hover:bg-gray-100 has-[:checked]:border-yellow-400 has-[:checked]:bg-yellow-50">
+                  <input
+                    type="radio"
+                    name="cancel-reason"
+                    value={reason}
+                    checked={cancelReasonOption === reason}
+                    onChange={() => { setCancelReasonOption(reason); if (reason !== 'อื่นๆ') setCancelReason('') }}
+                    className="accent-yellow-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">{reason}</span>
+                </label>
+              ))}
+            </div>
+            {cancelReasonOption === 'อื่นๆ' && (
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                maxLength={500}
+                rows={3}
+                placeholder="โปรดระบุเหตุผล..."
+                className="mt-3 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-yellow-400 focus:bg-white"
+              />
+            )}
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
-              onClick={() => { setCancelModalId(null); setCancelReason('') }}
+              onClick={() => { setCancelModalId(null); setCancelReason(''); setCancelReasonOption(''); setCancelIsPaid(false) }}
               className="ui-focus-ring ui-pressable flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
             >
               ปิดหน้าต่าง
@@ -684,9 +767,10 @@ export default function MyBookingPage() {
             <button
               type="button"
               onClick={() => cancelModalId && handleCancelBooking(cancelModalId)}
-              className="ui-focus-ring ui-pressable flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700"
+              disabled={!cancelReasonOption}
+              className={`ui-focus-ring ui-pressable flex-1 rounded-xl px-4 py-3 text-sm font-semibold text-white disabled:opacity-50 ${cancelIsPaid ? 'bg-purple-600 hover:bg-purple-700' : 'bg-red-600 hover:bg-red-700'}`}
             >
-              ยืนยันยกเลิก
+              {cancelIsPaid ? 'ส่งคำขอคืนเงิน' : 'ยืนยันยกเลิก'}
             </button>
           </div>
         </div>

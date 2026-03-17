@@ -10,7 +10,7 @@ const AppDataSource = new DataSource({
   port: parseInt(process.env.DB_PORT || '5432'),
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
-  database: process.env.DB_NAME || '9tours',
+  database: '9tours_db',
   entities: ['src/**/*.entity.ts'],
   synchronize: false,
 });

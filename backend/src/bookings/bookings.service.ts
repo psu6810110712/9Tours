@@ -458,11 +458,22 @@ export class BookingsService {
       throw new BadRequestException('สามารถยกเลิกได้เฉพาะรายการที่รอชำระเงิน รอตรวจสอบ หรือสำเร็จเท่านั้น');
     }
 
+    const paidStatuses = [BookingStatus.AWAITING_APPROVAL, BookingStatus.CONFIRMED, BookingStatus.SUCCESS];
+    if (paidStatuses.includes(booking.status)) {
+      const foundForDate = this.findScheduleInData(booking.scheduleId);
+      if (foundForDate?.schedule?.startDate) {
+        const startDate = new Date(foundForDate.schedule.startDate);
+        const diffDays = (startDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+        if (diffDays < 7) {
+          throw new BadRequestException('ไม่สามารถขอคืนเงินได้ เนื่องจากเหลือเวลาน้อยกว่า 7 วันก่อนวันเดินทาง');
+        }
+      }
+    }
+
     if (reason) {
       booking.cancellationReason = reason;
     }
 
-    const paidStatuses = [BookingStatus.AWAITING_APPROVAL, BookingStatus.CONFIRMED, BookingStatus.SUCCESS];
     if (paidStatuses.includes(booking.status)) {
       booking.isRefundRequested = true;
     }
