@@ -133,11 +133,11 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
   }
 
   return (
-    <div className="mb-4">
+    <div className="mb-3 sm:mb-4">
       <div className="md:hidden">
         <div
           ref={mobileGalleryRef}
-          className={`relative mb-4 overflow-hidden rounded-[1.9rem] border border-slate-200 bg-slate-100 ${galleryAspectClass}`}
+          className="relative mb-3 overflow-hidden rounded-[1.25rem] border border-slate-200 bg-slate-100 aspect-[20/9] sm:mb-4 sm:rounded-[1.9rem]"
         >
           <img
             src={activeImage}
@@ -162,7 +162,7 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
           <button
             type="button"
             onClick={() => setIsPopupOpen(true)}
-            className="ui-focus-ring ui-pressable absolute bottom-4 right-4 rounded-full border border-white/70 bg-white/92 px-4 py-2 text-sm font-bold text-slate-800 shadow-[0_10px_24px_rgba(15,23,42,0.14)] backdrop-blur-sm hover:bg-white"
+            className="ui-focus-ring ui-pressable absolute bottom-4 right-4 rounded-full border border-white/80 bg-white/80 px-4 py-2 text-sm font-bold text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.14)] backdrop-blur-sm hover:bg-white"
           >
             ดูรูปทั้งหมด
           </button>
@@ -248,7 +248,7 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
         </div>
       </div>
 
-      <h1 className="mt-8 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
+      <h1 className="mt-4 text-xl font-bold leading-tight text-gray-900 sm:text-3xl md:mt-6 md:text-4xl">
         {name}
       </h1>
 

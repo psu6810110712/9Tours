@@ -60,6 +60,56 @@ function scrollRow(ref: RefObject<HTMLDivElement | null>, amount: number) {
   ref.current?.scrollBy({ left: amount, behavior: 'smooth' })
 }
 
+function measureScrollAmount(
+  ref: RefObject<HTMLDivElement | null>,
+  narrowWidth: number,
+  wideWidth: number,
+  gap: number,
+) {
+  if (typeof window === 'undefined') {
+    return narrowWidth + gap
+  }
+
+  const fallbackWidth = window.innerWidth >= 640 ? wideWidth : narrowWidth
+  const fallbackSpacing = fallbackWidth + gap
+  const element = ref.current
+  if (!element) {
+    return fallbackSpacing
+  }
+
+  const first = element.children[0] as HTMLElement | undefined
+  if (!first) {
+    return fallbackSpacing
+  }
+
+  const firstRect = first.getBoundingClientRect()
+  const second = element.children[1] as HTMLElement | undefined
+  const baseSpacing = second
+    ? (() => {
+        const secondRect = second.getBoundingClientRect()
+        const delta = secondRect.left - firstRect.left
+        return Number.isFinite(delta) && delta > 0 ? delta : firstRect.width + gap
+      })()
+    : firstRect.width + gap
+
+  const reduction = fallbackSpacing * SCROLL_REDUCTION_RATIO
+  const adjusted = baseSpacing - reduction
+  return Math.max(adjusted, baseSpacing * 0.6)
+}
+
+const GAP_PX = 16
+const PLACE_CARD_NARROW = 180
+const PLACE_CARD_WIDE = 260
+const TOUR_CARD_NARROW = 180
+const TOUR_CARD_WIDE = 230
+const SCROLL_REDUCTION_RATIO = 0.2
+
+const getPlaceScrollAmount = (ref: RefObject<HTMLDivElement | null>) =>
+  measureScrollAmount(ref, PLACE_CARD_NARROW, PLACE_CARD_WIDE, GAP_PX)
+
+const getTourScrollAmount = (ref: RefObject<HTMLDivElement | null>) =>
+  measureScrollAmount(ref, TOUR_CARD_NARROW, TOUR_CARD_WIDE, GAP_PX)
+
 interface RailHeaderProps {
   title: string
   linkTo?: string
@@ -98,7 +148,7 @@ function RailShell({ children, scrollRef, canScrollLeft, canScrollRight, onPrev,
     <div className="relative">
       <div
         ref={scrollRef}
-        className={`scrollbar-hide flex gap-4 overflow-x-auto px-4 py-2 scroll-smooth ${className}`.trim()}
+        className={`scrollbar-hide flex gap-4 overflow-x-auto px-1 py-2 scroll-smooth ${className}`.trim()}
         style={{ scrollPaddingInline: '1rem' }}
       >
         {children}
@@ -299,8 +349,8 @@ export default function HomePage() {
             scrollRef={placeScrollRef}
             canScrollLeft={placeRail.canScrollLeft}
             canScrollRight={placeRail.canScrollRight}
-            onPrev={() => scrollRow(placeScrollRef, -280)}
-            onNext={() => scrollRow(placeScrollRef, 280)}
+            onPrev={() => scrollRow(placeScrollRef, -getPlaceScrollAmount(placeScrollRef))}
+            onNext={() => scrollRow(placeScrollRef, getPlaceScrollAmount(placeScrollRef))}
             className="pb-3"
           >
             {PLACES.map((place) => {
@@ -312,7 +362,7 @@ export default function HomePage() {
                   type="button"
                   aria-pressed={isSelected}
                   onClick={() => handlePlaceSelect(place)}
-                  className={`group relative h-40 w-60 flex-shrink-0 overflow-hidden rounded-[1.6rem] border-2 text-left transition-all ${isSelected
+                  className={`group relative h-25 w-[180px] flex-shrink-0 overflow-hidden rounded-[1.2rem] border-2 text-left transition-all sm:h-40 sm:w-[220px] lg:h-44 lg:w-[260px] ${isSelected
                     ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] shadow-[0_12px_28px_rgba(37,99,235,0.18)]'
                     : 'border-transparent bg-white/80 opacity-95 hover:border-white hover:opacity-100 hover:shadow-[0_10px_24px_rgba(15,23,42,0.10)]'
                     }`}
@@ -344,13 +394,13 @@ export default function HomePage() {
               scrollRef={tourScrollRef}
               canScrollLeft={popularRail.canScrollLeft}
               canScrollRight={popularRail.canScrollRight}
-              onPrev={() => scrollRow(tourScrollRef, -300)}
-              onNext={() => scrollRow(tourScrollRef, 300)}
+              onPrev={() => scrollRow(tourScrollRef, -getTourScrollAmount(tourScrollRef))}
+              onNext={() => scrollRow(tourScrollRef, getTourScrollAmount(tourScrollRef))}
               className="pb-2"
               showFade
             >
               {displayedTours.map((tour) => (
-                <div key={tour.id} className="w-[260px] flex-shrink-0 sm:w-[280px]">
+                <div key={tour.id} className="w-[180px] flex-shrink-0 sm:w-[260px]">
                   <TourCard tour={tour} isFavorite={isFavorite(tour.id)} onToggleFavorite={toggleFavorite} />
                 </div>
               ))}
@@ -371,13 +421,13 @@ export default function HomePage() {
                 scrollRef={recommendationScrollRef}
                 canScrollLeft={recommendationRail.canScrollLeft}
                 canScrollRight={recommendationRail.canScrollRight}
-                onPrev={() => scrollRow(recommendationScrollRef, -280)}
-                onNext={() => scrollRow(recommendationScrollRef, 280)}
+                onPrev={() => scrollRow(recommendationScrollRef, -getTourScrollAmount(recommendationScrollRef))}
+                onNext={() => scrollRow(recommendationScrollRef, getTourScrollAmount(recommendationScrollRef))}
                 className="pb-2"
                 showFade
               >
                 {recommendedTours.map((tour) => (
-                  <div key={tour.id} className="w-[260px] flex-shrink-0 sm:w-[280px]">
+                  <div key={tour.id} className="w-[180px] flex-shrink-0 sm:w-[260px]">
                     <TourCard tour={tour} isFavorite={isFavorite(tour.id)} onToggleFavorite={toggleFavorite} />
                   </div>
                 ))}

@@ -166,17 +166,16 @@ export default function Navbar() {
                     </Link>
                     <Link
                       to="/my-bookings"
-                      className={`ui-focus-ring ui-pressable inline-flex items-center gap-1 rounded-2xl border px-3 py-1.5 text-[13px] font-semibold transition-colors sm:text-[15px] ${
+                      aria-label="การจองของฉัน"
+                      className={`ui-focus-ring ui-pressable inline-flex items-center rounded-2xl border p-2 text-[13px] text-gray-500 transition-colors sm:text-[15px] ${
                         pathname === '/my-bookings'
                           ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)]/60 text-[var(--color-primary)]'
-                          : 'border-transparent text-gray-500 hover:border-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/60 hover:text-[var(--color-primary)]'
+                          : 'border-transparent hover:border-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/60 hover:text-[var(--color-primary)]'
                       }`}
                     >
-                      <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <svg className="h-4.5 w-4.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V5m8 2V5m-9 9h10m-11 6h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2Z" />
                       </svg>
-                      <span className="sm:hidden">การจอง</span>
-                      <span className="hidden sm:inline">การจองของฉัน</span>
                     </Link>
                   </>
                 ) : null}
@@ -346,8 +345,11 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/my-bookings"
-                  className={`block rounded-2xl px-4 py-3 text-[15px] font-semibold transition-colors ${pathname === '/my-bookings' ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]' : 'text-gray-700 hover:bg-gray-50'}`}
+                  className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-[15px] font-semibold transition-colors ${pathname === '/my-bookings' ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]' : 'text-gray-700 hover:bg-gray-50'}`}
                 >
+                  <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V5m8 2V5m-9 9h10m-11 6h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2Z" />
+                  </svg>
                   การจองของฉัน
                 </Link>
               </div>

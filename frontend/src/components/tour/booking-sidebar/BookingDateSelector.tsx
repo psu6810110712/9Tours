@@ -89,13 +89,13 @@ export default function BookingDateSelector({
   const showMonthPills = upcomingSchedules.length > 0 && availableMonths.length > 1
 
   return (
-    <div className="mb-5 border-b border-gray-200 pb-5">
-      <div className="mb-3">
-        <label className="block text-lg font-bold whitespace-nowrap text-slate-800">เลือกวันที่เดินทาง</label>
+    <div className="mb-4 border-b border-gray-200 pb-4 sm:mb-5 sm:pb-5">
+      <div className="mb-2.5 sm:mb-3">
+        <label className="block text-base font-bold whitespace-nowrap text-slate-800 sm:text-lg">เลือกวันที่เดินทาง</label>
       </div>
 
       {showMonthPills && (
-        <div className="relative mb-3">
+        <div className="relative mb-2.5 sm:mb-3">
           <div
             ref={monthScrollRef}
             className="scrollbar-hide flex gap-1.5 overflow-x-auto pb-1 scroll-smooth"
@@ -104,7 +104,7 @@ export default function BookingDateSelector({
               type="button"
               data-active-month={selectedMonth === 'all'}
               onClick={() => handleMonthClick('all')}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all whitespace-nowrap ${selectedMonth === 'all'
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold transition-all whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-xs ${selectedMonth === 'all'
                 ? 'bg-[var(--color-primary)] text-white shadow-sm'
                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
               }`}
@@ -121,7 +121,7 @@ export default function BookingDateSelector({
                   type="button"
                   data-active-month={isActive}
                   onClick={() => handleMonthClick(month)}
-                  className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition-all whitespace-nowrap ${isActive
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold transition-all whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-xs ${isActive
                     ? 'bg-[var(--color-primary)] text-white shadow-sm'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-700'
                   }`}
@@ -135,7 +135,7 @@ export default function BookingDateSelector({
       )}
 
       {upcomingSchedules.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-4 text-center text-sm text-gray-400">
+        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-3 py-3 text-center text-xs text-gray-400 sm:px-4 sm:py-4 sm:text-sm">
           ไม่มีรอบทัวร์ที่เปิดรับในขณะนี้
         </div>
       ) : (
@@ -193,17 +193,17 @@ export default function BookingDateSelector({
                       })
                       if (firstAvailable) setSelectedSchedule(firstAvailable)
                     }}
-                    className={`min-w-[72px] flex-shrink-0 rounded-[1.25rem] border px-3 py-3 text-center transition-all ${isSelected
+                    className={`min-w-[68px] flex-shrink-0 rounded-[1.15rem] border px-2.5 py-2.5 text-center transition-all sm:min-w-[72px] sm:rounded-[1.25rem] sm:px-3 sm:py-3 ${isSelected
                       ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] text-[var(--color-primary)] shadow-sm'
                       : isFullyBooked
                         ? 'cursor-not-allowed border-transparent bg-gray-50 text-gray-300'
                         : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                       }`}
                   >
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-80">{weekday}</span>
-                    <span className="mt-1 block text-xl font-bold leading-none">{day}</span>
-                    <span className="mt-1 block text-[11px] font-medium opacity-80">{month}</span>
-                    <span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[14px] font-semibold ${isFullyBooked ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.14em] opacity-80 sm:text-[10px] sm:tracking-[0.16em]">{weekday}</span>
+                    <span className="mt-0.5 block text-lg font-bold leading-none sm:mt-1 sm:text-xl">{day}</span>
+                    <span className="mt-0.5 block text-[10px] font-medium opacity-80 sm:mt-1 sm:text-[11px]">{month}</span>
+                    <span className={`mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[11px] font-semibold sm:px-2 sm:text-[14px] ${isFullyBooked ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
                       {isFullyBooked ? 'เต็ม' : 'ว่าง'}
                     </span>
                   </button>
@@ -220,17 +220,17 @@ export default function BookingDateSelector({
           </div>
 
           {selectedSchedule && !tour.minPeople && (
-            <div className="mt-5">
+            <div className="mt-4 sm:mt-5">
               {(() => {
                 const schedulesOnSelectedDate = upcomingSchedules.filter((schedule: TourSchedule) => schedule.startDate === selectedSchedule.startDate)
                 const hasMultipleRounds = schedulesOnSelectedDate.length > 1
 
                 return (
-                  <div className="space-y-2.5">
-                    <label className="block text-lg font-bold text-slate-800">
+                  <div className="space-y-2">
+                    <label className="block text-base font-bold text-slate-800 sm:text-lg">
                       {hasMultipleRounds ? 'เลือกรอบเวลา (Join Trip)' : 'รายละเอียดรอบ / จำนวนที่นั่งว่าง (Join Trip)'}
                     </label>
-                    <div className="grid gap-2">
+                    <div className="grid gap-1.5 sm:gap-2">
                       {schedulesOnSelectedDate.map((schedule: TourSchedule) => {
                         const seatsLeft = Math.max(0, availableSeatsData[schedule.id] ?? (schedule.maxCapacity - schedule.currentBooked))
                         const isFull = seatsLeft <= 0
@@ -242,7 +242,7 @@ export default function BookingDateSelector({
                             type="button"
                             disabled={isFull}
                             onClick={() => setSelectedSchedule(schedule)}
-                            className={`w-full rounded-[1.25rem] border px-4 py-3 text-left transition-all ${isActiveRound
+                            className={`w-full rounded-[1.15rem] border px-3 py-2.5 text-left transition-all sm:rounded-[1.25rem] sm:px-4 sm:py-3 ${isActiveRound
                               ? 'border-blue-300 bg-blue-50'
                               : isFull
                                 ? 'cursor-not-allowed border-gray-100 bg-gray-50 opacity-60'
@@ -251,19 +251,19 @@ export default function BookingDateSelector({
                           >
                             <div className="flex items-center justify-between gap-4">
                               <div className="flex items-center gap-3">
-                                <div className={`flex h-5 w-5 items-center justify-center rounded-full border ${isActiveRound ? 'border-accent bg-accent' : 'border-gray-300 bg-white'}`}>
-                                  {isActiveRound && <div className="h-2 w-2 rounded-full bg-white" />}
+                                <div className={`flex h-4 w-4 items-center justify-center rounded-full border sm:h-5 sm:w-5 ${isActiveRound ? 'border-accent bg-accent' : 'border-gray-300 bg-white'}`}>
+                                  {isActiveRound && <div className="h-1.5 w-1.5 rounded-full bg-white sm:h-2 sm:w-2" />}
                                 </div>
                                 <div>
-                                  <p className={`text-base font-bold ${isActiveRound ? 'text-gray-900' : 'text-gray-700'}`}>
+                                  <p className={`text-sm font-bold sm:text-base ${isActiveRound ? 'text-gray-900' : 'text-gray-700'}`}>
                                     {schedule.timeSlot ? schedule.timeSlot : (hasMultipleRounds ? 'ไม่ระบุเวลา' : 'รอบออกเดินทาง')}
                                   </p>
                                   {schedule.roundName && (
-                                    <p className="text-[13px] text-gray-500">{schedule.roundName}</p>
+                                    <p className="text-[11px] text-gray-500 sm:text-[13px]">{schedule.roundName}</p>
                                   )}
                                 </div>
                               </div>
-                              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isFull ? 'bg-red-50 text-red-500' : seatsLeft <= 5 ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                              <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold sm:px-3 sm:py-1 sm:text-xs ${isFull ? 'bg-red-50 text-red-500' : seatsLeft <= 5 ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}>
                                 {isFull ? 'เต็มแล้ว' : `เหลือ ${seatsLeft} ที่`}
                               </span>
                             </div>
@@ -278,17 +278,17 @@ export default function BookingDateSelector({
           )}
 
           {selectedSchedule && (tour.tourType === 'package' || !!tour.minPeople) && (
-            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 sm:mt-4 sm:px-4 sm:py-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-sm font-semibold whitespace-nowrap text-slate-600">วันที่ท่านเลือก</span>
+                <span className="text-xs font-semibold whitespace-nowrap text-slate-600 sm:text-sm">วันที่ท่านเลือก</span>
                 <div className="flex items-center gap-2">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center text-slate-400">
+                  <div className="flex h-4 w-4 shrink-0 items-center justify-center text-slate-400 sm:h-5 sm:w-5">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <rect x="3" y="4" width="18" height="18" rx="2" />
                       <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" />
                     </svg>
                   </div>
-                  <p className="text-sm font-bold text-slate-800">
+                  <p className="text-xs font-bold text-slate-800 sm:text-sm">
                     {(() => {
                       const start = parseDate(selectedSchedule.startDate)
                       let dateText = ''

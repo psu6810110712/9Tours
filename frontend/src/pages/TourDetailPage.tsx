@@ -54,7 +54,7 @@ export default function TourDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 pb-32 pt-6 sm:px-6 sm:pt-6 lg:px-8 lg:pb-8">
       <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <nav className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-400">
           <Link to="/" className="transition-colors hover:text-accent">หน้าแรก</Link>
@@ -84,11 +84,16 @@ export default function TourDetailPage() {
         <div className="min-w-0 lg:col-span-8">
           <TourInfo tour={tour} />
           <TourItinerary items={tour.itinerary} />
-          <ReviewList tourId={tour.id} />
+          <div className="hidden lg:block">
+            <ReviewList tourId={tour.id} />
+          </div>
         </div>
 
         <aside className="lg:col-span-4">
-          <BookingSidebar tour={tour} />
+          <BookingSidebar tour={tour} isMobileFixed />
+          <div className="mt-6 lg:hidden">
+            <ReviewList tourId={tour.id} />
+          </div>
         </aside>
       </div>
 

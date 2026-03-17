@@ -14,6 +14,7 @@ import BookingSummary from './booking-sidebar/BookingSummary'
 
 interface BookingSidebarProps {
   tour: Tour
+  isMobileFixed?: boolean
 }
 
 function getLocalTodayIsoDate() {
@@ -22,10 +23,11 @@ function getLocalTodayIsoDate() {
   return local.toISOString().slice(0, 10)
 }
 
-export default function BookingSidebar({ tour }: BookingSidebarProps) {
+export default function BookingSidebar({ tour, isMobileFixed = false }: BookingSidebarProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const today = useRef(getLocalTodayIsoDate()).current
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   const upcomingSchedules = useMemo(() => {
     return [...tour.schedules]
@@ -181,42 +183,85 @@ export default function BookingSidebar({ tour }: BookingSidebarProps) {
     navigate(`/booking/${tour.id}?scheduleId=${targetScheduleId}&adults=${adults}&children=${children}`)
   }
 
+  const handleDrawerToggle = () => setDrawerOpen((prev) => !prev)
+  const handleDrawerClose = () => setDrawerOpen(false)
+  const shouldUseDrawer = isMobileFixed
+
+  const summaryLabel = isPrivate ? 'ราคาเหมาจ่ายทั้งกลุ่ม' : 'ยอดชำระรวม'
+
+  const fullContent = (
+    <>
+      <BookingPriceHeader tour={tour} />
+
+      <BookingDateSelector
+        tour={tour}
+        upcomingSchedules={upcomingSchedules}
+        availableMonths={availableMonths}
+        selectedMonth={selectedMonth}
+        setSelectedMonth={setSelectedMonth}
+        selectedSchedule={selectedSchedule}
+        setSelectedSchedule={(schedule) => setSelectedScheduleId(schedule.id)}
+        scrollRef={scrollRef}
+        availableSeatsData={availableSeatsData}
+      />
+
+      <BookingGuestSelector
+        tour={tour}
+        adults={adults}
+        setAdults={setAdults}
+        children={children}
+        setChildren={setChildren}
+        isMaxReached={isMaxReached}
+        hasSelectedSchedule={!!selectedSchedule}
+      />
+
+      <BookingSummary
+        tour={tour}
+        adults={adults}
+        children={children}
+        totalPrice={totalPrice}
+        isBookingDisabled={isBookingDisabled}
+        buttonText={buttonText}
+        onBookingClick={handleBookingClick}
+      />
+    </>
+  )
+
   return (
     <>
-      <div className="ui-surface rounded-[1.75rem] border border-gray-100 bg-white p-5 lg:sticky lg:top-24">
-        <BookingPriceHeader tour={tour} />
+      {shouldUseDrawer && (
+        <>
+          {drawerOpen && <button type="button" aria-label="ปิดหน้าต่างจอง" className="fixed inset-0 z-30 bg-black/30 backdrop-blur-sm lg:hidden" onClick={handleDrawerClose} />}
+          <div className={`fixed inset-x-0 bottom-0 z-40 px-4 pb-[env(safe-area-inset-bottom,1rem)] pt-2 transition-transform duration-300 lg:hidden ${drawerOpen ? 'translate-y-0' : 'translate-y-[calc(100%-150px)]'}`}>
+            <div className="ui-surface relative rounded-[1.5rem] border border-gray-200 bg-white p-4 shadow-[0_24px_45px_rgba(15,23,42,0.25)] overflow-hidden">
+              <button type="button" aria-label="ปรับสถานะลิ้นชักการจอง" className="mx-auto mb-3 flex h-1.5 w-12 items-center justify-center rounded-full bg-gray-200" onClick={handleDrawerToggle} />
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div className={drawerOpen ? 'opacity-0 transition-opacity duration-200' : 'transition-opacity duration-200'}>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{summaryLabel}</p>
+                  <p className="text-xl font-bold text-gray-900">฿{totalPrice.toLocaleString()}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" onClick={handleDrawerToggle} className={`ui-pressable rounded-xl border px-3 py-2 text-xs font-semibold ${drawerOpen ? 'border-gray-200 bg-gray-50 text-gray-700' : 'border-primary bg-primary text-white'}`}>
+                    {drawerOpen ? 'ย่อ' : 'ดูรายละเอียด'}
+                  </button>
+                  {!drawerOpen && (
+                    <button type="button" onClick={handleDrawerToggle} className="hidden" aria-hidden="true" />
+                  )}
+                </div>
+              </div>
 
-        <BookingDateSelector
-          tour={tour}
-          upcomingSchedules={upcomingSchedules}
-          availableMonths={availableMonths}
-          selectedMonth={selectedMonth}
-          setSelectedMonth={setSelectedMonth}
-          selectedSchedule={selectedSchedule}
-          setSelectedSchedule={(schedule) => setSelectedScheduleId(schedule.id)}
-          scrollRef={scrollRef}
-          availableSeatsData={availableSeatsData}
-        />
+              <div className={`transition-[max-height] duration-300 ${drawerOpen ? 'max-h-[calc(100vh-260px)] overflow-y-auto overflow-x-hidden pr-2' : 'max-h-0 overflow-hidden'}`}>
+                {fullContent}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
-        <BookingGuestSelector
-          tour={tour}
-          adults={adults}
-          setAdults={setAdults}
-          children={children}
-          setChildren={setChildren}
-          isMaxReached={isMaxReached}
-          hasSelectedSchedule={!!selectedSchedule}
-        />
-
-        <BookingSummary
-          tour={tour}
-          adults={adults}
-          children={children}
-          totalPrice={totalPrice}
-          isBookingDisabled={isBookingDisabled}
-          buttonText={buttonText}
-          onBookingClick={handleBookingClick}
-        />
+      <div className={shouldUseDrawer ? 'hidden lg:block' : ''}>
+        <div className="ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-4 sm:p-5 sm:rounded-[1.75rem] lg:sticky lg:top-24">
+          {fullContent}
+        </div>
       </div>
 
       {showLoginModal && (
