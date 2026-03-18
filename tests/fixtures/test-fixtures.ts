@@ -16,8 +16,9 @@ export const test = base.extend<MyFixtures>({
     await use(new DashboardPage(page));
   },
   authenticatedPage: async ({ page, request }, use) => {
-    // Example of setting up auth state
     const apiUrl = process.env.PLAYWRIGHT_API_URL ?? 'http://127.0.0.1:3000';
+    
+    // Login via API - this sets httpOnly cookies on the request context
     const response = await request.post(`${apiUrl}/auth/login`, {
       data: {
         identifier: 'admin@9tours.com',
@@ -25,12 +26,13 @@ export const test = base.extend<MyFixtures>({
         rememberMe: true,
       },
     });
-    const { access_token } = await response.json();
     
-    await page.addInitScript((token) => {
-      window.localStorage.setItem('auth_token', token);
-    }, access_token);
-
+    if (!response.ok()) {
+      throw new Error(`Login failed: ${response.status()}`);
+    }
+    
+    // The request context now has cookies set - use the page for UI interactions
+    // The browser context shares cookies with the request context
     await use();
   },
 });
