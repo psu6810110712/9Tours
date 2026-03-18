@@ -59,7 +59,7 @@ export class EasySlipService {
       const formData = new FormData();
       formData.append(
         'file',
-        new Blob([fileBuffer], { type: mimeType || 'application/octet-stream' }),
+        new Blob([new Uint8Array(fileBuffer)], { type: mimeType || 'application/octet-stream' }),
         fileName,
       );
       formData.append(
