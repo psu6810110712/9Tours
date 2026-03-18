@@ -61,6 +61,9 @@ jobs:
       - name: Start backend
         run: npm run start > ../backend.log 2>&1 &
         working-directory: backend
+        env:
+          ENABLE_DEMO_DASHBOARD_SEED: 'true'
+          ENABLE_TOUR_JSON_IMPORT: 'false'
 
       - name: Start frontend
         run: npm run dev -- --host 127.0.0.1 > ../frontend.log 2>&1 &
