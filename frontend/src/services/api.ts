@@ -1,15 +1,10 @@
-﻿import axios, { type InternalAxiosRequestConfig } from 'axios'
+import axios, { type InternalAxiosRequestConfig } from 'axios'
 import type { User } from '../types/user'
 import { API_BASE_URL } from './apiBaseUrl'
-
-let accessToken: string | null = null
-export const setAccessToken = (token: string | null) => { accessToken = token }
-export const getAccessToken = () => accessToken
 
 const baseURL = API_BASE_URL
 
 export interface SessionRefreshResponse {
-  access_token: string
   user: User
 }
 
@@ -38,11 +33,9 @@ export const requestSessionRefresh = async (options: RefreshRequestOptions = {})
     refreshPromise = axios
       .post<SessionRefreshResponse>(`${baseURL}/auth/refresh`, undefined, { withCredentials: true })
       .then((response) => {
-        setAccessToken(response.data.access_token)
         return response.data
       })
       .catch((error) => {
-        setAccessToken(null)
         if (shouldEmitAuthExpiredOnRefreshFailure) {
           window.dispatchEvent(new CustomEvent('auth:expired'))
         }
@@ -56,13 +49,6 @@ export const requestSessionRefresh = async (options: RefreshRequestOptions = {})
 
   return refreshPromise
 }
-
-api.interceptors.request.use((config) => {
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`
-  }
-  return config
-})
 
 api.interceptors.response.use(
   (response) => response,
@@ -86,8 +72,7 @@ api.interceptors.response.use(
 
     try {
       originalConfig._retry = true
-      const refreshData = await requestSessionRefresh({ emitAuthExpired: true })
-      originalConfig.headers.Authorization = `Bearer ${refreshData.access_token}`
+      await requestSessionRefresh({ emitAuthExpired: true })
       return api(originalConfig)
     } catch (refreshError) {
       return Promise.reject(refreshError)

@@ -1,4 +1,4 @@
-﻿import api, { requestSessionRefresh, type SessionRefreshResponse } from './api'
+import api, { requestSessionRefresh, type SessionRefreshResponse } from './api'
 import { API_BASE_URL } from './apiBaseUrl'
 import type { User } from '../types/user'
 import type { CustomerPrefix } from '../utils/profileValidation'
@@ -27,7 +27,6 @@ interface UpdateOwnProfileDto {
 }
 
 interface AuthResponse {
-  access_token: string
   user: User
 }
 

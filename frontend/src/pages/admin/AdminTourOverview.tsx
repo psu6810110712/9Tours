@@ -252,9 +252,10 @@ export default function AdminTourOverview() {
       ) : (
         <div className="space-y-4">
           {filteredTours.map((tour) => {
-            const totalTourBooked = tour.schedules.reduce((sum, schedule) => sum + schedule.currentBooked, 0)
-            const totalTourCapacity = tour.schedules.reduce((sum, schedule) => sum + schedule.maxCapacity, 0)
-            const monthGroups = groupSchedulesByMonth(getVisibleSchedules(tour.schedules, showPastSchedules))
+            const visibleSchedules = getVisibleSchedules(tour.schedules, showPastSchedules)
+            const totalTourBooked = visibleSchedules.reduce((sum, schedule) => sum + schedule.currentBooked, 0)
+            const totalTourCapacity = visibleSchedules.reduce((sum, schedule) => sum + schedule.maxCapacity, 0)
+            const monthGroups = groupSchedulesByMonth(visibleSchedules)
 
             return (
               <div key={tour.id} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
