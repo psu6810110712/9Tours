@@ -12,6 +12,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { FestivalsModule } from './festivals/festivals.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { StorageModule } from './common/storage.module';
 import { validateEnv } from './config/env.validation';
 
 @Module({
@@ -40,6 +41,9 @@ import { validateEnv } from './config/env.validation';
 
     // เปิดใช้งาน Schedule สำหรับระบบ Cron Jobs (คืนที่นั่งอัตโนมัติ)
     ScheduleModule.forRoot(),
+
+    // Storage Module (Local or S3)
+    StorageModule,
 
     ToursModule,
     UsersModule,

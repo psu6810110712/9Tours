@@ -9,24 +9,26 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { access, readdir, stat } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { readdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { Payment } from './entities/payment.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { ToursService } from '../tours/tours.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EasySlipService, type EasySlipVerificationResult } from '../easyslip/easyslip.service';
-import { safeDeleteFile } from './slip-file.utils';
+import { StorageService } from '../common/storage.interface';
 import { buildPromptPayPayload, getActivePaymentQrExpiry } from './promptpay.util';
-import {
-  buildStoredUploadPath,
-  getSlipUploadDirectory,
-  getUploadsRoot,
-  resolveStoredUploadPath,
-} from '../common/upload-paths';
+import { getSlipUploadDirectory, getUploadsRoot } from '../common/upload-paths';
 
 const PROMPTPAY_QR_RENDERER_BASE_URL = 'https://api.qrserver.com/v1/create-qr-code/';
+
+interface UploadedSlipData {
+  storedPath: string;
+  buffer: Buffer;
+  fileName: string;
+  mimeType: string;
+}
 
 @Injectable()
 export class PaymentsService {
@@ -43,6 +45,7 @@ export class PaymentsService {
     private toursService: ToursService,
     private notificationsService: NotificationsService,
     private easySlipService: EasySlipService,
+    private storageService: StorageService,
   ) { }
 
   async getPaymentQr(bookingId: number, userId: string) {
@@ -87,7 +90,7 @@ export class PaymentsService {
 
   async createPayment(
     createPaymentDto: CreatePaymentDto,
-    slipFile: Express.Multer.File,
+    uploadedSlip: UploadedSlipData,
     userId: string,
     auditContext?: {
       ipAddress?: string | null;
@@ -95,7 +98,7 @@ export class PaymentsService {
     },
   ) {
     const { bookingId, paymentMethod } = createPaymentDto;
-    const normalizedSlipPath = buildStoredUploadPath('slips', slipFile.filename);
+    const { storedPath, buffer, fileName, mimeType } = uploadedSlip;
 
     const booking = await this.bookingsRepository.findOne({
       where: { id: bookingId, userId },
@@ -122,24 +125,20 @@ export class PaymentsService {
       );
     }
 
-    if (!slipFile) {
-      throw new BadRequestException('A payment slip image is required');
-    }
-
     const existingPayment = await this.paymentsRepository.findOne({
       where: { bookingId },
       order: { uploadedAt: 'DESC' },
     });
 
-    if (existingPayment) {
-      if (!canReplacePendingReview) {
-        await safeDeleteFile(slipFile.path);
-        throw new BadRequestException('A payment slip has already been uploaded for this booking');
-      }
+    if (existingPayment && !canReplacePendingReview) {
+      // Delete the uploaded file since we won't use it
+      await this.storageService.deleteFile({ storedPath }).catch(() => {});
+      throw new BadRequestException('A payment slip has already been uploaded for this booking');
     }
 
+    // Verify slip using buffer
     const verificationResult = this.resolveVerificationAgainstBooking(
-      await this.easySlipService.verifySlip(slipFile),
+      await this.easySlipService.verifySlip(buffer, fileName, mimeType),
       Number(booking.totalPrice),
     );
 
@@ -151,7 +150,7 @@ export class PaymentsService {
 
         existingPayment.amountPaid = booking.totalPrice;
         existingPayment.paymentMethod = paymentMethod;
-        existingPayment.slipUrl = normalizedSlipPath;
+        existingPayment.slipUrl = storedPath;
         existingPayment.uploadedByUserId = userId;
         existingPayment.uploadedFromIp = auditContext?.ipAddress ?? null;
         existingPayment.uploadedFromUserAgent = auditContext?.userAgent ?? null;
@@ -166,15 +165,16 @@ export class PaymentsService {
 
         savedPayment = await this.paymentsRepository.save(existingPayment);
 
-        if (previousSlipPath && previousSlipPath !== normalizedSlipPath) {
-          await safeDeleteFile(resolveStoredUploadPath(previousSlipPath));
+        // Delete old slip if different
+        if (previousSlipPath && previousSlipPath !== storedPath) {
+          await this.storageService.deleteFile({ storedPath: previousSlipPath }).catch(() => {});
         }
       } else {
         const newPayment = this.paymentsRepository.create({
           bookingId,
           amountPaid: booking.totalPrice,
           paymentMethod,
-          slipUrl: normalizedSlipPath,
+          slipUrl: storedPath,
           uploadedByUserId: userId,
           uploadedFromIp: auditContext?.ipAddress ?? null,
           uploadedFromUserAgent: auditContext?.userAgent ?? null,
@@ -193,7 +193,8 @@ export class PaymentsService {
       booking.status = BookingStatus.AWAITING_APPROVAL;
       await this.bookingsRepository.save(booking);
     } catch (error) {
-      await safeDeleteFile(slipFile.path);
+      // If error occurs, delete the uploaded file
+      await this.storageService.deleteFile({ storedPath }).catch(() => {});
       throw error;
     }
 
@@ -237,7 +238,7 @@ export class PaymentsService {
     };
   }
 
-  async getSlipFilePath(paymentId: number, userId: string, isAdmin: boolean) {
+  async getSlipStoredPath(paymentId: number, userId: string, isAdmin: boolean) {
     const payment = await this.paymentsRepository.findOne({
       where: { id: paymentId },
       relations: ['booking'],
@@ -247,24 +248,16 @@ export class PaymentsService {
       throw new NotFoundException('Payment slip not found');
     }
 
-    if (!isAdmin && payment.booking?.userId !== userId) {
+    const isOwner = payment.booking?.userId === userId;
+
+    if (!isAdmin && !isOwner) {
       throw new NotFoundException('Payment slip not found');
     }
 
-    const absolutePath = resolveStoredUploadPath(payment.slipUrl);
-
-    if (!absolutePath.startsWith(this.uploadsRoot)) {
-      this.logger.warn(`Blocked slip access outside upload directory for payment ${paymentId}`);
-      throw new NotFoundException('Payment slip not found');
-    }
-
-    try {
-      await access(absolutePath);
-    } catch {
-      throw new NotFoundException('Payment slip not found');
-    }
-
-    return absolutePath;
+    return {
+      storedPath: payment.slipUrl,
+      isOwner,
+    };
   }
 
   private buildQrImageUrl(qrPayload: string) {

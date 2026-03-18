@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { readFile } from 'node:fs/promises';
 
 export type PaymentVerificationStatus =
   | 'pending'
@@ -39,7 +38,7 @@ export class EasySlipService {
 
   constructor(private readonly configService: ConfigService) {}
 
-  async verifySlip(file: Express.Multer.File): Promise<EasySlipVerificationResult> {
+  async verifySlip(fileBuffer: Buffer, fileName: string, mimeType: string): Promise<EasySlipVerificationResult> {
     const apiSecret = this.configService.get<string>('SLIP2GO_API_SECRET')?.trim();
     const baseUrl = (this.configService.get<string>('SLIP2GO_BASE_URL') ?? 'https://connect.slip2go.com/api')
       .replace(/\/+$/, '');
@@ -57,12 +56,11 @@ export class EasySlipService {
     }
 
     try {
-      const fileBuffer = await readFile(file.path);
       const formData = new FormData();
       formData.append(
         'file',
-        new Blob([fileBuffer], { type: file.mimetype || 'application/octet-stream' }),
-        file.filename,
+        new Blob([fileBuffer], { type: mimeType || 'application/octet-stream' }),
+        fileName,
       );
       formData.append(
         'payload',
