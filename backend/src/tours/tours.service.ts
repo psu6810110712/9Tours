@@ -733,8 +733,13 @@ export class ToursService implements OnModuleInit {
       .select('b.schedule_id', 'scheduleId')
       .addSelect('SUM(b.pax_count)', 'totalPax')
       .addSelect('COUNT(b.id)', 'bookingCount')
-      .where('b.status NOT IN (:...excluded)', {
-        excluded: [BookingStatus.CANCELED, BookingStatus.REFUND_COMPLETED],
+      .where('b.status IN (:...activeStatuses)', {
+        activeStatuses: [
+          BookingStatus.PENDING_PAYMENT,
+          BookingStatus.AWAITING_APPROVAL,
+          BookingStatus.CONFIRMED,
+          BookingStatus.SUCCESS,
+        ],
       })
       .groupBy('b.schedule_id')
       .getRawMany();
