@@ -9,8 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { readdir } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { readdir, stat, unlink } from 'node:fs/promises';
+import { resolve, join } from 'node:path';
 import { Payment } from './entities/payment.entity';
 import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { CreatePaymentDto } from './dto/create-payment.dto';
@@ -336,7 +336,7 @@ export class PaymentsService {
           continue;
         }
 
-        await safeDeleteFile(absolutePath);
+        await unlink(absolutePath);
         this.logger.warn(`Deleted orphan slip file: ${normalizedPath}`);
       } catch {
         // Ignore per-file cleanup failures and continue.
