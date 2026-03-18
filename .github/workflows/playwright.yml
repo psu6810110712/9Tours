@@ -61,11 +61,8 @@ jobs:
       - name: Start backend
         run: npm run start > ../backend.log 2>&1 &
         working-directory: backend
-
-      - name: Seed database
-        run: npm run db:bootstrap && npm run seed:tours
-        working-directory: backend
         env:
+          ENABLE_DEMO_DASHBOARD_SEED: 'true'
           ENABLE_TOUR_JSON_IMPORT: 'false'
 
       - name: Start frontend
