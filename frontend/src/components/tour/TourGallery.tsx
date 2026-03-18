@@ -133,11 +133,11 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
   }
 
   return (
-    <div className="mb-4">
+    <div className="mb-3 sm:mb-4">
       <div className="md:hidden">
         <div
           ref={mobileGalleryRef}
-          className={`relative mb-4 overflow-hidden rounded-[1.9rem] border border-slate-200 bg-slate-100 ${galleryAspectClass}`}
+          className="relative mb-3 overflow-hidden rounded-[1.25rem] border border-slate-200 bg-slate-100 aspect-[20/9] sm:mb-4 sm:rounded-[1.9rem]"
         >
           <img
             src={activeImage}
@@ -162,7 +162,7 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
           <button
             type="button"
             onClick={() => setIsPopupOpen(true)}
-            className="ui-focus-ring ui-pressable absolute bottom-4 right-4 rounded-full border border-white/70 bg-white/92 px-4 py-2 text-sm font-bold text-slate-800 shadow-[0_10px_24px_rgba(15,23,42,0.14)] backdrop-blur-sm hover:bg-white"
+            className="ui-focus-ring ui-pressable absolute bottom-4 right-4 rounded-full border border-white/80 bg-white/80 px-4 py-2 text-sm font-bold text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.14)] backdrop-blur-sm hover:bg-white"
           >
             ดูรูปทั้งหมด
           </button>
@@ -248,12 +248,12 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
         </div>
       </div>
 
-      <h1 className="mt-8 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
+      <h1 className="mt-4 text-xl font-bold leading-tight text-gray-900 sm:text-3xl md:mt-6 md:text-4xl">
         {name}
       </h1>
 
       {isPopupOpen && (
-        <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-5 sm:p-8">
+        <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-2 sm:p-5 md:p-8">
           <button
             type="button"
             aria-label="ปิดแกลเลอรี"
@@ -279,7 +279,7 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
                 </button>
               </div>
 
-              <div className="relative flex-1 overflow-hidden bg-transparent px-5 py-5 sm:px-6 sm:py-6">
+              <div className="relative flex-1 overflow-hidden bg-transparent px-2 py-3 sm:px-5 sm:py-5 md:px-6 md:py-6">
                 <div className={`mx-auto w-full max-w-[108vh] overflow-hidden rounded-[1.6rem] border border-white/10 bg-black/25 shadow-[0_16px_44px_rgba(0,0,0,0.2)] ${galleryAspectClass}`}>
                   <img
                     src={activeImage}
@@ -293,12 +293,12 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
                     <ScrollerArrowButton
                       direction="left"
                       onClick={showPrev}
-                      className={`${galleryArrowButtonClass} absolute left-6 top-1/2 z-10 -translate-y-1/2`}
+                      className={`${galleryArrowButtonClass} absolute left-1 sm:left-6 top-1/2 z-10 -translate-y-1/2`}
                     />
                     <ScrollerArrowButton
                       direction="right"
                       onClick={showNext}
-                      className={`${galleryArrowButtonClass} absolute right-6 top-1/2 z-10 -translate-y-1/2`}
+                      className={`${galleryArrowButtonClass} absolute right-1 sm:right-6 top-1/2 z-10 -translate-y-1/2`}
                     />
                   </>
                 )}
@@ -312,7 +312,7 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
                         key={index}
                         type="button"
                         onClick={() => setActiveIndex(index)}
-                        className={`relative w-24 overflow-hidden rounded-[1rem] border transition-all sm:w-32 ${thumbnailAspectClass} ${activeIndex === index
+                        className={`relative w-16 overflow-hidden rounded-[0.75rem] border transition-all sm:w-24 md:w-32 sm:rounded-[1rem] ${thumbnailAspectClass} ${activeIndex === index
                           ? 'border-[var(--color-accent)] shadow-[0_0_0_2px_rgba(245,166,35,0.28)]'
                           : 'border-white/10 opacity-70 hover:opacity-100'
                           }`}

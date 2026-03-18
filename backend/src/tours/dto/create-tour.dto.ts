@@ -144,6 +144,19 @@ export class CreateTourDto {
   itinerary?: ItineraryItemDto[];
 
   @IsOptional()
+  @IsDateString()
+  discountStartDate?: string | null;
+
+  @IsOptional()
+  @IsDateString()
+  discountEndDate?: string | null;
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  festivalId?: number | null;
 }

@@ -5,9 +5,11 @@ import TourGallery from '../components/tour/TourGallery'
 import TourInfo from '../components/tour/TourInfo'
 import TourItinerary from '../components/tour/TourItinerary'
 import BookingSidebar from '../components/tour/BookingSidebar'
+import ReviewList from '../components/reviews/ReviewList'
 import { trackEvent } from '../services/trackingService'
 import { tourService } from '../services/tourService'
 import { useAuth } from '../context/AuthContext'
+import { useFavoritesContext } from '../context/FavoritesContext'
 import type { Tour } from '../types/tour'
 
 export default function TourDetailPage() {
@@ -16,6 +18,7 @@ export default function TourDetailPage() {
   const [related, setRelated] = useState<Tour[]>([])
   const navigate = useNavigate()
   const { isAdmin } = useAuth()
+  const { isFavorite, toggleFavorite } = useFavoritesContext()
   const trackedTourIdRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -51,7 +54,7 @@ export default function TourDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 pb-32 pt-6 sm:px-6 sm:pt-6 lg:px-8 lg:pb-8">
       <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <nav className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-400">
           <Link to="/" className="transition-colors hover:text-accent">หน้าแรก</Link>
@@ -81,10 +84,16 @@ export default function TourDetailPage() {
         <div className="min-w-0 lg:col-span-8">
           <TourInfo tour={tour} />
           <TourItinerary items={tour.itinerary} />
+          <div className="hidden lg:block">
+            <ReviewList tourId={tour.id} />
+          </div>
         </div>
 
         <aside className="lg:col-span-4">
-          <BookingSidebar tour={tour} />
+          <BookingSidebar tour={tour} isMobileFixed />
+          <div className="mt-6 lg:hidden">
+            <ReviewList tourId={tour.id} />
+          </div>
         </aside>
       </div>
 
@@ -96,7 +105,14 @@ export default function TourDetailPage() {
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {related.map((item) => <TourCard key={item.id} tour={item} />)}
+            {related.map((item) => (
+              <TourCard
+                key={item.id}
+                tour={item}
+                isFavorite={isFavorite(item.id)}
+                onToggleFavorite={toggleFavorite}
+              />
+            ))}
           </div>
         </section>
       )}

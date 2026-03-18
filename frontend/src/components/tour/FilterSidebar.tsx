@@ -17,6 +17,11 @@ const PROVINCES_BY_REGION: Record<string, string[]> = {
   ภาคตะวันออกเฉียงเหนือ: ['ขอนแก่น', 'นครราชสีมา', 'อุดรธานี'],
 }
 
+interface FestivalOption {
+  id: number
+  name: string
+}
+
 interface FilterSidebarProps {
   region: string
   province: string
@@ -33,6 +38,8 @@ interface FilterSidebarProps {
   }
   availableCategories: string[]
   availableMonths: MonthOption[]
+  festivals?: FestivalOption[]
+  festivalId?: number | null
   onRegionChange: (value: string) => void
   onProvinceChange: (value: string) => void
   onTourTypeChange: (value: string) => void
@@ -41,11 +48,17 @@ interface FilterSidebarProps {
   onMonthChange: (value: string) => void
   onMinPriceChange: (value: number) => void
   onMaxPriceChange: (value: number) => void
+  onFestivalChange?: (value: number | null) => void
   onClear: () => void
   mode?: 'sidebar' | 'drawer'
   onClose?: () => void
 }
 
+/* ─── Shared label style for section headings ─── */
+const sectionLabelClass = 'mb-2.5 block text-xs font-bold text-gray-500'
+const clearBtnClass = 'text-xs font-semibold text-primary hover:text-primary/80 hover:underline transition-colors'
+
+/* ─── Custom Select ─── */
 function CustomSelect({
   value,
   placeholder,
@@ -95,19 +108,17 @@ function CustomSelect({
           if (!disabled) setOpen((prev) => !prev)
         }}
         disabled={disabled}
-        className="ui-focus-ring flex h-12 w-full items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 text-left text-sm font-medium text-gray-700 outline-none transition-colors hover:border-gray-300 focus:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
+        className="ui-focus-ring flex h-11 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 text-left text-sm font-medium text-gray-700 outline-none transition-all hover:border-gray-300 focus:border-primary disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
       >
         <span className="truncate">{selectedLabel}</span>
-        <span className={`text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}>
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
-          </svg>
-        </span>
+        <svg className={`h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
+        </svg>
       </button>
 
       {open && !disabled && (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-20 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.12)]">
-          <div className="max-h-64 overflow-y-auto py-2">
+        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-30 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+          <div className="max-h-60 overflow-y-auto py-1">
             {options.map((option) => {
               const active = option.value === value
               return (
@@ -118,9 +129,7 @@ function CustomSelect({
                     onChange(option.value)
                     setOpen(false)
                   }}
-                  className={`flex w-full items-center px-4 py-2.5 text-left text-sm font-medium transition-colors ${
-                    active ? 'bg-[var(--color-primary)] text-white' : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                  className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-colors ${active ? 'bg-primary/10 font-bold text-primary' : 'font-medium text-gray-600 hover:bg-gray-50'}`}
                 >
                   {option.label}
                 </button>
@@ -133,6 +142,7 @@ function CustomSelect({
   )
 }
 
+/* ─── Searchable Select (for provinces) ─── */
 function SearchableSelect({
   value,
   placeholder,
@@ -187,29 +197,27 @@ function SearchableSelect({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="ui-focus-ring flex h-12 w-full items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 text-left text-sm font-medium text-gray-700 outline-none transition-colors hover:border-gray-300 focus:border-[var(--color-primary)]"
+        className="ui-focus-ring flex h-11 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 text-left text-sm font-medium text-gray-700 outline-none transition-all hover:border-gray-300 focus:border-primary"
       >
         <span className="truncate">{selectedLabel}</span>
-        <span className={`text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}>
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
-          </svg>
-        </span>
+        <svg className={`h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
+        </svg>
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-20 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.12)]">
-          <div className="border-b border-gray-100 p-3">
+        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-30 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+          <div className="border-b border-gray-100 p-2.5">
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="พิมพ์ค้นหาจังหวัด"
               autoFocus
-              className="ui-focus-ring h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 outline-none transition-colors focus:border-[var(--color-primary)]"
+              className="ui-focus-ring h-9 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm font-medium text-gray-700 outline-none transition-colors focus:border-primary focus:bg-white"
             />
           </div>
 
-          <div className="max-h-64 overflow-y-auto py-2">
+          <div className="max-h-60 overflow-y-auto py-1">
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option) => {
                 const active = option.value === value
@@ -221,16 +229,14 @@ function SearchableSelect({
                       onChange(option.value)
                       setOpen(false)
                     }}
-                    className={`flex w-full items-center px-4 py-2.5 text-left text-sm font-medium transition-colors ${
-                      active ? 'bg-[var(--color-primary)] text-white' : 'text-gray-700 hover:bg-gray-50'
-                    }`}
+                    className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-colors ${active ? 'bg-primary/10 font-bold text-primary' : 'font-medium text-gray-600 hover:bg-gray-50'}`}
                   >
                     {option.label}
                   </button>
                 )
               })
             ) : (
-              <div className="px-4 py-3 text-sm font-medium text-gray-400">ไม่พบจังหวัดที่ตรงกัน</div>
+              <div className="px-4 py-3 text-center text-sm font-medium text-gray-400">ไม่พบจังหวัดที่ตรงกัน</div>
             )}
           </div>
         </div>
@@ -239,6 +245,7 @@ function SearchableSelect({
   )
 }
 
+/* ─── Main Component ─── */
 export default function FilterSidebar({
   region,
   province,
@@ -252,6 +259,8 @@ export default function FilterSidebar({
   priceBounds,
   availableCategories,
   availableMonths,
+  festivals = [],
+  festivalId,
   onRegionChange,
   onProvinceChange,
   onTourTypeChange,
@@ -260,12 +269,13 @@ export default function FilterSidebar({
   onMonthChange,
   onMinPriceChange,
   onMaxPriceChange,
+  onFestivalChange,
   onClear,
   mode = 'sidebar',
   onClose,
 }: FilterSidebarProps) {
   const hasPriceFilter = minPrice > priceBounds.min || maxPrice < priceBounds.max
-  const hasFilter = region || province || tourType || search || month || categories.length > 0 || hasPriceFilter
+  const hasFilter = region || province || tourType || search || month || categories.length > 0 || festivalId || hasPriceFilter
   const provinceOptions = region
     ? (PROVINCES_BY_REGION[region] ?? [])
     : Object.values(PROVINCES_BY_REGION).flat()
@@ -363,14 +373,25 @@ export default function FilterSidebar({
     onMaxPriceChange(nextMax)
   }
 
+  /* ─────────────── Tour type toggle ─────────────── */
+  const tourTypeOptions = [
+    { value: '', label: 'ทั้งหมด' },
+    { value: 'one_day', label: 'วันเดย์ทริป' },
+    { value: 'package', label: 'แพ็กเกจ' },
+  ]
+  const activeIndex = tourTypeOptions.findIndex((o) => o.value === tourType)
+  const segmentCount = tourTypeOptions.length
+
   return (
     <aside className={isDrawer ? 'w-full' : 'w-full lg:w-72 lg:flex-shrink-0'}>
-      <div className={`ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-5 ${isDrawer ? '' : 'lg:sticky lg:top-24'}`}>
-        <div className="mb-5 flex items-center justify-between gap-3">
-          <h2 className="text-base font-bold text-gray-800">ตัวกรอง</h2>
-          <div className="flex items-center gap-2">
+      <div className={`ui-surface rounded-2xl border border-gray-100 bg-white p-5 ${isDrawer ? '' : 'lg:sticky lg:top-24'}`}>
+
+        {/* ── Header ── */}
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="text-base font-bold text-gray-900">ตัวกรอง</h2>
+          <div className="flex items-center gap-3">
             {hasFilter && (
-              <button type="button" onClick={onClear} className="text-md font-semibold text-accent hover:underline">
+              <button type="button" onClick={onClear} className={clearBtnClass}>
                 ล้างทั้งหมด
               </button>
             )}
@@ -378,7 +399,7 @@ export default function FilterSidebar({
               <button
                 type="button"
                 onClick={onClose}
-                className="ui-focus-ring flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+                className="ui-focus-ring flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
               >
                 ×
               </button>
@@ -386,106 +407,87 @@ export default function FilterSidebar({
           </div>
         </div>
 
+        {/* ── Sections ── */}
         <div className="space-y-0 [&>div:not(:first-child)]:border-t [&>div:not(:first-child)]:border-gray-100 [&>div:not(:first-child)]:pt-5 [&>div:not(:last-child)]:pb-5">
+
+          {/* ── Tour type ── */}
           <div>
-            <label className="mb-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">ประเภท</label>
-            {(() => {
-              const tourTypeOptions = [
-                { value: '', label: 'ทั้งหมด' },
-                { value: 'one_day', label: 'วันเดย์ทริป' },
-                { value: 'package', label: 'แพ็กเกจ' },
-              ]
-              const activeIndex = tourTypeOptions.findIndex((option) => option.value === tourType)
-              const count = tourTypeOptions.length
-
-              return (
-                <div className="relative flex rounded-full border border-gray-200 bg-gray-100 p-1">
-                  <div
-                    className="absolute bottom-1 top-1 rounded-full shadow-sm transition-all duration-300 ease-in-out"
-                    style={{
-                      width: `calc(${100 / count}% - 0px)`,
-                      left: `calc(${(activeIndex < 0 ? 0 : activeIndex) * (100 / count)}% + 0px)`,
-                      background: 'var(--color-primary)',
-                    }}
-                  />
-                  {tourTypeOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => onTourTypeChange(option.value)}
-                      className={`relative z-10 flex-1 rounded-full px-2 py-2 text-center text-sm font-semibold transition-colors duration-300 ${
-                        tourType === option.value ? 'text-white' : 'text-gray-500 hover:text-gray-700'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              )
-            })()}
-          </div>
-
-          <div>
-            <label className="mb-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">หมวดหมู่</label>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-gray-500">
-                  {categories.length > 0 ? `เลือกไว้ ${categories.length} หมวด` : 'เลือกได้หลายหมวดพร้อมกัน'}
-                </p>
-                {categories.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={clearSelectedCategories}
-                    className="text-xs font-semibold text-[var(--color-primary)] hover:underline"
-                  >
-                    ล้างที่เลือก
-                  </button>
-                )}
-              </div>
-
-              <div className="grid gap-x-4 gap-y-2 sm:grid-cols-2">
-                {visibleCategories.map((category) => {
-                  const isSelected = categories.includes(category)
-                  return (
-                    <label
-                      key={category}
-                      className="flex min-w-0 cursor-pointer items-center gap-3 rounded-xl px-1 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => onCategoryToggle(category)}
-                        className="h-4 w-4 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
-                      />
-                      <span className="truncate">{category}</span>
-                    </label>
-                  )
-                })}
-              </div>
-
-              {hasMoreCategories && (
+            <label className={sectionLabelClass}>ประเภท</label>
+            <div className="relative flex rounded-full border border-gray-200 bg-gray-100 p-1">
+              <div
+                className="absolute bottom-1 top-1 rounded-full bg-primary shadow-sm transition-all duration-300 ease-out"
+                style={{
+                  width: `calc(${100 / segmentCount}%)`,
+                  left: `calc(${(activeIndex < 0 ? 0 : activeIndex) * (100 / segmentCount)}%)`,
+                }}
+              />
+              {tourTypeOptions.map((option) => (
                 <button
+                  key={option.value}
                   type="button"
-                  onClick={() => setShowAllCategories((prev) => !prev)}
-                  className="flex w-full items-center justify-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                  onClick={() => onTourTypeChange(option.value)}
+                  className={`relative z-10 flex-1 rounded-full py-2 text-center text-sm font-semibold transition-colors duration-200 ${tourType === option.value ? 'text-white' : 'text-gray-500 hover:text-gray-700'}`}
                 >
-                  {showAllCategories ? '▲ แสดงน้อยลง' : `▼ ดูเพิ่มอีก ${hiddenCount} หมวด`}
+                  {option.label}
                 </button>
-              )}
+              ))}
             </div>
           </div>
 
+          {/* ── Categories ── */}
           <div>
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <label className="block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">เดือนที่เดินทาง</label>
+            <div className="mb-2.5 flex items-center justify-between">
+              <label className="text-xs font-bold text-gray-500">หมวดหมู่</label>
+              {categories.length > 0 && (
+                <button type="button" onClick={clearSelectedCategories} className={clearBtnClass}>
+                  ล้าง ({categories.length})
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              {visibleCategories.map((category) => {
+                const isSelected = categories.includes(category)
+                return (
+                  <label
+                    key={category}
+                    className="flex min-w-0 cursor-pointer items-center gap-2.5 rounded-lg px-1 py-1.5 text-sm transition-colors hover:bg-gray-50"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => onCategoryToggle(category)}
+                      className="h-4 w-4 shrink-0 rounded border-gray-300 text-primary accent-[var(--color-primary)] focus:ring-primary/30"
+                    />
+                    <span className={`truncate font-medium ${isSelected ? 'text-gray-900' : 'text-gray-600'}`}>{category}</span>
+                  </label>
+                )
+              })}
+            </div>
+
+            {hasMoreCategories && (
+              <button
+                type="button"
+                onClick={() => setShowAllCategories((prev) => !prev)}
+                className="mt-2 flex w-full items-center justify-center rounded-lg py-1.5 text-xs font-semibold text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+              >
+                {showAllCategories ? '▲ แสดงน้อยลง' : `▼ ดูเพิ่มอีก ${hiddenCount} หมวด`}
+              </button>
+            )}
+          </div>
+
+          {/* ── Month & Year ── */}
+          <div>
+            <div className="mb-2.5 flex items-center justify-between">
+              <label className="text-xs font-bold text-gray-500">เดือนที่เดินทาง</label>
               {month && (
-                <button type="button" onClick={() => onMonthChange('')} className="text-xs font-semibold text-accent hover:underline">
+                <button type="button" onClick={() => onMonthChange('')} className={clearBtnClass}>
                   ล้าง
                 </button>
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               <CustomSelect
                 value={selectedMonthNumber}
                 placeholder="ทุกเดือน"
@@ -508,19 +510,20 @@ export default function FilterSidebar({
             </div>
           </div>
 
+          {/* ── Price range ── */}
           <div>
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <label className="block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">ช่วงราคา</label>
-              <span className="text-md font-semibold text-gray-500">
-                ฿{minPrice.toLocaleString()} - ฿{maxPrice.toLocaleString()}
+            <div className="mb-3 flex items-center justify-between">
+              <label className="text-xs font-bold text-gray-500">ช่วงราคา</label>
+              <span className="text-xs font-bold text-gray-700">
+                ฿{minPrice.toLocaleString()} – ฿{maxPrice.toLocaleString()}
               </span>
             </div>
 
-            <div className="rounded-[1.2rem] border border-gray-200 bg-gray-50 px-4 py-4">
-              <div className="relative h-8">
-                <div className="absolute left-0 top-1/2 h-2 w-full -translate-y-1/2 rounded-full bg-gray-200" />
+            <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
+              <div className="relative h-6">
+                <div className="absolute left-0 top-1/2 h-1.5 w-full -translate-y-1/2 rounded-full bg-gray-200" />
                 <div
-                  className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-gradient-to-r from-[var(--color-primary)] to-amber-400"
+                  className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-primary to-amber-400"
                   style={{ left: `${leftPercent}%`, right: `${rightPercent}%` }}
                 />
                 <input
@@ -530,7 +533,7 @@ export default function FilterSidebar({
                   step={100}
                   value={minPrice}
                   onChange={(event) => onMinPriceChange(Number(event.target.value))}
-                  className="pointer-events-none absolute left-0 top-1/2 h-2 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--color-primary)] [&::-webkit-slider-thumb]:shadow-sm"
+                  className="pointer-events-none absolute left-0 top-1/2 h-1.5 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow"
                 />
                 <input
                   type="range"
@@ -539,18 +542,18 @@ export default function FilterSidebar({
                   step={100}
                   value={maxPrice}
                   onChange={(event) => onMaxPriceChange(Number(event.target.value))}
-                  className="pointer-events-none absolute left-0 top-1/2 h-2 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-500 [&::-webkit-slider-thumb]:shadow-sm"
+                  className="pointer-events-none absolute left-0 top-1/2 h-1.5 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-500 [&::-webkit-slider-thumb]:shadow"
                 />
               </div>
 
-              <div className="mt-4 flex items-center justify-between text-xs font-semibold text-gray-500">
-                <span>ต่ำสุด {priceBounds.min.toLocaleString()} บาท</span>
-                <span>สูงสุด {priceBounds.max.toLocaleString()} บาท</span>
+              <div className="mt-3 flex items-center justify-between text-[11px] font-medium text-gray-400">
+                <span>ต่ำสุด {priceBounds.min.toLocaleString()} ฿</span>
+                <span>สูงสุด {priceBounds.max.toLocaleString()} ฿</span>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="mt-3 grid grid-cols-2 gap-2.5">
                 <label className="block">
-                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.05em] text-gray-500">ราคาต่ำสุด</span>
+                  <span className="mb-1.5 block text-[11px] font-semibold text-gray-500">ราคาต่ำสุด</span>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -562,12 +565,12 @@ export default function FilterSidebar({
                         event.currentTarget.blur()
                       }
                     }}
-                    className="ui-focus-ring h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 outline-none transition-colors focus:border-[var(--color-primary)]"
+                    className="ui-focus-ring h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 outline-none transition-colors focus:border-primary"
                   />
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.05em] text-gray-500">ราคาสูงสุด</span>
+                  <span className="mb-1.5 block text-[11px] font-semibold text-gray-500">ราคาสูงสุด</span>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -579,15 +582,16 @@ export default function FilterSidebar({
                         event.currentTarget.blur()
                       }
                     }}
-                    className="ui-focus-ring h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 outline-none transition-colors focus:border-[var(--color-primary)]"
+                    className="ui-focus-ring h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 outline-none transition-colors focus:border-primary"
                   />
                 </label>
               </div>
             </div>
           </div>
 
+          {/* ── Region ── */}
           <div>
-            <label className="mb-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">ภาค</label>
+            <label className={sectionLabelClass}>ภาค</label>
             <CustomSelect
               value={region}
               placeholder="ทุกภาค"
@@ -602,8 +606,9 @@ export default function FilterSidebar({
             />
           </div>
 
+          {/* ── Province ── */}
           <div>
-            <label className="mb-2 block text-md font-semibold uppercase tracking-[0.05em] text-gray-600">จังหวัด</label>
+            <label className={sectionLabelClass}>จังหวัด</label>
             <SearchableSelect
               value={province}
               placeholder="ทุกจังหวัด"
@@ -614,6 +619,22 @@ export default function FilterSidebar({
               ]}
             />
           </div>
+
+          {/* ── Festival ── */}
+          {festivals.length > 0 && onFestivalChange && (
+            <div>
+              <label className={sectionLabelClass}>เทศกาล</label>
+              <CustomSelect
+                value={festivalId ? String(festivalId) : ''}
+                placeholder="ทุกเทศกาล"
+                onChange={(value) => onFestivalChange(value ? Number(value) : null)}
+                options={[
+                  { value: '', label: 'ทุกเทศกาล' },
+                  ...festivals.map((f) => ({ value: String(f.id), label: f.name })),
+                ]}
+              />
+            </div>
+          )}
         </div>
       </div>
     </aside>

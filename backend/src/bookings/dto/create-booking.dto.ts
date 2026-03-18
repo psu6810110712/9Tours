@@ -1,5 +1,5 @@
 ﻿import { Transform, Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Matches, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsOptional, IsString, Matches, Min, ValidateNested } from 'class-validator';
 import {
   CUSTOMER_NAME_REGEX,
   CUSTOMER_PREFIXES,
@@ -53,4 +53,19 @@ export class CreateBookingDto {
   @IsString()
   @IsOptional()
   specialRequest?: string;
+
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => TravelerInfoDto)
+  travelersInfo?: TravelerInfoDto[];
+}
+
+export class TravelerInfoDto {
+  @IsString()
+  name: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isLeadTraveler?: boolean;
 }

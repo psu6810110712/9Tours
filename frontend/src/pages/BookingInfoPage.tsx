@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import BookingSummaryCard from '../components/booking/BookingSummaryCard'
 import ProgressBar from '../components/common/ProgressBar'
@@ -32,11 +32,10 @@ interface ContactFormErrors {
 }
 
 function inputClass(error?: string) {
-  return `ui-focus-ring w-full rounded-2xl border px-4 py-3 text-base outline-none transition-all ${
-    error
-      ? 'border-red-200 bg-red-50/90 text-red-900 placeholder:text-red-300 focus:border-red-300'
-      : 'border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-300 focus:border-primary focus:bg-white'
-  }`
+  return `ui-focus-ring w-full rounded-2xl border px-4 py-3 text-base outline-none transition-all ${error
+    ? 'border-red-200 bg-red-50/90 text-red-900 placeholder:text-red-300 focus:border-red-300'
+    : 'border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-300 focus:border-primary focus:bg-white'
+    }`
 }
 
 export default function BookingInfoPage() {
@@ -45,8 +44,8 @@ export default function BookingInfoPage() {
   const navigate = useNavigate()
   const { user, refreshCurrentUser } = useAuth()
 
-  const adults = Number.parseInt(searchParams.get('adults') || '1', 10)
-  const children = Number.parseInt(searchParams.get('children') || '0', 10)
+  const [adults, setAdults] = useState(() => Number.parseInt(searchParams.get('adults') || '1', 10))
+  const [children, setChildren] = useState(() => Number.parseInt(searchParams.get('children') || '0', 10))
   const scheduleId = searchParams.get('scheduleId') || '-'
 
   const [tour, setTour] = useState<Tour | null>(null)
@@ -63,6 +62,27 @@ export default function BookingInfoPage() {
   const [manualContactDraft, setManualContactDraft] = useState<ContactDetails>(accountContact)
   const [hasManualDraft, setHasManualDraft] = useState(false)
   const [specialRequest, setSpecialRequest] = useState('')
+  const [travelersInfo, setTravelersInfo] = useState<{ name: string; isLeadTraveler: boolean }[]>(
+    () => Array.from({ length: adults + children }, (_, i) => ({ name: '', isLeadTraveler: i === 0 }))
+  )
+
+  useEffect(() => {
+    setTravelersInfo((prev) => {
+      const targetLength = adults + children
+      if (prev.length === targetLength) return prev
+      let newTravelers = [...prev]
+      if (newTravelers.length > targetLength) {
+        newTravelers = newTravelers.slice(0, targetLength)
+      } else {
+        const diff = targetLength - newTravelers.length
+        newTravelers = [...newTravelers, ...Array.from({ length: diff }, () => ({ name: '', isLeadTraveler: false }))]
+      }
+      if (newTravelers.length > 0 && !newTravelers.some(t => t.isLeadTraveler)) {
+        newTravelers[0].isLeadTraveler = true
+      }
+      return newTravelers
+    })
+  }, [adults, children])
 
   useEffect(() => {
     if (!tourId) {
@@ -97,11 +117,12 @@ export default function BookingInfoPage() {
     )
   }
 
+  const isPrivate = Boolean(tour?.minPeople)
   const adultPrice = tour?.price || 6900
   const childPrice = tour?.childPrice ?? adultPrice
-  const totalAdultPrice = adults * adultPrice
-  const totalChildPrice = children * childPrice
-  const totalPrice = totalAdultPrice + totalChildPrice
+  const totalAdultPrice = isPrivate ? 0 : adults * adultPrice
+  const totalChildPrice = isPrivate ? 0 : children * childPrice
+  const totalPrice = isPrivate ? adultPrice : totalAdultPrice + totalChildPrice
   const selectedSchedule = tour?.schedules?.find((schedule) => schedule.id === Number(scheduleId))
   const resolvedContact = contactMode === 'yes' ? accountContact : manualContactDraft
   const isAccountMode = contactMode === 'yes'
@@ -158,6 +179,10 @@ export default function BookingInfoPage() {
     setErrors({})
 
     try {
+      const filledTravelers = travelersInfo
+        .map((t) => ({ name: t.name.trim(), isLeadTraveler: t.isLeadTraveler }))
+        .filter((t) => t.name.length > 0)
+
       const payload = {
         scheduleId: Number(scheduleId),
         paxCount: adults + children,
@@ -168,6 +193,7 @@ export default function BookingInfoPage() {
         contactName: sanitizeCustomerName(resolvedContact.name),
         contactEmail: normalizeEmail(resolvedContact.email),
         contactPhone: normalizeThaiPhoneInput(resolvedContact.phone) ?? resolvedContact.phone,
+        travelersInfo: filledTravelers.length > 0 ? filledTravelers : undefined,
       }
 
       const response = await bookingService.createBooking(payload)
@@ -214,11 +240,21 @@ export default function BookingInfoPage() {
             </svg>
             ย้อนกลับ
           </button>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="ui-pressable self-start flex items-center gap-1.5 text-base font-bold text-primary hover:underline md:hidden"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19 3 12m0 0 7-7m-7 7h18" />
+            </svg>
+            ย้อนกลับ
+          </button>
           <ProgressBar currentStep={2} />
         </div>
 
         <div className="mb-8 text-center lg:text-left">
-          <h1 className="text-2xl font-bold text-gray-900">การจองของท่าน</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">การจองของท่าน</h1>
           <p className="mt-2 text-sm text-gray-500">กรุณาตรวจสอบข้อมูลผู้ติดต่อและรายละเอียดการเดินทางก่อนดำเนินการต่อ</p>
         </div>
 
@@ -344,6 +380,65 @@ export default function BookingInfoPage() {
                   <p className="mt-1.5 text-sm text-gray-400">ใช้สำหรับส่งรายละเอียดการจองและใบยืนยัน</p>
                   {errors.email && <p className="mt-1.5 text-sm text-red-500">{errors.email}</p>}
                 </div>
+              </div>
+            </section>
+
+            <section className="ui-surface rounded-[1.75rem] border border-gray-100 bg-white p-6 md:p-8">
+              <div className="mb-4">
+                <h2 className="text-xl font-bold text-gray-900">รายชื่อผู้เดินทาง</h2>
+                <p className="mt-1 text-sm text-gray-500">ระบุชื่อผู้เดินทางทุกท่าน (ไม่บังคับ)</p>
+              </div>
+
+              {isPrivate && (
+                <div className="mb-6 rounded-[1.25rem] border border-gray-200 bg-gray-50 px-4 py-4 sm:px-5">
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-[13px] font-bold text-gray-900 sm:text-sm">กรุณาระบุจำนวนผู้เดินทางจริงเพื่อเตรียมรถ/ที่พัก</span>
+                    <span className="text-xs font-bold text-gray-700 bg-gray-100/50 px-2.5 py-1 rounded-full">{adults + children} ท่าน</span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
+                    <div className="flex items-center justify-between rounded-[1rem] bg-white p-2.5 px-4 shadow-sm border border-gray-100/50">
+                      <div>
+                        <span className="block text-sm font-bold text-slate-700">ผู้ใหญ่</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button type="button" onClick={() => setAdults(Math.max(1, adults - 1))} className="ui-focus-ring flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100 font-bold disabled:opacity-40" disabled={adults <= 1}>−</button>
+                        <span className="w-5 text-center text-sm font-bold text-slate-900">{adults}</span>
+                        <button type="button" onClick={() => { if (adults + children < (tour?.maxPeople || Math.max(tour?.minPeople || 99, 99))) setAdults(adults + 1) }} className="ui-focus-ring flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100 font-bold disabled:opacity-40" disabled={adults + children >= (tour?.maxPeople || Math.max(tour?.minPeople || 99, 99))}>+</button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between rounded-[1rem] bg-white p-2.5 px-4 shadow-sm border border-amber-100/50">
+                      <div>
+                        <span className="block text-sm font-bold text-slate-700">เด็ก</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button type="button" onClick={() => setChildren(Math.max(0, children - 1))} className="ui-focus-ring flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100 font-bold disabled:opacity-40" disabled={children <= 0}>−</button>
+                        <span className="w-5 text-center text-sm font-bold text-slate-900">{children}</span>
+                        <button type="button" onClick={() => { if (adults + children < (tour?.maxPeople || Math.max(tour?.minPeople || 99, 99))) setChildren(children + 1) }} className="ui-focus-ring flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100 font-bold disabled:opacity-40" disabled={adults + children >= (tour?.maxPeople || Math.max(tour?.minPeople || 99, 99))}>+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                {travelersInfo.map((traveler, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <span className="w-20 shrink-0 text-sm font-semibold text-gray-500">
+                      {index < adults ? `ผู้ใหญ่ ${index + 1}` : `เด็ก ${index - adults + 1}`}
+                    </span>
+                    <input
+                      type="text"
+                      className="ui-focus-ring flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition-all placeholder:text-gray-300 focus:border-primary focus:bg-white"
+                      placeholder="ชื่อ-นามสกุล"
+                      value={traveler.name}
+                      onChange={(e) => {
+                        const next = [...travelersInfo]
+                        next[index] = { ...next[index], name: e.target.value }
+                        setTravelersInfo(next)
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
             </section>
 
