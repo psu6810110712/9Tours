@@ -22,6 +22,31 @@ interface FestivalOption {
   name: string
 }
 
+function balanceItemsByLabelLength(items: string[]) {
+  const sorted = [...items].sort((a, b) => {
+    if (b.length !== a.length) {
+      return b.length - a.length
+    }
+    return a.localeCompare(b, 'th')
+  })
+
+  const arranged: string[] = []
+  let left = 0
+  let right = sorted.length - 1
+
+  while (left <= right) {
+    arranged.push(sorted[left])
+    left += 1
+
+    if (left <= right) {
+      arranged.push(sorted[right])
+      right -= 1
+    }
+  }
+
+  return arranged
+}
+
 interface FilterSidebarProps {
   region: string
   province: string
@@ -55,8 +80,8 @@ interface FilterSidebarProps {
 }
 
 /* ─── Shared label style for section headings ─── */
-const sectionLabelClass = 'mb-2.5 block text-xs font-bold text-gray-500'
-const clearBtnClass = 'text-xs font-semibold text-primary hover:text-primary/80 hover:underline transition-colors'
+const sectionLabelClass = 'mb-2.5 block text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400'
+const clearBtnClass = 'text-xs font-semibold text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-dark)]'
 
 /* ─── Custom Select ─── */
 function CustomSelect({
@@ -293,9 +318,18 @@ export default function FilterSidebar({
   }, [availableCategories, categories])
 
   const hasMoreCategories = sortedCategories.length > CATEGORY_VISIBLE_COUNT
-  const visibleCategories = showAllCategories
-    ? sortedCategories
-    : sortedCategories.slice(0, CATEGORY_VISIBLE_COUNT)
+  const visibleCategories = useMemo(() => {
+    const selectedCategories = sortedCategories.filter((category) => categories.includes(category))
+    const unselectedCategories = sortedCategories.filter((category) => !categories.includes(category))
+    const balanced = [
+      ...balanceItemsByLabelLength(selectedCategories),
+      ...balanceItemsByLabelLength(unselectedCategories),
+    ]
+
+    return showAllCategories
+      ? balanced
+      : balanced.slice(0, CATEGORY_VISIBLE_COUNT)
+  }, [categories, showAllCategories, sortedCategories])
   const hiddenCount = Math.max(0, sortedCategories.length - CATEGORY_VISIBLE_COUNT)
 
   const isDrawer = mode === 'drawer'
@@ -445,7 +479,7 @@ export default function FilterSidebar({
               )}
             </div>
 
-            <div className="space-y-1">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
               {visibleCategories.map((category) => {
                 const isSelected = categories.includes(category)
                 return (
@@ -459,7 +493,7 @@ export default function FilterSidebar({
                       onChange={() => onCategoryToggle(category)}
                       className="h-4 w-4 shrink-0 rounded border-gray-300 text-primary accent-[var(--color-primary)] focus:ring-primary/30"
                     />
-                    <span className={`truncate font-medium ${isSelected ? 'text-gray-900' : 'text-gray-600'}`}>{category}</span>
+                    <span className={`min-w-0 leading-snug ${isSelected ? 'font-semibold text-gray-900' : 'font-medium text-gray-600'}`}>{category}</span>
                   </label>
                 )
               })}
@@ -514,16 +548,16 @@ export default function FilterSidebar({
           <div>
             <div className="mb-3 flex items-center justify-between">
               <label className="text-xs font-bold text-gray-500">ช่วงราคา</label>
-              <span className="text-xs font-bold text-gray-700">
+              <span className="rounded-full bg-[var(--color-primary-light)] px-2.5 py-1 text-xs font-bold text-slate-700">
                 ฿{minPrice.toLocaleString()} – ฿{maxPrice.toLocaleString()}
               </span>
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
-              <div className="relative h-6">
-                <div className="absolute left-0 top-1/2 h-1.5 w-full -translate-y-1/2 rounded-full bg-gray-200" />
+            <div className="rounded-[1.35rem] border border-slate-200 bg-gradient-to-b from-white to-slate-50 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+              <div className="relative h-5">
+                <div className="absolute left-0 top-1/2 h-1.5 w-full -translate-y-1/2 rounded-full bg-slate-200" />
                 <div
-                  className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-primary to-amber-400"
+                  className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-[var(--color-primary)] via-sky-400 to-amber-400"
                   style={{ left: `${leftPercent}%`, right: `${rightPercent}%` }}
                 />
                 <input
@@ -533,7 +567,7 @@ export default function FilterSidebar({
                   step={100}
                   value={minPrice}
                   onChange={(event) => onMinPriceChange(Number(event.target.value))}
-                  className="pointer-events-none absolute left-0 top-1/2 h-1.5 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow"
+                  className="pointer-events-none absolute left-0 top-1/2 h-1.5 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-[0_6px_16px_rgba(37,99,235,0.24)]"
                 />
                 <input
                   type="range"
@@ -542,22 +576,23 @@ export default function FilterSidebar({
                   step={100}
                   value={maxPrice}
                   onChange={(event) => onMaxPriceChange(Number(event.target.value))}
-                  className="pointer-events-none absolute left-0 top-1/2 h-1.5 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-500 [&::-webkit-slider-thumb]:shadow"
+                  className="pointer-events-none absolute left-0 top-1/2 h-1.5 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-amber-500 [&::-webkit-slider-thumb]:shadow-[0_6px_16px_rgba(245,158,11,0.24)]"
                 />
               </div>
 
-              <div className="mt-3 flex items-center justify-between text-[11px] font-medium text-gray-400">
+              <div className="hidden">
                 <span>ต่ำสุด {priceBounds.min.toLocaleString()} ฿</span>
                 <span>สูงสุด {priceBounds.max.toLocaleString()} ฿</span>
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-2.5">
+              <div className="mt-4 grid grid-cols-2 gap-2.5">
                 <label className="block">
                   <span className="mb-1.5 block text-[11px] font-semibold text-gray-500">ราคาต่ำสุด</span>
                   <input
                     type="text"
                     inputMode="numeric"
                     value={minPriceInput}
+                    placeholder={priceBounds.min.toLocaleString()}
                     onChange={(event) => setMinPriceInput(event.target.value.replace(/[^\d]/g, ''))}
                     onBlur={commitMinPriceInput}
                     onKeyDown={(event) => {
@@ -565,7 +600,7 @@ export default function FilterSidebar({
                         event.currentTarget.blur()
                       }
                     }}
-                    className="ui-focus-ring h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 outline-none transition-colors focus:border-primary"
+                    className="ui-focus-ring h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-700 outline-none transition-colors focus:border-[var(--color-primary)] focus:bg-white"
                   />
                 </label>
 
@@ -575,6 +610,7 @@ export default function FilterSidebar({
                     type="text"
                     inputMode="numeric"
                     value={maxPriceInput}
+                    placeholder={priceBounds.max.toLocaleString()}
                     onChange={(event) => setMaxPriceInput(event.target.value.replace(/[^\d]/g, ''))}
                     onBlur={commitMaxPriceInput}
                     onKeyDown={(event) => {
@@ -582,7 +618,7 @@ export default function FilterSidebar({
                         event.currentTarget.blur()
                       }
                     }}
-                    className="ui-focus-ring h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 outline-none transition-colors focus:border-primary"
+                    className="ui-focus-ring h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-700 outline-none transition-colors focus:border-[var(--color-primary)] focus:bg-white"
                   />
                 </label>
               </div>

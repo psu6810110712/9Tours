@@ -98,9 +98,9 @@ function measureScrollAmount(
 }
 
 const GAP_PX = 16
-const PLACE_CARD_NARROW = 180
+const PLACE_CARD_NARROW = 184
 const PLACE_CARD_WIDE = 260
-const TOUR_CARD_NARROW = 180
+const TOUR_CARD_NARROW = 224
 const TOUR_CARD_WIDE = 230
 const SCROLL_REDUCTION_RATIO = 0.2
 
@@ -119,7 +119,7 @@ interface RailHeaderProps {
 function RailHeader({ title, linkTo, linkLabel = 'ดูทั้งหมด' }: RailHeaderProps) {
   return (
     <div className="mb-4 flex items-center justify-between gap-4">
-      <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">{title}</h2>
+      <h2 className="text-lg font-bold tracking-[-0.02em] text-gray-900 sm:text-2xl">{title}</h2>
       {linkTo ? (
         <Link
           to={linkTo}
@@ -141,15 +141,43 @@ interface RailShellProps {
   onNext: () => void
   className?: string
   showFade?: boolean
+  showMobileArrows?: boolean
 }
 
-function RailShell({ children, scrollRef, canScrollLeft, canScrollRight, onPrev, onNext, className = '', showFade = false }: RailShellProps) {
+function RailShell({
+  children,
+  scrollRef,
+  canScrollLeft,
+  canScrollRight,
+  onPrev,
+  onNext,
+  className = '',
+  showFade = false,
+  showMobileArrows = false,
+}: RailShellProps) {
+  const [showArrows, setShowArrows] = useState(() => (
+    typeof window === 'undefined' ? true : (window.innerWidth >= 768 || showMobileArrows)
+  ))
+
+  useEffect(() => {
+    const updateArrowVisibility = () => {
+      setShowArrows(window.innerWidth >= 768 || showMobileArrows)
+    }
+
+    updateArrowVisibility()
+    window.addEventListener('resize', updateArrowVisibility)
+
+    return () => {
+      window.removeEventListener('resize', updateArrowVisibility)
+    }
+  }, [showMobileArrows])
+
   return (
     <div className="relative">
       <div
         ref={scrollRef}
-        className={`scrollbar-hide flex gap-4 overflow-x-auto px-1 py-2 scroll-smooth ${className}`.trim()}
-        style={{ scrollPaddingInline: '1rem' }}
+        className={`scrollbar-hide flex gap-4 overflow-x-auto px-0.5 py-2 pr-6 scroll-smooth sm:px-1 sm:pr-1 ${className}`.trim()}
+        style={{ scrollPaddingInline: '0.875rem' }}
       >
         {children}
       </div>
@@ -157,18 +185,18 @@ function RailShell({ children, scrollRef, canScrollLeft, canScrollRight, onPrev,
       {showFade && canScrollLeft && <div className="ui-rail-fade-left" />}
       {showFade && canScrollRight && <div className="ui-rail-fade-right" />}
 
-      {canScrollLeft && (
+      {showArrows && canScrollLeft && (
         <ScrollerArrowButton
           direction="left"
           onClick={onPrev}
-          className="absolute left-4 top-1/2 z-10 h-10 w-10 -translate-y-1/2"
+          className={`absolute top-1/2 z-10 -translate-y-1/2 ${showMobileArrows ? 'left-2 h-8 w-8 sm:left-4 sm:h-10 sm:w-10' : 'left-4 h-10 w-10'}`}
         />
       )}
-      {canScrollRight && (
+      {showArrows && canScrollRight && (
         <ScrollerArrowButton
           direction="right"
           onClick={onNext}
-          className="absolute right-4 top-1/2 z-10 h-10 w-10 -translate-y-1/2"
+          className={`absolute top-1/2 z-10 -translate-y-1/2 ${showMobileArrows ? 'right-2 h-8 w-8 sm:right-4 sm:h-10 sm:w-10' : 'right-4 h-10 w-10'}`}
         />
       )}
     </div>
@@ -288,40 +316,52 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-3 pt-3 sm:px-6 sm:pt-6 lg:px-8">
         <section
-          className="relative overflow-hidden rounded-[2rem]"
+          className="ui-home-hero relative overflow-hidden rounded-[2rem] border border-white/25 shadow-[0_24px_60px_rgba(15,23,42,0.16)] sm:rounded-[2.5rem]"
           style={{ backgroundImage: 'url(/hero-bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
         >
-          <div className="absolute inset-0 bg-black/30" />
-          <div className="relative z-10 px-5 py-12 text-center text-white sm:px-8 sm:py-14 lg:px-12 lg:py-16">
-            <div className="mx-auto max-w-3xl">
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,15,34,0.12)_0%,rgba(8,15,34,0.34)_42%,rgba(8,15,34,0.62)_100%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(180deg,rgba(8,15,34,0)_0%,rgba(8,15,34,0.18)_40%,rgba(8,15,34,0.42)_100%)]" />
+          <div className="relative z-10 px-4 py-8 text-center text-white sm:px-8 sm:py-14 lg:px-12 lg:py-16">
+            <div className="ui-home-hero-copy mx-auto max-w-[18.5rem] sm:max-w-3xl">
               <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">เลือกสไตล์ที่ชอบ แล้วหาทริปที่ใช่</h1>
             </div>
 
 
-            <div className="mx-auto mt-4 max-w-3xl text-center text-white">
-              <p className="mt-10 text-sm font-semibold text-white/90 sm:text-[24px]">กำลังมองหาทริปแนวไหนอยู่? เลือกแล้วกดค้นหาเลย</p>
+            <div className="ui-home-hero-subcopy mx-auto mt-4 max-w-[18.5rem] text-center text-white sm:max-w-3xl">
+              <p className="mt-10 text-sm font-semibold text-white/90 sm:text-[24px]">มองหาทริปแนวไหนอยู่? เลือกแล้วกดค้นหาเลย</p>
             </div>
 
-            <div className="mx-auto mt-4 flex max-w-4xl flex-wrap justify-center gap-3">
-              {heroCategories.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  aria-pressed={selectedCats.has(category)}
-                  onClick={() => toggleCategory(category)}
-                  className={`ui-pressable rounded-full px-5 py-2.5 text-sm font-semibold sm:px-6 sm:text-[15px] ${selectedCats.has(category)
-                    ? 'bg-[var(--color-accent)] text-white shadow-[0_10px_22px_rgba(245,166,35,0.22)]'
-                    : 'bg-white/90 text-gray-700 shadow-[0_8px_18px_rgba(15,23,42,0.08)] hover:bg-[rgba(245,166,35,0.85)] hover:text-white hover:shadow-[0_10px_20px_rgba(245,166,35,0.18)]'
-                    }`}
-                >
-                  {category}
-                </button>
-              ))}
+            <div className="mx-auto mt-4 w-full max-w-full sm:mt-4 sm:max-w-4xl">
+              <div className="relative">
+                <div className="scrollbar-hide flex w-full flex-nowrap justify-start gap-1.5 overflow-x-auto pb-1 pr-8 sm:flex-wrap sm:justify-center sm:gap-3 sm:overflow-visible sm:pr-0 sm:pb-0">
+                  {heroCategories.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      aria-pressed={selectedCats.has(category)}
+                      onClick={() => toggleCategory(category)}
+                      className={`ui-pressable inline-flex min-h-[36px] shrink-0 items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold sm:min-h-0 sm:px-6 sm:py-2.5 sm:text-[15px] ${selectedCats.has(category)
+                        ? 'bg-[var(--color-accent)] text-white shadow-[0_12px_24px_rgba(245,166,35,0.24)]'
+                        : 'bg-white/92 text-gray-700 shadow-[0_8px_18px_rgba(15,23,42,0.1)] hover:bg-[rgba(245,166,35,0.85)] hover:text-white hover:shadow-[0_10px_20px_rgba(245,166,35,0.18)]'
+                        }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-1.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-white/78 sm:hidden">
+                <span className="h-1.5 w-1.5 rounded-full bg-white/85" />
+                <span>เลื่อนดูหมวดหมู่เพิ่มเติม</span>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m9 6 6 6-6 6" />
+                </svg>
+              </div>
             </div>
 
-            <div className="mt-6">
+            <div className="mx-auto mt-4 max-w-4xl sm:mt-6">
               <SearchBar
                 search={search}
                 setSearch={setSearch}
@@ -342,8 +382,8 @@ export default function HomePage() {
         </section>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <section className="mb-10">
+      <div className="mx-auto max-w-7xl px-3 py-6 sm:px-6 sm:py-10 lg:px-8">
+        <section className="mb-8 sm:mb-10">
           <RailHeader title="สถานที่ยอดนิยม" />
           <RailShell
             scrollRef={placeScrollRef}
@@ -352,6 +392,7 @@ export default function HomePage() {
             onPrev={() => scrollRow(placeScrollRef, -getPlaceScrollAmount(placeScrollRef))}
             onNext={() => scrollRow(placeScrollRef, getPlaceScrollAmount(placeScrollRef))}
             className="pb-3"
+            showMobileArrows
           >
             {PLACES.map((place) => {
               const isSelected = selectedPlace.name === place.name
@@ -362,7 +403,7 @@ export default function HomePage() {
                   type="button"
                   aria-pressed={isSelected}
                   onClick={() => handlePlaceSelect(place)}
-                  className={`group relative h-25 w-[180px] flex-shrink-0 overflow-hidden rounded-[1.2rem] border-2 text-left transition-all sm:h-40 sm:w-[220px] lg:h-44 lg:w-[260px] ${isSelected
+                  className={`group relative h-[108px] w-[184px] flex-shrink-0 overflow-hidden rounded-[1.2rem] border-2 text-left transition-all sm:h-40 sm:w-[220px] sm:rounded-[1.2rem] lg:h-44 lg:w-[260px] ${isSelected
                     ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] shadow-[0_12px_28px_rgba(37,99,235,0.18)]'
                     : 'border-transparent bg-white/80 opacity-95 hover:border-white hover:opacity-100 hover:shadow-[0_10px_24px_rgba(15,23,42,0.10)]'
                     }`}
@@ -373,8 +414,8 @@ export default function HomePage() {
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className={`absolute inset-0 ${isSelected ? 'bg-gradient-to-t from-black/55 via-black/10 to-transparent' : 'bg-gradient-to-t from-black/60 via-black/15 to-transparent'}`} />
-                  <div className="absolute inset-x-4 bottom-4 text-white">
-                    <p className="text-lg font-bold">{place.name}</p>
+                  <div className="absolute inset-x-3 bottom-3 text-white sm:inset-x-4 sm:bottom-4">
+                    <p className="text-[0.95rem] font-bold tracking-[-0.02em] sm:text-lg">{place.name}</p>
                   </div>
                 </button>
               )
@@ -382,7 +423,7 @@ export default function HomePage() {
           </RailShell>
         </section>
 
-        <section ref={resultsSectionRef} className="mb-10 scroll-mt-24">
+        <section ref={resultsSectionRef} className="mb-8 scroll-mt-24 sm:mb-10">
           <RailHeader title={sectionTitle} linkTo={selectedPlace.province ? `/tours?province=${selectedPlace.province}` : '/tours'} />
 
           {toursLoading ? (
@@ -390,17 +431,18 @@ export default function HomePage() {
           ) : displayedTours.length === 0 ? (
             <div className="ui-surface rounded-[1.5rem] px-6 py-14 text-center text-gray-400">{emptyStateMessage}</div>
           ) : (
-            <RailShell
-              scrollRef={tourScrollRef}
-              canScrollLeft={popularRail.canScrollLeft}
-              canScrollRight={popularRail.canScrollRight}
-              onPrev={() => scrollRow(tourScrollRef, -getTourScrollAmount(tourScrollRef))}
-              onNext={() => scrollRow(tourScrollRef, getTourScrollAmount(tourScrollRef))}
-              className="pb-2"
-              showFade
-            >
+          <RailShell
+            scrollRef={tourScrollRef}
+            canScrollLeft={popularRail.canScrollLeft}
+            canScrollRight={popularRail.canScrollRight}
+            onPrev={() => scrollRow(tourScrollRef, -getTourScrollAmount(tourScrollRef))}
+            onNext={() => scrollRow(tourScrollRef, getTourScrollAmount(tourScrollRef))}
+            className="pb-2"
+            showFade
+            showMobileArrows
+          >
               {displayedTours.map((tour) => (
-                <div key={tour.id} className="w-[180px] flex-shrink-0 sm:w-[260px]">
+                <div key={tour.id} className="w-[224px] flex-shrink-0 sm:w-[260px]">
                   <TourCard tour={tour} isFavorite={isFavorite(tour.id)} onToggleFavorite={toggleFavorite} />
                 </div>
               ))}
@@ -425,9 +467,10 @@ export default function HomePage() {
                 onNext={() => scrollRow(recommendationScrollRef, getTourScrollAmount(recommendationScrollRef))}
                 className="pb-2"
                 showFade
+                showMobileArrows
               >
                 {recommendedTours.map((tour) => (
-                  <div key={tour.id} className="w-[180px] flex-shrink-0 sm:w-[260px]">
+                  <div key={tour.id} className="w-[224px] flex-shrink-0 sm:w-[260px]">
                     <TourCard tour={tour} isFavorite={isFavorite(tour.id)} onToggleFavorite={toggleFavorite} />
                   </div>
                 ))}

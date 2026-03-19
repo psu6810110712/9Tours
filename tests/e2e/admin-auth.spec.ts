@@ -12,7 +12,12 @@ async function loginSeededAdmin(page: Page) {
     },
   })
 
-  expect(response.ok()).toBeTruthy()
+  if (!response.ok()) {
+    const errorText = await response.text()
+    console.error('Login failed:', response.status(), errorText)
+  }
+  
+  expect(response.ok(), `Login should succeed, got ${response.status()}: ${await response.text()}`).toBeTruthy()
   return response.json() as Promise<{ access_token: string }>
 }
 
