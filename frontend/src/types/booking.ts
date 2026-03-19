@@ -1,5 +1,27 @@
-﻿import type { User } from './user'
+import type { User } from './user'
 import type { CustomerPrefix } from '../utils/profileValidation'
+
+export interface PaymentVerificationPartySummary {
+  name?: string | null
+  bank?: string | null
+  account?: string | null
+}
+
+export interface PaymentVerificationRawNormalized {
+  parties?: {
+    sender?: PaymentVerificationPartySummary | null
+    receiver?: PaymentVerificationPartySummary | null
+  } | null
+  transaction?: {
+    dateTime?: string | null
+    amount?: number | string | null
+    reference?: string | null
+  } | null
+}
+
+export type PaymentVerificationRaw = Record<string, unknown> & {
+  normalized?: PaymentVerificationRawNormalized | null
+}
 
 export interface Payment {
   id: number
@@ -16,7 +38,7 @@ export interface Payment {
   verifiedAt?: string | null
   verificationProvider?: string | null
   verificationMessage?: string | null
-  verificationRaw?: Record<string, unknown> | null
+  verificationRaw?: PaymentVerificationRaw | null
 }
 
 export interface PaymentQr {

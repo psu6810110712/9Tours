@@ -4,6 +4,8 @@ import type { Review } from '../../types/review'
 import StarRating from './StarRating'
 
 const PAGE_SIZE = 10
+const INITIAL_VISIBLE_REVIEWS = 4
+const LOAD_MORE_VISIBLE_STEP = 4
 
 interface ReviewListProps {
   tourId: number
@@ -29,11 +31,13 @@ export default function ReviewList({ tourId }: ReviewListProps) {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_REVIEWS)
 
   useEffect(() => {
     let cancelled = false
     setLoading(true)
     setReviews([])
+    setVisibleCount(INITIAL_VISIBLE_REVIEWS)
 
     reviewService.getReviews(tourId, PAGE_SIZE, 0)
       .then(({ data, total: t }) => {
@@ -51,10 +55,18 @@ export default function ReviewList({ tourId }: ReviewListProps) {
   }, [tourId])
 
   const handleLoadMore = async () => {
+    const nextVisibleCount = visibleCount + LOAD_MORE_VISIBLE_STEP
+
+    if (nextVisibleCount <= reviews.length || reviews.length >= total) {
+      setVisibleCount(nextVisibleCount)
+      return
+    }
+
     setLoadingMore(true)
     try {
       const { data } = await reviewService.getReviews(tourId, PAGE_SIZE, reviews.length)
       setReviews((prev) => [...prev, ...data])
+      setVisibleCount(nextVisibleCount)
     } catch {
       // silent
     } finally {
@@ -62,7 +74,8 @@ export default function ReviewList({ tourId }: ReviewListProps) {
     }
   }
 
-  const hasMore = reviews.length < total
+  const visibleReviews = reviews.slice(0, visibleCount)
+  const hasMore = visibleCount < total
 
   return (
     <section className="ui-surface mb-5 rounded-[1.5rem] border border-gray-100 bg-white p-6">
@@ -84,7 +97,7 @@ export default function ReviewList({ tourId }: ReviewListProps) {
         </div>
       ) : (
         <div className="space-y-4">
-          {reviews.map((review) => (
+          {visibleReviews.map((review) => (
             <div key={review.id} className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -102,7 +115,7 @@ export default function ReviewList({ tourId }: ReviewListProps) {
                 <StarRating value={review.rating} readonly size="sm" />
               </div>
 
-              <p className="mt-2 text-sm leading-6 text-gray-700 whitespace-pre-line">{review.comment}</p>
+              <p className="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">{review.comment}</p>
             </div>
           ))}
 
@@ -114,7 +127,7 @@ export default function ReviewList({ tourId }: ReviewListProps) {
                 disabled={loadingMore}
                 className="ui-focus-ring rounded-full border border-gray-200 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
-                {loadingMore ? 'กำลังโหลด...' : 'โหลดเพิ่มเติม'}
+                {loadingMore ? 'กำลังโหลด...' : 'ดูเพิ่มเติม'}
               </button>
             </div>
           )}

@@ -4,6 +4,7 @@ import Modal from '../../components/common/Modal'
 import { adminService } from '../../services/adminService'
 import { bookingService } from '../../services/bookingService'
 import type { Booking } from '../../types/booking'
+import { buildVerificationDetails } from '../../utils/paymentVerification'
 import { buildDisplayName } from '../../utils/profileValidation'
 
 const FILTER_TABS = [
@@ -26,14 +27,6 @@ const SORT_OPTIONS = [
 type FilterValue = (typeof FILTER_TABS)[number]['value']
 type SortValue = (typeof SORT_OPTIONS)[number]['value']
 type VerificationTone = 'green' | 'yellow' | 'red' | 'gray'
-type VerificationDetailItem = {
-  label: string
-  value: string
-}
-type VerificationDetailSection = {
-  title: string
-  items: VerificationDetailItem[]
-}
 
 function getBookingContactName(booking: Booking) {
   return buildDisplayName(
@@ -136,170 +129,6 @@ function getStatusBadge(status: string) {
 function getSortParts(sortValue: SortValue) {
   const [key, direction] = sortValue.split('-') as [string, 'asc' | 'desc']
   return { key, direction }
-}
-
-function getNestedRecord(value: unknown): Record<string, unknown> | null {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return null
-  }
-
-  return value as Record<string, unknown>
-}
-
-function formatVerificationValue(value: unknown) {
-  if (value === null || value === undefined || value === '') return '-'
-  if (typeof value === 'number') return value.toLocaleString('th-TH')
-  if (typeof value === 'boolean') return value ? 'ใช่' : 'ไม่ใช่'
-  return String(value)
-}
-
-function formatVerificationDateTime(value: unknown) {
-  if (!value) return '-'
-
-  const raw = String(value).trim()
-  const parsed = new Date(raw)
-  if (Number.isNaN(parsed.getTime())) {
-    return raw
-  }
-
-  return parsed.toLocaleString('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  })
-}
-
-function pickFirstValue(...values: unknown[]) {
-  return values.find((value) => value !== null && value !== undefined && value !== '')
-}
-
-function buildVerificationDetails(raw: unknown): VerificationDetailSection[] {
-  const record = getNestedRecord(raw)
-  if (!record) return []
-
-  const data = getNestedRecord(record.data)
-  const sender = getNestedRecord(data?.sender)
-  const receiver = getNestedRecord(data?.receiver)
-  const transactionItems: VerificationDetailItem[] = []
-  const partyItems: VerificationDetailItem[] = []
-  const referenceItems: VerificationDetailItem[] = []
-  const extraItems: VerificationDetailItem[] = []
-
-  const pushIfPresent = (
-    items: VerificationDetailItem[],
-    label: string,
-    value: unknown,
-    formatter?: (input: unknown) => string,
-  ) => {
-    if (value === null || value === undefined || value === '') return
-    items.push({
-      label,
-      value: formatter ? formatter(value) : formatVerificationValue(value),
-    })
-  }
-
-  pushIfPresent(
-    transactionItems,
-    'สถานะจาก API',
-    record.message,
-  )
-  pushIfPresent(
-    transactionItems,
-    'เวลาโอน',
-    pickFirstValue(data?.dateTime, data?.transDate, data?.transactionDateTime),
-    formatVerificationDateTime,
-  )
-  pushIfPresent(
-    transactionItems,
-    'จำนวนเงินที่ตรวจได้',
-    data?.amount,
-    (value) => `${formatVerificationValue(value)} บาท`,
-  )
-  pushIfPresent(
-    transactionItems,
-    'ค่าธรรมเนียม',
-    pickFirstValue(data?.fee, data?.feeAmount),
-    (value) => `${formatVerificationValue(value)} บาท`,
-  )
-  pushIfPresent(
-    transactionItems,
-    'รหัสผลตรวจ',
-    record.code,
-  )
-
-  pushIfPresent(
-    partyItems,
-    'ชื่อผู้โอน',
-    pickFirstValue(
-      sender?.displayName,
-      sender?.name,
-      data?.senderName,
-      data?.payerName,
-      data?.fromName,
-    ),
-  )
-  pushIfPresent(
-    partyItems,
-    'ธนาคารผู้โอน',
-    pickFirstValue(sender?.bank, sender?.bankName),
-  )
-  pushIfPresent(
-    partyItems,
-    'บัญชีผู้โอน',
-    pickFirstValue(sender?.account, sender?.accountNo, sender?.accountNumber),
-  )
-  pushIfPresent(
-    partyItems,
-    'ชื่อผู้รับ',
-    pickFirstValue(
-      receiver?.displayName,
-      receiver?.name,
-      data?.receiverName,
-      data?.payeeName,
-      data?.toName,
-    ),
-  )
-  pushIfPresent(
-    partyItems,
-    'ธนาคารผู้รับ',
-    pickFirstValue(receiver?.bank, receiver?.bankName),
-  )
-  pushIfPresent(
-    partyItems,
-    'บัญชีผู้รับ',
-    pickFirstValue(receiver?.account, receiver?.accountNo, receiver?.accountNumber),
-  )
-
-  pushIfPresent(
-    referenceItems,
-    'เลขอ้างอิงธุรกรรม',
-    pickFirstValue(
-      data?.transRef,
-      data?.transactionId,
-      data?.referenceId,
-    ),
-  )
-  pushIfPresent(referenceItems, 'Ref 1', data?.ref1)
-  pushIfPresent(referenceItems, 'Ref 2', data?.ref2)
-  pushIfPresent(referenceItems, 'Ref 3', data?.ref3)
-
-  const decode = typeof data?.decode === 'string' ? data.decode.replace(/\s+/g, ' ').trim() : ''
-  if (decode) {
-    extraItems.push({
-      label: 'ข้อมูลจาก QR',
-      value: decode.length > 160 ? `${decode.slice(0, 160)}...` : decode,
-    })
-  }
-
-  return [
-    { title: 'ข้อมูลธุรกรรม', items: transactionItems },
-    { title: 'ผู้โอนและผู้รับ', items: partyItems },
-    { title: 'เลขอ้างอิง', items: referenceItems },
-    { title: 'ข้อมูลเพิ่มเติม', items: extraItems },
-  ].filter((section) => section.items.length > 0)
 }
 
 export default function AdminBookings() {

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { attachSlipVerificationNormalization } from './slip2go-normalizer';
 
 export type PaymentVerificationStatus =
   | 'pending'
@@ -23,7 +24,7 @@ export interface EasySlipVerificationResult {
 interface Slip2GoResponsePayload {
   code?: string;
   message?: string;
-  data?: {
+  data?: Record<string, unknown> & {
     referenceId?: string;
     decode?: string;
     transRef?: string;
@@ -100,7 +101,7 @@ export class EasySlipService {
             ?? responsePayload.data.referenceId
             ?? null,
           verifiedAt: this.extractVerifiedAt(responsePayload.data.dateTime),
-          raw: responsePayload,
+          raw: attachSlipVerificationNormalization(responsePayload),
         };
       }
 
@@ -118,7 +119,7 @@ export class EasySlipService {
           ?? responsePayload.data?.referenceId
           ?? null,
         verifiedAt: null,
-        raw: responsePayload,
+        raw: attachSlipVerificationNormalization(responsePayload),
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

@@ -1,14 +1,11 @@
-import { readFile } from 'node:fs/promises';
 import { ConfigService } from '@nestjs/config';
 import { EasySlipService } from './easyslip.service';
 
-jest.mock('node:fs/promises', () => ({
-  readFile: jest.fn(),
-}));
-
 describe('EasySlipService', () => {
-  const mockedReadFile = jest.mocked(readFile);
   const originalFetch = global.fetch;
+  const fileBuffer = Buffer.from('slip-image');
+  const fileName = 'mock.png';
+  const mimeType = 'image/png';
 
   const createService = () => new EasySlipService({
     get: jest.fn((key: string) => {
@@ -17,16 +14,6 @@ describe('EasySlipService', () => {
       return undefined;
     }),
   } as unknown as ConfigService);
-
-  const file = {
-    path: 'uploads/slips/mock.png',
-    filename: 'mock.png',
-    mimetype: 'image/png',
-  } as Express.Multer.File;
-
-  beforeEach(() => {
-    mockedReadFile.mockResolvedValue(Buffer.from('slip-image'));
-  });
 
   afterEach(() => {
     jest.resetAllMocks();
@@ -47,14 +34,25 @@ describe('EasySlipService', () => {
       headers: { 'Content-Type': 'application/json' },
     })) as typeof fetch;
 
-    const result = await createService().verifySlip(file);
+    const result = await createService().verifySlip(fileBuffer, fileName, mimeType);
 
     expect(result.status).toBe('verified');
     expect(result.verifiedAmount).toBe(1);
     expect(result.verifiedTransRef).toBe('TX-001');
+    expect(result.raw?.normalized).toEqual({
+      parties: {
+        sender: { name: null, bank: null, account: null },
+        receiver: { name: null, bank: null, account: null },
+      },
+      transaction: {
+        dateTime: '2026-03-15T14:32:00.000Z',
+        amount: 1,
+        reference: 'TX-001',
+      },
+    });
   });
 
-  it('treats readable slips marked as valid as verified even when the provider code is different', async () => {
+  it('treats readable slips marked as valid as verified and appends normalized details', async () => {
     global.fetch = jest.fn().mockResolvedValue(new Response(JSON.stringify({
       code: '201000',
       message: 'Slip is valid.',
@@ -62,18 +60,39 @@ describe('EasySlipService', () => {
         amount: 1,
         referenceId: 'A22fe667943bb4510',
         dateTime: '2026-03-15T14:32:00.000Z',
+        sender: {
+          displayName: { th: 'นายใจดี' },
+          bank: { th: 'กสิกรไทย' },
+          account: { value: '123-4-56789-0' },
+        },
+        receiver: {
+          name: { en: 'Nine Tours' },
+          bankName: { en: 'Bangkok Bank' },
+          accountNumber: { value: '987-6-54321-0' },
+        },
       },
     }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     })) as typeof fetch;
 
-    const result = await createService().verifySlip(file);
+    const result = await createService().verifySlip(fileBuffer, fileName, mimeType);
 
     expect(result.status).toBe('verified');
     expect(result.verifiedAmount).toBe(1);
     expect(result.verifiedTransRef).toBe('A22fe667943bb4510');
-    expect(result.message).toBe('Slip is valid.');
+    expect(result.message).toBe('ตรวจสลิปผ่าน');
+    expect(result.raw?.normalized).toEqual({
+      parties: {
+        sender: { name: 'นายใจดี', bank: 'กสิกรไทย', account: '123-4-56789-0' },
+        receiver: { name: 'Nine Tours', bank: 'Bangkok Bank', account: '987-6-54321-0' },
+      },
+      transaction: {
+        dateTime: '2026-03-15T14:32:00.000Z',
+        amount: 1,
+        reference: 'A22fe667943bb4510',
+      },
+    });
   });
 
   it('still keeps duplicate slips as duplicate', async () => {
@@ -89,8 +108,19 @@ describe('EasySlipService', () => {
       headers: { 'Content-Type': 'application/json' },
     })) as typeof fetch;
 
-    const result = await createService().verifySlip(file);
+    const result = await createService().verifySlip(fileBuffer, fileName, mimeType);
 
     expect(result.status).toBe('duplicate');
+    expect(result.raw?.normalized).toEqual({
+      parties: {
+        sender: { name: null, bank: null, account: null },
+        receiver: { name: null, bank: null, account: null },
+      },
+      transaction: {
+        dateTime: null,
+        amount: 1,
+        reference: 'TX-USED',
+      },
+    });
   });
 });
