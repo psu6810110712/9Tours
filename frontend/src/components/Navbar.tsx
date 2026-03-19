@@ -111,7 +111,7 @@ export default function Navbar() {
 
   const navShellClass = isAdmin
     ? 'fixed inset-x-0 top-0 z-[var(--z-navbar)] border-b border-slate-800/80 bg-slate-800 text-white'
-    : 'sticky top-0 z-[var(--z-navbar)] border-b border-gray-200/90 bg-white/95 backdrop-blur'
+    : 'sticky top-0 z-[var(--z-navbar)] border-b border-gray-200/80 bg-white/95 shadow-[0_10px_30px_rgba(15,23,42,0.05)] backdrop-blur-xl'
 
   const logoTarget = isAdmin ? '/admin/dashboard' : '/'
   const desktopLinks = isAdmin ? ADMIN_LINKS : NAV_LINKS
@@ -120,9 +120,9 @@ export default function Navbar() {
   return (
     <>
       <nav className={navShellClass}>
-        <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-[74px] max-w-7xl items-center gap-2.5 px-3.5 sm:h-[68px] sm:gap-4 sm:px-6 lg:px-8">
           <Link to={logoTarget} className="flex min-w-0 items-center">
-            <img src="/logo.png" alt="9Tours" className="h-14 w-auto sm:h-16" />
+            <img src="/logo.png" alt="9Tours" className="h-11 w-auto sm:h-16" />
           </Link>
 
           <div className="hidden items-center gap-2 text-[15px] md:flex">
@@ -146,14 +146,14 @@ export default function Navbar() {
             })}
           </div>
 
-          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
             {user ? (
               <>
                 {user.role === 'customer' && user.profileCompleted ? (
                   <>
                     <Link
                       to="/favorites"
-                      className={`ui-focus-ring ui-pressable relative inline-flex items-center justify-center rounded-2xl border p-1.5 transition-colors ${
+                      className={`ui-focus-ring ui-pressable relative inline-flex h-10 w-10 items-center justify-center rounded-[1.1rem] border p-0 transition-colors sm:h-auto sm:w-auto sm:rounded-2xl sm:p-1.5 ${
                         pathname === '/favorites'
                           ? 'border-red-200 bg-red-50 text-red-500'
                           : 'border-transparent text-gray-400 hover:border-red-100 hover:bg-red-50 hover:text-red-500'
@@ -167,7 +167,7 @@ export default function Navbar() {
                     <Link
                       to="/my-bookings"
                       aria-label="การจองของฉัน"
-                      className={`ui-focus-ring ui-pressable inline-flex items-center rounded-2xl border p-2 text-[13px] text-gray-500 transition-colors sm:text-[15px] ${
+                      className={`ui-focus-ring ui-pressable inline-flex h-10 w-10 items-center justify-center rounded-[1.1rem] border p-0 text-[13px] text-gray-500 transition-colors sm:h-auto sm:w-auto sm:rounded-2xl sm:p-2 sm:text-[15px] ${
                         pathname === '/my-bookings'
                           ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)]/60 text-[var(--color-primary)]'
                           : 'border-transparent hover:border-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/60 hover:text-[var(--color-primary)]'
@@ -198,13 +198,13 @@ export default function Navbar() {
                     type="button"
                     onClick={() => setMenuOpen((prev) => !prev)}
                     aria-expanded={menuOpen}
-                    className={`ui-focus-ring ui-pressable flex items-center gap-2 rounded-full border px-1.5 py-1 text-sm font-medium transition-colors ${
+                    className={`ui-focus-ring ui-pressable flex h-10 min-w-[2.5rem] items-center justify-center gap-0 rounded-[1.1rem] border px-0.5 py-0 text-sm font-medium transition-colors md:h-auto md:min-w-0 md:gap-2 md:rounded-full md:px-1.5 md:py-1 ${
                       isAdmin
                         ? 'border-white/10 bg-white/6 text-white hover:border-white/20 hover:bg-white/10'
-                        : 'border-transparent text-gray-700 hover:border-gray-200 hover:bg-gray-50 hover:text-gray-900'
+                        : 'border-gray-200/80 bg-white/88 text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900 md:border-transparent md:bg-transparent'
                     }`}
                   >
-                    <span className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold shadow-sm ${
+                    <span className={`flex h-[2.125rem] w-[2.125rem] items-center justify-center rounded-full text-sm font-bold shadow-sm md:h-9 md:w-9 ${
                       isAdmin ? 'bg-white text-slate-900' : 'bg-[var(--color-primary)] text-white'
                     }`}>
                       {avatarLabel}
@@ -254,7 +254,7 @@ export default function Navbar() {
                   setModalError('')
                   setModal('login')
                 }}
-                className="ui-focus-ring ui-pressable rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-primary-dark)] sm:px-5"
+                className="ui-focus-ring ui-pressable rounded-[1rem] bg-[var(--color-primary)] px-3.5 py-2.5 text-[13px] font-semibold text-white shadow-[0_12px_24px_rgba(37,99,235,0.2)] hover:bg-[var(--color-primary-dark)] sm:rounded-xl sm:px-5 sm:text-sm sm:shadow-none"
               >
                 เข้าสู่ระบบ
               </button>
@@ -265,10 +265,10 @@ export default function Navbar() {
               aria-label={mobileMenuOpen ? 'ปิดเมนูนำทาง' : 'เปิดเมนูนำทาง'}
               aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className={`ui-focus-ring ui-pressable flex h-11 w-11 items-center justify-center rounded-2xl border md:hidden ${
+              className={`ui-focus-ring ui-pressable flex h-10 w-10 items-center justify-center rounded-[1.1rem] border md:hidden ${
                 isAdmin
                   ? 'border-white/10 bg-white/6 text-white hover:border-white/20 hover:bg-white/10'
-                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                  : 'border-gray-200/80 bg-white/88 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
               }`}
             >
               {mobileMenuOpen ? (
@@ -295,9 +295,9 @@ export default function Navbar() {
           onClick={() => setMobileMenuOpen(false)}
         />
         <aside
-          className={`absolute right-0 top-0 flex h-full w-[min(20rem,85vw)] flex-col border-l border-gray-200 bg-white shadow-[-8px_0_30px_rgba(15,23,42,0.12)] transition-transform duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          className={`absolute right-0 top-0 flex h-full w-[min(20rem,85vw)] flex-col border-l border-gray-200 bg-white/98 shadow-[-8px_0_30px_rgba(15,23,42,0.12)] backdrop-blur-xl transition-transform duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
-          <div className="flex h-[68px] items-center justify-between border-b border-gray-100 px-5">
+          <div className="flex h-[74px] items-center justify-between border-b border-gray-100 px-5">
             <span className="text-base font-bold text-gray-900">เมนู</span>
             <button
               type="button"
@@ -311,7 +311,7 @@ export default function Navbar() {
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto px-4 py-5">
+          <nav className="flex-1 overflow-y-auto px-4 py-4">
             <div className="space-y-1.5">
               {mobileLinks.map(({ label, path, match }) => (
                 <Link

@@ -108,7 +108,7 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
   return (
     <Link
       to={`/tours/${tour.id}`}
-      className="group relative flex h-full flex-col overflow-hidden rounded-[1rem] border border-gray-200 bg-white shadow-[0_3px_10px_rgba(15,23,42,0.05)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(15,23,42,0.10)]"
+      className="group relative flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-white/55 bg-white/84 shadow-[0_6px_18px_rgba(15,23,42,0.06)] backdrop-blur-[6px] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(15,23,42,0.1)] sm:rounded-[1rem] sm:border-white/60 sm:bg-white/88 sm:shadow-[0_4px_14px_rgba(15,23,42,0.05)]"
       onClick={() => {
         trackEvent({
           eventType: 'cta_click',
@@ -148,7 +148,7 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
           </span>
         </div>
       )}
-      <div className="h-[110px] sm:h-[170px] overflow-hidden border-b border-gray-100 bg-slate-100">
+      <div className="h-[128px] overflow-hidden border-b border-white/40 bg-slate-100/90 sm:h-[170px]">
         {hasCoverImage ? (
           <img
             src={coverImage}
@@ -162,12 +162,12 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
         )}
       </div>
 
-      <div className="grid flex-1 grid-rows-[auto_auto_1fr_auto] px-3.5 pt-3.5">
-        <h3 className="mt-1 md:mt-2 line-clamp-2 text-[0.95rem] md:text-[1.2rem] font-bold leading-[1.4] text-gray-700">
+      <div className="grid flex-1 grid-rows-[auto_auto_1fr_auto] px-4 pt-4 sm:px-3.5 sm:pt-3.5">
+        <h3 className="line-clamp-2 text-[1rem] font-bold leading-[1.35] tracking-[-0.02em] text-gray-800 md:mt-2 md:text-[1.2rem]">
           {tour.name}
         </h3>
 
-        <div className="mt-1 -ml-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] sm:text-[15px] md:text-[16px] font-semibold text-gray-700">
+        <div className="mt-2 -ml-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] font-semibold text-gray-700 sm:mt-1 sm:-ml-1.5 sm:gap-x-3 sm:text-[15px] md:text-[16px]">
           <span className="inline-flex items-center gap-1 leading-none text-gray-700">
             <StarIcon />
             <span>{tour.rating.toFixed(1)}</span>
@@ -177,20 +177,20 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
           <span className="hidden text-gray-700 md:inline">{metaText}</span>
         </div>
 
-        <div className="mt-0.5 grid gap-1.25">
+        <div className="mt-2 grid gap-1.5 sm:mt-0.5 sm:gap-1.25">
           {detailItems.map((item, index) => (
             <DetailItem key={`${item.text}-${index}`} icon={item.icon} text={item.text} />
           ))}
         </div>
 
-        <div className="-mx-3 -mb-5.5 mt-2 border-t border-gray-200">
-          <div className="relative min-h-[5.6rem] px-3 py-2">
+        <div className="-mx-4 -mb-5.5 mt-3 border-t border-white/55 sm:-mx-3 sm:mt-2">
+          <div className="relative min-h-[5.75rem] px-4 py-3 sm:min-h-[5.6rem] sm:px-3 sm:py-2">
             <div>
               <p className="text-[0.8rem] sm:text-[0.85rem] md:text-[0.9rem] font-semibold text-gray-700">
                 {isPrivate ? 'ราคาเหมาส่วนตัว' : 'ราคาเริ่มต้น'}
               </p>
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-gray-800">
-                <span className="mt-1 text-[1.3rem] md:text-[1.6rem] font-extrabold leading-none">{Number(tour.price).toLocaleString()}</span>
+                <span className="mt-1 text-[1.45rem] font-extrabold leading-none md:text-[1.6rem]">{Number(tour.price).toLocaleString()}</span>
                 <span className="text-[0.9rem] sm:text-[0.9rem] md:text-[0.9rem] font-semibold text-gray-900">
                   {isPrivate ? 'บาท' : 'บาท / ท่าน'}
                 </span>

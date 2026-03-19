@@ -120,25 +120,25 @@ export default function SearchBar({
   const canIncreaseAdults = totalTravelers < MAX_TRAVELERS
   const canIncreaseChildren = totalTravelers < MAX_TRAVELERS
   const surfaceClasses = transparent
-    ? 'border-white/15 bg-white/10 shadow-[0_22px_48px_rgba(15,23,42,0.2)]'
+    ? 'border-white/55 bg-white/88 shadow-[0_24px_50px_rgba(15,23,42,0.22)] sm:border-white/15 sm:bg-white/10 sm:shadow-[0_22px_48px_rgba(15,23,42,0.2)]'
     : 'border-white/70 bg-white/95 shadow-[0_22px_48px_rgba(15,23,42,0.16)]'
-  const blurClasses = transparent ? 'backdrop-blur-sm' : 'backdrop-blur-xl'
+  const blurClasses = transparent ? 'backdrop-blur-md sm:backdrop-blur-sm' : 'backdrop-blur-xl'
   const segmentClasses = transparent
-    ? 'border-slate-200/80 bg-white/90 shadow-[inset_0_0_0_0.25px_rgba(226,232,240,0.8)]'
+    ? 'border-slate-200 bg-slate-50 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.8)] sm:border-slate-200/80 sm:bg-white/90 sm:shadow-[inset_0_0_0_0.25px_rgba(226,232,240,0.8)]'
     : 'border-slate-200 bg-slate-50'
-  const fieldClasses = 'bg-white/90 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.8)]'
+  const fieldClasses = 'border border-slate-200/90 bg-white shadow-[inset_0_0_0_1px_rgba(226,232,240,0.65)]'
   const inputToneClasses = 'text-gray-800 placeholder:text-gray-400'
   const inactiveSegmentTextClasses = transparent
-    ? 'text-slate-400 hover:text-slate-900'
+    ? 'text-slate-500 hover:text-slate-900 sm:text-slate-400'
     : 'text-slate-500 hover:text-slate-800'
-  const shellPaddingClasses = transparent ? 'p-2 sm:p-2.5' : 'p-2.5 sm:p-3'
-  const layoutGapClasses = transparent ? 'gap-2 lg:gap-2' : 'gap-2.5'
-  const segmentWrapperClasses = transparent ? 'rounded-[1.2rem] p-1 min-h-[58px]' : 'rounded-[1.35rem] p-1.5'
-  const segmentButtonClasses = transparent ? 'min-h-[50px] px-3.5 py-0 text-[14px]' : 'px-4 py-3 text-[15px]'
-  const fieldPaddingClasses = transparent ? 'rounded-[1.2rem] px-4 py-2.5' : 'rounded-[1.35rem] px-5 py-3'
-  const searchIconWrapperClasses = transparent ? 'h-9 w-9' : 'h-10 w-10'
-  const searchInputClasses = transparent ? 'text-[14px] sm:text-[14px]' : 'text-[15px] sm:text-[15px]'
-  const searchButtonClasses = transparent ? 'rounded-[1.2rem] px-4 py-1 text-[16px] sm:min-w-[90px]' : 'rounded-[1.35rem] px-5 py-3 text-[15px] sm:min-w-[140px]'
+  const shellPaddingClasses = transparent ? 'p-1.5 sm:p-2.5' : 'p-2.5 sm:p-3'
+  const layoutGapClasses = transparent ? 'gap-1.5 lg:gap-2' : 'gap-2.5'
+  const segmentWrapperClasses = transparent ? 'rounded-[1rem] p-[3px] min-h-[46px] sm:rounded-[1.2rem] sm:p-1 sm:min-h-[58px]' : 'rounded-[1.35rem] p-1.5'
+  const segmentButtonClasses = transparent ? 'min-h-[38px] px-1.5 py-0 text-[11px] sm:min-h-[50px] sm:px-3.5 sm:text-[14px]' : 'px-4 py-3 text-[15px]'
+  const fieldPaddingClasses = transparent ? 'rounded-[1rem] px-3 py-1.5 sm:rounded-[1.2rem] sm:px-4 sm:py-2.5' : 'rounded-[1.35rem] px-5 py-3'
+  const searchIconWrapperClasses = transparent ? 'h-8 w-8 sm:h-9 sm:w-9' : 'h-10 w-10'
+  const searchInputClasses = transparent ? 'text-[12px] sm:text-[14px]' : 'text-[15px] sm:text-[15px]'
+  const searchButtonClasses = transparent ? 'min-h-[38px] w-full rounded-[1rem] px-4 py-1.5 text-[13px] sm:w-auto sm:min-w-[90px] sm:rounded-[1.2rem] sm:py-1' : 'rounded-[1.35rem] px-5 py-3 text-[15px] sm:min-w-[140px]'
 
   useEffect(() => {
     if (!isGuestPickerOpen) return
@@ -261,7 +261,7 @@ export default function SearchBar({
 
   return (
     <>
-      <div className={`ui-surface mx-auto w-full max-w-4xl rounded-[3rem] border ${shellPaddingClasses} ${blurClasses} ${surfaceClasses} ${className}`.trim()}>
+      <div className={`ui-surface mx-auto w-full max-w-4xl rounded-[1.5rem] border sm:rounded-[3rem] ${shellPaddingClasses} ${blurClasses} ${surfaceClasses} ${className}`.trim()}>
         <div className={`flex flex-col ${layoutGapClasses} lg:flex-row lg:items-stretch`.trim()}>
           {hasTourTypePicker && (
             <div className="lg:flex-shrink-0">

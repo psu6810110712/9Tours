@@ -176,9 +176,9 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 5.5rem;
+  width: 3.5rem;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(248, 250, 252, 0), rgba(248, 250, 252, 0.94) 65%, rgba(248, 250, 252, 1));
+  background: linear-gradient(90deg, rgba(248, 250, 252, 0), rgba(248, 250, 252, 0.72) 72%, rgba(248, 250, 252, 0.92));
 }
 
 .ui-rail-fade-left {
@@ -186,9 +186,13 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: 4rem;
+  width: 2.75rem;
   pointer-events: none;
-  background: linear-gradient(270deg, rgba(248, 250, 252, 0), rgba(248, 250, 252, 0.9) 65%, rgba(248, 250, 252, 1));
+  background: linear-gradient(270deg, rgba(248, 250, 252, 0), rgba(248, 250, 252, 0.68) 72%, rgba(248, 250, 252, 0.9));
+}
+
+.ui-home-hero {
+  min-height: 0;
 }
 
 @keyframes ui-fade-in {
@@ -234,6 +238,44 @@
 @media (hover: none) and (pointer: coarse) {
   .ui-pressable:hover {
     transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .ui-surface {
+    border-radius: 1.35rem;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1);
+  }
+
+  .ui-surface-strong {
+    border-radius: 1.6rem;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.13);
+  }
+
+  .ui-home-hero-copy h1 {
+    margin-top: 0.25rem;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+
+  .ui-home-hero-subcopy p {
+    margin-top: 0.25rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .ui-rail-fade-right {
+    width: 2.5rem;
+    background: linear-gradient(90deg, rgba(248, 250, 252, 0), rgba(248, 250, 252, 0.62) 76%, rgba(248, 250, 252, 0.84));
+  }
+
+  .ui-rail-fade-left {
+    width: 2rem;
+    background: linear-gradient(270deg, rgba(248, 250, 252, 0), rgba(248, 250, 252, 0.58) 76%, rgba(248, 250, 252, 0.8));
   }
 }
 
