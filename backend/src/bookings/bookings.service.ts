@@ -98,6 +98,10 @@ export class BookingsService {
     const { tour, schedule } = found;
     const isPrivate = !!tour.minPeople;
 
+    if (!tour.isActive) {
+      throw new BadRequestException('ทัวร์นี้ปิดให้บริการชั่วคราว ไม่สามารถจองได้');
+    }
+
     const existingPendingBooking = await this.bookingsRepository.findOne({
       where: {
         userId,

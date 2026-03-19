@@ -11,6 +11,7 @@ import { tourService } from '../services/tourService'
 import { useAuth } from '../context/AuthContext'
 import { useFavoritesContext } from '../context/FavoritesContext'
 import type { Tour } from '../types/tour'
+import { toast } from 'react-hot-toast'
 
 export default function TourDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -26,13 +27,19 @@ export default function TourDetailPage() {
 
     tourService.getOne(Number(id))
       .then((item) => {
+        if (!item?.isActive && !isAdmin) {
+          toast.error('ทัวร์นี้ปิดให้บริการชั่วคราว')
+          navigate('/tours', { replace: true })
+          return
+        }
+
         setTour(item)
         return tourService.getAll({ province: item.province }).then((list) => {
           setRelated(list.filter((candidate) => candidate.id !== item.id).slice(0, 4))
         })
       })
       .catch(() => navigate('/tours'))
-  }, [id, navigate])
+  }, [id, isAdmin, navigate])
 
   useEffect(() => {
     if (!tour?.id) return
@@ -110,6 +117,7 @@ export default function TourDetailPage() {
                 key={item.id}
                 tour={item}
                 isFavorite={isFavorite(item.id)}
+                isInactive={!item.isActive}
                 onToggleFavorite={toggleFavorite}
               />
             ))}

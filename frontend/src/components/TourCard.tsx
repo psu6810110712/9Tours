@@ -104,21 +104,9 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
   const detailItems = getCardDetailItems(tour)
 
   const metaText = isPopular ? 'ทัวร์ยอดนิยม' : 'ทัวร์แนะนำ'
-
-  return (
-    <Link
-      to={`/tours/${tour.id}`}
-      className="group relative flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-white/55 bg-white/84 shadow-[0_6px_18px_rgba(15,23,42,0.06)] backdrop-blur-[6px] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(15,23,42,0.1)] sm:rounded-[1rem] sm:border-white/60 sm:bg-white/88 sm:shadow-[0_4px_14px_rgba(15,23,42,0.05)]"
-      onClick={() => {
-        trackEvent({
-          eventType: 'cta_click',
-          pagePath: window.location.pathname + window.location.search,
-          tourId: tour.id,
-          elementId: 'tour_card_click',
-          metadata: { province: tour.province, tourType: tour.tourType },
-        })
-      }}
-    >
+  const cardClassName = 'group relative flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-white/55 bg-white/84 shadow-[0_6px_18px_rgba(15,23,42,0.06)] backdrop-blur-[6px] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(15,23,42,0.1)] sm:rounded-[1rem] sm:border-white/60 sm:bg-white/88 sm:shadow-[0_4px_14px_rgba(15,23,42,0.05)]'
+  const cardContent = (
+    <>
       {onToggleFavorite && (
         <HeartButton
           active={isFavorite}
@@ -199,6 +187,32 @@ export default function TourCard({ tour, isFavorite = false, isInactive = false,
           </div>
         </div>
       </div>
+    </>
+  )
+
+  if (isInactive) {
+    return (
+      <div className={cardClassName} aria-disabled="true">
+        {cardContent}
+      </div>
+    )
+  }
+
+  return (
+    <Link
+      to={`/tours/${tour.id}`}
+      className={cardClassName}
+      onClick={() => {
+        trackEvent({
+          eventType: 'cta_click',
+          pagePath: window.location.pathname + window.location.search,
+          tourId: tour.id,
+          elementId: 'tour_card_click',
+          metadata: { province: tour.province, tourType: tour.tourType },
+        })
+      }}
+    >
+      {cardContent}
     </Link>
   )
 }

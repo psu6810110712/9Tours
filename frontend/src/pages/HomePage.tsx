@@ -333,21 +333,32 @@ export default function HomePage() {
               <p className="mt-10 text-sm font-semibold text-white/90 sm:text-[24px]">มองหาทริปแนวไหนอยู่? เลือกแล้วกดค้นหาเลย</p>
             </div>
 
-            <div className="scrollbar-hide mx-auto mt-4 flex w-full max-w-full flex-nowrap justify-start gap-1.5 overflow-x-auto pb-1 sm:mt-4 sm:max-w-4xl sm:flex-wrap sm:justify-center sm:gap-3 sm:overflow-visible sm:pb-0">
-              {heroCategories.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  aria-pressed={selectedCats.has(category)}
-                  onClick={() => toggleCategory(category)}
-                  className={`ui-pressable inline-flex min-h-[36px] shrink-0 items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold sm:min-h-0 sm:px-6 sm:py-2.5 sm:text-[15px] ${selectedCats.has(category)
-                    ? 'bg-[var(--color-accent)] text-white shadow-[0_12px_24px_rgba(245,166,35,0.24)]'
-                    : 'bg-white/92 text-gray-700 shadow-[0_8px_18px_rgba(15,23,42,0.1)] hover:bg-[rgba(245,166,35,0.85)] hover:text-white hover:shadow-[0_10px_20px_rgba(245,166,35,0.18)]'
-                    }`}
-                >
-                  {category}
-                </button>
-              ))}
+            <div className="mx-auto mt-4 w-full max-w-full sm:mt-4 sm:max-w-4xl">
+              <div className="relative">
+                <div className="scrollbar-hide flex w-full flex-nowrap justify-start gap-1.5 overflow-x-auto pb-1 pr-8 sm:flex-wrap sm:justify-center sm:gap-3 sm:overflow-visible sm:pr-0 sm:pb-0">
+                  {heroCategories.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      aria-pressed={selectedCats.has(category)}
+                      onClick={() => toggleCategory(category)}
+                      className={`ui-pressable inline-flex min-h-[36px] shrink-0 items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold sm:min-h-0 sm:px-6 sm:py-2.5 sm:text-[15px] ${selectedCats.has(category)
+                        ? 'bg-[var(--color-accent)] text-white shadow-[0_12px_24px_rgba(245,166,35,0.24)]'
+                        : 'bg-white/92 text-gray-700 shadow-[0_8px_18px_rgba(15,23,42,0.1)] hover:bg-[rgba(245,166,35,0.85)] hover:text-white hover:shadow-[0_10px_20px_rgba(245,166,35,0.18)]'
+                        }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-1.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-white/78 sm:hidden">
+                <span className="h-1.5 w-1.5 rounded-full bg-white/85" />
+                <span>เลื่อนดูหมวดหมู่เพิ่มเติม</span>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m9 6 6 6-6 6" />
+                </svg>
+              </div>
             </div>
 
             <div className="mx-auto mt-4 max-w-4xl sm:mt-6">
@@ -371,7 +382,7 @@ export default function HomePage() {
         </section>
       </div>
 
-      <div className="mx-auto max-w-7xl px-3 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <div className="mx-auto max-w-7xl px-3 py-6 sm:px-6 sm:py-10 lg:px-8">
         <section className="mb-8 sm:mb-10">
           <RailHeader title="สถานที่ยอดนิยม" />
           <RailShell

@@ -7,6 +7,7 @@ import { bookingService } from '../services/bookingService'
 import { tourService } from '../services/tourService'
 import type { Tour } from '../types/tour'
 import { extractApiErrorMessage, extractApiFieldErrors } from '../utils/apiErrors'
+import { toast } from 'react-hot-toast'
 import {
   normalizeEmail,
   normalizeThaiPhoneInput,
@@ -91,6 +92,12 @@ export default function BookingInfoPage() {
 
     tourService.getOne(Number(tourId))
       .then((data) => {
+        if (!data?.isActive) {
+          toast.error('ทัวร์นี้ปิดให้บริการชั่วคราว ไม่สามารถจองได้')
+          navigate('/tours', { replace: true })
+          return
+        }
+
         setTour(data)
         setLoading(false)
       })
