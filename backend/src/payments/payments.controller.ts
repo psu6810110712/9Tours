@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
+import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { StorageService } from '../common/storage.interface';
 import { PaymentsService } from './payments.service';
@@ -34,7 +35,7 @@ export class PaymentsController {
   @Post()
   @UseInterceptors(
     FileInterceptor('slip', {
-      storage: 'memory' as any, // Use memory storage
+      storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
           return cb(new BadRequestException('Please upload only JPG or PNG slip images'), false);

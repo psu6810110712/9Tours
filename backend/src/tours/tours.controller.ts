@@ -15,6 +15,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -38,7 +39,7 @@ export class ToursController {
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: 'memory' as any,
+      storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
         const allowedMimeTypes = /\/(jpg|jpeg|png|gif|webp)$/;
         if (!file.mimetype.match(allowedMimeTypes)) {

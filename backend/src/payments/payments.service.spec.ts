@@ -40,6 +40,7 @@ describe('PaymentsService', () => {
   let toursService: any;
   let notificationsService: any;
   let easySlipService: any;
+  let storageService: any;
 
   const mockUserId = 'user-123';
   const mockAdminId = 'admin-456';
@@ -120,6 +121,14 @@ describe('PaymentsService', () => {
       verifySlip: jest.fn(),
     };
 
+    storageService = {
+      deleteFile: jest.fn().mockResolvedValue(undefined),
+      getFile: jest.fn(),
+      uploadFile: jest.fn(),
+      fileExists: jest.fn(),
+      buildPublicUrl: jest.fn(),
+    };
+
     service = new PaymentsService(
       paymentsRepository,
       bookingsRepository,
@@ -127,6 +136,7 @@ describe('PaymentsService', () => {
       toursService as unknown as ToursService,
       notificationsService as unknown as NotificationsService,
       easySlipService as unknown as EasySlipService,
+      storageService,
     );
   });
 
@@ -418,12 +428,12 @@ describe('PaymentsService', () => {
     });
   });
 
-  describe('getSlipFilePath', () => {
+  describe('getSlipStoredPath', () => {
 
     it('throws NotFoundException when payment not found', async () => {
       paymentsRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.getSlipFilePath(999, mockUserId, false)).rejects.toThrow(
+      await expect(service.getSlipStoredPath(999, mockUserId, false)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -432,7 +442,7 @@ describe('PaymentsService', () => {
       const payment = createMockPayment({ slipUrl: undefined });
       paymentsRepository.findOne.mockResolvedValue(payment);
 
-      await expect(service.getSlipFilePath(1, mockUserId, false)).rejects.toThrow(
+      await expect(service.getSlipStoredPath(1, mockUserId, false)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -444,35 +454,22 @@ describe('PaymentsService', () => {
       });
       paymentsRepository.findOne.mockResolvedValue(payment);
 
-      await expect(service.getSlipFilePath(1, mockUserId, false)).rejects.toThrow(
+      await expect(service.getSlipStoredPath(1, mockUserId, false)).rejects.toThrow(
         NotFoundException,
       );
     });
 
-    it('throws NotFoundException when file does not exist on disk', async () => {
+    it('returns stored path for the owner', async () => {
       const payment = createMockPayment({
         id: 1,
         booking: { id: 100, userId: mockUserId } as Booking,
       });
       paymentsRepository.findOne.mockResolvedValue(payment);
-      mockAccess.mockRejectedValue(new Error('ENOENT'));
 
-      await expect(service.getSlipFilePath(1, mockUserId, false)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-
-    it('blocks access to paths outside uploads directory', async () => {
-      const payment = createMockPayment({
-        id: 1,
-        slipUrl: '../../../etc/passwd',
-        booking: { id: 100, userId: mockUserId } as Booking,
+      await expect(service.getSlipStoredPath(1, mockUserId, false)).resolves.toEqual({
+        storedPath: payment.slipUrl,
+        isOwner: true,
       });
-      paymentsRepository.findOne.mockResolvedValue(payment);
-
-      await expect(service.getSlipFilePath(1, mockUserId, false)).rejects.toThrow(
-        NotFoundException,
-      );
     });
   });
 
