@@ -43,6 +43,7 @@ export default function ToursPage() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [sortMenuOpen, setSortMenuOpen] = useState(false)
   const sortMenuRef = useRef<HTMLDivElement>(null)
+  const mobileFiltersDrawerRef = useRef<HTMLDivElement>(null)
 
   const [region, setRegion] = useState(searchParams.get('region') || '')
   const [province, setProvince] = useState(searchParams.get('province') || '')
@@ -59,7 +60,7 @@ export default function ToursPage() {
     return raw ? Number(raw) : null
   })
 
-  useBodyScrollLock(mobileFiltersOpen)
+  useBodyScrollLock(mobileFiltersOpen, { allowTouchMoveRefs: [mobileFiltersDrawerRef] })
 
   useEffect(() => {
     tourService.getAll()
@@ -427,7 +428,7 @@ export default function ToursPage() {
             className="ui-overlay absolute inset-0"
             onClick={() => setMobileFiltersOpen(false)}
           />
-          <div className="animate-slide-up absolute inset-x-4 bottom-4 top-4 overflow-y-auto">
+          <div ref={mobileFiltersDrawerRef} className="animate-slide-up absolute inset-x-4 bottom-4 top-4 overflow-y-auto overscroll-contain">
             <FilterSidebar
               region={region}
               province={province}

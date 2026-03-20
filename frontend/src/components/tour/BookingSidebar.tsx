@@ -36,6 +36,7 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
   const [dragY, setDragY] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const touchStartY = useRef(0)
+  const gestureOffsetYRef = useRef(0)
   const suppressHeaderClickRef = useRef(false)
 
   const upcomingSchedules = useMemo(() => {
@@ -59,9 +60,10 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
   const [pendingBookingMap, setPendingBookingMap] = useState<Map<number, number>>(new Map())
   const [fetchKey, setFetchKey] = useState(1)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const drawerContentRef = useRef<HTMLDivElement>(null)
   const selectedSchedule = upcomingSchedules.find((schedule) => schedule.id === selectedScheduleId) ?? defaultSelectedSchedule
 
-  useBodyScrollLock(shouldUseDrawer && drawerOpen)
+  useBodyScrollLock(shouldUseDrawer && drawerOpen, { allowTouchMoveRefs: [drawerContentRef] })
 
   const availableMonths = useMemo(() => {
     const months = new Set<string>()
@@ -207,6 +209,7 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
 
     event.preventDefault()
     touchStartY.current = event.touches[0].clientY
+    gestureOffsetYRef.current = 0
     setDragY(0)
     setIsDragging(true)
   }
@@ -218,13 +221,14 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
 
     const currentY = event.touches[0].clientY
     const diff = currentY - touchStartY.current
+    gestureOffsetYRef.current = diff
 
     if (drawerOpen) {
       setDragY(Math.max(0, diff))
       return
     }
 
-    setDragY(Math.min(0, diff))
+    setDragY(0)
   }
 
   const handleTouchEnd = () => {
@@ -236,12 +240,13 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
       suppressHeaderClickRef.current = false
     }, 0)
 
-    if (drawerOpen && dragY > MOBILE_DRAWER_DRAG_THRESHOLD) {
+    if (drawerOpen && gestureOffsetYRef.current > MOBILE_DRAWER_DRAG_THRESHOLD) {
       setDrawerOpen(false)
-    } else if (!drawerOpen && dragY < -MOBILE_DRAWER_DRAG_THRESHOLD) {
+    } else if (!drawerOpen && gestureOffsetYRef.current < -MOBILE_DRAWER_DRAG_THRESHOLD) {
       setDrawerOpen(true)
     }
 
+    gestureOffsetYRef.current = 0
     setDragY(0)
   }
 
@@ -308,19 +313,17 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
             onClick={handleDrawerClose}
           />
           <div
-            className={`fixed inset-x-0 bottom-0 z-40 px-4 pb-[env(safe-area-inset-bottom,1rem)] pt-2 lg:hidden ${isDragging ? '' : 'transition-all duration-300 ease-out'} ${!isDragging && drawerOpen ? 'translate-y-0' : !isDragging ? 'translate-y-[calc(100%-150px)]' : ''}`}
+            className={`fixed inset-x-0 bottom-2 z-40 px-3 pb-[env(safe-area-inset-bottom,1rem)] pt-2 lg:hidden ${isDragging ? '' : 'transition-all duration-300 ease-out'} ${!isDragging && drawerOpen ? 'translate-y-0' : !isDragging ? 'translate-y-[calc(100%-150px)]' : ''}`}
             style={isDragging
-              ? {
-                transform: drawerOpen
-                  ? `translateY(${dragY}px)`
-                  : `translateY(calc(100% - ${MOBILE_DRAWER_PEEK_HEIGHT}px + ${dragY}px))`,
-              }
+              ? (drawerOpen
+                ? { transform: `translateY(${dragY}px)` }
+                : { transform: `translateY(calc(100% - ${MOBILE_DRAWER_PEEK_HEIGHT}px))` })
               : undefined}
           >
-            <div className={`ui-surface relative rounded-[1.5rem] border border-gray-200 bg-white p-4 overflow-hidden transition-shadow duration-300 ${drawerOpen ? 'shadow-[0_-8px_50px_rgba(15,23,42,0.3)]' : 'shadow-[0_-4px_30px_rgba(15,23,42,0.15)]'}`}>
+            <div className={`ui-surface relative rounded-[1.5rem] border border-gray-200 bg-white px-3 py-4 overflow-hidden transition-shadow duration-300 ${drawerOpen ? 'shadow-[0_-8px_50px_rgba(15,23,42,0.3)]' : 'shadow-[0_-4px_30px_rgba(15,23,42,0.15)]'}`}>
               <div
                 data-testid="booking-drawer-header"
-                className="cursor-pointer select-none"
+                className="cursor-pointer select-none touch-none"
                 onClick={handleHeaderClick}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
@@ -345,6 +348,11 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{summaryLabel}</p>
                     <p className="text-xl font-bold text-gray-900">฿{totalPrice.toLocaleString()}</p>
+                    {selectedSchedule && !isPrivate && (
+                      <p className="mt-1 text-[12px] font-medium text-gray-500">
+                        วันที่ {selectedSchedule.startDate} เหลือ {seatsLeft} ที่
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -353,22 +361,19 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
                         stopTogglePropagation(event)
                         handleDrawerToggle()
                       }}
-                      className="ui-pressable rounded-xl border border-primary bg-primary px-3 py-2 text-xs font-semibold text-white transition-transform active:scale-95"
+                      className="ui-pressable rounded-xl border border-primary bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-transform active:scale-95"
                     >
                       ดูรายละเอียด
                     </button>
                   </div>
                 </div>
-
-                <p className={`text-center text-[11px] text-gray-400 transition-all duration-300 ${drawerOpen ? 'mt-0 h-0 overflow-hidden opacity-0' : 'mt-1 opacity-100'}`}>
-                  ↑ ปัดขึ้นเพื่อจอง
-                </p>
               </div>
 
               <div
                 id="mobile-booking-drawer-content"
                 data-testid="booking-drawer-content"
-                className={`transition-all duration-300 ease-out ${drawerOpen ? 'max-h-[60vh] overflow-y-auto overflow-x-hidden overscroll-contain opacity-100' : 'max-h-0 overflow-hidden opacity-0'}`}
+                ref={drawerContentRef}
+                className={`transition-all duration-300 ease-out ${drawerOpen ? 'max-h-[60vh] overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide touch-pan-y opacity-100' : 'max-h-0 overflow-hidden opacity-0'}`}
               >
                 <div className="pb-3">
                   {renderContent(true)}

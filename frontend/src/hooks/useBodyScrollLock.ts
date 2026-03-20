@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 
 const LOCK_COUNT_ATTR = 'data-scroll-lock-count'
 const ORIGINAL_PADDING_ATTR = 'data-scroll-lock-padding-right'
@@ -9,7 +9,57 @@ const ORIGINAL_RIGHT_ATTR = 'data-scroll-lock-right'
 const ORIGINAL_WIDTH_ATTR = 'data-scroll-lock-width'
 const ORIGINAL_SCROLL_Y_ATTR = 'data-scroll-lock-scroll-y'
 
-export function useBodyScrollLock(locked: boolean) {
+type BodyScrollLockOptions = {
+  allowTouchMoveRefs?: Array<RefObject<HTMLElement | null>>
+}
+
+type TouchMoveState = {
+  lastTouchY: number
+}
+
+function getAllowedTouchMoveElement(
+  target: EventTarget | null,
+  allowTouchMoveRefs: Array<RefObject<HTMLElement | null>>,
+) {
+  if (!(target instanceof Node)) {
+    return null
+  }
+
+  for (const ref of allowTouchMoveRefs) {
+    const element = ref.current
+    if (element?.contains(target)) {
+      return element
+    }
+  }
+
+  return null
+}
+
+function shouldPreventChainedScroll(element: HTMLElement, deltaY: number) {
+  const maxScrollTop = element.scrollHeight - element.clientHeight
+  if (maxScrollTop <= 0) {
+    return true
+  }
+
+  const atTop = element.scrollTop <= 0
+  const atBottom = element.scrollTop >= maxScrollTop - 1
+  const isPullingDown = deltaY > 0
+  const isPushingUp = deltaY < 0
+
+  return (atTop && isPullingDown) || (atBottom && isPushingUp)
+}
+
+export function useBodyScrollLock(locked: boolean, options: BodyScrollLockOptions = {}) {
+  const { allowTouchMoveRefs = [] } = options
+  const allowTouchMoveRefsRef = useRef(allowTouchMoveRefs)
+  const touchMoveStateRef = useRef<TouchMoveState>({
+    lastTouchY: 0,
+  })
+
+  useEffect(() => {
+    allowTouchMoveRefsRef.current = allowTouchMoveRefs
+  }, [allowTouchMoveRefs])
+
   useEffect(() => {
     if (!locked || typeof document === 'undefined') {
       return
@@ -45,7 +95,37 @@ export function useBodyScrollLock(locked: boolean) {
 
     body.setAttribute(LOCK_COUNT_ATTR, String(currentCount + 1))
 
+    const handleTouchStart = (event: TouchEvent) => {
+      touchMoveStateRef.current = {
+        lastTouchY: event.touches[0]?.clientY ?? 0,
+      }
+    }
+
+    const preventBackgroundTouchMove = (event: TouchEvent) => {
+      const allowedElement = getAllowedTouchMoveElement(event.target, allowTouchMoveRefsRef.current)
+
+      if (!allowedElement) {
+        event.preventDefault()
+        return
+      }
+
+      const currentTouchY = event.touches[0]?.clientY ?? touchMoveStateRef.current.lastTouchY
+      const deltaY = currentTouchY - touchMoveStateRef.current.lastTouchY
+
+      touchMoveStateRef.current.lastTouchY = currentTouchY
+
+      if (shouldPreventChainedScroll(allowedElement, deltaY)) {
+        event.preventDefault()
+      }
+    }
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true })
+    document.addEventListener('touchmove', preventBackgroundTouchMove, { passive: false })
+
     return () => {
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchmove', preventBackgroundTouchMove)
+
       const nextCount = Math.max(0, Number(body.getAttribute(LOCK_COUNT_ATTR) ?? '1') - 1)
 
       if (nextCount === 0) {

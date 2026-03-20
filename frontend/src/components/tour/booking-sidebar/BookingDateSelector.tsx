@@ -162,7 +162,7 @@ export default function BookingDateSelector({
             {!isExpanded && (canScrollLeft || canScrollRight) && (
               <ScrollerArrowButton direction="left" onClick={() => scrollDates(-220)} disabled={!canScrollLeft} className="h-8 w-8 shrink-0 text-primary disabled:text-gray-200" />
             )}
-            <div className={`relative min-w-0 flex-1 overflow-hidden ${isExpanded ? '' : '-mx-4 px-4 sm:mx-0 sm:px-0'}`}>
+            <div className={`relative min-w-0 flex-1 overflow-hidden ${isExpanded ? '' : '-mx-2 px-2 sm:mx-0 sm:px-0'}`}>
               <div
                 ref={scrollRef}
                 className={`transform transition-all duration-300 ease-out ${
@@ -315,7 +315,7 @@ export default function BookingDateSelector({
                       if (firstAvailable) setSelectedSchedule(firstAvailable)
                     }}
                     className={`w-[calc(20%-0.5rem)] min-w-[66px] flex-shrink-0 flex flex-col items-center justify-center rounded-2xl border py-2.5 transition-all duration-300 sm:py-3 ${isSelected
-                      ? 'border-primary/40 bg-blue-50 text-primary shadow-md shadow-primary/10 scale-[1.06]'
+                      ? 'border-primary/40 bg-blue-50 text-primary shadow-sm shadow-primary/10 scale-[1.02] sm:scale-[1.05]'
                       : isFullyBooked
                         ? 'cursor-not-allowed border-transparent bg-gray-50 text-gray-300'
                         : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm'

@@ -21,8 +21,9 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
   const desktopLeftRef = useRef<HTMLDivElement | null>(null)
   const desktopCenterRef = useRef<HTMLButtonElement | null>(null)
   const desktopRightRef = useRef<HTMLDivElement | null>(null)
+  const popupContentRef = useRef<HTMLDivElement | null>(null)
 
-  useBodyScrollLock(isPopupOpen)
+  useBodyScrollLock(isPopupOpen, { allowTouchMoveRefs: [popupContentRef] })
 
   useEffect(() => {
     if (!isPopupOpen) {
@@ -260,7 +261,7 @@ export default function TourGallery({ images, name }: TourGalleryProps) {
             className="ui-overlay-strong absolute inset-0"
             onClick={() => setIsPopupOpen(false)}
           />
-          <div className="ui-pop relative z-10 w-full max-w-6xl" onClick={(event) => event.stopPropagation()}>
+          <div ref={popupContentRef} className="ui-pop relative z-10 w-full max-w-6xl" onClick={(event) => event.stopPropagation()}>
             <div className="flex max-h-[calc(100vh-4rem)] flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-black/45 shadow-[0_32px_90px_rgba(0,0,0,0.34)] backdrop-blur-sm sm:max-h-[calc(100vh-5rem)]">
               <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-transparent px-5 py-4 text-white sm:px-6 sm:py-5">
                 <div className="min-w-0">

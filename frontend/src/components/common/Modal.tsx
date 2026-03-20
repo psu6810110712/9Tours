@@ -11,7 +11,7 @@ interface ModalProps {
 export default function Modal({ isOpen, onClose, children, width = 'max-w-md' }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
 
-  useBodyScrollLock(isOpen)
+  useBodyScrollLock(isOpen, { allowTouchMoveRefs: [dialogRef] })
 
   const onCloseRef = useRef(onClose)
   useEffect(() => {

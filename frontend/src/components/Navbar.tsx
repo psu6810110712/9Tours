@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
@@ -34,12 +34,13 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [modal, setModal] = useState<'login' | 'register' | null>(null)
+  const mobileMenuRef = useRef<HTMLElement | null>(null)
   const navigate = useNavigate()
   const location = useLocation()
   const { pathname, search } = location
   const [modalError, setModalError] = useState('')
 
-  useBodyScrollLock(mobileMenuOpen)
+  useBodyScrollLock(mobileMenuOpen, { allowTouchMoveRefs: [mobileMenuRef] })
 
   const displayName = useMemo(() => {
     if (!user) {
@@ -295,6 +296,7 @@ export default function Navbar() {
           onClick={() => setMobileMenuOpen(false)}
         />
         <aside
+          ref={mobileMenuRef}
           className={`absolute right-0 top-0 flex h-full w-[min(20rem,85vw)] flex-col border-l border-gray-200 bg-white/98 shadow-[-8px_0_30px_rgba(15,23,42,0.12)] backdrop-blur-xl transition-transform duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
           <div className="flex h-[74px] items-center justify-between border-b border-gray-100 px-5">
