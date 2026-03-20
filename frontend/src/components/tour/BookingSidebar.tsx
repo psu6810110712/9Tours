@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type SyntheticEvent, type TouchEvent } from 'react'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import type { Tour, TourSchedule } from '../../types/tour'
 import { useAuth } from '../../context/AuthContext'
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
 import { bookingService } from '../../services/bookingService'
 import { trackEvent } from '../../services/trackingService'
 import { tourService } from '../../services/tourService'
@@ -17,6 +18,9 @@ interface BookingSidebarProps {
   isMobileFixed?: boolean
 }
 
+const MOBILE_DRAWER_PEEK_HEIGHT = 150
+const MOBILE_DRAWER_DRAG_THRESHOLD = 72
+
 function getLocalTodayIsoDate() {
   const now = new Date()
   const local = new Date(now.getTime() - (now.getTimezoneOffset() * 60 * 1000))
@@ -26,12 +30,13 @@ function getLocalTodayIsoDate() {
 export default function BookingSidebar({ tour, isMobileFixed = false }: BookingSidebarProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const today = useRef(getLocalTodayIsoDate()).current
+  const shouldUseDrawer = isMobileFixed
+  const today = useMemo(() => getLocalTodayIsoDate(), [])
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [dragY, setDragY] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const touchStartY = useRef(0)
-  const drawerRef = useRef<HTMLDivElement>(null)
+  const suppressHeaderClickRef = useRef(false)
 
   const upcomingSchedules = useMemo(() => {
     return [...tour.schedules]
@@ -55,6 +60,8 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
   const [fetchKey, setFetchKey] = useState(1)
   const scrollRef = useRef<HTMLDivElement>(null)
   const selectedSchedule = upcomingSchedules.find((schedule) => schedule.id === selectedScheduleId) ?? defaultSelectedSchedule
+
+  useBodyScrollLock(shouldUseDrawer && drawerOpen)
 
   const availableMonths = useMemo(() => {
     const months = new Set<string>()
@@ -95,9 +102,9 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
 
     const visibleSchedules = selectedMonth === 'all'
       ? upcomingSchedules.slice(0, 30)
-      : upcomingSchedules.filter((s) => s.startDate.startsWith(selectedMonth))
+      : upcomingSchedules.filter((schedule) => schedule.startDate.startsWith(selectedMonth))
 
-    const schedulesToFetch = visibleSchedules.filter((s) => availableSeatsData[s.id] == null)
+    const schedulesToFetch = visibleSchedules.filter((schedule) => availableSeatsData[schedule.id] == null)
     if (schedulesToFetch.length === 0) return
 
     let cancelled = false
@@ -113,6 +120,7 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
           }
         }),
       )
+
       if (!cancelled) {
         setAvailableSeatsData((prev) => ({ ...prev, ...results }))
       }
@@ -120,18 +128,7 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
 
     void fetchVisibleSeats()
     return () => { cancelled = true }
-  }, [tour?.id, selectedMonth, upcomingSchedules, fetchKey])
-
-  useEffect(() => {
-    if (drawerOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [drawerOpen])
+  }, [tour?.id, selectedMonth, upcomingSchedules, fetchKey, availableSeatsData])
 
   const seatsLeft = selectedSchedule
     ? Math.max(0, availableSeatsData[selectedSchedule.id] ?? (selectedSchedule.maxCapacity - selectedSchedule.currentBooked))
@@ -199,44 +196,66 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
   }
 
   const handleDrawerToggle = () => setDrawerOpen((prev) => !prev)
-  const handleDrawerClose = () => setDrawerOpen(false)
-  const shouldUseDrawer = isMobileFixed
+  const handleDrawerClose = () => {
+    setDrawerOpen(false)
+    setIsDragging(false)
+    setDragY(0)
+  }
 
-  // Touch gesture handlers for drawer
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY
+  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    if (!shouldUseDrawer) return
+
+    event.preventDefault()
+    touchStartY.current = event.touches[0].clientY
+    setDragY(0)
     setIsDragging(true)
   }
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
     if (!isDragging) return
-    const currentY = e.touches[0].clientY
+
+    event.preventDefault()
+
+    const currentY = event.touches[0].clientY
     const diff = currentY - touchStartY.current
-    
-    // When drawer is open, only allow dragging down (positive diff)
-    // When drawer is closed, only allow dragging up (negative diff)
+
     if (drawerOpen) {
       setDragY(Math.max(0, diff))
-    } else {
-      setDragY(Math.min(0, diff))
+      return
     }
+
+    setDragY(Math.min(0, diff))
   }
 
   const handleTouchEnd = () => {
     if (!isDragging) return
+
     setIsDragging(false)
-    
-    const threshold = 80 // pixels to trigger open/close
-    
-    if (drawerOpen && dragY > threshold) {
-      // Swipe down while open -> close
+    suppressHeaderClickRef.current = true
+    window.setTimeout(() => {
+      suppressHeaderClickRef.current = false
+    }, 0)
+
+    if (drawerOpen && dragY > MOBILE_DRAWER_DRAG_THRESHOLD) {
       setDrawerOpen(false)
-    } else if (!drawerOpen && dragY < -threshold) {
-      // Swipe up while closed -> open
+    } else if (!drawerOpen && dragY < -MOBILE_DRAWER_DRAG_THRESHOLD) {
       setDrawerOpen(true)
     }
-    
+
     setDragY(0)
+  }
+
+  const handleHeaderClick = () => {
+    if (suppressHeaderClickRef.current) {
+      suppressHeaderClickRef.current = false
+      return
+    }
+    if (isDragging) return
+    handleDrawerToggle()
+  }
+
+  const stopTogglePropagation = (event: SyntheticEvent) => {
+    event.stopPropagation()
   }
 
   const summaryLabel = isPrivate ? 'ราคาเหมาจ่ายทั้งกลุ่ม' : 'ยอดชำระรวม'
@@ -283,41 +302,74 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
     <>
       {shouldUseDrawer && (
         <>
-          {/* Backdrop overlay with fade */}
-          <div 
-            className={`fixed inset-0 z-30 bg-black/20 backdrop-blur-[2px] lg:hidden transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          <div
+            data-testid="booking-drawer-backdrop"
+            className={`fixed inset-0 z-30 bg-black/20 backdrop-blur-[2px] lg:hidden transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
             onClick={handleDrawerClose}
           />
-          <div 
-            ref={drawerRef}
+          <div
             className={`fixed inset-x-0 bottom-0 z-40 px-4 pb-[env(safe-area-inset-bottom,1rem)] pt-2 lg:hidden ${isDragging ? '' : 'transition-all duration-300 ease-out'} ${!isDragging && drawerOpen ? 'translate-y-0' : !isDragging ? 'translate-y-[calc(100%-150px)]' : ''}`}
-            style={isDragging ? { transform: drawerOpen ? `translateY(${dragY}px)` : `translateY(calc(100% - 150px + ${dragY}px))` } : undefined}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
+            style={isDragging
+              ? {
+                transform: drawerOpen
+                  ? `translateY(${dragY}px)`
+                  : `translateY(calc(100% - ${MOBILE_DRAWER_PEEK_HEIGHT}px + ${dragY}px))`,
+              }
+              : undefined}
           >
             <div className={`ui-surface relative rounded-[1.5rem] border border-gray-200 bg-white p-4 overflow-hidden transition-shadow duration-300 ${drawerOpen ? 'shadow-[0_-8px_50px_rgba(15,23,42,0.3)]' : 'shadow-[0_-4px_30px_rgba(15,23,42,0.15)]'}`}>
-              {/* Drag handle */}
-              <div className="mx-auto mb-3 flex h-5 w-16 cursor-grab items-center justify-center active:cursor-grabbing" onClick={handleDrawerToggle}>
-                <div className={`h-1.5 w-12 rounded-full transition-all duration-300 ${drawerOpen ? 'bg-gray-400 w-10' : 'bg-gray-300 w-12'}`} />
-              </div>
-              <div className={`flex items-center justify-between gap-3 transition-all duration-300 ease-out ${drawerOpen ? 'h-0 overflow-hidden opacity-0 mb-0' : 'mb-3 opacity-100'}`}>
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{summaryLabel}</p>
-                  <p className="text-xl font-bold text-gray-900">฿{totalPrice.toLocaleString()}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={handleDrawerToggle} className="ui-pressable rounded-xl border border-primary bg-primary px-3 py-2 text-xs font-semibold text-white transition-transform active:scale-95">
-                    ดูรายละเอียด
-                  </button>
-                </div>
-              </div>
-              {/* Swipe hint at bottom center */}
-              <p className={`text-center text-[11px] text-gray-400 transition-all duration-300 ${drawerOpen ? 'opacity-0 h-0 overflow-hidden mt-0' : 'opacity-100 mt-1'}`}>
-                ↑ ปัดขึ้นเพื่อจอง
-              </p>
+              <div
+                data-testid="booking-drawer-header"
+                className="cursor-pointer select-none"
+                onClick={handleHeaderClick}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                <button
+                  type="button"
+                  data-testid="booking-drawer-handle"
+                  aria-controls="mobile-booking-drawer-content"
+                  aria-expanded={drawerOpen}
+                  aria-label={drawerOpen ? 'ย่อรายละเอียดการจอง' : 'ขยายรายละเอียดการจอง'}
+                  className="mx-auto mb-3 flex h-5 w-16 cursor-grab items-center justify-center active:cursor-grabbing"
+                  onClick={(event) => {
+                    stopTogglePropagation(event)
+                    handleDrawerToggle()
+                  }}
+                >
+                  <div className={`h-1.5 w-12 rounded-full transition-all duration-300 ${drawerOpen ? 'bg-gray-400 w-10' : 'bg-gray-300 w-12'}`} />
+                </button>
 
-              <div className={`transition-all duration-300 ease-out ${drawerOpen ? 'max-h-[60vh] opacity-100 overflow-y-auto overflow-x-hidden' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+                <div className={`flex items-center justify-between gap-3 transition-all duration-300 ease-out ${drawerOpen ? 'mb-0 h-0 overflow-hidden opacity-0' : 'mb-3 opacity-100'}`}>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{summaryLabel}</p>
+                    <p className="text-xl font-bold text-gray-900">฿{totalPrice.toLocaleString()}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        stopTogglePropagation(event)
+                        handleDrawerToggle()
+                      }}
+                      className="ui-pressable rounded-xl border border-primary bg-primary px-3 py-2 text-xs font-semibold text-white transition-transform active:scale-95"
+                    >
+                      ดูรายละเอียด
+                    </button>
+                  </div>
+                </div>
+
+                <p className={`text-center text-[11px] text-gray-400 transition-all duration-300 ${drawerOpen ? 'mt-0 h-0 overflow-hidden opacity-0' : 'mt-1 opacity-100'}`}>
+                  ↑ ปัดขึ้นเพื่อจอง
+                </p>
+              </div>
+
+              <div
+                id="mobile-booking-drawer-content"
+                data-testid="booking-drawer-content"
+                className={`transition-all duration-300 ease-out ${drawerOpen ? 'max-h-[60vh] overflow-y-auto overflow-x-hidden overscroll-contain opacity-100' : 'max-h-0 overflow-hidden opacity-0'}`}
+              >
                 <div className="pb-3">
                   {renderContent(true)}
                 </div>
@@ -328,7 +380,7 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
       )}
 
       <div className={shouldUseDrawer ? 'hidden lg:block' : ''}>
-        <div className="ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-4 sm:p-5 sm:rounded-[1.75rem] lg:sticky lg:top-24">
+        <div className="ui-surface rounded-[1.5rem] border border-gray-100 bg-white p-4 sm:rounded-[1.75rem] sm:p-5 lg:sticky lg:top-24">
           {renderContent(false)}
         </div>
       </div>
