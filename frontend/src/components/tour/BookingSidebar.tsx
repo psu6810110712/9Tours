@@ -28,6 +28,10 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
   const { user } = useAuth()
   const today = useRef(getLocalTodayIsoDate()).current
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [dragY, setDragY] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const touchStartY = useRef(0)
+  const drawerRef = useRef<HTMLDivElement>(null)
 
   const upcomingSchedules = useMemo(() => {
     return [...tour.schedules]
@@ -198,6 +202,43 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
   const handleDrawerClose = () => setDrawerOpen(false)
   const shouldUseDrawer = isMobileFixed
 
+  // Touch gesture handlers for drawer
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY
+    setIsDragging(true)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return
+    const currentY = e.touches[0].clientY
+    const diff = currentY - touchStartY.current
+    
+    // When drawer is open, only allow dragging down (positive diff)
+    // When drawer is closed, only allow dragging up (negative diff)
+    if (drawerOpen) {
+      setDragY(Math.max(0, diff))
+    } else {
+      setDragY(Math.min(0, diff))
+    }
+  }
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+    
+    const threshold = 80 // pixels to trigger open/close
+    
+    if (drawerOpen && dragY > threshold) {
+      // Swipe down while open -> close
+      setDrawerOpen(false)
+    } else if (!drawerOpen && dragY < -threshold) {
+      // Swipe up while closed -> open
+      setDrawerOpen(true)
+    }
+    
+    setDragY(0)
+  }
+
   const summaryLabel = isPrivate ? 'ราคาเหมาจ่ายทั้งกลุ่ม' : 'ยอดชำระรวม'
 
   const renderContent = (isDrawer: boolean) => (
@@ -242,23 +283,41 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
     <>
       {shouldUseDrawer && (
         <>
-          {drawerOpen && <button type="button" aria-label="ปิดหน้าต่างจอง" className="fixed inset-0 z-30 lg:hidden" onClick={handleDrawerClose} />}
-          <div className={`fixed inset-x-0 bottom-0 z-40 px-4 pb-[env(safe-area-inset-bottom,1rem)] pt-2 transition-transform duration-300 lg:hidden ${drawerOpen ? 'translate-y-0' : 'translate-y-[calc(100%-150px)]'}`}>
-            <div className="ui-surface relative rounded-[1.5rem] border border-gray-200 bg-white p-4 shadow-[0_24px_45px_rgba(15,23,42,0.25)] overflow-hidden">
-              <button type="button" aria-label="ปรับสถานะลิ้นชักการจอง" className="mx-auto mb-3 flex h-1.5 w-12 items-center justify-center rounded-full bg-gray-200" onClick={handleDrawerToggle} />
-              <div className={`flex items-center justify-between gap-3 ${drawerOpen ? 'h-0 overflow-hidden opacity-0' : 'mb-3'}`}>
+          {/* Backdrop overlay with fade */}
+          <div 
+            className={`fixed inset-0 z-30 bg-black/20 backdrop-blur-[2px] lg:hidden transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            onClick={handleDrawerClose}
+          />
+          <div 
+            ref={drawerRef}
+            className={`fixed inset-x-0 bottom-0 z-40 px-4 pb-[env(safe-area-inset-bottom,1rem)] pt-2 lg:hidden ${isDragging ? '' : 'transition-all duration-300 ease-out'} ${!isDragging && drawerOpen ? 'translate-y-0' : !isDragging ? 'translate-y-[calc(100%-150px)]' : ''}`}
+            style={isDragging ? { transform: drawerOpen ? `translateY(${dragY}px)` : `translateY(calc(100% - 150px + ${dragY}px))` } : undefined}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className={`ui-surface relative rounded-[1.5rem] border border-gray-200 bg-white p-4 overflow-hidden transition-shadow duration-300 ${drawerOpen ? 'shadow-[0_-8px_50px_rgba(15,23,42,0.3)]' : 'shadow-[0_-4px_30px_rgba(15,23,42,0.15)]'}`}>
+              {/* Drag handle */}
+              <div className="mx-auto mb-3 flex h-5 w-16 cursor-grab items-center justify-center active:cursor-grabbing" onClick={handleDrawerToggle}>
+                <div className={`h-1.5 w-12 rounded-full transition-all duration-300 ${drawerOpen ? 'bg-gray-400 w-10' : 'bg-gray-300 w-12'}`} />
+              </div>
+              <div className={`flex items-center justify-between gap-3 transition-all duration-300 ease-out ${drawerOpen ? 'h-0 overflow-hidden opacity-0 mb-0' : 'mb-3 opacity-100'}`}>
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{summaryLabel}</p>
                   <p className="text-xl font-bold text-gray-900">฿{totalPrice.toLocaleString()}</p>
                 </div>
-                <div className="flex gap-2">
-                  <button type="button" onClick={handleDrawerToggle} className="ui-pressable rounded-xl border border-primary bg-primary px-3 py-2 text-xs font-semibold text-white">
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={handleDrawerToggle} className="ui-pressable rounded-xl border border-primary bg-primary px-3 py-2 text-xs font-semibold text-white transition-transform active:scale-95">
                     ดูรายละเอียด
                   </button>
                 </div>
               </div>
+              {/* Swipe hint at bottom center */}
+              <p className={`text-center text-[11px] text-gray-400 transition-all duration-300 ${drawerOpen ? 'opacity-0 h-0 overflow-hidden mt-0' : 'opacity-100 mt-1'}`}>
+                ↑ ปัดขึ้นเพื่อจอง
+              </p>
 
-              <div className={`transition-[max-height] duration-300 ${drawerOpen ? 'max-h-[60vh] overflow-y-auto overflow-x-hidden' : 'max-h-0 overflow-hidden'}`}>
+              <div className={`transition-all duration-300 ease-out ${drawerOpen ? 'max-h-[60vh] opacity-100 overflow-y-auto overflow-x-hidden' : 'max-h-0 opacity-0 overflow-hidden'}`}>
                 <div className="pb-3">
                   {renderContent(true)}
                 </div>

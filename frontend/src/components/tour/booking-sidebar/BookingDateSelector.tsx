@@ -38,8 +38,19 @@ export default function BookingDateSelector({
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
+  const [viewState, setViewState] = useState<'idle' | 'exiting' | 'entering'>('idle')
   const [calendarMonthIndex, setCalendarMonthIndex] = useState(0)
   const monthScrollRef = useRef<HTMLDivElement>(null)
+
+  const handleToggleView = () => {
+    if (viewState !== 'idle') return
+    setViewState('exiting')
+    setTimeout(() => {
+      setIsExpanded(prev => !prev)
+      setViewState('entering')
+      setTimeout(() => setViewState('idle'), 350)
+    }, 200)
+  }
 
   useEffect(() => {
     const element = scrollRef.current
@@ -95,8 +106,8 @@ export default function BookingDateSelector({
       <div className="mb-2.5 sm:mb-3 flex items-baseline justify-between">
         <label className="block text-base font-bold whitespace-nowrap text-slate-800 sm:text-lg">เลือกวันที่เดินทาง</label>
         {upcomingSchedules.length > 4 && (
-          <button type="button" onClick={() => setIsExpanded(!isExpanded)} className="text-xs font-semibold text-primary sm:text-sm hover:underline">
-            {isExpanded ? 'ดูแบบเลื่อนแนวนอน' : 'ดูในรูปแบบตารางปฏิทิน'}
+          <button type="button" onClick={handleToggleView} className="text-xs font-semibold text-primary sm:text-lg hover:underline">
+            {isExpanded ? 'ขอดูแบบแถบเลื่อน' : 'ขอดูแบบปฏิทิน'}
           </button>
         )}
       </div>
@@ -111,7 +122,7 @@ export default function BookingDateSelector({
               type="button"
               data-active-month={selectedMonth === 'all'}
               onClick={() => handleMonthClick('all')}
-              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold transition-all whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-xs ${selectedMonth === 'all'
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[14px] font-bold transition-all whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-md ${selectedMonth === 'all'
                 ? 'bg-[var(--color-primary)] text-white shadow-sm'
                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
               }`}
@@ -128,7 +139,7 @@ export default function BookingDateSelector({
                   type="button"
                   data-active-month={isActive}
                   onClick={() => handleMonthClick(month)}
-                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold transition-all whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-xs ${isActive
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[14px] font-bold transition-all whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-md ${isActive
                     ? 'bg-[var(--color-primary)] text-white shadow-sm'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-700'
                   }`}
@@ -149,15 +160,19 @@ export default function BookingDateSelector({
         <>
           <div className={`flex ${isExpanded ? 'flex-col' : 'items-center gap-1.5'}`}>
             {!isExpanded && (canScrollLeft || canScrollRight) && (
-              <ScrollerArrowButton direction="left" onClick={() => scrollDates(-220)} disabled={!canScrollLeft} className="h-8 w-8 shrink-0" />
+              <ScrollerArrowButton direction="left" onClick={() => scrollDates(-220)} disabled={!canScrollLeft} className="h-8 w-8 shrink-0 text-primary disabled:text-gray-200" />
             )}
-            <div className={`relative min-w-0 flex-1 ${isExpanded ? '' : '-mx-4 px-4 sm:mx-0 sm:px-0'}`}>
+            <div className={`relative min-w-0 flex-1 overflow-hidden ${isExpanded ? '' : '-mx-4 px-4 sm:mx-0 sm:px-0'}`}>
               <div
                 ref={scrollRef}
-                className={isExpanded 
+                className={`transform transition-all duration-300 ease-out ${
+                  viewState === 'exiting' ? 'opacity-0 scale-95 blur-sm' : 
+                  viewState === 'entering' ? 'opacity-100 scale-100 blur-0 animate-slide-up' : 
+                  'opacity-100 scale-100 blur-0'
+                } ${isExpanded 
                   ? "w-full overflow-y-auto max-h-[60vh] pr-2 scrollbar-hide" 
                   : "scrollbar-hide flex gap-2.5 overflow-x-auto pb-4 pt-2 scroll-smooth"
-                }
+                }`}
                 style={isExpanded ? {} : { scrollPaddingInline: '1rem' }}
               >
               {(() => {
@@ -198,7 +213,7 @@ export default function BookingDateSelector({
                             type="button" 
                             onClick={() => setCalendarMonthIndex(safeIndex - 1)} 
                             disabled={!hasPrev}
-                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${hasPrev ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' : 'text-gray-200'}`}
+                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${hasPrev ? 'bg-gray-50 text-primary hover:bg-gray-100' : 'text-gray-200'}`}
                           >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                           </button>
@@ -209,7 +224,7 @@ export default function BookingDateSelector({
                             type="button" 
                             onClick={() => setCalendarMonthIndex(safeIndex + 1)} 
                             disabled={!hasNext}
-                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${hasNext ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' : 'text-gray-200'}`}
+                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${hasNext ? 'bg-gray-50 text-primary hover:bg-gray-100' : 'text-gray-200'}`}
                           >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                           </button>
@@ -299,28 +314,28 @@ export default function BookingDateSelector({
                       })
                       if (firstAvailable) setSelectedSchedule(firstAvailable)
                     }}
-                    className={`min-w-[66px] sm:min-w-[70px] flex-shrink-0 flex flex-col items-center justify-center rounded-2xl border py-2.5 transition-all duration-300 sm:py-3 ${isSelected
-                      ? 'border-primary bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02]'
+                    className={`w-[calc(20%-0.5rem)] min-w-[66px] flex-shrink-0 flex flex-col items-center justify-center rounded-2xl border py-2.5 transition-all duration-300 sm:py-3 ${isSelected
+                      ? 'border-primary/40 bg-blue-50 text-primary shadow-md shadow-primary/10 scale-[1.06]'
                       : isFullyBooked
                         ? 'cursor-not-allowed border-transparent bg-gray-50 text-gray-300'
                         : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm'
                       }`}
                   >
-                    <span className={`text-[9px] font-bold uppercase tracking-widest ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>{weekday}</span>
-                    <span className="mt-0.5 block text-[1.25rem] font-black leading-none sm:text-[1.45rem]">{day}</span>
-                    <span className={`mt-0.5 block text-[10px] font-semibold ${isSelected ? 'text-white/80' : 'text-gray-500'}`}>{month}</span>
-                    <span className={`mt-1.5 inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold ${isSelected ? 'bg-white/20 text-white' : isFullyBooked ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
+                    <span className={`text-[14px] font-bold uppercase tracking-widest ${isSelected ? 'text-primary/70' : 'text-gray-400'}`}>{weekday}</span>
+                    <span className={`mt-0.5 block text-[1.25rem] font-black leading-none sm:text-[1.45rem] ${isSelected ? 'text-primary' : ''}`}>{day}</span>
+                    <span className={`mt-0.5 block text-[14px] font-semibold ${isSelected ? 'text-primary/70' : 'text-gray-500'}`}>{month}</span>
+                    <span className={`mt-1.5 inline-flex rounded-full px-2 py-0.5 text-[14px] font-bold ${isSelected ? 'bg-primary/0 text-primary' : isFullyBooked ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
                       {isFullyBooked ? 'เต็ม' : 'ว่าง'}
                     </span>
                   </button>
                 ))
               })()}
               </div>
-              {!isExpanded && canScrollLeft && <div className="ui-rail-fade-left absolute left-0 top-0 bottom-4 w-6 sm:hidden pointer-events-none" />}
-              {!isExpanded && canScrollRight && <div className="ui-rail-fade-right absolute right-0 top-0 bottom-4 w-6 sm:hidden pointer-events-none" />}
+              {!isExpanded && canScrollLeft && <div className="ui-rail-fade-left absolute left-0 top-0 bottom-4 w-3 pointer-events-none" />}
+              {!isExpanded && canScrollRight && <div className="ui-rail-fade-right absolute right-0 top-0 bottom-4 w-3 pointer-events-none" />}
             </div>
             {!isExpanded && (canScrollLeft || canScrollRight) && (
-              <ScrollerArrowButton direction="right" onClick={() => scrollDates(220)} disabled={!canScrollRight} className="h-8 w-8 shrink-0" />
+              <ScrollerArrowButton direction="right" onClick={() => scrollDates(220)} disabled={!canScrollRight} className="h-8 w-8 shrink-0 text-primary disabled:text-gray-200" />
             )}
           </div>
 
@@ -340,6 +355,7 @@ export default function BookingDateSelector({
                         const seatsLeft = Math.max(0, availableSeatsData[schedule.id] ?? (schedule.maxCapacity - schedule.currentBooked))
                         const isFull = seatsLeft <= 0
                         const isActiveRound = selectedSchedule.id === schedule.id
+                        const capacityPercent = schedule.maxCapacity > 0 ? (seatsLeft / schedule.maxCapacity) * 100 : 0
 
                         return (
                           <button
@@ -347,28 +363,28 @@ export default function BookingDateSelector({
                             type="button"
                             disabled={isFull}
                             onClick={() => setSelectedSchedule(schedule)}
-                            className={`w-full rounded-[1.15rem] border px-3 py-2.5 text-left transition-all sm:rounded-[1.25rem] sm:px-4 sm:py-3 ${isActiveRound
-                              ? 'border-blue-300 bg-blue-50'
+                            className={`w-full rounded-2xl border px-3 py-2.5 text-left transition-all duration-300 sm:px-4 sm:py-3 ${isActiveRound
+                              ? 'border-primary/40 bg-blue-50 shadow-md shadow-gray-400/10 text-primary scale-[1.03]'
                               : isFull
                                 ? 'cursor-not-allowed border-gray-100 bg-gray-50 opacity-60'
-                                : 'border-gray-200 bg-white hover:border-gray-300'
+                                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                               }`}
                           >
                             <div className="flex items-center justify-between gap-4">
-                              <div className="flex items-center gap-3">
-                                <div className={`flex h-4 w-4 items-center justify-center rounded-full border sm:h-5 sm:w-5 ${isActiveRound ? 'border-accent bg-accent' : 'border-gray-300 bg-white'}`}>
-                                  {isActiveRound && <div className="h-1.5 w-1.5 rounded-full bg-white sm:h-2 sm:w-2" />}
+                              <div className="flex items-center gap-4">
+                                <div className={`flex h-6 w-6 items-center justify-center rounded-full border sm:h-6 sm:w-6 ${isActiveRound ? 'border-primary bg-primary' : 'border-gray-300 bg-white'}`}>
+                                  {isActiveRound && <div className="h-3 w-3 rounded-full bg-white sm:h-3 sm:w-3" />}
                                 </div>
                                 <div>
-                                  <p className={`text-sm font-bold sm:text-base ${isActiveRound ? 'text-gray-900' : 'text-gray-700'}`}>
+                                  <p className={`text-sm font-bold sm:text-base ${isActiveRound ? 'text-primary' : 'text-gray-700'}`}>
                                     {schedule.timeSlot ? schedule.timeSlot : (hasMultipleRounds ? 'ไม่ระบุเวลา' : 'รอบออกเดินทาง')}
                                   </p>
                                   {schedule.roundName && (
-                                    <p className="text-[11px] text-gray-500 sm:text-[13px]">{schedule.roundName}</p>
+                                    <p className={`text-[11px] sm:text-[13px] ${isActiveRound ? 'text-primary/70' : 'text-gray-500'}`}>{schedule.roundName}</p>
                                   )}
                                 </div>
                               </div>
-                              <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold sm:px-3 sm:py-1 sm:text-xs ${isFull ? 'bg-red-50 text-red-500' : seatsLeft <= 5 ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                              <span className={`rounded-full px-2 py-0.5 text-[15px] font-semibold sm:px-3 sm:py-1 sm:text-md ${isFull ? 'bg-red-50 text-red-500' : capacityPercent > 50 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
                                 {isFull ? 'เต็มแล้ว' : `เหลือ ${seatsLeft} ที่`}
                               </span>
                             </div>

@@ -26,7 +26,7 @@ export default function BookingGuestSelector({
       <div className="mb-4 rounded-[1.25rem] border border-slate-200 bg-slate-50 px-3 py-3 sm:mb-5 sm:rounded-[1.5rem] sm:px-4 sm:py-4">
         <label className="mb-2 block text-sm font-semibold text-slate-700 sm:text-md">จำนวนผู้เดินทาง</label>
         <div className="flex items-center gap-3">
-          <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 sm:h-10 sm:w-10">
+          <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-2xl bg-blue-100 text-blue-600 sm:h-10 sm:w-10">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -35,7 +35,7 @@ export default function BookingGuestSelector({
             <p className="text-[13px] font-semibold text-slate-900 sm:text-[15px]">
               เหมาะสำหรับ {tour.minPeople}–{tour.maxPeople || tour.minPeople} ท่าน
             </p>
-            <span className="mt-1 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 sm:px-2.5 sm:py-1 sm:text-xs">
+            <span className="mt-1 inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700 sm:px-2.5 sm:py-1 sm:text-xs">
               ราคาเหมาจ่ายทั้งกลุ่ม
             </span>
           </div>
@@ -48,7 +48,7 @@ export default function BookingGuestSelector({
     <div className="mb-4 sm:mb-5">
       <div className="mb-3 sm:mb-4">
         <label className="block text-base font-bold text-slate-800 sm:text-lg">จำนวนผู้เดินทาง</label>
-        {!hasSelectedSchedule && <p className="mt-1 text-xs text-amber-600">กรุณาเลือกวันที่ก่อนเพื่อเลือกจำนวนคน</p>}
+        {!hasSelectedSchedule && <p className="mt-1 text-xs text-blue-600">กรุณาเลือกวันที่ก่อนเพื่อเลือกจำนวนคน</p>}
       </div>
 
       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-3">

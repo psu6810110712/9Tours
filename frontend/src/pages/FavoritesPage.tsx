@@ -90,7 +90,7 @@ export default function FavoritesPage() {
   const selectedSortLabel = SORT_OPTIONS.find((o) => o.value === sortBy)?.label ?? SORT_OPTIONS[0].label
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-4">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">ทัวร์ที่ถูกใจ</h1>
@@ -114,7 +114,7 @@ export default function FavoritesPage() {
           </button>
 
           {sortMenuOpen && (
-            <div className="ui-pop absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-[190px] rounded-[1.4rem] border border-gray-200 bg-white p-2 shadow-[0_20px_40px_rgba(15,23,42,0.14)]">
+            <div className="ui-pop animate-slide-up absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-[190px] rounded-[1.4rem] border border-gray-200 bg-white p-2 shadow-[0_20px_40px_rgba(15,23,42,0.14)]">
               <div role="listbox" aria-label="เรียงลำดับทัวร์ที่ถูกใจ" className="space-y-1">
                 {SORT_OPTIONS.map((option) => (
                   <button

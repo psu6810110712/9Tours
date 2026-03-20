@@ -55,7 +55,7 @@ export default function BookingSummary({
 
       <div className="flex flex-wrap items-end justify-between gap-2 pt-3 sm:pt-4">
         <span className="text-sm font-bold text-gray-900 sm:text-base">รวมทั้งหมด</span>
-        <span className="text-xl font-bold leading-none text-accent sm:text-2xl">{totalPrice.toLocaleString()} บาท</span>
+        <span className="text-xl text-gray-900 font-bold leading-none text-accent sm:text-3xl">{totalPrice.toLocaleString()} บาท</span>
       </div>
 
       <button

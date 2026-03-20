@@ -174,7 +174,7 @@ export default function NotificationBell() {
 
       {/* Dropdown */}
       {open && (
-        <div className="ui-surface ui-pop absolute right-0 z-[48] mt-3 w-[360px] overflow-hidden border border-gray-100 bg-white">
+        <div className="ui-surface ui-pop animate-slide-up absolute right-0 z-[48] mt-3 w-[360px] overflow-hidden border border-gray-100 bg-white">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
             <h3 className="text-sm font-semibold text-gray-800">การแจ้งเตือน</h3>

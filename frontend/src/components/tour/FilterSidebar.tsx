@@ -142,7 +142,7 @@ function CustomSelect({
       </button>
 
       {open && !disabled && (
-        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-30 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+        <div className="animate-slide-up absolute left-0 right-0 top-[calc(100%+4px)] z-30 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
           <div className="max-h-60 overflow-y-auto py-1">
             {options.map((option) => {
               const active = option.value === value
@@ -231,7 +231,7 @@ function SearchableSelect({
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-30 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+        <div className="animate-slide-up absolute left-0 right-0 top-[calc(100%+4px)] z-30 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
           <div className="border-b border-gray-100 p-2.5">
             <input
               value={query}

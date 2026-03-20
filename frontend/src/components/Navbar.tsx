@@ -218,7 +218,7 @@ export default function Navbar() {
                   {menuOpen && (
                     <>
                       <button type="button" className="fixed inset-0 z-[47]" aria-label="ปิดเมนูผู้ใช้" onClick={() => setMenuOpen(false)} />
-                      <div className="ui-surface ui-pop absolute right-0 z-[48] mt-3 w-60 overflow-hidden border border-gray-100 bg-white py-1.5 text-sm">
+                      <div className="ui-surface ui-pop animate-slide-up absolute right-0 z-[48] mt-3 w-60 overflow-hidden border border-gray-100 bg-white py-1.5 text-sm">
                         <div className="border-b border-gray-100 px-4 py-3">
                           <p className="truncate font-semibold text-gray-800">{displayName}</p>
                           <p className="truncate text-xs text-gray-500">{user.email}</p>
