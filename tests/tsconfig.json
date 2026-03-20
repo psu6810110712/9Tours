@@ -1,11 +1,23 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@page-objects/*": ["page-objects/*"],
-      "@fixtures/*": ["fixtures/*"]
+      "@page-objects/*": [
+        "page-objects/*"
+      ],
+      "@fixtures/*": [
+        "fixtures/*"
+      ]
     }
   },
-  "include": ["**/*.ts"]
+  "include": [
+    "**/*.ts"
+  ]
 }
