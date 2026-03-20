@@ -344,27 +344,27 @@ export default function BookingSidebar({ tour, isMobileFixed = false }: BookingS
                   <div className={`h-1.5 w-12 rounded-full transition-all duration-300 ${drawerOpen ? 'bg-gray-400 w-10' : 'bg-gray-300 w-12'}`} />
                 </button>
 
-                <div className={`flex items-center justify-between gap-3 transition-all duration-300 ease-out ${drawerOpen ? 'mb-0 h-0 overflow-hidden opacity-0' : 'mb-3 opacity-100'}`}>
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{summaryLabel}</p>
-                    <p className="text-xl font-bold text-gray-900">฿{totalPrice.toLocaleString()}</p>
-                    {selectedSchedule && !isPrivate && (
-                      <p className="mt-1 text-[12px] font-medium text-gray-500">
-                        วันที่ {selectedSchedule.startDate} เหลือ {seatsLeft} ที่
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        stopTogglePropagation(event)
-                        handleDrawerToggle()
-                      }}
-                      className="ui-pressable rounded-xl border border-primary bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-transform active:scale-95"
-                    >
-                      ดูรายละเอียด
-                    </button>
+                <div className={`transition-all duration-300 ease-out ${drawerOpen ? 'mb-0 h-0 overflow-hidden opacity-0' : 'mb-3 opacity-100'}`}>
+                  <p className="mb-2 text-center text-[14px] font-medium text-gray-400">
+                    ปัดขึ้นเพื่อจอง
+                  </p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{summaryLabel}</p>
+                      <p className="text-xl font-bold text-gray-900">฿{totalPrice.toLocaleString()}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopTogglePropagation(event)
+                          handleDrawerToggle()
+                        }}
+                        className="ui-pressable rounded-xl border border-primary bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-transform active:scale-95"
+                      >
+                        ดูรายละเอียด
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
